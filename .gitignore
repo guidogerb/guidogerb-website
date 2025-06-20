@@ -25,6 +25,6 @@ dist-ssr
 
 # amplify
 .amplify
-amplify_outputs*
+amplify_outputs.json.orig
 amplifyconfiguration*
-amplify_outputs.json
+amplify_outputs.json.orig
