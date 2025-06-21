@@ -36,7 +36,6 @@
         "guidogerbwebsitebde9229eCustomMessage": {
           "REDIRECTURL": "/",
           "EMAILSUBJECT": "Welcome! Let's confirm your email.",
-          "EMAILMESSAGE": "Hi {{username}}, /Thank you for joining the Guido Gerber Publishing community! We’re excited to give you access to our music scores, AI tools, and behind-the-scenes content. //To keep your account secure, we need to verify that this email address is really yours. Simpl",
           "deploymentBucketName": "amplify-guidogerbwebsite-prod-110016-deployment",
           "s3Key": "amplify-builds/guidogerbwebsitebde9229eCustomMessage-73616a7247574244586a-build.zip"
         },

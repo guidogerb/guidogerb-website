@@ -135,14 +135,6 @@
         }
       ]
     },
-    "AMPLIFY_function_guidogerbwebsitebde9229eCustomMessage_EMAILMESSAGE": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "guidogerbwebsitebde9229eCustomMessage"
-        }
-      ]
-    },
     "AMPLIFY_function_guidogerbwebsitebde9229eCustomMessage_EMAILSUBJECT": {
       "usedBy": [
         {
