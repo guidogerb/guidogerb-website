@@ -1,0 +1,16 @@
+{
+  "trigger": true,
+  "modules": [
+    "captcha-define-challenge"
+  ],
+  "parentResource": "guidogerbwebsitebde9229e",
+  "functionName": "guidogerbwebsitebde9229eDefineAuthChallenge",
+  "resourceName": "guidogerbwebsitebde9229eDefineAuthChallenge",
+  "parentStack": "auth",
+  "triggerEnvs": "[]",
+  "triggerDir": "/snapshot/repo/build/node_modules/@aws-amplify/amplify-category-auth/provider-utils/awscloudformation/triggers/DefineAuthChallenge",
+  "triggerTemplate": "DefineAuthChallenge.json.ejs",
+  "triggerEventPath": "DefineAuthChallenge.event.json",
+  "roleName": "guidogerbwebsitebde9229eDefineAuthChallenge",
+  "skipEdit": true
+}

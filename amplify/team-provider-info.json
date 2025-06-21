@@ -1,0 +1,38 @@
+{
+  "prod": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-guidogerbwebsite-prod-110016-authRole",
+      "UnauthRoleArn": "arn:aws:iam::471112830678:role/amplify-guidogerbwebsite-prod-110016-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::471112830678:role/amplify-guidogerbwebsite-prod-110016-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-guidogerbwebsite-prod-110016-deployment",
+      "UnauthRoleName": "amplify-guidogerbwebsite-prod-110016-unauthRole",
+      "StackName": "amplify-guidogerbwebsite-prod-110016",
+      "StackId": "arn:aws:cloudformation:us-east-1:471112830678:stack/amplify-guidogerbwebsite-prod-110016/350acbc0-4ec1-11f0-b9c1-0affe3485391",
+      "AmplifyAppId": "d295eioxqacudl"
+    },
+    "categories": {
+      "api": {
+        "guidogerbwebsite": {}
+      },
+      "auth": {
+        "guidogerbwebsitebde9229e": {}
+      },
+      "function": {
+        "guidogerbwebsitebde9229eDefineAuthChallenge": {},
+        "guidogerbwebsitebde9229eCreateAuthChallenge": {},
+        "guidogerbwebsitebde9229eVerifyAuthChallengeResponse": {
+          "RECAPTCHASECRET": "6LeK7WgrAAAAAOwe-uBh1rhQCAFxhyBPEwSr9CT3"
+        },
+        "guidogerbwebsitebde9229eCustomMessage": {
+          "REDIRECTURL": "/",
+          "EMAILSUBJECT": "Welcome! Let's confirm your email.",
+          "EMAILMESSAGE": "Hi {{username}}, /Thank you for joining the Guido Gerber Publishing community! We’re excited to give you access to our music scores, AI tools, and behind-the-scenes content. //To keep your account secure, we need to verify that this email address is really yours. Simpl"
+        },
+        "guidogerbwebsitebde9229ePostConfirmation": {
+          "GROUP": "users"
+        }
+      }
+    }
+  }
+}

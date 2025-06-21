@@ -28,3 +28,15 @@ This library is licensed under the MIT-0 License. See the LICENSE file.
 npx ampx sandbox
 npm run dev
 npx ampx generate outputs
+
+
+for r in us-east-1 us-west-2 eu-west-1 ap-southeast-2; do
+echo "🔎 $r"
+aws amplify list-apps --region $r --query 'apps[*].[appId,name]' --output text
+done
+🔎 us-east-1
+d295eioxqacudl  guidogerb-website
+d31al9t04be7ye  garygerber-website
+🔎 us-west-2
+🔎 eu-west-1
+🔎 ap-southeast-2
