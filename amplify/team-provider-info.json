@@ -20,18 +20,30 @@
         "guidogerbwebsitebde9229e": {}
       },
       "function": {
-        "guidogerbwebsitebde9229eDefineAuthChallenge": {},
-        "guidogerbwebsitebde9229eCreateAuthChallenge": {},
+        "guidogerbwebsitebde9229eDefineAuthChallenge": {
+          "deploymentBucketName": "amplify-guidogerbwebsite-prod-110016-deployment",
+          "s3Key": "amplify-builds/guidogerbwebsitebde9229eDefineAuthChallenge-48385665554a585a3575-build.zip"
+        },
+        "guidogerbwebsitebde9229eCreateAuthChallenge": {
+          "deploymentBucketName": "amplify-guidogerbwebsite-prod-110016-deployment",
+          "s3Key": "amplify-builds/guidogerbwebsitebde9229eCreateAuthChallenge-41446934487968336e34-build.zip"
+        },
         "guidogerbwebsitebde9229eVerifyAuthChallengeResponse": {
-          "RECAPTCHASECRET": "6LeK7WgrAAAAAOwe-uBh1rhQCAFxhyBPEwSr9CT3"
+          "RECAPTCHASECRET": "6LeK7WgrAAAAAOwe-uBh1rhQCAFxhyBPEwSr9CT3",
+          "deploymentBucketName": "amplify-guidogerbwebsite-prod-110016-deployment",
+          "s3Key": "amplify-builds/guidogerbwebsitebde9229eVerifyAuthChallengeResponse-3063743472695248394f-build.zip"
         },
         "guidogerbwebsitebde9229eCustomMessage": {
           "REDIRECTURL": "/",
           "EMAILSUBJECT": "Welcome! Let's confirm your email.",
-          "EMAILMESSAGE": "Hi {{username}}, /Thank you for joining the Guido Gerber Publishing community! We’re excited to give you access to our music scores, AI tools, and behind-the-scenes content. //To keep your account secure, we need to verify that this email address is really yours. Simpl"
+          "EMAILMESSAGE": "Hi {{username}}, /Thank you for joining the Guido Gerber Publishing community! We’re excited to give you access to our music scores, AI tools, and behind-the-scenes content. //To keep your account secure, we need to verify that this email address is really yours. Simpl",
+          "deploymentBucketName": "amplify-guidogerbwebsite-prod-110016-deployment",
+          "s3Key": "amplify-builds/guidogerbwebsitebde9229eCustomMessage-73616a7247574244586a-build.zip"
         },
         "guidogerbwebsitebde9229ePostConfirmation": {
-          "GROUP": "users"
+          "GROUP": "users",
+          "deploymentBucketName": "amplify-guidogerbwebsite-prod-110016-deployment",
+          "s3Key": "amplify-builds/guidogerbwebsitebde9229ePostConfirmation-354c3838536a792f7435-build.zip"
         }
       }
     }

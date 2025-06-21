@@ -119,6 +119,22 @@
     }
   },
   "parameters": {
+    "AMPLIFY_function_guidogerbwebsitebde9229eCreateAuthChallenge_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229eCreateAuthChallenge"
+        }
+      ]
+    },
+    "AMPLIFY_function_guidogerbwebsitebde9229eCreateAuthChallenge_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229eCreateAuthChallenge"
+        }
+      ]
+    },
     "AMPLIFY_function_guidogerbwebsitebde9229eCustomMessage_EMAILMESSAGE": {
       "usedBy": [
         {
@@ -143,6 +159,38 @@
         }
       ]
     },
+    "AMPLIFY_function_guidogerbwebsitebde9229eCustomMessage_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229eCustomMessage"
+        }
+      ]
+    },
+    "AMPLIFY_function_guidogerbwebsitebde9229eCustomMessage_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229eCustomMessage"
+        }
+      ]
+    },
+    "AMPLIFY_function_guidogerbwebsitebde9229eDefineAuthChallenge_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229eDefineAuthChallenge"
+        }
+      ]
+    },
+    "AMPLIFY_function_guidogerbwebsitebde9229eDefineAuthChallenge_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229eDefineAuthChallenge"
+        }
+      ]
+    },
     "AMPLIFY_function_guidogerbwebsitebde9229ePostConfirmation_GROUP": {
       "usedBy": [
         {
@@ -151,7 +199,39 @@
         }
       ]
     },
+    "AMPLIFY_function_guidogerbwebsitebde9229ePostConfirmation_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229ePostConfirmation"
+        }
+      ]
+    },
+    "AMPLIFY_function_guidogerbwebsitebde9229ePostConfirmation_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229ePostConfirmation"
+        }
+      ]
+    },
     "AMPLIFY_function_guidogerbwebsitebde9229eVerifyAuthChallengeResponse_RECAPTCHASECRET": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229eVerifyAuthChallengeResponse"
+        }
+      ]
+    },
+    "AMPLIFY_function_guidogerbwebsitebde9229eVerifyAuthChallengeResponse_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "guidogerbwebsitebde9229eVerifyAuthChallengeResponse"
+        }
+      ]
+    },
+    "AMPLIFY_function_guidogerbwebsitebde9229eVerifyAuthChallengeResponse_s3Key": {
       "usedBy": [
         {
           "category": "function",
