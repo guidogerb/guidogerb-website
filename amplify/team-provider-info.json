@@ -9,7 +9,8 @@
       "UnauthRoleName": "amplify-guidogerbwebsite-prod-110016-unauthRole",
       "StackName": "amplify-guidogerbwebsite-prod-110016",
       "StackId": "arn:aws:cloudformation:us-east-1:471112830678:stack/amplify-guidogerbwebsite-prod-110016/350acbc0-4ec1-11f0-b9c1-0affe3485391",
-      "AmplifyAppId": "d295eioxqacudl"
+      "AmplifyAppId": "d295eioxqacudl",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-guidogerbwebsite-prod-110016-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
     },
     "categories": {
       "api": {
