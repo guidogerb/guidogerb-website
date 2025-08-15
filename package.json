@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "sandbox": "npx ampx sandbox",
     "deploy:main:use1": "npx ampx pipeline-deploy --branch main --app-id d295eioxqacudl",
-    "outputs": "npx ampx generate outputs"
+    "outputs": "npx ampx generate outputs",
+    "amplify": "npx ampx",
+    "amplify:pull": "npx ampx pull",
+    "amplify:status": "npx ampx status"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.5.5",

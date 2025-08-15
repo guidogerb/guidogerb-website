@@ -46,6 +46,11 @@ Reference: Amplify React quickstart deploy docs: https://docs.amplify.aws/react/
 - Error: [RunningPipelineDeployNotInCiError] when running npx ampx pipeline-deploy locally.
   - Cause: pipeline-deploy is meant for CI/CD runners (like Amplify Hosting build) and will fail locally.
   - Fix: Use npx ampx sandbox (or npm run sandbox) on your local machine. After that, run npx ampx generate outputs (or npm run outputs) to refresh amplify_outputs.json.
+- Error: AmplifyError [NoPackageManagerError]: npm_config_user_agent environment variable is undefined when running amplify directly.
+  - Cause: Running amplify outside of a package manager (npm/yarn/pnpm) means npm_config_user_agent isn’t set, and Amplify CLI expects it.
+  - Fix: Run through your package manager. Examples:
+    - npm run amplify:pull -- --appId <APP_ID> --envName <ENV>
+    - or: npx ampx pull --appId <APP_ID> --envName <ENV>
 - Important: --app-id must be the alphanumeric Amplify appId, not the app name. Examples for CI:
   - guidogerb-website: appId d295eioxqacudl (us-east-1)
   - garygerber-website: appId d31al9t04be7ye (us-east-1)
