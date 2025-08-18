@@ -7,7 +7,7 @@ import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
 
 const client = generateClient<Schema>();
 
-function App() {
+function AppHome() {
     const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
     const [profile, setProfile] = useState<Schema["UserProfile"]["type"] | null>(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
@@ -107,4 +107,14 @@ function App() {
     );
 }
 
-export default App;
+import PickleCheezePage from './websites/pickleCheeze/PickleCheezePage';
+
+function AppRouter() {
+    const path = (typeof window !== 'undefined' ? window.location.pathname : '/') || '/';
+    if (path.startsWith('/pickle-cheeze')) {
+        return <PickleCheezePage/>;
+    }
+    return <AppHome/>;
+}
+
+export default AppRouter;

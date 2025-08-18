@@ -239,6 +239,12 @@ Below is a phased, practical plan to turn this starter into a music and book pub
 - Note: Create Cognito user pool groups named Admin, Creator, Customer in your environment to use role mapping.
 
 
+## Development conventions
+
+- Site-specific pages should live under src/websites/{siteName}. For example: src/websites/pickleCheeze.
+- Reusable UI and logic should be implemented as shared components under src/components and imported by website pages.
+- Static/media assets should be hosted behind CloudFront at https://assets.guidogerbpublishing.com/ and referenced by absolute URLs from the React app. Avoid bundling large media into the app build.
+
 ## Tests
 
 This project uses Vitest with jsdom and Testing Library for unit tests that validate implemented services and deployment configuration.
