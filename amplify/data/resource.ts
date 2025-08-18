@@ -24,6 +24,19 @@ const schema = a.schema({
       socialLinks: a.json(), // e.g., { website, twitter, instagram }
     })
     .authorization(allow => [allow.owner()]),
+
+  // Global Vote counters per song (id is the song's relative path)
+  Vote: a
+    .model({
+      id: a.id().required(),
+      up: a.integer().required(),
+      down: a.integer().required(),
+    })
+    // Allow both authenticated users and guests (unauth identities) to read/create/update
+    .authorization(allow => [
+      allow.authenticated().to(["create", "read", "update"]),
+      allow.guest().to(["create", "read", "update"]),
+    ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
@@ -31,9 +44,7 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'userPool'
-    // By removing apiKeyAuthorizationMode, you are ensuring that access to your API
-    // is restricted to authenticated users, thus resolving the warning about
-    // public access.
+    defaultAuthorizationMode: 'userPool',
+    additionalAuthorizationModes: ['iam']
   },
 });
