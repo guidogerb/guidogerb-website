@@ -42,6 +42,44 @@ Notes:
 
 Reference: Amplify React quickstart deploy docs: https://docs.amplify.aws/react/start/quickstart/#deploy-a-fullstack-app-to-aws
 
+## Custom domain setup (Amplify Hosting)
+
+If your site loads on the default Amplify domain but https://yourdomain.com fails with DNS_PROBE_FINISHED_NXDOMAIN, it means the custom domain isn’t associated or DNS isn’t configured yet.
+
+There are two parts:
+1) Associate the domain to your Amplify app (so Amplify knows which branch serves it).
+2) Create DNS records at your registrar (or Route 53) so the domain resolves to Amplify.
+
+Quick automation (Route 53 or external DNS):
+- Prereqs: AWS CLI v2 with permissions for Amplify, and your Amplify appId.
+- Run the helper script (Windows PowerShell example):
+
+  powershell -ExecutionPolicy Bypass -File .\amplify\setupCustomDomain.ps1 -AppId d295eioxqacudl -DomainName guidogerbpublishing.com -Branch main -Region us-east-1
+
+What this does:
+- Associates www.guidogerbpublishing.com to the main branch.
+- Associates the apex/root guidogerbpublishing.com (you can configure redirect to www in the Amplify console).
+- If your DNS is hosted in Route 53 in this account, Amplify can auto-create DNS records.
+- If your DNS is external, the script will output CNAME/ALIAS targets that you must add at your registrar.
+
+Manual steps (Amplify Console):
+- Open AWS Amplify Console → Hosting → Domain management → Connect domain.
+- Enter guidogerbpublishing.com and add subdomains:
+  - www → main branch
+  - root/apex (no prefix) → redirect to www (recommended)
+- If DNS is in Route 53 in the same account, accept record creation. Otherwise copy the DNS instructions and create records at your registrar.
+
+DNS record examples (external registrar):
+- CNAME www → <Amplify provided target> (e.g., xxxxx.cloudfront.net)
+- ALIAS/ANAME A apex → <Amplify/CloudFront target> (or use registrar’s ALIAS/ANAME feature). If ALIAS/ANAME isn’t supported, use the Amplify-provided apex guidance.
+
+Verification:
+- Propagation usually takes 15–30 minutes (can take up to 24–48 hours globally).
+- Test:
+  - https://www.guidogerbpublishing.com
+  - https://guidogerbpublishing.com
+- In Amplify Console → Domain management, status should become AVAILABLE.
+
 ## Troubleshooting: Local vs CI Deploy
 - Error: [RunningPipelineDeployNotInCiError] when running npx ampx pipeline-deploy locally.
   - Cause: pipeline-deploy is meant for CI/CD runners (like Amplify Hosting build) and will fail locally.
@@ -227,3 +265,28 @@ How to run:
 Notes:
 - These tests are unit-level and do not call live AWS services; the Amplify.configure test uses a mock for aws-amplify.
 - To validate backend connectivity end-to-end, use your existing Amplify sandbox/pipeline and manual checks, or add integration tests with mocked network if desired.
+
+
+
+### Troubleshooting: Domain management role missing (AWSAmplifyDomainRole-... cannot be found)
+If Amplify Console → Hosting → Domain management shows:
+
+  The role with name AWSAmplifyDomainRole-<something> cannot be found.
+
+It means the per-domain IAM role Amplify uses to manage DNS validation was removed or never created. Fix it by recreating the role:
+
+- Windows PowerShell (from this repo root):
+  powershell -ExecutionPolicy Bypass -File .\amplify\fixAmplifyDomainRole.ps1 -RoleName AWSAmplifyDomainRole-Z09604182LJLD0XSED80O -Region us-east-1
+
+- If you don’t recall the exact suffix, try the generic name first:
+  powershell -ExecutionPolicy Bypass -File .\amplify\fixAmplifyDomainRole.ps1 -RoleName AWSAmplifyDomainRole -Region us-east-1
+
+- Optional: scope to a specific Route 53 hosted zone (tighter permissions):
+  powershell -ExecutionPolicy Bypass -File .\amplify\fixAmplifyDomainRole.ps1 -RoleName AWSAmplifyDomainRole -HostedZoneId Z123EXAMPLE -Region us-east-1
+
+Next steps:
+1) Return to Amplify Console → Hosting → Domain management and retry the previous action (connect domain / save settings).
+2) If you still see the error, copy the role name from the error and rerun the script with that exact -RoleName value.
+3) If your DNS is not in Route 53, you can bypass automation by creating the DNS records manually. Use:
+   powershell -ExecutionPolicy Bypass -File .\amplify\setupCustomDomain.ps1 -AppId d295eioxqacudl -DomainName guidogerbpublishing.com -Branch main -Region us-east-1
+   The script will print the required CNAME/ALIAS targets to add at your registrar.
