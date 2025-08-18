@@ -199,3 +199,31 @@ Below is a phased, practical plan to turn this starter into a music and book pub
   - UserProfile model: id (Cognito userId), displayName, role, avatarUrl, bio, socialLinks (JSON). Owner‑only auth.
 - UI shows current role badge and requires profile creation before accessing the app.
 - Note: Create Cognito user pool groups named Admin, Creator, Customer in your environment to use role mapping.
+
+
+## Tests
+
+This project uses Vitest with jsdom and Testing Library for unit tests that validate implemented services and deployment configuration.
+
+What’s covered:
+- Amplify service configuration
+  - Validates amplify_outputs.json contains required Auth and API fields.
+  - Ensures src/main.tsx calls Amplify.configure(outputs).
+- Voting service logic
+  - Tests mutual exclusivity and count increment/decrement rules (extracted to src/services/voteLogic.ts).
+- Deployment configuration
+  - Parses amplify.yml and asserts backend pipeline-deploy and frontend build steps exist.
+
+How to run:
+1. Install dependencies (use a clean install):
+   npm ci
+2. Run the test suite once:
+   npm test
+3. Watch mode during development:
+   npm run test:watch
+4. Coverage report (text in terminal and HTML under coverage/):
+   npm run coverage
+
+Notes:
+- These tests are unit-level and do not call live AWS services; the Amplify.configure test uses a mock for aws-amplify.
+- To validate backend connectivity end-to-end, use your existing Amplify sandbox/pipeline and manual checks, or add integration tests with mocked network if desired.

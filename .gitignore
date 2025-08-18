@@ -54,3 +54,5 @@ s3/
 
 /amplify_user_accessKeys.csv
 /amplify-backup/
+
+package-lock.json
