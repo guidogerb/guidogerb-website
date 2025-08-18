@@ -3,25 +3,18 @@ import type {Schema} from "../amplify/data/resource";
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import {generateClient} from "aws-amplify/data";
 import ProfileSetup from "./ProfileSetup";
+import SitesList from './components/SitesList';
 import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
 
 const client = generateClient<Schema>();
 
 function AppHome() {
-    const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
     const [profile, setProfile] = useState<Schema["UserProfile"]["type"] | null>(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
     const { user, signOut } = useAuthenticator();
 
     // Resolve derived role from Cognito groups (computed asynchronously in effect)
 
-    useEffect(() => {
-        // Load todos
-        const sub = client.models.Todo.observeQuery().subscribe({
-            next: (data) => setTodos([...data.items]),
-        });
-        return () => sub.unsubscribe();
-    }, []);
 
     useEffect(() => {
         // On login, determine groups and attempt to load UserProfile by user id
@@ -60,13 +53,6 @@ function AppHome() {
         })();
     }, [user?.userId]);
 
-    function deleteTodo(id: string) {
-        client.models.Todo.delete({id})
-    }
-
-    function createTodo() {
-        client.models.Todo.create({content: window.prompt("Todo content") || ""});
-    }
 
     if (loadingProfile) {
         return <main><p>Loading profile…</p></main>;
@@ -84,35 +70,29 @@ function AppHome() {
     return (
         <main>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1>{user?.signInDetails?.loginId}'s todos</h1>
+                <h1>Welcome{user?.signInDetails?.loginId ? `, ${user?.signInDetails?.loginId}` : ''}</h1>
                 <div>
                     <span style={{ padding: '2px 8px', border: '1px solid #ccc', borderRadius: 12, marginRight: 12 }}>Role: {roleLabel}</span>
                     <button onClick={signOut}>Sign out</button>
                 </div>
             </div>
-            <button onClick={createTodo}>+ new</button>
-            <ul>
-                {todos.map((todo) => (
-                    <li key={todo.id}  onClick={() => deleteTodo(todo.id)}>{todo.content}</li>
-                ))}
-            </ul>
-            <div>
-                🥳 App successfully hosted. Try creating a new todo.
-                <br/>
-                <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-                    Review next step of this tutorial.
-                </a>
-            </div>
+            {/* Authenticated landing now lists sites instead of todos */}
+            <SitesList />
         </main>
     );
 }
 
 import PickleCheezePage from './websites/pickleCheeze/PickleCheezePage';
+import RequireAuth from './components/RequireAuth';
 
 function AppRouter() {
     const path = (typeof window !== 'undefined' ? window.location.pathname : '/') || '/';
     if (path.startsWith('/pickle-cheeze')) {
-        return <PickleCheezePage/>;
+        return (
+            <RequireAuth>
+                <PickleCheezePage/>
+            </RequireAuth>
+        );
     }
     return <AppHome/>;
 }

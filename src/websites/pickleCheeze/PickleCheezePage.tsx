@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import SearchInput from '../../components/SearchInput';
 import AudioPlayer, { Track } from '../../components/AudioPlayer';
 import VoteButtons from '../../components/VoteButtons';

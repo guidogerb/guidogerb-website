@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { initialState, reduceVote, State } from '../services/voteLogic';
 import type { Counts } from '../services/voteLogic';
 
