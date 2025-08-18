@@ -4,7 +4,6 @@ param(
   [string]$HostedZoneId = "",
   [switch]$Force
 )
-
 <#!
 .SYNOPSIS
   Recreate the missing IAM role used by AWS Amplify Hosting Domain Management (e.g., "AWSAmplifyDomainRole-<id>")
