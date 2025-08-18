@@ -22,5 +22,6 @@
     "types": ["vitest/globals", "node"]
   },
   "include": ["src", "amplify_outputs.json"],
+  "exclude": ["src/__tests__", "src/test"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
