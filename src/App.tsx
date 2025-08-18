@@ -83,6 +83,7 @@ function AppHome() {
 }
 
 import PickleCheezePage from './websites/pickleCheeze/PickleCheezePage';
+import ThisIsMyStoryPage from './websites/gayleGayler/ThisIsMyStoryPage';
 import RequireAuth from './components/RequireAuth';
 
 function AppRouter() {
@@ -91,6 +92,13 @@ function AppRouter() {
         return (
             <RequireAuth>
                 <PickleCheezePage/>
+            </RequireAuth>
+        );
+    }
+    if (path.startsWith('/this-is-my-story') || path.startsWith('/gayle-gayler')) {
+        return (
+            <RequireAuth>
+                <ThisIsMyStoryPage/>
             </RequireAuth>
         );
     }

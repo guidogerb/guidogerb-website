@@ -13,6 +13,12 @@ const defaultSites: Site[] = [
     path: '/pickle-cheeze',
     description: 'Music library with shuffle player and global voting',
   },
+  {
+    key: 'this-is-my-story',
+    name: 'This Is My Story (Gayle Gayler)',
+    path: '/this-is-my-story',
+    description: 'Album page with player and voting',
+  },
 ];
 
 export default function SitesList({ sites = defaultSites }: { sites?: Site[] }) {
