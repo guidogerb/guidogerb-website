@@ -3,7 +3,7 @@ name: Build (CI)
 on:
   pull_request:
     branches: [ "main", "prod" ]
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,15 +23,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ./package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Configure npm for GitHub Packages
+        env:
+          NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ env.NPMRC_TOKEN }}" >> ~/.npmrc
           echo "@guidogerb:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "always-auth=true" >> ~/.npmrc
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies (workspaces)
         run: npm install
