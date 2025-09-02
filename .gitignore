@@ -3,6 +3,5 @@
 /s3/
 /pythonScripts/writeHtml/.idea/
 /pythonScripts/writeHtml/.venv/
-/package-lock.json
 
 /website/.env
