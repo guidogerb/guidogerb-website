@@ -4,6 +4,8 @@
   "private": true,
   "workspaces": [
     "@guidogerb/components/api",
+    "@guidogerb/components/auth",
+    "@guidogerb/components/menu",
     "@guidogerb/components/pages/*",
     "@guidogerb/components/router/*",
     "@guidogerb/css",
@@ -12,12 +14,11 @@
     "website"
   ],
   "scripts": {
-    "clean": "rimraf --glob \"node_modules\" \"@guidogerb/**/node_modules\" \"dist\"  \"@guidogerb/**/dist\"",
-    "build:modules": "npm run -ws --if-present build",
-    "build": "npm run clean && npm run build:modules"
+    "clean": "rimraf --glob \"package-lock.json\" \"node_modules\" \"@guidogerb/**/node_modules\" \"dist\"  \"@guidogerb/**/dist\"",
+    "build:modules": "npm run --workspaces --if-present build",
+    "build": "npm run clean && npm install && npm run build:modules"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"
   }
-
 }

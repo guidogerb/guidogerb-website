@@ -491,9 +491,9 @@ export function useCart() { /* add, remove, totals, currency */ }
 2. **Packages** scaffold: `ui`, `auth`, `api-client`, `catalog`, `commerce`, `payments-crypto` (Phase 2), `sw`, `storage`, `analytics`, `ai-support`.
 3. **Publishing**: GitHub Packages with scoped packages (`@org/*`); configure `.npmrc` for auth; CI publishes on tagged release via Changesets.
 
-### B. Frontend App (Vite + React + PWA)
+### B. Frontend Auth (Vite + React + PWA)
 
-1. **App scaffold**: `apps/web` with Vite React + TypeScript, React Router, Zustand or Context for state where noted.
+1. **Auth scaffold**: `apps/web` with Vite React + TypeScript, React Router, Zustand or Context for state where noted.
 2. **PWA**: add `vite-plugin-pwa` in `injectManifest` mode; create `packages/sw/src/sw.ts` using Workbox.
 
     * Precache app shell, route bundles, fonts, icons.
@@ -509,7 +509,7 @@ export function useCart() { /* add, remove, totals, currency */ }
 
 ### C. Authentication (Cognito + Social IdPs)
 
-1. **Cognito**: CDK creates User Pool, App Client (PKCE), Hosted UI domain; User Pool Groups/Roles (admin, creator, customer).
+1. **Cognito**: CDK creates User Pool, Auth Client (PKCE), Hosted UI domain; User Pool Groups/Roles (admin, creator, customer).
 2. **Social IdPs**: configure Google, Apple, Facebook, Microsoft; enable Attribute Mapping (email, name, picture); restrict sign-up by domain/allowlist (optional).
 3. **Frontend**: `packages/auth` implements `loginWithHostedUI`, `handleRedirect`, `getAccessToken`, silent refresh with refresh tokens in IndexedDB (wrapped by WebCrypto).
 4. **API Authorizer**: API Gateway JWT authorizer against User Pool; scopes/claims include `tenantId`, `roles`.
@@ -626,7 +626,7 @@ workbox.routing.registerRoute(({request})=>request.destination==='script'||reque
 
 ```ts
 export class WebStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.Auth, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
     const siteBucket = new s3.Bucket(this, 'SiteBucket', { websiteIndexDocument: 'index.html', blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL });
     const oai = new cloudfront.OriginAccessIdentity(this, 'OAI');
