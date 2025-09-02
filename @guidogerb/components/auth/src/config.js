@@ -15,6 +15,7 @@ const readEnv = (key, fallback) => {
 export function getEnvConfig() {
   // Using VITE_ prefix so Vite exposes these to the client bundle
   const authority = readEnv('VITE_COGNITO_AUTHORITY', undefined);
+  const metadataUrl = readEnv('VITE_COGNITO_METADATA_URL', undefined);
   const clientId = readEnv('VITE_COGNITO_CLIENT_ID', undefined);
   const redirectUri = readEnv('VITE_REDIRECT_URI', typeof window !== 'undefined' ? window.location.origin : undefined);
   const responseType = readEnv('VITE_RESPONSE_TYPE', 'code');
@@ -24,6 +25,7 @@ export function getEnvConfig() {
 
   return {
     authority,
+    metadataUrl,
     clientId,
     redirectUri,
     responseType,
@@ -36,6 +38,7 @@ export function getEnvConfig() {
 export function getOidcConfig(overrides = {}) {
   const env = getEnvConfig();
   const authority = overrides.authority ?? env.authority;
+  const metadataUrl = overrides.metadataUrl ?? env.metadataUrl;
   const client_id = overrides.clientId ?? env.clientId;
   const redirect_uri = overrides.redirectUri ?? env.redirectUri;
   const response_type = overrides.responseType ?? env.responseType;
@@ -43,6 +46,7 @@ export function getOidcConfig(overrides = {}) {
 
   return {
     authority,
+    metadataUrl,
     client_id,
     redirect_uri,
     response_type,

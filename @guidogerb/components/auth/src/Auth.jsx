@@ -21,7 +21,14 @@ function Auth({ children, autoSignIn = false }) {
     }
 
     if (auth.error) {
-        return <div>Encountering error... {auth.error.message}</div>;
+        return (
+            <div>
+                Encountering error... {auth.error.message}
+                <div style={{ marginTop: 8, color: '#a00' }}>
+                    Hint: ensure OIDC is configured. Set either VITE_COGNITO_AUTHORITY or VITE_COGNITO_METADATA_URL, and also VITE_COGNITO_CLIENT_ID, VITE_REDIRECT_URI, VITE_COGNITO_SCOPE in your app’s .env.
+                </div>
+            </div>
+        );
     }
 
     if (auth.isAuthenticated) {
