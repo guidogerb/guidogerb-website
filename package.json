@@ -14,7 +14,7 @@
   "scripts": {
     "clean": "rimraf --glob \"node_modules\" \"@guidogerb/**/node_modules\" \"dist\"  \"@guidogerb/**/dist\"",
     "build:modules": "npm run -ws --if-present build",
-    "build": "npm run clean && npm install && npm run build:modules"
+    "build": "npm run clean && npm run build:modules"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

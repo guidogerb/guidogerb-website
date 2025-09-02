@@ -10,6 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@guidogerb/components-api": "workspace:*",
+    "@guidogerb/components-menu": "workspace:*",
+    "@guidogerb/components-pages-protected": "workspace:*",
+    "@guidogerb/components-pages-public": "workspace:*",
+    "@guidogerb/components-router-protected": "workspace:*",
+    "@guidogerb/components-router-public": "workspace:*",
+    "@guidogerb/css": "workspace:*",
+    "@guidogerb/footer": "workspace:*",
+    "@guidogerb/header": "workspace:*",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
