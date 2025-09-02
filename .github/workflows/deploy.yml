@@ -1,0 +1,93 @@
+name: Build and Deploy Website
+
+on:
+  push:
+    branches: [ "main", "prod" ]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NODE_VERSION: '20.19.0'
+  # Map branch to deployment target. You can also move these to Org/Repo Variables.
+  # If you prefer GitHub Environments, you can split jobs by branch and set environment: prod/main.
+  DEPLOY_BUCKET_MAIN: ${{ secrets.S3_BUCKET_MAIN }}
+  DEPLOY_BUCKET_PROD: ${{ secrets.S3_BUCKET_PROD }}
+  CF_DISTRIBUTION_MAIN: ${{ secrets.CF_DISTRIBUTION_MAIN }}
+  CF_DISTRIBUTION_PROD: ${{ secrets.CF_DISTRIBUTION_PROD }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  GITHUB_TOKEN: ${{ secrets.NPMRC_TOKEN }}
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy (${{ github.ref_name }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Configure npm for GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${NPMRC_TOKEN}" >> ~/.npmrc
+          echo "@guidogerb:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+
+
+      - name: Install dependencies (workspaces)
+        run: npm install
+
+      - name: Build monorepo
+        run: npm run build
+
+      - name: Upload build artifact (website)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-dist-${{ github.ref_name }}
+          path: website/dist
+
+      - name: Determine target (bucket and distribution)
+        id: target
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          if [ "$BRANCH" = "main" ]; then
+            echo "bucket=${DEPLOY_BUCKET_MAIN}" >> $GITHUB_OUTPUT
+            echo "distribution=${CF_DISTRIBUTION_MAIN}" >> $GITHUB_OUTPUT
+          elif [ "$BRANCH" = "prod" ]; then
+            echo "bucket=${DEPLOY_BUCKET_PROD}" >> $GITHUB_OUTPUT
+            echo "distribution=${CF_DISTRIBUTION_PROD}" >> $GITHUB_OUTPUT
+          else
+            echo "Unsupported branch: $BRANCH" >&2
+            exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          role-session-name: github-actions-${{ github.ref_name }}
+        if: ${{ steps.target.outputs.bucket != '' }}
+
+      - name: Sync to S3
+        if: ${{ steps.target.outputs.bucket != '' }}
+        run: |
+          aws s3 sync website/dist s3://${{ steps.target.outputs.bucket }} \
+            --delete \
+            --cache-control "public, max-age=300" \
+            --exclude "*.map"
+
+      - name: Create CloudFront invalidation
+        if: ${{ steps.target.outputs.distribution != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.target.outputs.distribution }} \
+            --paths "/*"

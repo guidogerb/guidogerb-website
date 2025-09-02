@@ -1,0 +1,46 @@
+name: Build (CI)
+
+on:
+  pull_request:
+    branches: [ "main", "prod" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '20.19.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Configure npm for GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
+          echo "@guidogerb:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies (workspaces)
+        run: npm install
+
+      - name: Build monorepo
+        run: npm run build
+
+      - name: Save website build artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-dist
+          path: website/dist
