@@ -80,7 +80,7 @@ function ce() {
             return e = e.displayName, e || (e = r.displayName || r.name || "", e = e !== "" ? "ForwardRef(" + e + ")" : "ForwardRef"), e;
           case Q:
             return r = e.displayName || null, r !== null ? r : n(e.type) || "Memo";
-          case y:
+          case I:
             r = e._payload, e = e._init;
             try {
               return n(e(r));
@@ -111,7 +111,7 @@ function ce() {
     }
     function c(e) {
       if (e === h) return "<>";
-      if (typeof e == "object" && e !== null && e.$$typeof === y)
+      if (typeof e == "object" && e !== null && e.$$typeof === I)
         return "<...>";
       try {
         var r = n(e);
@@ -121,7 +121,7 @@ function ce() {
       }
     }
     function a() {
-      var e = A.A;
+      var e = S.A;
       return e === null ? null : e.getOwner();
     }
     function s() {
@@ -152,13 +152,13 @@ function ce() {
         "Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release."
       )), e = this.props.ref, e !== void 0 ? e : null;
     }
-    function G(e, r, i, u, m, d, k, w) {
+    function G(e, r, i, u, _, d, k, w) {
       return i = d.ref, e = {
-        $$typeof: I,
+        $$typeof: y,
         type: e,
         key: r,
         props: d,
-        _owner: m
+        _owner: _
       }, (i !== void 0 ? i : null) !== null ? Object.defineProperty(e, "ref", {
         enumerable: !1,
         get: O
@@ -184,7 +184,7 @@ function ce() {
         value: w
       }), Object.freeze && (Object.freeze(e.props), Object.freeze(e)), e;
     }
-    function x(e, r, i, u, m, d, k, w) {
+    function P(e, r, i, u, _, d, k, w) {
       var l = r.children;
       if (l !== void 0)
         if (u)
@@ -199,10 +199,10 @@ function ce() {
         else j(l);
       if (C.call(r, "key")) {
         l = n(e);
-        var R = Object.keys(r).filter(function(te) {
+        var T = Object.keys(r).filter(function(te) {
           return te !== "key";
         });
-        u = 0 < R.length ? "{key: someKey, " + R.join(": ..., ") + ": ...}" : "{key: someKey}", $[l + u] || (R = 0 < R.length ? "{" + R.join(": ..., ") + ": ...}" : "{}", console.error(
+        u = 0 < T.length ? "{key: someKey, " + T.join(": ..., ") + ": ...}" : "{key: someKey}", $[l + u] || (T = 0 < T.length ? "{" + T.join(": ..., ") + ": ...}" : "{}", console.error(
           `A props object containing a "key" prop is being spread into JSX:
   let props = %s;
   <%s {...props} />
@@ -211,14 +211,14 @@ React keys must be passed directly to JSX without using spread:
   <%s key={someKey} {...props} />`,
           u,
           l,
-          R,
+          T,
           l
         ), $[l + u] = !0);
       }
       if (l = null, i !== void 0 && (t(i), l = "" + i), f(r) && (t(r.key), l = "" + r.key), "key" in r) {
         i = {};
-        for (var P in r)
-          P !== "key" && (i[P] = r[P]);
+        for (var x in r)
+          x !== "key" && (i[x] = r[x]);
       } else i = r;
       return l && E(
         i,
@@ -227,7 +227,7 @@ React keys must be passed directly to JSX without using spread:
         e,
         l,
         d,
-        m,
+        _,
         a(),
         i,
         k,
@@ -235,9 +235,9 @@ React keys must be passed directly to JSX without using spread:
       );
     }
     function j(e) {
-      typeof e == "object" && e !== null && e.$$typeof === I && e._store && (e._store.validated = 1);
+      typeof e == "object" && e !== null && e.$$typeof === y && e._store && (e._store.validated = 1);
     }
-    var b = ne, I = Symbol.for("react.transitional.element"), W = Symbol.for("react.portal"), h = Symbol.for("react.fragment"), q = Symbol.for("react.strict_mode"), J = Symbol.for("react.profiler"), z = Symbol.for("react.consumer"), X = Symbol.for("react.context"), B = Symbol.for("react.forward_ref"), H = Symbol.for("react.suspense"), Z = Symbol.for("react.suspense_list"), Q = Symbol.for("react.memo"), y = Symbol.for("react.lazy"), K = Symbol.for("react.activity"), ee = Symbol.for("react.client.reference"), A = b.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, C = Object.prototype.hasOwnProperty, re = Array.isArray, S = console.createTask ? console.createTask : function() {
+    var b = ne, y = Symbol.for("react.transitional.element"), W = Symbol.for("react.portal"), h = Symbol.for("react.fragment"), q = Symbol.for("react.strict_mode"), J = Symbol.for("react.profiler"), z = Symbol.for("react.consumer"), X = Symbol.for("react.context"), B = Symbol.for("react.forward_ref"), H = Symbol.for("react.suspense"), Z = Symbol.for("react.suspense_list"), Q = Symbol.for("react.memo"), I = Symbol.for("react.lazy"), K = Symbol.for("react.activity"), ee = Symbol.for("react.client.reference"), S = b.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, C = Object.prototype.hasOwnProperty, re = Array.isArray, A = console.createTask ? console.createTask : function() {
       return null;
     };
     b = {
@@ -248,30 +248,30 @@ React keys must be passed directly to JSX without using spread:
     var N, U = {}, D = b.react_stack_bottom_frame.bind(
       b,
       s
-    )(), Y = S(c(s)), $ = {};
-    v.Fragment = h, v.jsx = function(e, r, i, u, m) {
-      var d = 1e4 > A.recentlyCreatedOwnerStacks++;
-      return x(
+    )(), Y = A(c(s)), $ = {};
+    v.Fragment = h, v.jsx = function(e, r, i, u, _) {
+      var d = 1e4 > S.recentlyCreatedOwnerStacks++;
+      return P(
         e,
         r,
         i,
         !1,
         u,
-        m,
+        _,
         d ? Error("react-stack-top-frame") : D,
-        d ? S(c(e)) : Y
+        d ? A(c(e)) : Y
       );
-    }, v.jsxs = function(e, r, i, u, m) {
-      var d = 1e4 > A.recentlyCreatedOwnerStacks++;
-      return x(
+    }, v.jsxs = function(e, r, i, u, _) {
+      var d = 1e4 > S.recentlyCreatedOwnerStacks++;
+      return P(
         e,
         r,
         i,
         !0,
         u,
-        m,
+        _,
         d ? Error("react-stack-top-frame") : D,
-        d ? S(c(e)) : Y
+        d ? A(c(e)) : Y
       );
     };
   })()), v;
@@ -280,8 +280,8 @@ var F;
 function se() {
   return F || (F = 1, process.env.NODE_ENV === "production" ? g.exports = ie() : g.exports = ce()), g.exports;
 }
-var _ = se();
-const ue = { BASE_URL: "/", DEV: !1, MODE: "production", PROD: !0, SSR: !1, VITE_APP_OAUTH2_CLIENT_ID: "neurale-Bow-789393" }, T = (n, o) => {
+var m = se();
+const ue = { BASE_URL: "/", DEV: !1, MODE: "production", PROD: !0, SSR: !1 }, R = (n, o) => {
   try {
     const t = ue?.[n];
     return t == null || t === "" ? o : t;
@@ -290,7 +290,7 @@ const ue = { BASE_URL: "/", DEV: !1, MODE: "production", PROD: !0, SSR: !1, VITE
   }
 };
 function M() {
-  const n = T("VITE_COGNITO_AUTHORITY", void 0), o = T("VITE_COGNITO_CLIENT_ID", void 0), t = T("VITE_REDIRECT_URI", typeof window < "u" ? window.location.origin : void 0), c = T("VITE_RESPONSE_TYPE", "code"), a = T("VITE_COGNITO_SCOPE", "email openid phone"), s = T("VITE_COGNITO_DOMAIN", void 0), f = T("VITE_LOGOUT_URI", t);
+  const n = R("VITE_COGNITO_AUTHORITY", void 0), o = R("VITE_COGNITO_CLIENT_ID", void 0), t = R("VITE_REDIRECT_URI", typeof window < "u" ? window.location.origin : void 0), c = R("VITE_RESPONSE_TYPE", "code"), a = R("VITE_COGNITO_SCOPE", "email openid phone"), s = R("VITE_COGNITO_DOMAIN", void 0), f = R("VITE_LOGOUT_URI", t);
   return {
     authority: n,
     clientId: o,
@@ -315,20 +315,20 @@ function fe(n = {}) {
   const o = M(), t = n.clientId ?? o.clientId, c = n.logoutUri ?? o.logoutUri, a = n.cognitoDomain ?? o.cognitoDomain;
   return !t || !c || !a ? void 0 : `${a.replace(/\/$/, "")}/logout?client_id=${encodeURIComponent(t)}&logout_uri=${encodeURIComponent(c)}`;
 }
-function me({ children: n, autoSignIn: o = !1 }) {
+function _e({ children: n, autoSignIn: o = !1 }) {
   const t = oe(), c = () => {
     const a = fe();
     a ? window.location.href = a : t.removeUser();
   };
-  return t.isLoading ? /* @__PURE__ */ _.jsx("div", { children: "Loading..." }) : t.error ? /* @__PURE__ */ _.jsxs("div", { children: [
+  return t.isLoading ? /* @__PURE__ */ m.jsx("div", { children: "Loading..." }) : t.error ? /* @__PURE__ */ m.jsxs("div", { children: [
     "Encountering error... ",
     t.error.message
-  ] }) : t.isAuthenticated ? /* @__PURE__ */ _.jsxs("div", { children: [
+  ] }) : t.isAuthenticated ? /* @__PURE__ */ m.jsxs("div", { children: [
     n ?? null,
-    /* @__PURE__ */ _.jsx("div", { style: { marginTop: 12 }, children: /* @__PURE__ */ _.jsx("button", { onClick: () => c(), children: "Sign out" }) })
-  ] }) : o ? (t.signinRedirect(), null) : /* @__PURE__ */ _.jsxs("div", { children: [
-    /* @__PURE__ */ _.jsx("button", { onClick: () => t.signinRedirect(), children: "Sign in" }),
-    /* @__PURE__ */ _.jsx("button", { onClick: () => c(), style: { marginLeft: 8 }, children: "Sign out" })
+    /* @__PURE__ */ m.jsx("div", { style: { marginTop: 12 }, children: /* @__PURE__ */ m.jsx("button", { onClick: () => c(), children: "Sign out" }) })
+  ] }) : o ? (t.signinRedirect(), null) : /* @__PURE__ */ m.jsxs("div", { children: [
+    /* @__PURE__ */ m.jsx("button", { onClick: () => t.signinRedirect(), children: "Sign in" }),
+    /* @__PURE__ */ m.jsx("button", { onClick: () => c(), style: { marginLeft: 8 }, children: "Sign out" })
   ] });
 }
 function Ee({
@@ -343,10 +343,10 @@ function Ee({
   const E = le({ authority: n, clientId: o, redirectUri: t, responseType: c, scope: a }), O = () => {
     window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
   };
-  return /* @__PURE__ */ _.jsx(ae, { ...E, onSigninCallback: s || O, children: f });
+  return /* @__PURE__ */ m.jsx(ae, { ...E, onSigninCallback: s || O, children: f });
 }
 export {
-  me as Auth,
+  _e as Auth,
   Ee as AuthProvider,
   M as getEnvConfig,
   fe as getLogoutUrl,
