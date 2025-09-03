@@ -18,7 +18,7 @@ export default function AuthProvider({ children }) {
         response_type: import.meta.env.VITE_RESPONSE_TYPE ?? 'code',
     };
 
-    console.log("AuthProvider config: ", JSON.stringify(config));
+    console.log("AuthProvider config: ", JSON.stringify(userManagerSettings));
 
     const onSigninCallback = () => {
         // Clean up the URL after redirect login
