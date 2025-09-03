@@ -3,23 +3,24 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.es.js",
+  "main": "./index.js",
+  "module": "./index.js",
   "exports": {
     ".": {
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "import": "./index.js",
+      "require": "./index.js"
     }
   },
   "files": [
-    "dist"
+    "index.js",
+    "src"
   ],
   "scripts": {
     "build": "vite build"
   },
   "peerDependencies": {
-    "react": ">=18",
-    "react-dom": ">=18"
+    "react": ">=19",
+    "react-dom": ">=19"
   },
   "dependencies": {
     "oidc-client-ts": "^3.3.0",

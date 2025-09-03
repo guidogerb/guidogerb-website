@@ -1,13 +1,22 @@
-import { useAuth } from "react-oidc-context";
-import { getLogoutUrl } from './config';
+import { useEffect, useRef } from 'react';
+import { useAuth } from 'react-oidc-context';
 
 // Auth wrapper component: guards its children behind OIDC authentication
-// Usage: <Auth><Protected /></Auth>
+// Usage: <Auth autoSignIn><Protected /></Auth>
 function Auth({ children, autoSignIn = false }) {
     const auth = useAuth();
+    const redirectStartedRef = useRef(false);
+
+    // Avoid calling signinRedirect in render and guard for StrictMode double-invocation
+    useEffect(() => {
+        if (autoSignIn && !auth.isAuthenticated && !auth.isLoading && !redirectStartedRef.current) {
+            redirectStartedRef.current = true;
+            auth.signinRedirect();
+        }
+    }, [autoSignIn, auth.isAuthenticated, auth.isLoading, auth]);
 
     const signOutRedirect = () => {
-        const url = getLogoutUrl();
+        const url = import.meta.env.VITE_LOGOUT_URI;
         if (url) {
             window.location.href = url;
         } else {
@@ -43,8 +52,7 @@ function Auth({ children, autoSignIn = false }) {
     }
 
     if (autoSignIn) {
-        // Trigger redirect sign-in automatically if requested
-        auth.signinRedirect();
+        // Redirect will be triggered by effect
         return null;
     }
 

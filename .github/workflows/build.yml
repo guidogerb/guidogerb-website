@@ -18,6 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Create .env file from secret
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.VITE_ENV }}" > .env
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
