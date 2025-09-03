@@ -4,4 +4,5 @@
 /pythonScripts/writeHtml/.idea/
 /pythonScripts/writeHtml/.venv/
 
-/website/.env
+/.env
+/.env
