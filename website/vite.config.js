@@ -1,15 +1,14 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 
 export default defineConfig(({ mode }) => {
-    // Load env from monorepo root
-    const env = loadEnv(mode, path.resolve(__dirname, '../..'), '')
+    // Load env from the same directory as this vite.config.js file
+    const env = loadEnv(mode, __dirname, '')
 
     return {
         plugins: [react()],
         define: {
-            // spread all prefixed vars
+            // Spread all env vars prefixed with VITE_
             ...Object.fromEntries(
                 Object.entries(env)
                     .filter(([key]) => key.startsWith('VITE_'))

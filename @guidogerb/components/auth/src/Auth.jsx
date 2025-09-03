@@ -1,14 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from 'react-oidc-context';
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Load environment variables from .env file located two levels up
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 // Auth wrapper component: guards its children behind OIDC authentication
 // Usage: <Auth autoSignIn><Protected /></Auth>
-function Auth({ children, autoSignIn = false }) {
+function Auth({ children, autoSignIn = false }, logoutUri) {
     const auth = useAuth();
     const redirectStartedRef = useRef(false);
 
@@ -21,7 +16,7 @@ function Auth({ children, autoSignIn = false }) {
     }, [autoSignIn, auth.isAuthenticated, auth.isLoading, auth]);
 
     const signOutRedirect = () => {
-        const url = import.meta.env.VITE_LOGOUT_URI;
+        const url = logoutUri;
         if (url) {
             window.location.href = url;
         } else {

@@ -26,7 +26,7 @@ function App() {
       {/* Protected section (requires sign-in) */}
       <div style={{ border: '1px solid #ccc', padding: 12, marginTop: 16 }}>
         <h2>Protected Area</h2>
-        <Auth autoSignIn>
+        <Auth autoSignIn logoutUri={import.meta.env.VITE_LOGOUT_URI}>
           <ProtectedContent />
         </Auth>
       </div>

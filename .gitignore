@@ -4,7 +4,7 @@
 /pythonScripts/writeHtml/.idea/
 /pythonScripts/writeHtml/.venv/
 
-/.env
+/website/.env
 
 **/dist/
 /package-lock.json
