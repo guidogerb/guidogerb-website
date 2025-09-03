@@ -10,23 +10,22 @@ import { getOidcConfig } from './config';
 export default function AuthProvider({
   authority,
   metadataUrl,
-  clientId,
-  redirectUri,
-  responseType,
+  client_id,
+  redirect_uri,
+  response_type,
   scope,
-  onSigninCallback,
+  post_logout_redirect_uri,
   children,
 }) {
-  const config = getOidcConfig({ authority, metadataUrl, clientId, redirectUri, responseType, scope });
-
-  // Validate: either authority or metadataUrl must be provided
-  const hasAuthority = !!config.authority && String(config.authority).trim() !== '';
-  const hasMetadata = !!config.metadataUrl && String(config.metadataUrl).trim() !== '';
-  if (!hasAuthority && !hasMetadata) {
-    const message = 'AuthProvider misconfigured: No authority or metadataUrl configured on settings. Set VITE_COGNITO_AUTHORITY or VITE_COGNITO_METADATA_URL (and related VITE_* vars), or pass props to <AuthProvider>.';
-    // eslint-disable-next-line no-console
-    console.error(message, { config });
-    throw new Error(message);
+  const config  = {
+      authority: import.meta.env.VITE_COGNITO_AUTHORITY,            // optional if using metadataUrl
+      metadataUrl: import.meta.env.VITE_COGNITO_METADATA_URL,       // optional if using authority
+      client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
+      redirect_uri: import.meta.env.VITE_REDIRECT_URI,
+      on_signin_callback: import.meta.env.VITE_REDIRECT_URI,
+      post_logout_redirect_uri: import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI,
+      scope: import.meta.env.VITE_COGNITO_SCOPE ?? "openid profile email",
+      response_type: import.meta.env.VITE_RESPONSE_TYPE ?? "code",
   }
 
   // Default callback recommended by react-oidc-context docs to clean up hash
@@ -35,7 +34,7 @@ export default function AuthProvider({
   };
 
   return (
-    <OidcAuthProvider {...config} onSigninCallback={onSigninCallback || defaultSigninCb}>
+    <OidcAuthProvider {...config} onSigninCallback={config.on_signin_callback || defaultSigninCb}>
       {children}
     </OidcAuthProvider>
   );
