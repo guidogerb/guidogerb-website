@@ -1,13 +1,11 @@
 import React from 'react';
 import { AuthProvider as OidcAuthProvider } from 'react-oidc-context';
-import { getOidcConfig } from './config';
 
-// Wrapper that configures react-oidc-context from props or Vite env
-// Usage:
-// <AuthProvider>
-//   <App/>
-// </AuthProvider>
+// AuthProvider component: wraps its children with OIDC authentication context
+// Usage: <AuthProvider><Protected /></AuthProvider>
+//
 export default function AuthProvider({
+  children,
   authority,
   metadataUrl,
   client_id,
@@ -15,7 +13,6 @@ export default function AuthProvider({
   response_type,
   scope,
   post_logout_redirect_uri,
-  children,
 }) {
   const config  = {
       authority: import.meta.env.VITE_COGNITO_AUTHORITY,            // optional if using metadataUrl
@@ -27,6 +24,10 @@ export default function AuthProvider({
       scope: import.meta.env.VITE_COGNITO_SCOPE ?? "openid profile email",
       response_type: import.meta.env.VITE_RESPONSE_TYPE ?? "code",
   }
+
+  // Debug: show the resolved AuthProvider configuration
+  // Note: contains only public OIDC settings (no client secret)
+  console.log("AuthProvider config: ", JSON.stringify(config));
 
   // Default callback recommended by react-oidc-context docs to clean up hash
   const defaultSigninCb = () => {
