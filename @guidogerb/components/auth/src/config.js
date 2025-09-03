@@ -38,11 +38,16 @@ export function getEnvConfig() {
 export function getOidcConfig(overrides = {}) {
   const env = getEnvConfig();
   const authority = overrides.authority ?? env.authority;
-  const metadataUrl = overrides.metadataUrl ?? env.metadataUrl;
+  let metadataUrl = overrides.metadataUrl ?? env.metadataUrl;
   const client_id = overrides.clientId ?? env.clientId;
   const redirect_uri = overrides.redirectUri ?? env.redirectUri;
   const response_type = overrides.responseType ?? env.responseType;
   const scope = overrides.scope ?? env.scope;
+
+  // Fallback: if authority is provided but metadataUrl is not, derive it per OIDC discovery convention
+  if (!metadataUrl && authority) {
+    metadataUrl = `${String(authority).replace(/\/$/, '')}/.well-known/openid-configuration`;
+  }
 
   return {
     authority,
