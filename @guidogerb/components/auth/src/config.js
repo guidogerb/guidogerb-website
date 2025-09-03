@@ -37,6 +37,7 @@ export function getEnvConfig() {
 
 export function getOidcConfig(overrides = {}) {
   const env = getEnvConfig();
+  console.log(JSON.stringify(env, null, 2));
   const authority = overrides.authority ?? env.authority;
   let metadataUrl = overrides.metadataUrl ?? env.metadataUrl;
   const client_id = overrides.clientId ?? env.clientId;
