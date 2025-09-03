@@ -23,7 +23,9 @@
     "react-dom": ">=19"
   },
   "dependencies": {
+    "dotenv": "^17.2.2",
     "oidc-client-ts": "^3.3.0",
+    "path": "^0.12.7",
     "react-oidc-context": "^3.3.0"
   },
   "devDependencies": {
