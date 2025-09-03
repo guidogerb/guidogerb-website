@@ -1,5 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from 'react-oidc-context';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from .env file located two levels up
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 // Auth wrapper component: guards its children behind OIDC authentication
 // Usage: <Auth autoSignIn><Protected /></Auth>

@@ -1,5 +1,10 @@
 import React from 'react';
 import { AuthProvider as OidcAuthProvider } from 'react-oidc-context';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from .env file located two levels up
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 export default function AuthProvider({ children }) {
     // Settings for oidc-client-ts via react-oidc-context
