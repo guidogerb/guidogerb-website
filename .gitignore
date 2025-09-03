@@ -6,4 +6,5 @@
 
 /.env
 
-/@guidogerb/**/dist/
+**/dist/
+/package-lock.json
