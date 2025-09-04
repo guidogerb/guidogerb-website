@@ -4716,50 +4716,50 @@ end note
 
 * **Users**
 
-  * `PK: userId (S)`, attrs: `handle (S, unique)`, `email (S, unique per region)`, `region (S)`, `displayName (S)`, `bio (S)`, `avatarKey (S)`, `createdAt (N)`, `roles (SS) [creator|listener|admin]`, `status (S)`
-  * GSIs: `byHandle` (PK=`handle`), `byEmail` (PK=`email`)
+    * `PK: userId (S)`, attrs: `handle (S, unique)`, `email (S, unique per region)`, `region (S)`, `displayName (S)`, `bio (S)`, `avatarKey (S)`, `createdAt (N)`, `roles (SS) [creator|listener|admin]`, `status (S)`
+    * GSIs: `byHandle` (PK=`handle`), `byEmail` (PK=`email`)
 * **Tracks**
 
-  * `PK: trackId (S)`, attrs: `ownerId (S)`, `title (S)`, `description (S)`, `tags (SS)`, `privacy (S) [public|private|unlisted]`, `status (S) [draft|processing|ready|blocked]`, `originalKey (S)`, `hlsBasePath (S)`, `durationSec (N)`, `loudnessLUFS (N)`, `waveformKey (S)`, `artKey (S)`, `createdAt (N)`
-  * GSIs: `byOwner` (PK=`ownerId`, SK=`createdAt` desc); `publicRecent` (PK=`public#<region>`, SK=`createdAt`).
+    * `PK: trackId (S)`, attrs: `ownerId (S)`, `title (S)`, `description (S)`, `tags (SS)`, `privacy (S) [public|private|unlisted]`, `status (S) [draft|processing|ready|blocked]`, `originalKey (S)`, `hlsBasePath (S)`, `durationSec (N)`, `loudnessLUFS (N)`, `waveformKey (S)`, `artKey (S)`, `createdAt (N)`
+    * GSIs: `byOwner` (PK=`ownerId`, SK=`createdAt` desc); `publicRecent` (PK=`public#<region>`, SK=`createdAt`).
 * **Playlists**
 
-  * `PK: playlistId (S)`, attrs: `ownerId (S)`, `title (S)`, `privacy (S)`, `createdAt (N)`
-  * GSI: `byOwner` (PK=`ownerId`, SK=`createdAt`).
+    * `PK: playlistId (S)`, attrs: `ownerId (S)`, `title (S)`, `privacy (S)`, `createdAt (N)`
+    * GSI: `byOwner` (PK=`ownerId`, SK=`createdAt`).
 * **PlaylistItems**
 
-  * `PK: playlistId (S)`, `SK: pos (N)`; attrs: `trackId (S)`, `addedAt (N)`
+    * `PK: playlistId (S)`, `SK: pos (N)`; attrs: `trackId (S)`, `addedAt (N)`
 * **Follows**
 
-  * `PK: userId (S)`, `SK: followedUserId (S)`; attrs: `createdAt (N)`
-  * GSI: `reverse` (PK=`followedUserId`, SK=`userId`) for followers.
+    * `PK: userId (S)`, `SK: followedUserId (S)`; attrs: `createdAt (N)`
+    * GSI: `reverse` (PK=`followedUserId`, SK=`userId`) for followers.
 * **Likes** (works for tracks/playlists)
 
-  * `PK: userId (S)`, `SK: targetType#targetId (S)`; attrs: `createdAt (N)`
-  * GSI: `byTarget` (PK=`targetType#targetId`, SK=`createdAt`) for counts/recent likes.
+    * `PK: userId (S)`, `SK: targetType#targetId (S)`; attrs: `createdAt (N)`
+    * GSI: `byTarget` (PK=`targetType#targetId`, SK=`createdAt`) for counts/recent likes.
 * **Reposts**
 
-  * Same key pattern as Likes with targetType `track`.
+    * Same key pattern as Likes with targetType `track`.
 * **Comments** (timestamp-anchored)
 
-  * `PK: trackId (S)`, `SK: tsMs#commentId (S)`; attrs: `userId (S)`, `text (S)`, `createdAt (N)`
-  * GSI: `byUser` (PK=`userId`, SK=`createdAt`).
+    * `PK: trackId (S)`, `SK: tsMs#commentId (S)`; attrs: `userId (S)`, `text (S)`, `createdAt (N)`
+    * GSI: `byUser` (PK=`userId`, SK=`createdAt`).
 * **PlaysAgg** (daily aggregates; raw plays go to Kinesis → S3)
 
-  * `PK: trackId#yyyy-mm-dd (S)`, attrs: `plays (N)`, `likes (N)`, `reposts (N)`, `region (S)`
+    * `PK: trackId#yyyy-mm-dd (S)`, attrs: `plays (N)`, `likes (N)`, `reposts (N)`, `region (S)`
 * **WebSocketConnections**
 
-  * `PK: userId (S)`, `SK: connectionId (S)`; attrs: `expiresAt (N, TTL)`, `subscriptions (SS)`
+    * `PK: userId (S)`, `SK: connectionId (S)`; attrs: `expiresAt (N, TTL)`, `subscriptions (SS)`
 * **ModerationReports**
 
-  * `PK: targetType#targetId (S)`, `SK: reportId (S)`; attrs: `reason (S)`, `status (S)`, `createdAt (N)`, `reporterId (S)`
+    * `PK: targetType#targetId (S)`, `SK: reportId (S)`; attrs: `reason (S)`, `status (S)`, `createdAt (N)`, `reporterId (S)`
 * **Plans** (listener/creator)
 
-  * `PK: planId (S)`, attrs: `type (S) [listener|creator]`, `features (SS)`, `region (S)`, `currency (S)`, `price (N)`, `stripePriceId (S)`
+    * `PK: planId (S)`, attrs: `type (S) [listener|creator]`, `features (SS)`, `region (S)`, `currency (S)`, `price (N)`, `stripePriceId (S)`
 * **Subscriptions**
 
-  * `PK: subscriptionId (S)`, attrs: `userId (S)`, `planId (S)`, `status (S)`, `provider (S)=stripe`, `externalId (S)`, `currentPeriodEnd (N)`, `currency (S)`
-  * GSI: `byUser` (PK=`userId`, SK=`createdAt`).
+    * `PK: subscriptionId (S)`, attrs: `userId (S)`, `planId (S)`, `status (S)`, `provider (S)=stripe`, `externalId (S)`, `currentPeriodEnd (N)`, `currency (S)`
+    * GSI: `byUser` (PK=`userId`, SK=`createdAt`).
 
 > **Throughput:** Start PAY\_PER\_REQUEST; move hot tables (Tracks, Likes, Comments) to provisioned with AutoScaling.
 
@@ -4767,29 +4767,29 @@ end note
 
 * **AuthN/Z**
 
-  * Cognito User Pool + Hosted UI + 3rd‑party OAuth (Google, Apple, etc.).
-  * API Gateway JWT authorizer validates tokens; scopes via Cognito Resource Server: `audio.read`, `audio.write`, `social.write`, `payments.write`.
+    * Cognito User Pool + Hosted UI + 3rd‑party OAuth (Google, Apple, etc.).
+    * API Gateway JWT authorizer validates tokens; scopes via Cognito Resource Server: `audio.read`, `audio.write`, `social.write`, `payments.write`.
 
 * **Endpoints (representative)**
 
-  * `POST /v1/upload/sign` → pre‑signed S3 PUT URL (region-specific bucket)
-  * `POST /v1/tracks` → create track (status=`processing`)
-  * `GET /v1/tracks/{id}` / `PATCH /v1/tracks/{id}` / `DELETE ...`
-  * `GET /v1/users/{handle}`; `GET /v1/users/{id}`; `PATCH /v1/me`
-  * `POST /v1/tracks/{id}/like` / `DELETE .../like`
-  * `POST /v1/tracks/{id}/repost` / `DELETE .../repost`
-  * `GET /v1/tracks/{id}/comments` / `POST /v1/tracks/{id}/comments`
-  * `GET /v1/playlists` / `POST /v1/playlists` / `PATCH /v1/playlists/{id}`
-  * `POST /v1/follow/{userId}` / `DELETE /v1/follow/{userId}`
-  * `GET /v1/feed` (from follows + recommendations)
-  * `GET /v1/search?q=...` (OpenSearch proxy)
-  * `GET /v1/plans` / `POST /v1/subscriptions` (start checkout) / `POST /v1/payments/webhook` (Stripe)
-  * `GET /oembed?url=...` (public)
+    * `POST /v1/upload/sign` → pre‑signed S3 PUT URL (region-specific bucket)
+    * `POST /v1/tracks` → create track (status=`processing`)
+    * `GET /v1/tracks/{id}` / `PATCH /v1/tracks/{id}` / `DELETE ...`
+    * `GET /v1/users/{handle}`; `GET /v1/users/{id}`; `PATCH /v1/me`
+    * `POST /v1/tracks/{id}/like` / `DELETE .../like`
+    * `POST /v1/tracks/{id}/repost` / `DELETE .../repost`
+    * `GET /v1/tracks/{id}/comments` / `POST /v1/tracks/{id}/comments`
+    * `GET /v1/playlists` / `POST /v1/playlists` / `PATCH /v1/playlists/{id}`
+    * `POST /v1/follow/{userId}` / `DELETE /v1/follow/{userId}`
+    * `GET /v1/feed` (from follows + recommendations)
+    * `GET /v1/search?q=...` (OpenSearch proxy)
+    * `GET /v1/plans` / `POST /v1/subscriptions` (start checkout) / `POST /v1/payments/webhook` (Stripe)
+    * `GET /oembed?url=...` (public)
 
 * **Access Patterns**
 
-  * Track page: Tracks → Owner via `ownerId` → Comments (paginated by `tsMs`) → Like/Repost counts via `byTarget` GSI.
-  * Home feed: fan-out-on-write to Notifications (optional), else fan-in via Follows + Tracks `byOwner`.
+    * Track page: Tracks → Owner via `ownerId` → Comments (paginated by `tsMs`) → Like/Repost counts via `byTarget` GSI.
+    * Home feed: fan-out-on-write to Notifications (optional), else fan-in via Follows + Tracks `byOwner`.
 
 #### 2.4 API (WebSocket) — real-time comments & notifications
 
@@ -5953,8 +5953,8 @@ Example content uploaded during deploy:
 {
   "env": "prod",
   "region": "us-east-1",
-  "apiBase": "/api",
-  "wsBase": "/ws",
+  "apiBase": "/api",     
+  "wsBase": "/ws",       
   "ads": { "enabled": false, "mode": "CSAI" },
   "features": { "realtime": true, "offline": true }
 }
@@ -6597,9 +6597,9 @@ packages:
 * **Single bucket:** `s3://rootBucketWebsites` with key prefixes per host.
 * **Keying rule:** `sites/<host>/{asset...}` where `<host>` is the request **Host** header (lowercased). Examples:
 
-  * `sites/mainstreamingsite.com/index.html`
-  * `sites/mystore.com/index.html`
-  * `sites/myusercreatorprofile.soundalike.example/index.html`
+    * `sites/mainstreamingsite.com/index.html`
+    * `sites/mystore.com/index.html`
+    * `sites/myusercreatorprofile.soundalike.example/index.html`
 * **Build output per site** goes to its prefix. CI syncs: `aws s3 sync websites/<domain>/dist s3://rootBucketWebsites/sites/<host>/`.
 
 #### H.3 CloudFront design
@@ -6608,15 +6608,15 @@ Two paths to satisfy both alias and arbitrary custom domains:
 
 1. **Shared distribution** for your apex + wildcard: serves `*.soundalike.example` and `soundalike.example`.
 
-   * **ACM cert**: SANs for apex + `*.soundalike.example`.
-   * **CloudFront Function** maps Host → S3 prefix (`/sites/<host>`).
-   * **Route53** A/AAAA records for each platform alias (e.g., `mystore.soundalike.example`).
+    * **ACM cert**: SANs for apex + `*.soundalike.example`.
+    * **CloudFront Function** maps Host → S3 prefix (`/sites/<host>`).
+    * **Route53** A/AAAA records for each platform alias (e.g., `mystore.soundalike.example`).
 
 2. **Per‑custom‑domain distribution** for external domains (e.g., `mystore.com`).
 
-   * **ACM cert per custom domain** (DNS validated in customer DNS).
-   * **Origin** same root bucket; **Origin Path** set to `/sites/mystore.com` (no function needed).
-   * **Customer** creates CNAME `mystore.com → dxxxx.cloudfront.net`.
+    * **ACM cert per custom domain** (DNS validated in customer DNS).
+    * **Origin** same root bucket; **Origin Path** set to `/sites/mystore.com` (no function needed).
+    * **Customer** creates CNAME `mystore.com → dxxxx.cloudfront.net`.
 
 > This avoids continuously re‑issuing one giant SAN certificate while giving you one fast shared distro for all your platform subdomains.
 
@@ -7417,4 +7417,788 @@ Outputs:
 > **Notes:** For the tenant template, we set `OriginPath` to `/sites/<primary-alias>`. Ensure your build syncs to that prefix. If you manage DNS, add a separate Route53 stack to alias the primary domain to the `DistributionDomainName`.
 
 ```
+
+
+---
+
+### Appendix L — Monorepo Design Review & Implementation (pnpm + Vite + Scoped Packages)
+
+**Status: designed to your specs.** Each scoped package has lint & TS configs and ships React/JSX components; every website workspace is a Vite React app. Global + per‑site env files (both dotted and hyphen forms) populate `VITE_*` at **compile time** in local dev and GitHub Actions.
+
+#### L.1 Repo layout (final)
 ```
+
+/                 package.json  pnpm-workspace.yaml  tsconfig.base.json  .eslintrc.cjs  .prettierrc
+/.npmrc           # includes GitHub Packages scope config (see L.7)
+/.env             /.env-development   /.env-production        # GLOBAL (hyphen)
+/.env.development /.env.production                           # GLOBAL (dotted for Vite default)
+/scripts
+deploy-all.mjs  deploy-site.mjs  write-env.mjs             # helpers
+/packages
+/ui             # @mypackage/ui (React components)
+/player         # @mypackage/player (player components/hooks)
+/config         # @mypackage/config (runtime/shared config utils)
+/websites
+/mainstreamingsite.com
+/mystore.com
+/myadminsite.com
+/myusercreatorprofile.com
+/.env             /.env-development   /.env-production    # SITE (hyphen)
+/.env.development /.env.production                           # SITE (dotted)
+
+````
+
+#### L.2 Root configs
+**`pnpm-workspace.yaml`**
+```yaml
+packages:
+  - 'packages/*'
+  - 'websites/*'
+````
+
+**`tsconfig.base.json`**
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@mypackage/ui": ["packages/ui/src/index.ts"],
+      "@mypackage/player": ["packages/player/src/index.ts"],
+      "@mypackage/config": ["packages/config/src/index.ts"]
+    }
+  }
+}
+```
+
+**`.eslintrc.cjs`**
+
+```js
+module.exports = {
+  root: true,
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint', 'react', 'react-hooks'],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:react/recommended', 'plugin:react-hooks/recommended', 'prettier'],
+  settings: { react: { version: 'detect' } },
+  ignorePatterns: ['dist', 'node_modules']
+}
+```
+
+**`.prettierrc`**
+
+```json
+{ "semi": false, "singleQuote": true, "trailingComma": "all" }
+```
+
+#### L.3 Scoped package template (React + lint)
+
+**`packages/ui/package.json`**
+
+```json
+{
+  "name": "@mypackage/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "echo 'no tests'"
+  },
+  "peerDependencies": { "react": ">=18", "react-dom": ">=18" },
+  "devDependencies": { "typescript": "^5", "@types/react": "^18", "@types/react-dom": "^18" }
+}
+```
+
+**`packages/ui/src/index.ts`**
+
+```ts
+export { Button } from './lib/Button'
+```
+
+**`packages/ui/src/lib/Button.tsx`**
+
+```tsx
+import * as React from 'react'
+export function Button({ children }: { children: React.ReactNode }) {
+  const brand = import.meta.env.VITE_BRAND_NAME || 'Brand'
+  return <button>{brand}: {children}</button>
+}
+```
+
+> Note: Because packages are consumed via **workspace symlinks**, `import.meta.env.VITE_*` resolves at the **website** build, so shared components get compile‑time values from the active site + global envs.
+
+#### L.4 Website template (Vite React + env merging)
+
+**`websites/mystore.com/package.json`**
+
+```json
+{
+  "name": "mystore.com",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "react": "^18",
+    "react-dom": "^18",
+    "@mypackage/ui": "workspace:*",
+    "@mypackage/player": "workspace:*",
+    "@mypackage/config": "workspace:*"
+  },
+  "devDependencies": { "vite": "^5", "@vitejs/plugin-react": "^4", "typescript": "^5" }
+}
+```
+
+**`websites/mystore.com/vite.config.ts`** (merges global + site env; supports dotted & hyphen forms)
+
+```ts
+import { defineConfig, loadEnv } from 'vite'
+import react from '@vitejs/plugin-react'
+import fs from 'node:fs'
+import path from 'node:path'
+import dotenv from 'dotenv'
+
+function loadHyphenEnv(dir: string, mode: string) {
+  const base = path.join(dir, '.env')
+  const hyphen = path.join(dir, `.env-${mode}`)
+  const out: Record<string, string> = {}
+  ;[base, hyphen].forEach((p) => {
+    if (fs.existsSync(p)) Object.assign(out, dotenv.parse(fs.readFileSync(p)))
+  })
+  return out
+}
+
+export default defineConfig(({ mode }) => {
+  const root = path.resolve(__dirname, '../..')
+  const globalDot = loadEnv(mode, root, 'VITE_')         // .env.development/.env.production
+  const globalHyphen = loadHyphenEnv(root, mode)          // .env-development/.env-production
+  const siteDot = loadEnv(mode, __dirname, 'VITE_')       // site .env.* (dotted)
+  const siteHyphen = loadHyphenEnv(__dirname, mode)       // site .env-* (hyphen)
+
+  const merged = { ...globalDot, ...globalHyphen, ...siteDot, ...siteHyphen }
+
+  return {
+    plugins: [react()],
+    envDir: root,                 // allow Vite to search the repo root
+    define: Object.fromEntries(
+      Object.entries(merged).map(([k, v]) => [
+        `import.meta.env.${k}`, JSON.stringify(v),
+      ]),
+    ),
+    build: { outDir: 'dist' }
+  }
+})
+```
+
+**`websites/mystore.com/src/main.tsx`**
+
+```tsx
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import { Button } from '@mypackage/ui'
+
+createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <h1>{import.meta.env.VITE_SITE_HOST}</h1>
+    <Button>Click me</Button>
+  </React.StrictMode>,
+)
+```
+
+#### L.5 Root `package.json` (scripts for lint/build/deploy & packages)
+
+```json
+{
+  "private": true,
+  "packageManager": "pnpm@9",
+  "workspaces": ["packages/*", "websites/*"],
+  "scripts": {
+    "lint": "pnpm -r eslint \"**/*.{ts,tsx}\"",
+    "typecheck": "pnpm -r --parallel --filter ./packages/** --filter ./websites/** run typecheck",
+    "build:sites": "pnpm -r --filter ./websites/** run build",
+    "build:site": "node scripts/deploy-site.mjs --build-only",
+    "deploy:all": "node scripts/deploy-all.mjs",
+    "deploy:site": "node scripts/deploy-site.mjs",
+    "env:write": "node scripts/write-env.mjs",
+
+    "packages:lint": "pnpm -r --filter ./packages/** run lint",
+    "packages:build": "pnpm -r --filter ./packages/** run build",
+
+    "packages:publish:github": "pnpm -r --filter ./packages/** exec bash -lc 'jq \".private=false\" package.json > package.tmp && mv package.tmp package.json && npm publish --access public'"
+  }
+}
+```
+
+> The `packages:publish:github` script is only used in CI (see L.7) with an npm token and **GitHub Packages** registry set in `.npmrc`. During normal dev, packages remain `private: true` and unpublished; websites depend on them via `workspace:*`.
+
+**Root `.npmrc`** (GitHub Packages for `@mypackage` scope)
+
+```
+@mypackage:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NPM_TOKEN}
+```
+
+#### L.6 Env files & precedence
+
+**Supported files (both global & per‑site):**
+
+* Hyphen: `.env`, `.env-development`, `.env-production`
+* Dotted: `.env`, `.env.development`, `.env.production` (Vite default)
+
+**Precedence (highest → lowest):** `site.dotted` → `site.hyphen` → `global.dotted` → `global.hyphen` → process env from CI.
+
+**Typical vars**
+
+```
+VITE_BRAND_NAME=Soundalike
+VITE_API_BASE=/api
+VITE_WS_BASE=/ws
+VITE_SITE_HOST=mystore.com
+VITE_CF_DISTRIBUTION_ID=E123ABC456
+```
+
+#### L.7 GitHub Actions (CI/CD) — env + deploy + packages
+
+**`.github/workflows/deploy-sites.yml`**
+
+```yaml
+name: Deploy Multi-tenant Sites
+on: { push: { branches: [ main ] } }
+permissions: { contents: read }
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      ROOT_BUCKET: ${{ secrets.ROOT_BUCKET }}
+      SHARED_DIST_ID: ${{ secrets.SHARED_DIST_ID }}
+      # Global VITE_* fallbacks
+      VITE_BRAND_NAME: ${{ vars.VITE_BRAND_NAME }}
+      VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+      VITE_WS_BASE: ${{ vars.VITE_WS_BASE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - run: pnpm install --frozen-lockfile
+      - name: Determine changed sites
+        id: changes
+        run: |
+          echo "sites=$(git diff --name-only HEAD~1 | awk -F/ '/^websites\//{print $2}' | sort -u | xargs)" >> $GITHUB_OUTPUT
+      - name: Write env files (global + site)
+        run: |
+          node scripts/write-env.mjs ${{ steps.changes.outputs.sites }}
+      - name: Build changed sites
+        if: steps.changes.outputs.sites != ''
+        run: |
+          for s in ${{ steps.changes.outputs.sites }}; do pnpm --filter websites/$s build; done
+      - name: Deploy changed sites
+        if: steps.changes.outputs.sites != ''
+        run: |
+          for s in ${{ steps.changes.outputs.sites }}; do \
+            aws s3 sync websites/$s/dist s3://$ROOT_BUCKET/sites/$s/ --delete; \
+            aws cloudfront create-invalidation --distribution-id $SHARED_DIST_ID --paths "/sites/$s/*"; \
+          done
+```
+
+**`.github/workflows/publish-packages.yml`**
+
+```yaml
+name: Publish @mypackage/* to GitHub Packages
+on:
+  push:
+    tags:
+      - 'pkg-v*'
+permissions:
+  contents: read
+  packages: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - run: pnpm install --frozen-lockfile
+      - name: Configure npm for GitHub Packages
+        run: echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+        env: { NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+      - name: Build packages
+        run: pnpm -r --filter ./packages/** run build
+      - name: Publish
+        run: pnpm run packages:publish:github
+        env: { NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+```
+
+**`scripts/write-env.mjs`** (writes per‑site env files from repo vars/secrets; optional)
+
+```js
+import fs from 'node:fs'
+import path from 'node:path'
+const sites = process.argv.slice(2)
+const globalEnv = {
+  VITE_BRAND_NAME: process.env.VITE_BRAND_NAME || 'Soundalike',
+  VITE_API_BASE: process.env.VITE_API_BASE || '/api',
+  VITE_WS_BASE: process.env.VITE_WS_BASE || '/ws'
+}
+for (const site of sites) {
+  const siteDir = path.join('websites', site)
+  const envPath = path.join(siteDir, '.env')
+  const lines = Object.entries(globalEnv).map(([k,v]) => `${k}=${v}`)
+  fs.writeFileSync(envPath, lines.join('
+'))
+}
+```
+
+---
+
+### Appendix M — End‑to‑End Multi‑Tenant Setup & Deployment
+
+1. **Provision infra**
+
+    * Deploy **`shared-distro-prod.yml`** (Appendix K) with your apex domain and root bucket.
+    * Create the **private** S3 root bucket and apply the **OAC bucket policy** (Appendix I.1) with the shared distro ARN.
+
+2. **Bootstrap repo**
+
+    * Commit files from Appendix L; run `pnpm i`; run `pnpm build:sites` to validate.
+
+3. **Add a new website**
+
+    * `pnpm dlx create-vite websites/newbrand.com --template react-ts` (then align with our template).
+    * Add env files inside `websites/newbrand.com/` and at root for globals.
+
+4. **First deploy**
+
+    * `pnpm deploy:all` (uses `scripts/deploy-all.mjs` to build → sync → invalidate).
+
+5. **Platform alias**
+
+    * Add `newbrand.${apex}` A/AAAA to the **shared** distro.
+
+6. **Custom domain (tenant)**
+
+    * Run Tenant Onboarding (Appendix J) with `Aliases=["newbrand.com","www.newbrand.com"]` → deploys a tenant distro with `OriginPath=/sites/newbrand.com` and updates the bucket policy.
+
+7. **Ongoing CI**
+
+    * On each merge to `main`, only changed sites build and deploy. `@mypackage/*` changes trigger full site rebuilds.
+
+You now have a production‑grade, workspace‑powered multi‑tenant setup where global + site envs drive compile‑time `VITE_*` values across all shared components.
+
+---
+
+### Appendix N — Developer Bootstrap Guide & Deployment Scripts
+
+This section gives contractors **copy‑paste commands** plus script stubs to deploy all multi‑tenant sites or a single site from the monorepo.
+
+#### N.1 Prerequisites
+
+* **Node 20+** and **pnpm 9+**: `corepack enable && corepack prepare pnpm@9 --activate`
+* **AWS CLI v2** configured with credentials that can: `s3:PutObject`, `cloudfront:CreateInvalidation`, `cloudfront:GetDistribution`.
+* Environment variables (export once in your shell or CI):
+
+    * `AWS_REGION` (e.g., `us-east-1`)
+    * `ROOT_BUCKET` (name of private S3 bucket, e.g., `rootBucketWebsites`)
+    * `SHARED_DIST_ID` (ID of the shared CloudFront distribution)
+
+Optional per‑tenant invalidations: set `TENANT_DIST_ID` when invalidating a custom domain distribution as well.
+
+#### N.2 First‑time repo bootstrap
+
+```bash
+# clone & install
+pnpm install
+
+# (optional) write a base .env to each site with shared VITE_* from env/vars
+node scripts/write-env.mjs $(ls websites)
+
+# build shared packages then all sites
+pnpm packages:build
+pnpm build:sites
+
+# deploy all sites to s3://$ROOT_BUCKET/sites/<host>/ and invalidate shared distro
+pnpm deploy:all
+```
+
+#### N.3 Script: `scripts/deploy-all.mjs`
+
+```js
+#!/usr/bin/env node
+import { readdirSync } from 'node:fs'
+import { execSync } from 'node:child_process'
+
+const ROOT_BUCKET = process.env.ROOT_BUCKET
+const SHARED_DIST_ID = process.env.SHARED_DIST_ID
+const AWS_REGION = process.env.AWS_REGION || 'us-east-1'
+
+if (!ROOT_BUCKET || !SHARED_DIST_ID) {
+  console.error('Missing env: ROOT_BUCKET and SHARED_DIST_ID are required')
+  process.exit(1)
+}
+
+const sites = readdirSync('websites', { withFileTypes: true })
+  .filter(d => d.isDirectory())
+  .map(d => d.name)
+
+for (const site of sites) {
+  console.log(`
+▶ Building ${site}`)
+  execSync(`pnpm --filter websites/${site} build`, { stdio: 'inherit' })
+  console.log(`▶ Syncing to s3://${ROOT_BUCKET}/sites/${site}/`)
+  execSync(`aws s3 sync websites/${site}/dist s3://${ROOT_BUCKET}/sites/${site}/ --delete --region ${AWS_REGION}`, { stdio: 'inherit' })
+}
+
+// Build a single invalidation with all changed site paths
+const paths = sites.map(s => `"/sites/${s}/*"`).join(' ')
+console.log('▶ Creating CloudFront invalidation for shared distro')
+execSync(`aws cloudfront create-invalidation --distribution-id ${SHARED_DIST_ID} --paths ${paths}`, { stdio: 'inherit' })
+console.log('✅ All sites deployed')
+```
+
+#### N.4 Script: `scripts/deploy-site.mjs`
+
+```js
+#!/usr/bin/env node
+import { execSync } from 'node:child_process'
+import process from 'node:process'
+
+const args = Object.fromEntries(process.argv.slice(2).map(a => a.split('=')))
+const site = args['--site'] || args.site
+const buildOnly = '--build-only' in args || args['--build-only'] === 'true'
+const ROOT_BUCKET = process.env.ROOT_BUCKET
+const AWS_REGION = process.env.AWS_REGION || 'us-east-1'
+const DIST_ID = args['--distro-id'] || process.env.TENANT_DIST_ID || process.env.SHARED_DIST_ID
+
+if (!site) { console.error('Usage: node scripts/deploy-site.mjs --site=domain.tld [--build-only] [--distro-id=E...ID]'); process.exit(1) }
+if (!buildOnly && (!ROOT_BUCKET || !DIST_ID)) { console.error('Missing env: ROOT_BUCKET and DIST_ID/SHARED_DIST_ID'); process.exit(1) }
+
+console.log(`▶ Building ${site}`)
+execSync(`pnpm --filter websites/${site} build`, { stdio: 'inherit' })
+
+if (!buildOnly) {
+  console.log(`▶ Syncing to s3://${ROOT_BUCKET}/sites/${site}/`)
+  execSync(`aws s3 sync websites/${site}/dist s3://${ROOT_BUCKET}/sites/${site}/ --delete --region ${AWS_REGION}`, { stdio: 'inherit' })
+  console.log(`▶ Invalidating CloudFront distro ${DIST_ID}`)
+  execSync(`aws cloudfront create-invalidation --distribution-id ${DIST_ID} --paths "/sites/${site}/*"`, { stdio: 'inherit' })
+  console.log('✅ Site deployed')
+}
+```
+
+#### N.5 Optional: `scripts/deploy-tenant.mjs` (custom domain distro too)
+
+```js
+#!/usr/bin/env node
+import { execSync } from 'node:child_process'
+const site = process.argv[2]
+const tenantDist = process.argv[3] // E.g., E123TENANT
+if (!site || !tenantDist) { console.error('Usage: deploy-tenant.mjs <site> <TENANT_DIST_ID>'); process.exit(1) }
+execSync(`node scripts/deploy-site.mjs --site=${site}`, { stdio: 'inherit' })
+execSync(`aws cloudfront create-invalidation --distribution-id ${tenantDist} --paths "/*"`, { stdio: 'inherit' })
+```
+
+#### N.6 Local development
+
+```bash
+# run a single site (hot reload; packages symlinked via pnpm workspaces)
+pnpm --filter websites/mystore.com dev
+
+# modify @mypackage/ui and see changes live
+pnpm --filter @mypackage/ui dev
+```
+
+#### N.7 Environment population
+
+* **Local:** `cp .env.development .env` at root and inside each `websites/<host>/` (or run `node scripts/write-env.mjs <host>`).
+* **CI:** use GitHub **Environment Variables/Secrets** to set `VITE_*`, then call `write-env.mjs` before `vite build`.
+
+**Compile‑time injection into shared components** is guaranteed because packages are built/consumed via workspace links and Vite in the site controls `import.meta.env` at build time.
+
+---
+
+*With the scripts above, you can now run `pnpm deploy:all` or `pnpm deploy:site -- --site=mystore.com` to publish to the multi‑tenant S3/CloudFront setup described in Appendices H–K.*
+
+---
+
+### Appendix O — Makefile One‑Liners
+
+> Drop this `Makefile` in the repo root. It wraps the Node scripts and AWS CLI for fast, reproducible deploys. Targets are **idempotent** and fail fast.
+
+```Makefile
+# Makefile — multi-tenant deploy helpers
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c
+
+## ===== Variables (override via env or make VAR=value) ===== ##
+AWS_REGION        ?= us-east-1
+ENV               ?= prod
+ROOT_BUCKET       ?= rootBucketWebsites
+CF_LOG_BUCKET     ?= $(ROOT_BUCKET) # bucket receiving CF logs (must allow log delivery)
+SHARED_DIST_ID    ?=                  # e.g., E2ABCDE12345
+DIST_ID           ?= $(SHARED_DIST_ID)
+
+# Shared distro (apex + wildcard)
+APEX_DOMAIN       ?= soundalike.example
+ACM_ARN_SHARED    ?=                   # us-east-1 cert covering APEX + *.
+WAF_ARN           ?=                   # WAFv2 WebACL (CLOUDFRONT)
+HOSTED_ZONE_ID    ?=                   # Optional; if set, Route53 records will be created
+
+# Tenant onboarding
+DOMAIN            ?= mystore.com
+ALIASES           ?= $(DOMAIN),www.$(DOMAIN)
+STATE_MACHINE_ARN ?=                   # If set, use Step Functions onboarding (Appendix J)
+ACM_ARN_TENANT    ?=                   # If no SFN, provide cert for tenant
+
+# Templates
+TEMPLATES_DIR         ?= infra/templates
+SHARED_TEMPLATE       ?= $(TEMPLATES_DIR)/shared-distro-prod.yml
+TENANT_TEMPLATE       ?= $(TEMPLATES_DIR)/tenant-distro-prod.yml
+
+# Helpers
+JSON := python - <<'PY'
+import json,sys,os
+inp = {"env":os.environ.get('ENV','prod'),
+       "domain":os.environ['DOMAIN'],
+       "subjectAltNames": os.environ.get('ALIASES','').split(','),
+       "rootBucket": os.environ['ROOT_BUCKET'],
+       "tenantTemplateUrl": os.environ.get('TENANT_TEMPLATE_URL',''),
+       "webAclArn": os.environ.get('WAF_ARN',''),
+       "hostedZoneId": os.environ.get('HOSTED_ZONE_ID','')}
+print(json.dumps(inp))
+PY
+
+## ===== Utility ===== ##
+.PHONY: help
+help:
+	@awk 'BEGIN{FS=":.*##"; printf "
+Targets:
+"} /^[a-zA-Z_-]+:.*?##/{printf "  [36m%-22s[0m %s
+", $$1, $$2}' $(MAKEFILE_LIST)
+
+## ===== Monorepo scripts ===== ##
+.PHONY: deploy-all
+deploy-all: ## Build & deploy ALL sites to S3 and invalidate shared distro
+	@test -n "$(ROOT_BUCKET)" && test -n "$(SHARED_DIST_ID)"
+	pnpm deploy:all
+
+.PHONY: deploy-site
+deploy-site: ## Build & deploy one site: make deploy-site SITE=myusercreatorprofile.com [DIST_ID=E...] 
+	@test -n "$(ROOT_BUCKET)" && test -n "$(DIST_ID)"
+	@test -n "$(SITE)" || (echo "SITE is required" && exit 1)
+	node scripts/deploy-site.mjs --site=$(SITE) --distro-id=$(DIST_ID)
+
+.PHONY: invalidate
+invalidate: ## Invalidate a path on a distro: make invalidate DIST_ID=E... PATHS="/sites/mystore.com/*"
+	@test -n "$(DIST_ID)" && test -n "$(PATHS)"
+	aws cloudfront create-invalidation --distribution-id $(DIST_ID) --paths $(PATHS)
+
+## ===== Shared distribution (apex + wildcard) ===== ##
+.PHONY: deploy-shared-stack
+deploy-shared-stack: ## Deploy shared CloudFront (apex + wildcard)
+	@test -n "$(APEX_DOMAIN)" && test -n "$(ACM_ARN_SHARED)" && test -n "$(WAF_ARN)" && test -n "$(CF_LOG_BUCKET)"
+	aws cloudformation deploy \
+	  --template-file $(SHARED_TEMPLATE) \
+	  --stack-name shared-distro-$(ENV) \
+	  --capabilities CAPABILITY_NAMED_IAM \
+	  --parameter-overrides \
+	    Env=$(ENV) \
+	    DomainName=$(APEX_DOMAIN) \
+	    RootWebsitesBucketName=$(ROOT_BUCKET) \
+	    AcmCertificateArn=$(ACM_ARN_SHARED) \
+	    WebAclArn=$(WAF_ARN) \
+	    LogBucketName=$(CF_LOG_BUCKET) \
+	    HostedZoneId=$(HOSTED_ZONE_ID)
+
+## ===== Tenant onboarding ===== ##
+.PHONY: onboard-tenant
+onboard-tenant: ## Provision tenant via Step Functions (if STATE_MACHINE_ARN set) or direct CFN
+	@test -n "$(DOMAIN)"
+	@if [ -n "$(STATE_MACHINE_ARN)" ]; then \
+	  echo "▶ Starting Step Functions onboarding for $(DOMAIN)"; \
+	  aws stepfunctions start-execution \
+	    --state-machine-arn $(STATE_MACHINE_ARN) \
+	    --name tenant-$(DOMAIN)-$$(date +%s) \
+	    --input $$($(JSON)); \
+	else \
+	  echo "▶ Direct CFN deploy for $(DOMAIN)"; \
+	  test -n "$(ACM_ARN_TENANT)" && test -n "$(WAF_ARN)" && test -n "$(CF_LOG_BUCKET)"; \
+	  aws cloudformation deploy \
+	    --template-file $(TENANT_TEMPLATE) \
+	    --stack-name tenant-$(DOMAIN) \
+	    --capabilities CAPABILITY_NAMED_IAM \
+	    --parameter-overrides \
+	      Env=$(ENV) \
+	      RootWebsitesBucketName=$(ROOT_BUCKET) \
+	      Aliases=$(ALIASES) \
+	      AcmCertificateArn=$(ACM_ARN_TENANT) \
+	      WebAclArn=$(WAF_ARN) \
+	      LogBucketName=$(CF_LOG_BUCKET) \
+	      HostedZoneId=$(HOSTED_ZONE_ID); \
+	fi
+
+.PHONY: write-env
+write-env: ## Write global env into each site .env (or SITE=domain.tld)
+	@if [ -n "$(SITE)" ]; then \
+	  node scripts/write-env.mjs $(SITE); \
+	else \
+	  node scripts/write-env.mjs $$(ls websites); \
+	fi
+```
+
+**Usage examples**
+
+```
+make deploy-all ROOT_BUCKET=rootBucketWebsites SHARED_DIST_ID=E2ABCD12345
+make deploy-site SITE=mystore.com ROOT_BUCKET=rootBucketWebsites DIST_ID=E2ABCD12345
+make deploy-shared-stack APEX_DOMAIN=soundalike.example ACM_ARN_SHARED=arn:aws:acm:us-east-1:... WAF_ARN=arn:aws:wafv2:... CF_LOG_BUCKET=cf-logs-bucket ROOT_BUCKET=rootBucketWebsites HOSTED_ZONE_ID=Z...
+make onboard-tenant DOMAIN=mystore.com ALIASES="mystore.com,www.mystore.com" ACM_ARN_TENANT=arn:aws:acm:us-east-1:... WAF_ARN=arn:aws:wafv2:... CF_LOG_BUCKET=cf-logs-bucket ROOT_BUCKET=rootBucketWebsites
+```
+
+> Tip: export common env once in your shell (or CI variables) so you can just run `make deploy-all` and `make onboard-tenant DOMAIN=...`.
+
+```
+
+---
+
+### Appendix O — Makefile One‑Liners — Usage Notes
+
+**How to run these targets**
+- Set required environment variables once in your shell (or CI):
+  - `export ROOT_BUCKET=<your-root-websites-bucket>`
+  - `export SHARED_DIST_ID=<E...ID>`
+  - optional: `export AWS_REGION=us-east-1`
+- Then run:
+  - **Deploy all sites**: `make deploy-all`
+  - **Deploy one site**: `make deploy-site SITE=mystore.com [DIST_ID=E...ID]`
+  - **Stand up shared distro** (apex + wildcard): `make deploy-shared-stack APEX_DOMAIN=example.com ACM_ARN_SHARED=arn:... WAF_ARN=arn:... CF_LOG_BUCKET=cf-logs-bucket ROOT_BUCKET=<bucket> [HOSTED_ZONE_ID=Z...]`
+  - **Onboard a tenant** (custom domain):
+    - via Step Functions (recommended): `make onboard-tenant DOMAIN=mystore.com ALIASES="mystore.com,www.mystore.com" STATE_MACHINE_ARN=arn:aws:states:...`
+    - or direct CloudFormation: `make onboard-tenant DOMAIN=mystore.com ALIASES="mystore.com,www.mystore.com" ACM_ARN_TENANT=arn:... WAF_ARN=arn:... CF_LOG_BUCKET=cf-logs-bucket`
+  - **Write env files** (global → sites): `make write-env` or for one: `make write-env SITE=mystore.com`
+
+> Pro tip: `make help` lists available targets with descriptions.
+
+---
+
+### Appendix P — Repository Structure (Multi‑Tenant Monorepo)
+
+#### P.1 Directory tree
+```
+
+repo-root/
+├─ Makefile                        # Appendix O
+├─ pnpm-workspace.yaml
+├─ package.json                    # root scripts (build/deploy all/sites)
+├─ tsconfig.base.json
+├─ .eslintrc.cjs  .prettierrc
+├─ .npmrc                          # @mypackage -> GitHub Packages (optional)
+├─ .env  .env-development  .env-production
+├─ .env.development  .env.production
+├─ scripts/
+│  ├─ deploy-all.mjs               # builds all sites -> s3 sync -> CF invalidate
+│  ├─ deploy-site.mjs              # builds one site -> s3 sync -> CF invalidate
+│  ├─ deploy-tenant.mjs            # optional: invalidate tenant distro too
+│  └─ write-env.mjs                # writes envs into site .env
+├─ infra/
+│  ├─ stacks/                      # CFN nested stacks (edge, api, auth, data, ...)
+│  ├─ templates/                   # Appendix K templates (shared/tenant prod)
+│  │  ├─ shared-distro-prod.yml
+│  │  └─ tenant-distro-prod.yml
+│  ├─ params/                      # per-env, per-region param JSONs
+│  ├─ onboarding/                  # Step Functions ASL, Lambda for tenant onboarding
+│  └─ waf/                         # WAF JSON/YAML policies
+├─ packages/
+│  ├─ ui/                          # @mypackage/ui (React components)
+│  ├─ player/                      # @mypackage/player
+│  └─ config/                      # @mypackage/config
+├─ websites/
+│  ├─ mainstreamingsite.com/
+│  │  ├─ src/  public/  vite.config.ts
+│  │  ├─ .env  .env-development  .env-production
+│  │  └─ .env.development  .env.production
+│  ├─ mystore.com/                # additional single-domain sites
+│  ├─ myadminsite.com/
+│  └─ myusercreatorprofile.com/   # 3rd level under apex also supported via shared distro
+└─ .github/
+└─ workflows/
+├─ deploy-sites.yml         # CI for multi-tenant deploys
+└─ publish-packages.yml     # CI for publishing @mypackage/\* (optional)
+
+````
+
+#### P.2 UML — logical layout & references
+```plantuml
+@startuml
+skinparam packageStyle rectangle
+
+package "repo-root" {
+  [Makefile]
+  [package.json]
+  [pnpm-workspace.yaml]
+  [scripts/*]
+}
+
+package "packages" {
+  [@mypackage/ui]
+  [@mypackage/player]
+  [@mypackage/config]
+}
+
+package "websites" {
+  [mainstreamingsite.com]
+  [mystore.com]
+  [myadminsite.com]
+  [myusercreatorprofile.com]
+}
+
+package "infra" {
+  [templates/shared-distro-prod.yml]
+  [templates/tenant-distro-prod.yml]
+  [stacks/*]
+  [onboarding/*]
+}
+
+package ".github/workflows" {
+  [deploy-sites.yml]
+  [publish-packages.yml]
+}
+
+[@mypackage/ui] ..> [packages] : workspace
+[@mypackage/player] ..> [packages] : workspace
+[@mypackage/config] ..> [packages] : workspace
+
+[mainstreamingsite.com] --> [@mypackage/ui]
+[mainstreamingsite.com] --> [@mypackage/player]
+[mainstreamingsite.com] --> [@mypackage/config]
+[mystore.com] --> [@mypackage/ui]
+[myadminsite.com] --> [@mypackage/ui]
+[myusercreatorprofile.com] --> [@mypackage/ui]
+
+[deploy-sites.yml] ..> [scripts/*]
+[Makefile] ..> [scripts/*]
+[Makefile] ..> [infra/templates/shared-distro-prod.yml]
+[Makefile] ..> [infra/templates/tenant-distro-prod.yml]
+
+@enduml
+````
+
+**Notes**
+
+* Platform subdomains (e.g., `*.apexdomain.com`) use the **shared distro** + host→prefix rewrite to `s3://rootBucketWebsites/sites/<host>/...`.
+* External custom domains get a **tenant distro** whose **OriginPath** is `/sites/<custom-domain>` pointing to the same root bucket.
+* All sites consume the shared packages via **workspace symlinks**, ensuring `VITE_*` values are compiled into shared components per‑site.
