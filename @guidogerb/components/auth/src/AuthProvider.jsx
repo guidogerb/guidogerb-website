@@ -31,6 +31,8 @@ export default function AuthProvider({
     post_logout_redirect_uri: post_logout_redirect_uri ?? env?.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI,
   };
 
+  console.log('[AuthProvider] Configuring OIDC with:', JSON.stringify(cfg));
+
   // Validate required settings (either authority OR metadataUrl must be provided)
   const missing = [];
   if (!cfg.authority && !cfg.metadataUrl) missing.push('authority or metadataUrl');
