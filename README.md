@@ -79,6 +79,30 @@ Confirmed scope updates from you:
 
 ## Method
 
+### Localhost Cognito setup (redirect_mismatch)
+If you see a Cognito Hosted UI error like:
+
+redirect_mismatch for client_id=...
+
+it means the redirect_uri your app sends does not exactly match one of the Callback URLs configured for your Cognito App client.
+
+To fix for localhost:
+- Ensure your dev server runs on the port your env specifies (default 4173, strict port). Free the port or change it.
+  - Change website/.env.development:
+    - VITE_SITE_PORT=4173 (or your port)
+    - VITE_LOGIN_CALLBACK_PATH=/auth/loginCallback
+    - VITE_REDIRECT_URI=http://localhost:4173/auth/loginCallback (must include the exact port)
+- In the Cognito console → User pools → App client → Hosted UI → Callback URLs, add the exact URL, e.g.:
+  - http://localhost:4173/auth/loginCallback
+- Also add a Sign out URL (for post logout redirect):
+  - http://localhost:4173/auth/logout
+
+Notes:
+- The app will warn in console if redirect_uri doesn’t match the current origin. In development, if redirect_uri isn’t set, it will default to window.location.origin + VITE_LOGIN_CALLBACK_PATH.
+- Any change to port or path must be reflected both in .env.development and in Cognito App client settings.
+
+## Method
+
 ### 1) Monorepo & Package Architecture (Reusable Modules)
 
 **Tooling**: pnpm workspaces, Changesets for versioning, TypeScript strict mode, tsup for library builds, Vitest + Testing Library.

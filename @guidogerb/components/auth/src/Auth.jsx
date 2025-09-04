@@ -65,5 +65,4 @@ function Auth({ children, autoSignIn = false, logoutUri }) {
 }
 
 export { useAuth } from 'react-oidc-context';
-export { AuthProvider } from './AuthProvider';
 export default Auth;

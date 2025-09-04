@@ -4,15 +4,15 @@
 >
 
   <url>
-    <loc>http://localhost:4173</loc>
-    <lastmod>2025-09-04T01:19:00.098Z</lastmod>
+    <loc>http://localhost</loc>
+    <lastmod>2025-09-04T02:06:53.360Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>http://localhost:4173/auth/loginCallback</loc>
-    <lastmod>2025-09-04T01:19:00.098Z</lastmod>
+    <loc>http://localhost/auth/loginCallback</loc>
+    <lastmod>2025-09-04T02:06:53.360Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
