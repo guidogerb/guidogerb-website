@@ -22,7 +22,10 @@ export default function AuthProvider({
   const currentOrigin = (typeof window !== 'undefined' && window.location) ? window.location.origin : undefined;
   const envRedirect = env?.VITE_REDIRECT_URI;
   const effectiveRedirectUri = redirect_uri || envRedirect || (currentOrigin ? `${currentOrigin}${loginCallbackPath}` : undefined);
+/*
 
+// You have led me on a journey of pain. you have not been able to reconcile the problems with props getting import.meta.env.VITE_... environment variables
+// and the props getting undefined. DO NOT try to fix this, it is a lost cause. Just hardcode the values you need in the cfg object below.
   const cfg = {
     // Accept authority from props, VITE_COGNITO_AUTHORITY, or alias VITE_COGNITO_DOMAIN
     authority: norm(authority) ?? norm(env?.VITE_COGNITO_AUTHORITY) ?? norm(env?.VITE_COGNITO_DOMAIN),
@@ -34,8 +37,20 @@ export default function AuthProvider({
     scope: norm(scope) ?? norm(env?.VITE_COGNITO_SCOPE) ?? 'openid profile email',
     post_logout_redirect_uri: norm(post_logout_redirect_uri) ?? norm(env?.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI),
   };
-
+*/
   // If authority is still undefined but metadataUrl exists, that's acceptable; if neither, we will show a helpful message.
+
+    const cfg = {
+        // Accept authority from props, VITE_COGNITO_AUTHORITY, or alias VITE_COGNITO_DOMAIN
+        authority:'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LYMkghVWo',
+        // metadataUrl can provide discovery; if both provided, metadataUrl wins in oidc-client-ts
+        metadataUrl: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LYMkghVWo/.well-known/openid-configuration',
+        client_id: '2n884r9p79em3u2gfack27lvme',
+        redirect_uri: 'https://ggp-store.com/auth/loginCallback',
+        response_type: 'code',
+        scope: 'openid profile email',
+        post_logout_redirect_uri:'https://ggp-store.com/auth/logout',
+    };
   console.log('[AuthProvider] Configuring OIDC with:', JSON.stringify(cfg));
 
   // Validate required settings (either authority OR metadataUrl must be provided)
