@@ -5,10 +5,15 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf package-lock.json node_modules dist",
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint ",
-    "preview": "vite preview"
+    "dev": "node ./generate-sitemap.mjs development && vite",
+    "build": "node ./generate-sitemap.mjs production && vite build",
+    "build:staging": "node ./generate-sitemap.mjs development && vite build --mode staging",
+    "build:prod-bundle": "node ./generate-sitemap.mjs production && vite build --mode production-bundle",
+    "prepreview": "npm run build",
+    "preview": "vite preview --strictPort",
+    "lint": "eslint . --ext .js,.jsx --max-warnings=0",
+    "sitemap:dev": "node ./generate-sitemap.mjs development",
+    "sitemap:prod": "node ./generate-sitemap.mjs production"
   },
   "dependencies": {
     "@guidogerb/components-api": "0.0.1",

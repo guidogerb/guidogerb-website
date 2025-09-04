@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
-import { useAuth } from '@guidogerb/components-auth';
+import auth  from './AuthProvider';
 
 export default function LoginCallback() {
-  const auth = useAuth();
-
   useEffect(() => {
     let canceled = false;
     // react-oidc-context will typically handle the callback automatically when the provider is mounted

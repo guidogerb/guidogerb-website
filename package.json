@@ -14,9 +14,12 @@
     "website"
   ],
   "scripts": {
-    "clean": "rimraf --glob \"package-lock.json\" \"node_modules\" \"@guidogerb/**/node_modules\" \"dist\"  \"@guidogerb/**/dist\"",
+    "clean": "rimraf --glob \"@guidogerb/**/dist\" \"website/dist\"",
     "build:modules": "npm run --workspaces --if-present build",
-    "build": "npm run clean && npm install && npm run build:modules"
+    "build": "npm install && npm run clean && npm run build:modules && npm run build -w website",
+    "dev:local": "npm install && npm run clean && npm run build:modules && npm run dev -w website",
+    "ci:deploy:main": "npm ci && npm run build:modules && npm run build:staging -w website",
+    "ci:deploy:prod": "npm ci && npm run build:modules && npm run lint -w website && npm run build:prod-bundle -w website"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

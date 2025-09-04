@@ -1,9 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.jsx'
+import App from './App'
 import { AuthProvider } from '@guidogerb/components-auth'
-import LoginCallback from './auth/LoginCallback.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -15,12 +14,9 @@ createRoot(document.getElementById('root')).render(
           response_type={import.meta.env.VITE_RESPONSE_TYPE}
           scope={import.meta.env.VITE_COGNITO_SCOPE}
           post_logout_redirect_uri={import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI}
+          loginCallbackPath={import.meta.env.VITE_LOGIN_CALLBACK_PATH || '/auth/loginCallback'}
       >
-          {window.location.pathname === '/auth/loginCallback' ? (
-            <LoginCallback />
-          ) : (
-            <App />
-          )}
+          <App />
       </AuthProvider>
   </StrictMode>,
 )

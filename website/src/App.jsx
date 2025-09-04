@@ -1,16 +1,7 @@
 import './App.css'
+import Protected from "@guidogerb/components-pages-protected";
+import Welcome from "./website-components/welcome-page";
 
-import { Auth, useAuth } from '@guidogerb/components-auth'
-
-function ProtectedContent() {
-  const auth = useAuth();
-  return (
-    <div>
-      <h2>Welcome</h2>
-      <pre>Email: {auth.user?.profile?.email || '(no email in profile)'} </pre>
-    </div>
-  );
-}
 
 function App() {
 
@@ -23,16 +14,15 @@ function App() {
         </p>
       </div>
 
-      {/* Protected section (requires sign-in) */}
-      <div style={{ border: '1px solid #ccc', padding: 12, marginTop: 16 }}>
+    <div style={{ border: '1px solid #ccc', padding: 12, marginTop: 16 }}>
         <h2>Protected Area</h2>
-        <Auth autoSignIn logoutUri={import.meta.env.VITE_LOGOUT_URI}>
-          <ProtectedContent />
-        </Auth>
-      </div>
-
+        {/* Protected section (requires sign-in) */}
+        <Protected logoutUri={import.meta.env.VITE_LOGOUT_URI}>
+            <Welcome/>
+        </Protected>
+    </div>
     </>
   )
 }
 
-export default App
+export default App;
