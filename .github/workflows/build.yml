@@ -23,6 +23,26 @@ jobs:
         run: |
           echo "${{ secrets.VITE_ENV }}" > website/.env
 
+      - name: Validate VITE env
+        run: |
+          set -e
+          if [ ! -f website/.env ]; then echo "website/.env not found"; exit 1; fi
+          # Load .env lines into shell (only VITE_* lines, ignoring quotes)
+          export $(grep -E '^VITE_[A-Z0-9_]+=' website/.env | sed 's/\r$//' | sed 's/^export //')
+          missing=()
+          # Require client_id
+          if [ -z "$VITE_COGNITO_CLIENT_ID" ]; then missing+=("VITE_COGNITO_CLIENT_ID"); fi
+          # Require either authority or metadata
+          if [ -z "$VITE_COGNITO_AUTHORITY" ] && [ -z "$VITE_COGNITO_METADATA_URL" ]; then missing+=("VITE_COGNITO_AUTHORITY or VITE_COGNITO_METADATA_URL"); fi
+          # Require redirect_uri
+          if [ -z "$VITE_REDIRECT_URI" ]; then missing+=("VITE_REDIRECT_URI"); fi
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "Missing required VITE_ keys: ${missing[*]}" >&2
+            echo "Ensure repository secret VITE_ENV contains these keys." >&2
+            exit 1
+          fi
+          echo "VITE env validation passed"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
