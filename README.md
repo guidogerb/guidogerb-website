@@ -872,7 +872,7 @@ h = hmac.new(SECRET_KEY, f"{user_id}|{asset_id}|{entitlement_id}|{exp}".encode()
 For GitHub Actions to build a working bundle, the repository secret VITE_ENV must contain these keys (one per line) and non-empty values:
 
 - VITE_COGNITO_CLIENT_ID=<your_cognito_app_client_id>
-- VITE_COGNITO_AUTHORITY=<your_issuer_url> OR VITE_COGNITO_METADATA_URL=<your_openid_config_url>
+- VITE_COGNITO_AUTHORITY=<your_issuer_url> OR VITE_COGNITO_DOMAIN=<your_cognito_domain_url> OR VITE_COGNITO_METADATA_URL=<your_openid_config_url>
 - VITE_REDIRECT_URI=https://your.domain/auth/loginCallback
 - Optional but recommended:
   - VITE_COGNITO_SCOPE="openid profile email"

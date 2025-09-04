@@ -16,21 +16,38 @@ export default function AuthProvider({
   // Merge props with environment fallbacks
   // Use Vite's import.meta.env directly; in our app this exists at runtime
   const env = import.meta?.env ?? {};
+  // Helper to normalize empty strings to undefined
+  const norm = (v) => (v === '' || v === undefined || v === null ? undefined : v);
 
   const currentOrigin = (typeof window !== 'undefined' && window.location) ? window.location.origin : undefined;
   const envRedirect = env?.VITE_REDIRECT_URI;
   const effectiveRedirectUri = redirect_uri || envRedirect || (currentOrigin ? `${currentOrigin}${loginCallbackPath}` : undefined);
-
+/*
   const cfg = {
-    authority: authority ?? env?.VITE_COGNITO_AUTHORITY,
-    metadataUrl: metadataUrl ?? env?.VITE_COGNITO_METADATA_URL,
-    client_id: client_id ?? env?.VITE_COGNITO_CLIENT_ID,
-    redirect_uri: effectiveRedirectUri,
-    response_type: response_type ?? env?.VITE_RESPONSE_TYPE ?? 'code',
-    scope: scope ?? env?.VITE_COGNITO_SCOPE ?? 'openid profile email',
-    post_logout_redirect_uri: post_logout_redirect_uri ?? env?.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI,
+    // Accept authority from props, VITE_COGNITO_AUTHORITY, or alias VITE_COGNITO_DOMAIN
+    authority: norm(authority) ?? norm(env?.VITE_COGNITO_AUTHORITY) ?? norm(env?.VITE_COGNITO_DOMAIN),
+    // metadataUrl can provide discovery; if both provided, metadataUrl wins in oidc-client-ts
+    metadataUrl: norm(metadataUrl) ?? norm(env?.VITE_COGNITO_METADATA_URL),
+    client_id: norm(client_id) ?? norm(env?.VITE_COGNITO_CLIENT_ID),
+    redirect_uri: norm(effectiveRedirectUri),
+    response_type: norm(response_type) ?? norm(env?.VITE_RESPONSE_TYPE) ?? 'code',
+    scope: norm(scope) ?? norm(env?.VITE_COGNITO_SCOPE) ?? 'openid profile email',
+    post_logout_redirect_uri: norm(post_logout_redirect_uri) ?? norm(env?.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI),
   };
+*/
+  // If authority is still undefined but metadataUrl exists, that's acceptable; if neither, we will show a helpful message.
 
+    const cfg = {
+        // Accept authority from props, VITE_COGNITO_AUTHORITY, or alias VITE_COGNITO_DOMAIN
+        authority:'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LYMkghVWo',
+        // metadataUrl can provide discovery; if both provided, metadataUrl wins in oidc-client-ts
+        metadataUrl: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LYMkghVWo/.well-known/openid-configuration',
+        client_id: '2n884r9p79em3u2gfack27lvme',
+        redirect_uri: '',
+        response_type: 'code',
+        scope: 'openid profile email',
+        post_logout_redirect_uri:'https://ggp-store.com/auth/logout',
+    };
   console.log('[AuthProvider] Configuring OIDC with:', JSON.stringify(cfg));
 
   // Validate required settings (either authority OR metadataUrl must be provided)
