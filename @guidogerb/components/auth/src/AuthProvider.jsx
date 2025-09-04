@@ -43,7 +43,7 @@ export default function AuthProvider({
         // metadataUrl can provide discovery; if both provided, metadataUrl wins in oidc-client-ts
         metadataUrl: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LYMkghVWo/.well-known/openid-configuration',
         client_id: '2n884r9p79em3u2gfack27lvme',
-        redirect_uri: '',
+        redirect_uri: 'https://ggp-store.com/auth/loginCallback',
         response_type: 'code',
         scope: 'openid profile email',
         post_logout_redirect_uri:'https://ggp-store.com/auth/logout',
