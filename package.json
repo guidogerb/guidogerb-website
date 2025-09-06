@@ -19,11 +19,14 @@
   ],
   "scripts": {
     "clean": "rimraf --glob \"@guidogerb/**/dist\" \"websites/**/dist\"",
-    "build:modules": "npm run --workspaces --if-present build",
-    "build": "npm install && npm run clean && npm run build:modules && npm run build -w websites/stream4cloud.com",
-    "dev:local": "npm install && npm run clean && npm run build:modules && npm run dev -w websites/stream4cloud.com",
-    "ci:deploy:main": "npm ci && npm run build:modules && npm run build:staging -w websites/stream4cloud.com",
-    "ci:deploy:prod": "npm ci && npm run build:modules && npm run lint -w websites/stream4cloud.com && npm run build:prod-bundle -w websites/stream4cloud.com"
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "build:site:stream4cloud": "pnpm --filter websites/stream4cloud.com build",
+    "dev:site:stream4cloud": "pnpm --filter websites/stream4cloud.com dev",
+    "ci:deploy:main": "pnpm -r build && pnpm --filter websites/stream4cloud.com build:staging",
+    "ci:deploy:prod": "pnpm -r build && pnpm --filter websites/stream4cloud.com lint && pnpm --filter websites/stream4cloud.com build:prod-bundle"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

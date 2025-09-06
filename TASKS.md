@@ -1,0 +1,80 @@
+# TASKS — Kickoff Plan from SPEC-1
+
+This document captures a prioritized, actionable task list derived from SPEC.md and the current repository state. Aim for small, verifiable increments. Items are grouped by area with suggested owners and acceptance criteria.
+
+## 0) Repo Hygiene & Tooling
+- [ ] Switch root scripts to pnpm (SPEC + README recommend pnpm; current scripts use npm workspaces)
+  - Update root package.json scripts to: build/dev/lint/test using `pnpm -r`
+  - Acceptance: `pnpm -r build` builds all workspaces; `pnpm -r dev` runs watchers where present.
+- [ ] Align workspace naming and versions
+  - Current workspaces include `@guidogerb/components/*` but packages are not present. Either add stubs (see 2) or remove until ready.
+  - Acceptance: `pnpm install` succeeds with no missing workspace warnings.
+- [ ] Add baseline lint/format config (ESLint + Prettier, TS config once TS is introduced)
+  - Acceptance: `pnpm -r lint` runs and passes (or reports real linting issues).
+
+## 1) CSS Tokens & Reset (Low Effort, Immediate Value)
+- [ ] Populate `@guidogerb/css/reset.css` with a modern reset (e.g., Andy Bell / Josh Comeau / normalize.css-inspired)
+- [ ] Populate `@guidogerb/css/tokens.css` with CSS variables for colors, spacing, radii, typography, etc.
+  - Acceptance: Importing these files applies baseline styles; sample page renders with tokens available under `:root`.
+
+## 2) Workspace Stubs (Unblock Builds)
+Create minimal package stubs for listed shared packages so that builds resolve dependencies. Each package: package.json, src/index.(ts|js), and README.
+- [ ] `@guidogerb/components-api`
+- [ ] `@guidogerb/components-auth`
+- [ ] `@guidogerb/components-menu`
+- [ ] `@guidogerb/components-pages-public`
+- [ ] `@guidogerb/components-pages-protected`
+- [ ] `@guidogerb/components-router-public`
+- [ ] `@guidogerb/components-router-protected`
+- [ ] `@guidogerb/footer`
+- [ ] `@guidogerb/header`
+  - Acceptance: `pnpm -r build` succeeds (packages can export placeholders).
+
+## 3) Websites — Vite App Baseline
+- [ ] Confirm websites/garygerber.com runs locally (vite dev) with placeholder routes using shared packages.
+- [ ] Create similar scaffolds for other sites listed in workspaces (copy garygerber.com as baseline) or remove from workspaces until ready.
+  - Acceptance: Each included website can `pnpm --filter <site> dev` and `build` successfully.
+
+## 4) Environment & Secrets
+- [ ] Document and template `.env` requirements per site (see SPEC §11 and PUBLISHING.md §9)
+- [ ] Add `.env.example` for each website with VITE_* keys.
+  - Acceptance: New dev can copy `.env.example` → `.env` and run dev server.
+
+## 5) PWA & Offline Shell
+- [ ] Add vite-plugin-pwa and a minimal Workbox service worker package `@guidogerb/sw` (stub now; real logic later)
+- [ ] Provide `infra/scripts/writeHtml` utilities for offline.html and sitemap (as per README there)
+  - Acceptance: Dev build includes manifest and registers SW behind a feature flag (can be disabled in dev).
+
+## 6) CI/CD Scaffolding (GitHub Actions + AWS OIDC)
+- [ ] Add basic GitHub Actions workflow that builds workspaces and artifacts for one website (stream4cloud.com or garygerber.com)
+- [ ] Add placeholder for AWS OIDC role assumption (no secrets in repo)
+  - Acceptance: Workflow passes on pull requests; produces build artifacts.
+
+## 7) Infra Notes & Placeholders
+- [ ] Validate `infra/cfn/` presence vs PUBLISHING.md steps; if missing, create directory structure and README placeholders
+  - Acceptance: Clear path for infra deployment; no build coupling.
+
+## 8) Documentation Upkeep
+- [ ] Cross-link SPEC.md, PUBLISHING.md, README.md, and TASKS.md
+- [ ] Add ADRs directory for future architectural decisions
+  - Acceptance: Onboarding flow: read SPEC → follow PUBLISHING → run websites locally.
+
+## 9) Milestone M0 Deliverables (per SPEC §12)
+- [ ] Monorepo structure finalized; pnpm workspaces stable
+- [ ] One Vite app deployed to S3/CloudFront (manual steps OK)
+- [ ] Cognito Hosted UI integrated at least for local login flow (redirect handler stub)
+- [ ] DynamoDB table + API skeleton noted in infra (no BE code required yet)
+  - Acceptance: Public routes render; auth redirect works; deployment documented and repeatable.
+
+---
+
+## Suggested Sequence (Weeks 0–2)
+1. Day 1–2: Repo hygiene (pnpm), CSS tokens/reset, stub packages (Tasks 0–2)
+2. Day 3–4: Website baseline runs locally with placeholders (Task 3–4)
+3. Day 5: PWA shell wiring & offline.html script (Task 5)
+4. Days 6–7: Minimal CI workflow (Task 6) and infra placeholders (Task 7)
+5. Day 8–10: Hardening and documentation (Tasks 8–9)
+
+## Notes
+- Keep SPA free of secrets. Use Cognito Hosted UI (Auth Code + PKCE) as specified.
+- Prefer incremental PRs per package to keep diffs small.
