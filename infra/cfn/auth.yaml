@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stream4Cloud Auth - Cognito User Pool + App Client + optional Hosted UI domain and Google IdP
+Parameters:
+  UserPoolName:
+    Type: String
+    Default: Stream4CloudUsers
+  CreateHostedUIDomain:
+    Type: String
+    AllowedValues: ["true","false"]
+    Default: "true"
+  HostedUIDomainPrefix:
+    Type: String
+    Default: "s4c-auth-domain"
+    Description: Unique prefix for Cognito Hosted UI domain (must be globally unique in region)
+  EnableGoogleIdP:
+    Type: String
+    AllowedValues: ["true","false"]
+    Default: "false"
+  GoogleClientId:
+    Type: String
+    Default: ""
+  GoogleClientSecret:
+    Type: String
+    Default: ""
+    NoEcho: true
+
+Conditions:
+  WantHostedUiDomain: !Equals [!Ref CreateHostedUIDomain, "true"]
+  WantGoogle: !Equals [!Ref EnableGoogleIdP, "true"]
+
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Ref UserPoolName
+      UsernameAttributes: ["email"]
+      AutoVerifiedAttributes: ["email"]
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+      AllowedOAuthFlows: ["code"]
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes: ["email","openid","profile"]
+      CallbackURLs:
+        - https://example.com/auth/loginCallback
+      LogoutURLs:
+        - https://example.com/auth/logout
+      SupportedIdentityProviders:
+        - COGNITO
+        - !If [WantGoogle, GOOGLE, !Ref "AWS::NoValue"]
+      PreventUserExistenceErrors: ENABLED
+
+  HostedUIDomain:
+    Condition: WantHostedUiDomain
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref HostedUIDomainPrefix
+      UserPoolId: !Ref UserPool
+
+  GoogleIdP:
+    Condition: WantGoogle
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      ProviderName: Google
+      ProviderType: Google
+      UserPoolId: !Ref UserPool
+      AttributeMapping:
+        email: email
+        given_name: given_name
+        family_name: family_name
+      ProviderDetails:
+        client_id: !Ref GoogleClientId
+        client_secret: !Ref GoogleClientSecret
+        authorize_scopes: "openid email profile"
+
+Outputs:
+  UserPoolId:
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Value: !Ref UserPoolClient
+  HostedUIIssuer:
+    Value: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"

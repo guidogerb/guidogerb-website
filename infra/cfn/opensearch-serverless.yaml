@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stream4Cloud OpenSearch Serverless - collection + security policies
+Parameters:
+  CollectionName:
+    Type: String
+    Default: s4c-search
+  AdminPrincipalArn:
+    Type: String
+    Description: IAM ARN (user/role) granted data access
+
+Resources:
+  EncryptionPolicy:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Name: !Sub "${CollectionName}-enc"
+      Type: encryption
+      Policy: !Sub |
+        {
+          "Rules": [
+            {"ResourceType": "collection", "Resource": ["collection/${CollectionName}"]}
+          ],
+          "AWSOwnedKey": true
+        }
+
+  NetworkPolicy:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Name: !Sub "${CollectionName}-net"
+      Type: network
+      Policy: |
+        {"Rules":[{"ResourceType":"collection","Resource":["collection/*"]},{"ResourceType":"dashboard","Resource":["dashboard/*"]}],"AllowFromPublic":true}
+
+  DataAccessPolicy:
+    Type: AWS::OpenSearchServerless::AccessPolicy
+    Properties:
+      Name: !Sub "${CollectionName}-data"
+      Type: data
+      Policy: !Sub |
+        [
+          {
+            "Rules":[
+              {"ResourceType":"collection","Resource":["collection/${CollectionName}*"],"Permission":["aoss:CreateCollectionItems","aoss:DescribeCollectionItems","aoss:ReadDocument","aoss:WriteDocument"]},
+              {"ResourceType":"index","Resource":["index/${CollectionName}/*"],"Permission":["aoss:CreateIndex","aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}
+            ],
+            "Principal":[ "${AdminPrincipalArn}" ]
+          }
+        ]
+
+  Collection:
+    Type: AWS::OpenSearchServerless::Collection
+    Properties:
+      Name: !Ref CollectionName
+      Type: SEARCH
+
+Outputs:
+  CollectionId:
+    Value: !GetAtt Collection.Id
+  CollectionEndpoint:
+    Value: !GetAtt Collection.CollectionEndpoint

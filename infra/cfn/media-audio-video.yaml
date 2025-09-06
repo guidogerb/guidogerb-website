@@ -1,0 +1,337 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stream4Cloud Media - MediaConvert JobTemplates + Step Functions + submitter Lambdas
+Parameters:
+  InputBucketName:
+    Type: String
+    Description: S3 bucket for uploads
+  OutputBucketName:
+    Type: String
+    Description: S3 bucket for HLS outputs
+  MediaConvertRoleName:
+    Type: String
+    Default: s4c-mediaconvert-role
+  LambdaRuntime:
+    Type: String
+    Default: python3.12
+
+Resources:
+  MediaConvertServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref MediaConvertRoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: mediaconvert.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: MediaConvertS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${InputBucketName}"
+                  - !Sub "arn:aws:s3:::${OutputBucketName}"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:aws:s3:::${InputBucketName}/*"
+                  - !Sub "arn:aws:s3:::${OutputBucketName}/*"
+
+  AudioJobTemplate:
+    Type: AWS::MediaConvert::JobTemplate
+    Properties:
+      Name: !Sub "s4c-audio-aac-hls-${AWS::Region}"
+      SettingsJson:
+        OutputGroups:
+          - Name: HLS
+            OutputGroupSettings:
+              Type: HLS_GROUP_SETTINGS
+              HlsGroupSettings:
+                Destination: !Sub "s3://${OutputBucketName}/audio/"
+                SegmentLength: 4
+                MinSegmentLength: 0
+                ManifestDurationFormat: FLOATING_POINT
+                CodecSpecification: RFC_4281
+            Outputs:
+              - AudioDescriptions:
+                  - AudioTypeControl: FOLLOW_INPUT
+                    CodecSettings:
+                      Codec: AAC
+                      AacSettings:
+                        Bitrate: 64000
+                        CodingMode: CODING_MODE_2_0
+                        SampleRate: 48000
+                ContainerSettings: { Container: M3U8 }
+              - AudioDescriptions:
+                  - AudioTypeControl: FOLLOW_INPUT
+                    CodecSettings:
+                      Codec: AAC
+                      AacSettings:
+                        Bitrate: 128000
+                        CodingMode: CODING_MODE_2_0
+                        SampleRate: 48000
+                ContainerSettings: { Container: M3U8 }
+
+  VideoJobTemplate:
+    Type: AWS::MediaConvert::JobTemplate
+    Properties:
+      Name: !Sub "s4c-video-h264-hls-${AWS::Region}"
+      SettingsJson:
+        OutputGroups:
+          - Name: HLS
+            OutputGroupSettings:
+              Type: HLS_GROUP_SETTINGS
+              HlsGroupSettings:
+                Destination: !Sub "s3://${OutputBucketName}/video/"
+                SegmentLength: 4
+                MinSegmentLength: 0
+                ManifestDurationFormat: FLOATING_POINT
+                CodecSpecification: RFC_4281
+            Outputs:
+              - VideoDescription:
+                  CodecSettings:
+                    Codec: H_264
+                    H264Settings:
+                      Bitrate: 800000
+                      RateControlMode: CBR
+                      GopSize: 2
+                      GopSizeUnits: SECONDS
+                      CodecLevel: AUTO
+                      CodecProfile: MAIN
+                ContainerSettings: { Container: M3U8 }
+              - VideoDescription:
+                  CodecSettings:
+                    Codec: H_264
+                    H264Settings:
+                      Bitrate: 1500000
+                      RateControlMode: CBR
+                      GopSize: 2
+                      GopSizeUnits: SECONDS
+                      CodecLevel: AUTO
+                      CodecProfile: MAIN
+                ContainerSettings: { Container: M3U8 }
+              - VideoDescription:
+                  CodecSettings:
+                    Codec: H_264
+                    H264Settings:
+                      Bitrate: 2500000
+                      RateControlMode: CBR
+                      GopSize: 2
+                      GopSizeUnits: SECONDS
+                      CodecLevel: AUTO
+                      CodecProfile: MAIN
+                ContainerSettings: { Container: M3U8 }
+
+  SubmitAudioLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: MediaConvertSubmit
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - mediaconvert:CreateJob
+                  - mediaconvert:DescribeEndpoints
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt MediaConvertServiceRole.Arn
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:aws:s3:::${InputBucketName}"
+                  - !Sub "arn:aws:s3:::${OutputBucketName}"
+                  - !Sub "arn:aws:s3:::${InputBucketName}/*"
+                  - !Sub "arn:aws:s3:::${OutputBucketName}/*"
+
+  SubmitAudioJob:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: !Ref LambdaRuntime
+      Role: !GetAtt SubmitAudioLambdaRole.Arn
+      Handler: index.handler
+      Timeout: 60
+      Environment:
+        Variables:
+          JOB_TEMPLATE: !Ref AudioJobTemplate
+          ROLE_ARN: !GetAtt MediaConvertServiceRole.Arn
+          OUTPUT_BUCKET: !Ref OutputBucketName
+      Code:
+        ZipFile: |
+          import json, os, boto3
+          def handler(event, context):
+              s3_key = event.get("inputKey")
+              if not s3_key:
+                  return {"statusCode": 400, "body": "missing inputKey"}
+              mc = boto3.client("mediaconvert", region_name=os.environ["AWS_REGION"], endpoint_url=_endpoint())
+              job = mc.create_job(
+                  Role=os.environ["ROLE_ARN"],
+                  Settings={
+                      "Inputs": [{"FileInput": f"s3://{event.get('inputBucket')}/{s3_key}"}],
+                      "OutputGroups": []  # overridden by JobTemplate
+                  },
+                  JobTemplate=os.environ["JOB_TEMPLATE"]
+              )
+              return {"statusCode": 200, "body": json.dumps({"jobId": job["Job"]["Id"]})}
+
+          def _endpoint():
+              mc = boto3.client("mediaconvert", region_name=os.environ["AWS_REGION"])
+              res = mc.describe_endpoints(MaxResults=1)
+              return res["Endpoints"][0]["Url"]
+
+  SubmitVideoLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: MediaConvertSubmit
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - mediaconvert:CreateJob
+                  - mediaconvert:DescribeEndpoints
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt MediaConvertServiceRole.Arn
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:aws:s3:::${InputBucketName}"
+                  - !Sub "arn:aws:s3:::${OutputBucketName}"
+                  - !Sub "arn:aws:s3:::${InputBucketName}/*"
+                  - !Sub "arn:aws:s3:::${OutputBucketName}/*"
+
+  SubmitVideoJob:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: !Ref LambdaRuntime
+      Role: !GetAtt SubmitVideoLambdaRole.Arn
+      Handler: index.handler
+      Timeout: 60
+      Environment:
+        Variables:
+          JOB_TEMPLATE: !Ref VideoJobTemplate
+          ROLE_ARN: !GetAtt MediaConvertServiceRole.Arn
+          OUTPUT_BUCKET: !Ref OutputBucketName
+      Code:
+        ZipFile: |
+          import json, os, boto3
+          def handler(event, context):
+              s3_key = event.get("inputKey")
+              if not s3_key:
+                  return {"statusCode": 400, "body": "missing inputKey"}
+              mc = boto3.client("mediaconvert", region_name=os.environ["AWS_REGION"], endpoint_url=_endpoint())
+              job = mc.create_job(
+                  Role=os.environ["ROLE_ARN"],
+                  Settings={
+                      "Inputs": [{"FileInput": f"s3://{event.get('inputBucket')}/{s3_key}"}],
+                      "OutputGroups": []  # overridden by JobTemplate
+                  },
+                  JobTemplate=os.environ["JOB_TEMPLATE"]
+              )
+              return {"statusCode": 200, "body": json.dumps({"jobId": job["Job"]["Id"]})}
+
+          def _endpoint():
+              mc = boto3.client("mediaconvert", region_name=os.environ["AWS_REGION"])
+              res = mc.describe_endpoints(MaxResults=1)
+              return res["Endpoints"][0]["Url"]
+
+  MediaStateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokeLambdas
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource:
+                  - !GetAtt SubmitAudioJob.Arn
+                  - !GetAtt SubmitVideoJob.Arn
+
+  MediaStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      RoleArn: !GetAtt MediaStateMachineRole.Arn
+      StateMachineName: s4c-media-pipeline
+      DefinitionString:
+        !Sub |
+          {
+            "Comment": "Media pipeline (audio/video)",
+            "StartAt": "Decide",
+            "States": {
+              "Decide": {
+                "Type": "Choice",
+                "Choices": [
+                  { "Variable": "$.mediaType", "StringEquals": "audio", "Next": "SubmitAudio" },
+                  { "Variable": "$.mediaType", "StringEquals": "video", "Next": "SubmitVideo" }
+                ],
+                "Default": "FailState"
+              },
+              "SubmitAudio": {
+                "Type": "Task",
+                "Resource": "${SubmitAudioJob.Arn}",
+                "End": true
+              },
+              "SubmitVideo": {
+                "Type": "Task",
+                "Resource": "${SubmitVideoJob.Arn}",
+                "End": true
+              },
+              "FailState": { "Type": "Fail", "Error": "InvalidMediaType", "Cause": "mediaType must be 'audio' or 'video'" }
+            }
+          }
+
+Outputs:
+  AudioJobTemplateName:
+    Value: !Ref AudioJobTemplate
+  VideoJobTemplateName:
+    Value: !Ref VideoJobTemplate
+  MediaStateMachineArn:
+    Value: !Ref MediaStateMachine

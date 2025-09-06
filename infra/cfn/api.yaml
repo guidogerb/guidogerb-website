@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stream4Cloud API - HTTP API + Lambda + JWT authorizer (Cognito)
+Parameters:
+  ApiName:
+    Type: String
+    Default: stream4cloud-api
+  StageName:
+    Type: String
+    Default: prod
+  CognitoIssuerUrl:
+    Type: String
+    Description: e.g., https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXX
+  CognitoAudienceClientIds:
+    Type: String
+    Description: JSON array string of allowed audience client IDs (e.g., ["abc123"]) 
+
+Resources:
+  HelloLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-hello"
+      RetentionInDays: 14
+
+  HelloFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  HelloFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-hello"
+      Role: !GetAtt HelloFunctionRole.Arn
+      Runtime: python3.12
+      Handler: index.handler
+      Timeout: 10
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              return {
+                  "statusCode": 200,
+                  "headers": {"content-type":"application/json"},
+                  "body": json.dumps({"ok": True, "service": "stream4cloud-api", "path": event.get('rawPath')})
+              }
+
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Ref ApiName
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins: ["*"]
+        AllowMethods: ["GET","POST","OPTIONS"]
+        AllowHeaders: ["authorization","content-type"]
+
+  LambdaIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloFunction.Arn}/invocations"
+      PayloadFormatVersion: "2.0"
+
+  HealthRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /health"
+      Target: !Sub "integrations/${LambdaIntegration}"
+
+  InvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref HelloFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*/*/health"
+
+  JwtAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref HttpApi
+      AuthorizerType: JWT
+      IdentitySource:
+        - "$request.header.Authorization"
+      Name: cognito-jwt
+      JwtConfiguration:
+        Audience: !Ref CognitoAudienceClientIds
+        Issuer: !Ref CognitoIssuerUrl
+
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: !Ref StageName
+      AutoDeploy: true
+
+Outputs:
+  ApiEndpoint:
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"

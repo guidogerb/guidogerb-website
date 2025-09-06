@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stream4Cloud Data - DynamoDB single-table starter
+Parameters:
+  TableName:
+    Type: String
+    Default: Stream4Cloud
+  EnablePITR:
+    Type: String
+    AllowedValues: ["true","false"]
+    Default: "true"
+
+Conditions:
+  PITR: !Equals [!Ref EnablePITR, "true"]
+
+Resources:
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: !If [PITR, true, false]
+
+Outputs:
+  TableName:
+    Value: !Ref Table
+  TableStreamArn:
+    Value: !GetAtt Table.StreamArn
