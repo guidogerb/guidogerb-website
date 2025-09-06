@@ -1,0 +1,9 @@
+{
+  "Parameters": {
+    "SiteDomainName": "picklecheeze.com",
+    "CertificateArn": "arn:aws:acm:us-east-1:123456789012:certificate/REPLACE-WITH-YOUR-CERT-ARN",
+    "HostedZoneId": "REPLACE-WITH-HOSTED-ZONE-ID-OR-EMPTY-STRING",
+    "BucketName": "",
+    "LoggingBucketName": ""
+  }
+}

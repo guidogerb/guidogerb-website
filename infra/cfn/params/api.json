@@ -1,0 +1,8 @@
+{
+  "Parameters": {
+    "ApiName": "stream4cloud-api",
+    "StageName": "prod",
+    "CognitoIssuerUrl": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_REPLACE",
+    "CognitoAudienceClientIds": "[\"REPLACE-CLIENT-ID\"]"
+  }
+}

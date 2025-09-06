@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "TableName": "Stream4Cloud",
+    "EnablePITR": "true"
+  }
+}

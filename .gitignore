@@ -8,3 +8,6 @@
 
 **/dist/
 /package-lock.json
+/infra/scripts/writeHtml/.venv/*
+/infra/scripts/writeHtml/.idea/*
+/infra/scripts/writeHtml/.venv/*
