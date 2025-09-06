@@ -11,15 +11,19 @@
     "@guidogerb/css",
     "@guidogerb/footer",
     "@guidogerb/header",
-    "website"
+    "websites/garygerber.com",
+    "websites/ggp-store.com",
+    "websites/picklecheeze.com",
+    "websites/this-is-my-story.org",
+    "websites/stream4cloud.com"
   ],
   "scripts": {
-    "clean": "rimraf --glob \"@guidogerb/**/dist\" \"websites/ggp-store.com/dist\"",
+    "clean": "rimraf --glob \"@guidogerb/**/dist\" \"websites/**/dist\"",
     "build:modules": "npm run --workspaces --if-present build",
-    "build": "npm install && npm run clean && npm run build:modules && npm run build -w websites/ggp-store.com",
-    "dev:local": "npm install && npm run clean && npm run build:modules && npm run dev -w websites/ggp-store.com",
-    "ci:deploy:main": "npm ci && npm run build:modules && npm run build:staging -w websites/ggp-store.com",
-    "ci:deploy:prod": "npm ci && npm run build:modules && npm run lint -w websites/ggp-store.com && npm run build:prod-bundle -w website"
+    "build": "npm install && npm run clean && npm run build:modules && npm run build -w websites/stream4cloud.com",
+    "dev:local": "npm install && npm run clean && npm run build:modules && npm run dev -w websites/stream4cloud.com",
+    "ci:deploy:main": "npm ci && npm run build:modules && npm run build:staging -w websites/stream4cloud.com",
+    "ci:deploy:prod": "npm ci && npm run build:modules && npm run lint -w websites/stream4cloud.com && npm run build:prod-bundle -w website"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

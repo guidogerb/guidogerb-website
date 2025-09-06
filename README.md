@@ -1,3 +1,23 @@
+# guidogerb-website (Stream4Cloud Phase-1)
+
+Monorepo for four sites (unique domains) plus shared packages and infra to power the Stream4Cloud Phase-1 deliverable.
+
+## What’s included (Phase-1 scope)
+- 4 separate websites (unique domains; no shared apex in v1)
+- Shared `@guidogerb/*` packages (auth, ui, api-client, sw, components)
+- Auth via **Cognito Hosted UI** and optional **Google OAuth (OIDC)**
+- Minimal APIs (HTTP API + a health Lambda)
+- Data: DynamoDB single-table starter
+- Media: MediaConvert **audio (AAC/HLS)** and **video (H.264/HLS)** job templates + Step Functions
+- CDN: CloudFront + S3 (OAC), optional Route 53 DNS
+- Search: OpenSearch Serverless collection (placeholder)
+
+> Monetization, payouts, community features, and discovery are **deferred** to later phases.
+
+## Repo structure (high level)
+
+
+
 # README — Multi‑tenant S3/CloudFront Monorepo
 
 A production‑ready mono‑repo that hosts **many independent websites** from a **single private S3 bucket** behind CloudFront, with:
