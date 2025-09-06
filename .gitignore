@@ -12,3 +12,4 @@
 **/.env-development
 **/.env-production
 
+**/.env-VITE_ENV-secret
