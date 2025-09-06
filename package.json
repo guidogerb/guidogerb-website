@@ -23,7 +23,7 @@
     "build": "npm install && npm run clean && npm run build:modules && npm run build -w websites/stream4cloud.com",
     "dev:local": "npm install && npm run clean && npm run build:modules && npm run dev -w websites/stream4cloud.com",
     "ci:deploy:main": "npm ci && npm run build:modules && npm run build:staging -w websites/stream4cloud.com",
-    "ci:deploy:prod": "npm ci && npm run build:modules && npm run lint -w websites/stream4cloud.com && npm run build:prod-bundle -w website"
+    "ci:deploy:prod": "npm ci && npm run build:modules && npm run lint -w websites/stream4cloud.com && npm run build:prod-bundle -w websites/stream4cloud.com"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"
