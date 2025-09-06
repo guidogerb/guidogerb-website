@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "@guidogerb/components/api",
+    "@guidogerb/components/api-client",
     "@guidogerb/components/auth",
     "@guidogerb/components/menu",
     "@guidogerb/components/pages/*",
@@ -14,12 +14,12 @@
     "website"
   ],
   "scripts": {
-    "clean": "rimraf --glob \"@guidogerb/**/dist\" \"website/dist\"",
+    "clean": "rimraf --glob \"@guidogerb/**/dist\" \"websites/ggp-store.com/dist\"",
     "build:modules": "npm run --workspaces --if-present build",
-    "build": "npm install && npm run clean && npm run build:modules && npm run build -w website",
-    "dev:local": "npm install && npm run clean && npm run build:modules && npm run dev -w website",
-    "ci:deploy:main": "npm ci && npm run build:modules && npm run build:staging -w website",
-    "ci:deploy:prod": "npm ci && npm run build:modules && npm run lint -w website && npm run build:prod-bundle -w website"
+    "build": "npm install && npm run clean && npm run build:modules && npm run build -w websites/ggp-store.com",
+    "dev:local": "npm install && npm run clean && npm run build:modules && npm run dev -w websites/ggp-store.com",
+    "ci:deploy:main": "npm ci && npm run build:modules && npm run build:staging -w websites/ggp-store.com",
+    "ci:deploy:prod": "npm ci && npm run build:modules && npm run lint -w websites/ggp-store.com && npm run build:prod-bundle -w website"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

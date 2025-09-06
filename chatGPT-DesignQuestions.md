@@ -113,18 +113,22 @@ Notes:
 
 ```
 root/
-  website/                    # Vite + React app (S3/CloudFront)
+  websites/                     # Vite + React app (S3/CloudFront)
+  websites/ggp-store.com        # GuidoGerbPublishing store            
+  websites/garygerber.com       # GaryGerber.com music
+  websites/picklecheeze.com     # PickleCheeze.com debut album
+  websites/this-is-my-story.org # Mom's stories
   @guidogerb/
-    ui/                       # Headless UI + design system components
-    auth/                     # Cognito auth hooks (PKCE), token mgmt
-    api-client/               # Typed SDK for API Gateway routes
-    catalog/                  # Types, zod validators, search helpers, payments-crypto, coinbase-client (coinbase/BitPay client), checkout, flows
-    storage/                  # S3 presign client, download guard
-    analytics/                # Event schema + emitter (web + lambda)
-    ai-support/               # RAG client (OpenSearch) + chat UI
-    config/                   # ESLint/Prettier/TS config packages
+    ui/                         # Headless UI + design system components
+    auth/                       # Cognito auth hooks (PKCE), token mgmt
+    api-client/                 # Typed SDK for API Gateway routes
+    catalog/                    # Types, zod validators, search helpers, payments-crypto, coinbase-client (coinbase/BitPay client), checkout, flows
+    storage/                    # S3 presign client, download guard
+    analytics/                  # Event schema + emitter (web + lambda)
+    ai-support/                 # RAG client (OpenSearch) + chat UI
+    config/                     # ESLint/Prettier/TS config packages
   infra/
-    cdk/                      # IaC for AWS resources
+    cdk/                        # IaC for AWS resources
 ```
 
 **Publishing**
@@ -889,11 +893,11 @@ Notes:
 
 ##  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# SPEC-1-SoundCloud-like on AWS (CloudFormation)
+# SPEC-1-Stream4Cloud on AWS (CloudFormation)
 
 ## Background
 
-**Mission.** Launch a creator-first audio streaming web platform with SoundCloud-like capabilities—upload, encode, stream, discover—implemented entirely with AWS CloudFormation (no CDK/Terraform) to ensure deterministic, reviewable IaC and repeatable multi-environment deploys.
+**Mission.** Launch a creator-first audio streaming web platform with Stream4Cloud capabilities—upload, encode, stream, discover—implemented entirely with AWS CloudFormation (no CDK/Terraform) to ensure deterministic, reviewable IaC and repeatable multi-environment deploys.
 
 **Audience & Use Cases.** Independent artists upload tracks; listeners stream on web, follow creators, like tracks/playlists; basic search and simple analytics. Creator onboarding should be self-serve.
 
@@ -911,7 +915,7 @@ Notes:
 
 **Updates from stakeholder (Sep 4, 2025):**
 
-* **Scope:** Aim for **full feature parity** with current public SoundCloud features for v1 (clarifications pending below).
+* **Scope:** Aim for **full feature parity** with current public Stream4Cloud features for v1 (clarifications pending below).
 * **Regions:** Deploy in **us-east-1** and an EU region (**assumed eu-west-1**) with point-of-sale multi-currency and regional tax compliance.
 
 *We will refine these in the next sections.*
@@ -924,7 +928,7 @@ Notes:
 
 * **Web only** (v1) using **Vite + React** for UI; hosted on CloudFront + S3.
 * **Offline support via Service Worker** (Vite PWA) to cache UI, APIs, and a limited set of HLS segments for recent plays with expiry; no permanent downloads.
-* Web experience parity for SoundCloud public features: creator signup, profiles, upload, track pages, streaming, discovery/search, comments on waveform, likes, reposts, playlists/sets.
+* Web experience parity for Stream4Cloud public features: creator signup, profiles, upload, track pages, streaming, discovery/search, comments on waveform, likes, reposts, playlists/sets.
 * Multi-region deployment: us-east-1 and EU (assumed eu-west-1) with data residency controls for UGC and personal data.
 * Audio ingest → serverless pipeline → **HLS (AAC)** renditions with waveform data and cover art thumbnails; **loudness normalization**.
 * Privacy: Public/Private/Unlisted; shareable **embeds (oEmbed)**.
@@ -2009,11 +2013,11 @@ Resources:
 
 ##  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# SPEC-1-SoundCloud-like on AWS (CloudFormation)
+# SPEC-1-Stream4Cloud on AWS (CloudFormation)
 
 ## Background
 
-**Mission.** Launch a creator-first audio streaming web platform with SoundCloud-like capabilities—upload, encode, stream, discover—implemented entirely with AWS CloudFormation (no CDK/Terraform) to ensure deterministic, reviewable IaC and repeatable multi-environment deploys.
+**Mission.** Launch a creator-first audio streaming web platform with Stream4Cloud capabilities—upload, encode, stream, discover—implemented entirely with AWS CloudFormation (no CDK/Terraform) to ensure deterministic, reviewable IaC and repeatable multi-environment deploys.
 
 **Audience & Use Cases.** Independent artists upload tracks; listeners stream on web, follow creators, like tracks/playlists; basic search and simple analytics. Creator onboarding should be self-serve.
 
@@ -2031,7 +2035,7 @@ Resources:
 
 **Updates from stakeholder (Sep 4, 2025):**
 
-* **Scope:** Aim for **full feature parity** with current public SoundCloud features for v1 (clarifications pending below).
+* **Scope:** Aim for **full feature parity** with current public Stream4Cloud features for v1 (clarifications pending below).
 * **Regions:** Deploy in **us-east-1** and an EU region (**assumed eu-west-1**) with point-of-sale multi-currency and regional tax compliance.
 
 *We will refine these in the next sections.*
@@ -2044,7 +2048,7 @@ Resources:
 
 * **Web only** (v1) using **Vite + React** for UI; hosted on CloudFront + S3.
 * **Offline support via Service Worker** (Vite PWA) to cache UI, APIs, and a limited set of HLS segments for recent plays with expiry; no permanent downloads.
-* Web experience parity for SoundCloud public features: creator signup, profiles, upload, track pages, streaming, discovery/search, comments on waveform, likes, reposts, playlists/sets.
+* Web experience parity for Stream4Cloud public features: creator signup, profiles, upload, track pages, streaming, discovery/search, comments on waveform, likes, reposts, playlists/sets.
 * Multi-region deployment: us-east-1 and EU (assumed eu-west-1) with data residency controls for UGC and personal data.
 * Audio ingest → serverless pipeline → **HLS (AAC)** renditions with waveform data and cover art thumbnails; **loudness normalization**.
 * Privacy: Public/Private/Unlisted; shareable **embeds (oEmbed)**.
@@ -3158,11 +3162,11 @@ Resources:
 
 
 
-# SPEC-1-SoundCloud-like on AWS (CloudFormation)
+# SPEC-1-Stream4Cloud on AWS (CloudFormation)
 
 ## Background
 
-**Mission.** Launch a creator-first audio streaming web platform with SoundCloud-like capabilities—upload, encode, stream, discover—implemented entirely with AWS CloudFormation (no CDK/Terraform) to ensure deterministic, reviewable IaC and repeatable multi-environment deploys.
+**Mission.** Launch a creator-first audio streaming web platform with Stream4Cloud capabilities—upload, encode, stream, discover—implemented entirely with AWS CloudFormation (no CDK/Terraform) to ensure deterministic, reviewable IaC and repeatable multi-environment deploys.
 
 **Audience & Use Cases.** Independent artists upload tracks; listeners stream on web, follow creators, like tracks/playlists; basic search and simple analytics. Creator onboarding should be self-serve.
 
@@ -3180,7 +3184,7 @@ Resources:
 
 **Updates from stakeholder (Sep 4, 2025):**
 
-* **Scope:** Aim for **full feature parity** with current public SoundCloud features for v1 (clarifications pending below).
+* **Scope:** Aim for **full feature parity** with current public Stream4Cloud features for v1 (clarifications pending below).
 * **Regions:** Deploy in **us-east-1** and an EU region (**assumed eu-west-1**) with point-of-sale multi-currency and regional tax compliance.
 
 *We will refine these in the next sections.*
@@ -3193,7 +3197,7 @@ Resources:
 
 * **Web only** (v1) using **Vite + React** for UI; hosted on CloudFront + S3.
 * **Offline support via Service Worker** (Vite PWA) to cache UI, APIs, and a limited set of HLS segments for recent plays with expiry; no permanent downloads.
-* Web experience parity for SoundCloud public features: creator signup, profiles, upload, track pages, streaming, discovery/search, comments on waveform, likes, reposts, playlists/sets.
+* Web experience parity for Stream4Cloud public features: creator signup, profiles, upload, track pages, streaming, discovery/search, comments on waveform, likes, reposts, playlists/sets.
 * Multi-region deployment: us-east-1 and EU (assumed eu-west-1) with data residency controls for UGC and personal data.
 * Audio ingest → serverless pipeline → **HLS (AAC)** renditions with waveform data and cover art thumbnails; **loudness normalization**.
 * Privacy: Public/Private/Unlisted; shareable **embeds (oEmbed)**.
@@ -4480,11 +4484,11 @@ API -> Email: notify reporter & creator
 
 ##   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# SPEC-1-SoundCloud-like on AWS (CloudFormation)
+# SPEC-1-Stream4Cloud on AWS (CloudFormation)
 
 ## Background
 
-**Mission.** Launch a creator-first audio streaming web platform with SoundCloud-like capabilities—upload, encode, stream, discover—implemented entirely with AWS CloudFormation (no CDK/Terraform) to ensure deterministic, reviewable IaC and repeatable multi-environment deploys.
+**Mission.** Launch a creator-first audio streaming web platform with Stream4Cloud capabilities—upload, encode, stream, discover—implemented entirely with AWS CloudFormation (no CDK/Terraform) to ensure deterministic, reviewable IaC and repeatable multi-environment deploys.
 
 **Audience & Use Cases.** Independent artists upload tracks; listeners stream on web, follow creators, like tracks/playlists; basic search and simple analytics. Creator onboarding should be self-serve.
 
@@ -4502,7 +4506,7 @@ API -> Email: notify reporter & creator
 
 **Updates from stakeholder (Sep 4, 2025):**
 
-* **Scope:** Aim for **full feature parity** with current public SoundCloud features for v1 (clarifications pending below).
+* **Scope:** Aim for **full feature parity** with current public Stream4Cloud features for v1 (clarifications pending below).
 * **Regions:** Deploy in **us-east-1** and an EU region (**assumed eu-west-1**) with point-of-sale multi-currency and regional tax compliance.
 
 *We will refine these in the next sections.*
@@ -4515,7 +4519,7 @@ API -> Email: notify reporter & creator
 
 * **Web only** (v1) using **Vite + React** for UI; hosted on CloudFront + S3.
 * **Offline support via Service Worker** (Vite PWA) to cache UI, APIs, and a limited set of HLS segments for recent plays with expiry; no permanent downloads.
-* Web experience parity for SoundCloud public features: creator signup, profiles, upload, track pages, streaming, discovery/search, comments on waveform, likes, reposts, playlists/sets.
+* Web experience parity for Stream4Cloud public features: creator signup, profiles, upload, track pages, streaming, discovery/search, comments on waveform, likes, reposts, playlists/sets.
 * Multi-region deployment: us-east-1 and EU (assumed eu-west-1) with data residency controls for UGC and personal data.
 * Audio ingest → serverless pipeline → **HLS (AAC)** renditions with waveform data and cover art thumbnails; **loudness normalization**.
 * Privacy: Public/Private/Unlisted; shareable **embeds (oEmbed)**.

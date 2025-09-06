@@ -1,6 +1,6 @@
 import './App.css'
 import Protected from "@guidogerb/components-pages-protected";
-import Welcome from "./website-components/welcome-page";
+import Welcome from "./website-components/welcome-page/index.jsx";
 
 
 function App() {

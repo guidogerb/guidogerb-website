@@ -4,7 +4,7 @@
 /pythonScripts/writeHtml/.idea/
 /pythonScripts/writeHtml/.venv/
 
-/website/.env
+/websites/ggp-store.com/.env
 
 **/dist/
 /package-lock.json
