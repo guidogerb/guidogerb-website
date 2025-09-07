@@ -11,11 +11,10 @@
     "@guidogerb/css",
     "@guidogerb/footer",
     "@guidogerb/header",
-    "websites/garygerber.com",
-    "websites/ggp-store.com",
-    "websites/picklecheeze.com",
-    "websites/this-is-my-story.org",
-    "websites/stream4cloud.com"
+    "websites/garygerber",
+    "websites/picklecheeze",
+    "websites/this-is-my-story",
+    "websites/stream4cloud"
   ],
   "scripts": {
     "clean": "rimraf --glob \"@guidogerb/**/dist\" \"websites/**/dist\"",
