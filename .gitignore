@@ -16,3 +16,5 @@
 **/.env-VITE_ENV-secret
 /infra/keys/**
 
+/pnpm-lock.yaml
+**/pnpm-lock.yaml
