@@ -12,6 +12,7 @@
     "@guidogerb/footer",
     "@guidogerb/header",
     "websites/garygerber.com",
+    "websites/guidogerbpublishing.com",
     "websites/picklecheeze.com",
     "websites/this-is-my-story.org",
     "websites/stream4cloud.com"
@@ -28,6 +29,7 @@
     "build:site:this-is-my-story": "pnpm --filter websites/this-is-my-story.org build",
     "dev:site:stream4cloud": "pnpm --filter websites/stream4cloud.com dev",
     "dev:site:garygerber": "pnpm --filter websites/garygerber.com dev",
+    "dev:site:guidogerbpublishing": "pnpm --filter websites/guidogerbpublishing.com dev",
     "dev:site:picklecheeze": "pnpm --filter websites/picklecheeze.com dev",
     "dev:site:this-is-my-story": "pnpm --filter websites/this-is-my-story.org dev",
     "ci:deploy:main": "pnpm -r build",
