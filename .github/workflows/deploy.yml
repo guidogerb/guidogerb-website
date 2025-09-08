@@ -65,12 +65,14 @@ jobs:
         id: sites
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.sites }}" != "all" ]; then
-            sites="${{ github.event.inputs.sites }}"
+            # Convert comma-separated input to JSON array
+            sites_input="${{ github.event.inputs.sites }}"
+            sites_json=$(echo "$sites_input" | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/')
           else
-            sites="garygerber.com,picklecheeze.com,this-is-my-story.org,stream4cloud.com"
+            sites_json='["garygerber.com","picklecheeze.com","this-is-my-story.org","stream4cloud.com"]'
           fi
-          echo "sites=$sites" >> $GITHUB_OUTPUT
-          echo "Deploying sites: $sites"
+          echo "sites=$sites_json" >> $GITHUB_OUTPUT
+          echo "Deploying sites: $sites_json"
 
       - name: Determine environment
         id: env
@@ -89,7 +91,7 @@ jobs:
         run: pnpm -r build
 
       - name: Build garygerber.com
-        if: contains(steps.sites.outputs.sites, 'garygerber.com')
+        if: contains(fromJson(steps.sites.outputs.sites), 'garygerber.com')
         run: |
           if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
             pnpm --filter websites/garygerber.com build:prod-bundle
@@ -98,7 +100,7 @@ jobs:
           fi
 
       - name: Build picklecheeze.com
-        if: contains(steps.sites.outputs.sites, 'picklecheeze.com')
+        if: contains(fromJson(steps.sites.outputs.sites), 'picklecheeze.com')
         run: |
           if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
             pnpm --filter websites/picklecheeze.com build:prod-bundle
@@ -107,7 +109,7 @@ jobs:
           fi
 
       - name: Build this-is-my-story.org
-        if: contains(steps.sites.outputs.sites, 'this-is-my-story.org')
+        if: contains(fromJson(steps.sites.outputs.sites), 'this-is-my-story.org')
         run: |
           if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
             pnpm --filter websites/this-is-my-story.org build:prod-bundle
@@ -116,7 +118,7 @@ jobs:
           fi
 
       - name: Build stream4cloud.com
-        if: contains(steps.sites.outputs.sites, 'stream4cloud.com')
+        if: contains(fromJson(steps.sites.outputs.sites), 'stream4cloud.com')
         run: |
           if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
             pnpm --filter websites/stream4cloud.com build:prod-bundle
@@ -139,7 +141,7 @@ jobs:
     if: success()
     strategy:
       matrix:
-        site: ${{ fromJson(format('["{0}"]', join(split(needs.build.outputs.sites, ','), '","'))) }}
+        site: ${{ fromJson(needs.build.outputs.sites) }}
       fail-fast: false
 
     steps:
