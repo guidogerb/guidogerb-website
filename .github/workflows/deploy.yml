@@ -26,6 +26,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    env:
+      NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,4 +62,3 @@ jobs:
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ inputs.distribution_id }} --paths "/*"
-

@@ -6,6 +6,8 @@ on:
 jobs:
   review:
     runs-on: ubuntu-latest
+    env:
+      NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

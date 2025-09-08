@@ -15,6 +15,8 @@ jobs:
   build:
     name: Build and Test All Websites
     runs-on: ubuntu-latest
+    env:
+      NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,14 +30,6 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Configure npm for GitHub Packages
-        env:
-          NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ env.NPMRC_TOKEN }}" >> ~/.npmrc
-          echo "@guidogerb:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
 
       - name: Install dependencies
         run: pnpm install

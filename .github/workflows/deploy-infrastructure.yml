@@ -85,7 +85,7 @@ jobs:
           echo "Verifying CloudFormation stacks..."
 
           if [ "${{ github.event.inputs.action }}" = "deploy-all" ]; then
-            domains="garygerber.com stream4cloud.com picklecheeze.com this-is-my-story.org"
+            domains="guidogerbpublishing.com garygerber.com stream4cloud.com picklecheeze.com this-is-my-story.org"
           else
             domains="${{ github.event.inputs.domain }}"
           fi

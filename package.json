@@ -19,7 +19,7 @@
     "websites/stream4cloud.com"
   ],
   "scripts": {
-    "clean": "rimraf --glob \"@guidogerb/**/dist\" \"websites/**/dist\"",
+    "clean": "rimraf --glob \"node_modules\" \"@guidogerb/**/node_modules\" \"websites/**/node_modules\" \"@guidogerb/**/dist\" \"websites/**/dist\" \"**/pnpm-lock.yaml\" \"**/package-lock.json\" \"**/yarn.lock\" \"**/npm-shrinkwrap.json\"",
     "cleani": "pnpm run clean && pnpm install",
     "cleanr": "pnpm run cleani && pnpm -r build",
     "build": "pnpm -r build",
