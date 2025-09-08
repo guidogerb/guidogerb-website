@@ -1,0 +1,15 @@
+packages:
+  # Components
+  - '@guidogerb/components/api-client'
+  - '@guidogerb/components/auth'
+  - '@guidogerb/components/menu'
+  - '@guidogerb/components/pages/*'
+  - '@guidogerb/components/router/*'
+  - '@guidogerb/css'
+  - '@guidogerb/footer'
+  - '@guidogerb/header'
+  # Websites
+  - 'websites/garygerber.com'
+  - 'websites/picklecheeze.com'
+  - 'websites/this-is-my-story.org'
+  - 'websites/stream4cloud.com'

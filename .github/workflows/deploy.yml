@@ -37,7 +37,7 @@ jobs:
     outputs:
       sites: ${{ steps.sites.outputs.sites }}
       environment: ${{ steps.env.outputs.environment }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,6 +47,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Configure npm for GitHub Packages
         run: |
           echo "//npm.pkg.github.com/:_authToken=${{ env.NPMRC_TOKEN }}" >> ~/.npmrc
@@ -54,7 +59,7 @@ jobs:
           echo "always-auth=true" >> ~/.npmrc
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Determine sites to deploy
         id: sites
@@ -136,7 +141,7 @@ jobs:
       matrix:
         site: ${{ fromJson(format('["{0}"]', join(split(needs.build.outputs.sites, ','), '","'))) }}
       fail-fast: false
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -159,23 +164,23 @@ jobs:
         run: |
           site_name=$(echo "${{ matrix.site }}" | sed 's/\./-/g')
           stack_name="s4c-edge-${site_name}"
-          
+
           # Get stack outputs
           outputs=$(aws cloudformation describe-stacks \
             --stack-name "$stack_name" \
             --region ${{ env.AWS_REGION }} \
             --query 'Stacks[0].Outputs' \
             --output json 2>/dev/null || echo '[]')
-          
+
           # Extract bucket name and distribution ID
           bucket=$(echo "$outputs" | jq -r '.[] | select(.OutputKey=="SiteBucketName") | .OutputValue // empty')
           distribution=$(echo "$outputs" | jq -r '.[] | select(.OutputKey=="DistributionId") | .OutputValue // empty')
-          
+
           if [ -z "$bucket" ] || [ -z "$distribution" ]; then
             echo "Warning: Could not find bucket or distribution for ${{ matrix.site }}"
             echo "Stack outputs: $outputs"
           fi
-          
+
           echo "bucket=$bucket" >> $GITHUB_OUTPUT
           echo "distribution=$distribution" >> $GITHUB_OUTPUT
           echo "Site: ${{ matrix.site }}, Bucket: $bucket, Distribution: $distribution"

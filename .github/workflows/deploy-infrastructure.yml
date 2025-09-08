@@ -34,7 +34,7 @@ jobs:
   deploy-infrastructure:
     name: Deploy CloudFormation Infrastructure
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,25 +82,25 @@ jobs:
         if: contains(github.event.inputs.action, 'deploy')
         run: |
           echo "Verifying CloudFormation stacks..."
-          
+
           if [ "${{ github.event.inputs.action }}" = "deploy-all" ]; then
             domains="garygerber.com stream4cloud.com picklecheeze.com this-is-my-story.org"
           else
             domains="${{ github.event.inputs.domain }}"
           fi
-          
+
           for domain in $domains; do
             stack_name="s4c-edge-$(echo $domain | sed 's/\./-/g')"
             echo "Checking stack: $stack_name"
-            
+
             status=$(aws cloudformation describe-stacks \
               --stack-name "$stack_name" \
               --region ${{ env.AWS_REGION }} \
               --query 'Stacks[0].StackStatus' \
               --output text 2>/dev/null || echo "NOT_FOUND")
-            
+
             echo "$domain: $status"
-            
+
             if [ "$status" = "CREATE_COMPLETE" ] || [ "$status" = "UPDATE_COMPLETE" ]; then
               # Get stack outputs
               aws cloudformation describe-stacks \

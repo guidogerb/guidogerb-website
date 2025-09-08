@@ -24,6 +24,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Configure npm for GitHub Packages
         env:
           NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
@@ -33,7 +38,7 @@ jobs:
           echo "always-auth=true" >> ~/.npmrc
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Lint all packages
         run: npm run lint
