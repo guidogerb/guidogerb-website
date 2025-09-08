@@ -13,4 +13,4 @@
 **/.env-production
 
 **/.env-VITE_ENV-secret
-/infra/keys/
+/infra/keys/**
