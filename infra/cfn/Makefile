@@ -3,7 +3,7 @@ REGION ?= us-east-1
 PROFILE ?=
 AWS = aws $(if $(PROFILE),--profile $(PROFILE),)
 PARAMS_DIR = params
-DOMAINS = garygerber.com ggp-store.com picklecheeze.com this-is-my-story.org
+DOMAINS = garygerber.com stream4cloud.com picklecheeze.com this-is-my-story.org
 define stack_name
 s4c-edge-$(subst .,-,$(1))
 endef

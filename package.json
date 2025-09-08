@@ -11,10 +11,10 @@
     "@guidogerb/css",
     "@guidogerb/footer",
     "@guidogerb/header",
-    "websites/garygerber",
-    "websites/picklecheeze",
-    "websites/this-is-my-story",
-    "websites/stream4cloud"
+    "websites/garygerber.com",
+    "websites/picklecheeze.com",
+    "websites/this-is-my-story.org",
+    "websites/stream4cloud.com"
   ],
   "scripts": {
     "clean": "rimraf --glob \"@guidogerb/**/dist\" \"websites/**/dist\"",
@@ -23,9 +23,15 @@
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "build:site:stream4cloud": "pnpm --filter websites/stream4cloud.com build",
+    "build:site:garygerber": "pnpm --filter websites/garygerber.com build",
+    "build:site:picklecheeze": "pnpm --filter websites/picklecheeze.com build",
+    "build:site:this-is-my-story": "pnpm --filter websites/this-is-my-story.org build",
     "dev:site:stream4cloud": "pnpm --filter websites/stream4cloud.com dev",
-    "ci:deploy:main": "pnpm -r build && pnpm --filter websites/stream4cloud.com build:staging",
-    "ci:deploy:prod": "pnpm -r build && pnpm --filter websites/stream4cloud.com lint && pnpm --filter websites/stream4cloud.com build:prod-bundle"
+    "dev:site:garygerber": "pnpm --filter websites/garygerber.com dev",
+    "dev:site:picklecheeze": "pnpm --filter websites/picklecheeze.com dev",
+    "dev:site:this-is-my-story": "pnpm --filter websites/this-is-my-story.org dev",
+    "ci:deploy:main": "pnpm -r build",
+    "ci:deploy:prod": "pnpm -r build && pnpm -r lint"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

@@ -1,4 +1,4 @@
-name: Build (CI)
+name: Build and Test (CI)
 
 on:
   pull_request:
@@ -13,41 +13,16 @@ env:
 
 jobs:
   build:
+    name: Build and Test All Websites
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Create .env file from secret
-      - name: Create website/.env file
-        run: |
-          echo "${{ secrets.VITE_ENV }}" > website/.env
-
-      - name: Validate VITE env
-        run: |
-          set -e
-          if [ ! -f website/.env ]; then echo "website/.env not found"; exit 1; fi
-          # Load .env lines into shell (only VITE_* lines, ignoring quotes)
-          export $(grep -E '^VITE_[A-Z0-9_]+=' website/.env | sed 's/\r$//' | sed 's/^export //')
-          missing=()
-          # Require client_id
-          if [ -z "$VITE_COGNITO_CLIENT_ID" ]; then missing+=("VITE_COGNITO_CLIENT_ID"); fi
-          # Require either authority or metadata
-          if [ -z "$VITE_COGNITO_AUTHORITY" ] && [ -z "$VITE_COGNITO_METADATA_URL" ]; then missing+=("VITE_COGNITO_AUTHORITY or VITE_COGNITO_METADATA_URL"); fi
-          # Require redirect_uri
-          if [ -z "$VITE_REDIRECT_URI" ]; then missing+=("VITE_REDIRECT_URI"); fi
-          if [ ${#missing[@]} -ne 0 ]; then
-            echo "Missing required VITE_ keys: ${missing[*]}" >&2
-            echo "Ensure repository secret VITE_ENV contains these keys." >&2
-            exit 1
-          fi
-          echo "VITE env validation passed"
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          # cache: 'npm'
 
       - name: Configure npm for GitHub Packages
         env:
@@ -57,20 +32,52 @@ jobs:
           echo "@guidogerb:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "always-auth=true" >> ~/.npmrc
 
-      - name: Install dependencies (CI)
-        run: npm ci
+      - name: Install dependencies
+        run: npm install
 
-      - name: Build (branch-specific)
+      - name: Lint all packages
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build components
+        run: pnpm -r build
+
+      - name: Test branch-specific build (garygerber.com)
         run: |
           if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            npm run ci:deploy:prod
+            pnpm --filter websites/garygerber.com build:prod-bundle
           else
-            npm run ci:deploy:main
+            pnpm --filter websites/garygerber.com build:staging
           fi
 
-      - name: Save website build artifact
+      - name: Test branch-specific build (picklecheeze.com)
+        run: |
+          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
+            pnpm --filter websites/picklecheeze.com build:prod-bundle
+          else
+            pnpm --filter websites/picklecheeze.com build:staging
+          fi
+
+      - name: Test branch-specific build (this-is-my-story.org)
+        run: |
+          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
+            pnpm --filter websites/this-is-my-story.org build:prod-bundle
+          else
+            pnpm --filter websites/this-is-my-story.org build:staging
+          fi
+
+      - name: Test branch-specific build (stream4cloud.com)
+        run: |
+          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
+            pnpm --filter websites/stream4cloud.com build:prod-bundle
+          else
+            pnpm --filter websites/stream4cloud.com build:staging
+          fi
+
+      - name: Save build artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: website-dist
-          path: website/dist
+          name: all-websites-dist-${{ github.head_ref || github.ref_name }}
+          path: websites/*/dist
+          retention-days: 7

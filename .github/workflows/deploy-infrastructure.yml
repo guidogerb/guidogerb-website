@@ -1,0 +1,112 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Deployment action'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+        - deploy
+        - delete
+        - deploy-all
+        - delete-all
+      domain:
+        description: 'Specific domain to deploy (if not using deploy-all)'
+        required: false
+        type: choice
+        options:
+        - garygerber.com
+        - stream4cloud.com
+        - picklecheeze.com
+        - this-is-my-story.org
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+jobs:
+  deploy-infrastructure:
+    name: Deploy CloudFormation Infrastructure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-actions-infrastructure
+
+      - name: Deploy infrastructure
+        working-directory: infra/cfn
+        run: |
+          case "${{ github.event.inputs.action }}" in
+            "deploy")
+              if [ -n "${{ github.event.inputs.domain }}" ]; then
+                make deploy-edge-${{ github.event.inputs.domain }} REGION=${{ env.AWS_REGION }}
+              else
+                echo "Domain is required for single deploy action"
+                exit 1
+              fi
+              ;;
+            "delete")
+              if [ -n "${{ github.event.inputs.domain }}" ]; then
+                make delete-edge-${{ github.event.inputs.domain }} REGION=${{ env.AWS_REGION }}
+              else
+                echo "Domain is required for single delete action"
+                exit 1
+              fi
+              ;;
+            "deploy-all")
+              make deploy-edge-all REGION=${{ env.AWS_REGION }}
+              ;;
+            "delete-all")
+              make delete-edge-all REGION=${{ env.AWS_REGION }}
+              ;;
+            *)
+              echo "Unknown action: ${{ github.event.inputs.action }}"
+              exit 1
+              ;;
+          esac
+
+      - name: Verify deployment
+        if: contains(github.event.inputs.action, 'deploy')
+        run: |
+          echo "Verifying CloudFormation stacks..."
+          
+          if [ "${{ github.event.inputs.action }}" = "deploy-all" ]; then
+            domains="garygerber.com stream4cloud.com picklecheeze.com this-is-my-story.org"
+          else
+            domains="${{ github.event.inputs.domain }}"
+          fi
+          
+          for domain in $domains; do
+            stack_name="s4c-edge-$(echo $domain | sed 's/\./-/g')"
+            echo "Checking stack: $stack_name"
+            
+            status=$(aws cloudformation describe-stacks \
+              --stack-name "$stack_name" \
+              --region ${{ env.AWS_REGION }} \
+              --query 'Stacks[0].StackStatus' \
+              --output text 2>/dev/null || echo "NOT_FOUND")
+            
+            echo "$domain: $status"
+            
+            if [ "$status" = "CREATE_COMPLETE" ] || [ "$status" = "UPDATE_COMPLETE" ]; then
+              # Get stack outputs
+              aws cloudformation describe-stacks \
+                --stack-name "$stack_name" \
+                --region ${{ env.AWS_REGION }} \
+                --query 'Stacks[0].Outputs[?OutputKey==`SiteBucketName` || OutputKey==`DistributionId`].[OutputKey,OutputValue]' \
+                --output table
+            fi
+          done
