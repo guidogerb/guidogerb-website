@@ -170,7 +170,7 @@ POST /store/{id}/products
 ```
 VITE_COGNITO_CLIENT_ID=...
 VITE_COGNITO_AUTHORITY=...  # OR VITE_COGNITO_DOMAIN=... OR VITE_COGNITO_METADATA_URL=...
-VITE_REDIRECT_URI=https://your.domain/auth/loginCallback
+VITE_REDIRECT_URI=https://your.domain/auth/callback
 # Recommended:
 VITE_COGNITO_SCOPE="openid profile email"
 VITE_RESPONSE_TYPE=code
@@ -181,7 +181,7 @@ VITE_BASE_PATH=/
 
 **Localhost Cognito fix (redirect_mismatch)**
 - Ensure dev server port matches `.env.development` (e.g., `VITE_SITE_PORT=4173`).  
-- Set `VITE_LOGIN_CALLBACK_PATH=/auth/loginCallback` and `VITE_REDIRECT_URI=http://localhost:4173/auth/loginCallback`.  
+- Set `VITE_LOGIN_CALLBACK_PATH=/auth/callback` and `VITE_REDIRECT_URI=http://localhost:4173/auth/callback`.  
 - Add the exact callback/sign‑out URLs in Cognito App Client.
 
 ## 12) Milestones (timeboxes assume 2–3 FE, 2 BE, 1 DevOps)

@@ -4,12 +4,19 @@ This document consolidates all install and deployment instructions for **Stream4
 
 ---
 
+## Architecture summary (SPEC-1)
+- Core stack: Vite, React, TypeScript; AWS with API Gateway, Lambda, DynamoDB, CloudFront, S3, Cognito; Stripe for payments.
+- Multi-tenant + custom domains via CloudFront; TLS with ACM; DNS records with Route 53.
+- PWA with a service worker: offline precache of shell, Background Sync for writes, offline.html fallback.
+- Security & compliance: PCI SAQ-A, GDPR/CCPA, encryption with KMS, WAF, least privilege IAM.
+- Secure downloads: pre-signed URL + permission-hash with TTL, limited uses, and audit logging.
+
 ## 1) Prerequisites
 
-- **Node.js** ≥ 20 and **pnpm**
-- **AWS CLI v2** configured (admin/deployer role)
-- **ACM certificates (us-east-1)** for each domain
-- Optional: **GNU Make** (macOS/Linux) or **PowerShell** (Windows)
+- Node.js ≥ 20 and pnpm
+- AWS CLI v2 configured (admin/deployer role)
+- ACM certificates (us-east-1) for each domain
+- Optional: GNU Make (macOS/Linux) or PowerShell (Windows)
 
 ---
 
@@ -37,12 +44,12 @@ Create `websites/<site>/.env`:
 ```ini
 VITE_COGNITO_CLIENT_ID=...
 VITE_COGNITO_AUTHORITY=https://cognito-idp.<region>.amazonaws.com/<userPoolId>
-VITE_REDIRECT_URI=https://<domain>/auth/loginCallback
+VITE_REDIRECT_URI=https://<domain>/auth/callback
 VITE_COGNITO_SCOPE=openid profile email
 VITE_API_BASE_URL=https://<api-id>.execute-api.<region>.amazonaws.com
 ```
 
-> **Never** store secrets in the SPA. Use **Cognito Hosted UI** (Auth Code + PKCE).
+> Never store secrets in the SPA. Use Cognito Hosted UI (Auth Code + PKCE).
 
 ---
 
@@ -51,11 +58,11 @@ VITE_API_BASE_URL=https://<api-id>.execute-api.<region>.amazonaws.com
 All templates are under `infra/cfn/stream4cloud/`. Parameters live in `infra/cfn/stream4cloud/params/`.
 
 ### 3.1 Fill parameter files
-- `edge-<domain>.json` → set `CertificateArn` and `HostedZoneId` (or leave empty to skip DNS record).
+- `edge-<domain>.json` → set `CertificateArn` (ACM) and `HostedZoneId` for Route 53 (or skip DNS record creation).
 - `auth.json` → choose unique `HostedUIDomainPrefix`; set Google IdP if desired.
-- `api.json` → leave placeholders for now (auto-filled via script).
-- `media.json` → set S3 buckets for input/output.
-- `opensearch.json` → set Admin principal ARN.
+- `api.json` → placeholders for now (auto-filled via script).
+- `media.json` → S3 buckets for input/output.
+- `opensearch.json` → Admin principal ARN.
 
 ### 3.2 Deploy sequence (PowerShell)
 From `infra/cfn/stream4cloud/`:
@@ -69,7 +76,7 @@ From `infra/cfn/stream4cloud/`:
 .\deploy.ps1 -Action DeploySearch -Region us-east-1
 ```
 
-Or with **Make**:
+Or with Make:
 ```bash
 make deploy-edge-all REGION=us-east-1
 make deploy-auth REGION=us-east-1
@@ -80,10 +87,10 @@ make deploy-search REGION=us-east-1
 ```
 
 ### 3.3 Verify stacks
-- CloudFront distributions = **Enabled/Deployed**
-- DNS record created (if HostedZoneId provided)
-- Cognito Hosted UI domain reachable
-- API `GET /health` returns `{"ok": true}`
+- CloudFront distributions = Enabled/Deployed; alternate domain names configured for multi-tenant custom domains.
+- Route 53 DNS records created (if HostedZoneId provided) and ACM certs issued.
+- Cognito Hosted UI domain reachable.
+- API `GET /health` returns `{"ok": true}`.
 
 ### 3.4 Tear-down (reverse order)
 ```powershell
@@ -101,12 +108,12 @@ make deploy-search REGION=us-east-1
 
 ### 4.1 Build a site
 ```bash
-pnpm --filter websites/ggp-store.com build
+pnpm --filter websites/stream4cloud.com build
 ```
 
 ### 4.2 Upload to S3 (static hosting bucket from `edge-site.yaml`)
 ```bash
-aws s3 sync websites/ggp-store.com/dist s3://<SiteBucketName>/ --delete
+aws s3 sync websites/stream4cloud.com/dist s3://<SiteBucketName>/ --delete
 ```
 
 ### 4.3 Invalidate CloudFront
@@ -116,39 +123,44 @@ aws cloudfront create-invalidation --distribution-id <DistributionId> --paths "/
 
 ### 4.4 Repeat for each site
 - `garygerber.com`
-- `ggp-store.com`
+- `guidogerbpublishing.com`
 - `picklecheeze.com`
 - `this-is-my-story.org`
 
-> Consider adding GitHub Actions to automate build → S3 upload → invalidation per-site.
+> Consider GitHub Actions to automate: build → S3 upload → invalidation per site.
 
 ---
 
 ## 5) Auth Integration (Frontend)
 
-Use the shared package **`@guidogerb/auth`** to initiate Hosted UI login and retrieve access tokens.
+Use the shared package `@guidogerb/components-auth` (Cognito Hosted UI + PKCE) to initiate login and retrieve access tokens.
 
-**Minimal flow**
+Minimal flow:
 ```ts
-import { loginWithHostedUI, handleRedirect, getAccessToken } from '@guidogerb/auth'
-// On app start:
+import { loginWithHostedUI, handleRedirect, getAccessToken } from '@guidogerb/components-auth'
 handleRedirect()
-// On sign-in click:
 loginWithHostedUI()
-// For API calls:
 const token = await getAccessToken()
 ```
 
 ---
 
-## 6) Media Ingest & Transcode (Audio + Video)
+## 6) PWA Offline & Static Pages
+
+- Add `@guidogerb/sw` or `vite-plugin-pwa` with a service worker.
+- Precache the app shell; use Background Sync for writes.
+- Provide `/offline.html` fallback (see `infra/scripts/writeHtml`).
+
+---
+
+## 7) Media Ingest & Transcode (Audio + Video)
 
 The `media-audio-video.yaml` stack provisions:
-- MediaConvert **JobTemplates** (audio AAC/HLS, video H.264/HLS)
+- MediaConvert JobTemplates (audio AAC/HLS, video H.264/HLS)
 - Two minimal submitter Lambdas
-- Step Functions **State Machine** (`s4c-media-pipeline`)
+- Step Functions State Machine (`s4c-media-pipeline`)
 
-**Invoke example**
+Invoke example
 ```json
 {
   "mediaType": "audio",
@@ -161,24 +173,31 @@ Outputs land under the `OutputBucketName` with `audio/` or `video/` prefixes.
 
 ---
 
-## 7) Search (OpenSearch Serverless)
+## 8) Secure Downloads (API)
 
-Provisioned collection (placeholder in Phase-1). Use for simple title/creator search first; expand later for discovery.
-
----
-
-## 8) Troubleshooting
-
-- **Cognito redirect mismatch** → ensure your callback/logout URIs exactly match Hosted UI settings.
-- **CloudFront 403 to S3 origin** → verify OAC is attached and S3 bucket policy allows CloudFront service principal (via distribution ARN).
-- **MediaConvert access errors** → the service role must have S3 list/get/put for input/output buckets.
-- **CORS** → set appropriate `Access-Control-Allow-*` on API responses if calling from the SPA.
+Downloads must use pre-signed URLs from S3 and a permission-hash token with TTL and limited uses; all accesses are audit logged.
 
 ---
 
-## 9) Appendix
+## 9) Security & Compliance
 
-### Required build-time env (`VITE_*`)
+- PCI SAQ-A boundary (Stripe-hosted elements/links)
+- GDPR/CCPA: consent + DSRs
+- Encryption with KMS and least privilege IAM
+- WAF managed rules and rate limits
+
+---
+
+## 10) Troubleshooting
+
+- Cognito redirect mismatch → ensure callback/logout URIs exactly match Hosted UI settings.
+- CloudFront 403 to S3 origin → verify OAC and S3 policy allow CloudFront service principal (via distribution ARN).
+- MediaConvert access errors → service role must have S3 list/get/put for input/output buckets.
+- CORS → set appropriate `Access-Control-Allow-*` on API responses if calling from the SPA.
+
+---
+
+## 11) Appendix: Required build-time env (VITE_*)
 ```
 VITE_COGNITO_CLIENT_ID=...
 VITE_COGNITO_AUTHORITY=...

@@ -36,13 +36,13 @@ Create minimal package stubs for listed shared packages so that builds resolve d
   - Acceptance: Each included website can `pnpm --filter <site> dev` and `build` successfully.
 
 ## 4) Environment & Secrets
-- [ ] Document and template `.env` requirements per site (see SPEC §11 and PUBLISHING.md §9)
+- [ ] Document and template `.env` requirements per site (see SPEC §11 and PUBLISHING.md §11)
 - [ ] Add `.env.example` for each website with VITE_* keys.
   - Acceptance: New dev can copy `.env.example` → `.env` and run dev server.
 
 ## 5) PWA & Offline Shell
 - [ ] Add vite-plugin-pwa and a minimal Workbox service worker package `@guidogerb/sw` (stub now; real logic later)
-- [ ] Provide `infra/scripts/writeHtml` utilities for offline.html and sitemap (as per README there)
+- [ ] Provide `infra/scripts/writeHtml` utilities for offline.html and sitemap
   - Acceptance: Dev build includes manifest and registers SW behind a feature flag (can be disabled in dev).
 
 ## 6) CI/CD Scaffolding (GitHub Actions + AWS OIDC)
@@ -68,13 +68,11 @@ Create minimal package stubs for listed shared packages so that builds resolve d
 
 ---
 
-## Suggested Sequence (Weeks 0–2)
-1. Day 1–2: Repo hygiene (pnpm), CSS tokens/reset, stub packages (Tasks 0–2)
-2. Day 3–4: Website baseline runs locally with placeholders (Task 3–4)
-3. Day 5: PWA shell wiring & offline.html script (Task 5)
-4. Days 6–7: Minimal CI workflow (Task 6) and infra placeholders (Task 7)
-5. Day 8–10: Hardening and documentation (Tasks 8–9)
-
-## Notes
-- Keep SPA free of secrets. Use Cognito Hosted UI (Auth Code + PKCE) as specified.
-- Prefer incremental PRs per package to keep diffs small.
+## 10) Spec-alignment checklist (must-haves)
+To ensure tasks remain aligned with SPEC-1 and compliance rules, confirm these areas are covered during M0–M1:
+- Core stack: Vite, React, TypeScript; AWS with API Gateway, Lambda, DynamoDB, CloudFront, S3, Cognito; Stripe for payments.
+- Multi-tenant + custom domains via CloudFront; ACM certificates; Route 53 DNS.
+- PWA with a service worker: offline precache, Background Sync, offline.html fallback.
+- Security & compliance: PCI SAQ-A, GDPR, encryption with KMS, WAF, least privilege IAM.
+- Secure downloads: pre-signed URL + permission-hash with TTL, limited uses, audit logging.
+- Search/observability mentions: OpenSearch (BM25/Serverless) and Lambda Powertools/CloudWatch/X-Ray with p95 Core Web Vitals (LCP/INP/CLS).

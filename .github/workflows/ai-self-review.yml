@@ -1,0 +1,22 @@
+name: ai-self-review
+on:
+  push:
+    paths: [".aiassistant/rules/**.md", "SPEC.md", "PUBLISHING.md", "README.md", "TASKS.md"]
+  workflow_dispatch: {}
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm i --ignore-scripts
+      - name: Validate docs
+        run: |
+          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json SPEC.md
+          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json README.md
+          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json PUBLISHING.md
+          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json TASKS.md

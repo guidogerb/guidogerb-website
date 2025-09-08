@@ -8,6 +8,7 @@ This repository supports automated deployment of multiple websites through GitHu
 - **picklecheeze.com** - Blog/portfolio site  
 - **this-is-my-story.org** - Story sharing platform
 - **stream4cloud.com** - Streaming service platform
+- **guidogerbpublishing.com** - GuidoGerb Publishing, LLC website and platform
 
 ## Workflow Overview
 

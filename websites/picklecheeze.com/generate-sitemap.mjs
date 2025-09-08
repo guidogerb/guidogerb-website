@@ -43,7 +43,7 @@ const siteUrl = env.VITE_SITE_URL || (mode === 'production' ? 'https://ggp-store
 // Define your public routes here. Start minimal; expand as you add pages.
 const routes = [
     '/',               // home
-    '/auth/loginCallback', // example auth callback if exposed
+    '/auth/callback', // example auth callback if exposed
     // add more public routes as needed: '/catalog', '/artists', etc.
 ];
 

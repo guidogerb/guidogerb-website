@@ -5,11 +5,13 @@ packages:
   - '@guidogerb/components/menu'
   - '@guidogerb/components/pages/*'
   - '@guidogerb/components/router/*'
+  - '@guidogerb/components/sw'
   - '@guidogerb/css'
   - '@guidogerb/footer'
   - '@guidogerb/header'
   # Websites
   - 'websites/garygerber.com'
+  - 'websites/guidogerbpublishing.com'
   - 'websites/picklecheeze.com'
   - 'websites/this-is-my-story.org'
   - 'websites/stream4cloud.com'

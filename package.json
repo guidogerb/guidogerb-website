@@ -33,7 +33,12 @@
     "dev:site:picklecheeze": "pnpm --filter websites/picklecheeze.com dev",
     "dev:site:this-is-my-story": "pnpm --filter websites/this-is-my-story.org dev",
     "ci:deploy:main": "pnpm -r build",
-    "ci:deploy:prod": "pnpm -r build && pnpm -r lint"
+    "ci:deploy:prod": "pnpm -r build && pnpm -r lint",
+    "ai:check": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json",
+    "ai:check:readme": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json README.md",
+    "ai:check:spec": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json SPEC.md",
+    "ai:check:publishing": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json PUBLISHING.md",
+    "ai:check:tasks": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json TASKS.md"
   },
   "devDependencies": {
     "rimraf": "^6.0.1"

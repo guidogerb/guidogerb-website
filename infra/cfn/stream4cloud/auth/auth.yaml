@@ -53,7 +53,7 @@ Resources:
       AllowedOAuthFlowsUserPoolClient: true
       AllowedOAuthScopes: ["email","openid","profile"]
       CallbackURLs:
-        - https://example.com/auth/loginCallback
+        - https://example.com/auth/callback
       LogoutURLs:
         - https://example.com/auth/logout
       SupportedIdentityProviders:

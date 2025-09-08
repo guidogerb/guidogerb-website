@@ -5,14 +5,14 @@
 
   <url>
     <loc>https://ggp-store.com</loc>
-    <lastmod>2025-09-08T22:12:25.543Z</lastmod>
+    <lastmod>2025-09-08T22:12:25.548Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
     <loc>https://ggp-store.com/auth/callback</loc>
-    <lastmod>2025-09-08T22:12:25.543Z</lastmod>
+    <lastmod>2025-09-08T22:12:25.548Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -1,0 +1,29 @@
+# An .aiignore file follows the same syntax as a .gitignore file.
+# .gitignore documentation: https://git-scm.com/docs/gitignore
+
+# you can ignore files
+.DS_Store
+*.log
+*.tmp
+
+# or folders
+dist/
+build/
+out/
+
+/.idea/
+/node_modules/
+/s3/
+
+/package-lock.json
+**/package-lock.json
+
+**/dist/
+**/.venv/
+**/.idea/
+**/.env
+**/.env-development
+**/.env-production
+
+**/.env-VITE_ENV-secret
+/infra/keys/**

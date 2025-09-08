@@ -1,0 +1,22 @@
+{
+  "name": "@guidogerb/components-sw",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "src"
+  ],
+  "peerDependencies": {
+    "react": ">=19"
+  }
+}
+

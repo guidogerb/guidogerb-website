@@ -22,6 +22,7 @@ on:
         - stream4cloud.com
         - picklecheeze.com
         - this-is-my-story.org
+        - guidogerbpublishing.com
 
 permissions:
   contents: read

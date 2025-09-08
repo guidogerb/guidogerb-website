@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       sites:
-        description: 'Sites to deploy (comma-separated: garygerber.com,picklecheeze.com,this-is-my-story.org,stream4cloud.com)'
+        description: 'Sites to deploy (comma-separated: guidogerbpublishing.com,garygerber.com,picklecheeze.com,this-is-my-story.org,stream4cloud.com)'
         required: false
         default: 'all'
         type: string
@@ -89,6 +89,15 @@ jobs:
 
       - name: Build components
         run: pnpm -r build
+
+      - name: Build guidogerbpublishing.com
+        if: contains(fromJson(steps.sites.outputs.sites), 'guidogerbpublishing.com')
+        run: |
+          if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
+            pnpm --filter websites/guidogerbpublishing.com build:prod-bundle
+          else
+            pnpm --filter websites/guidgerbpublishing.com build:staging
+          fi
 
       - name: Build garygerber.com
         if: contains(fromJson(steps.sites.outputs.sites), 'garygerber.com')

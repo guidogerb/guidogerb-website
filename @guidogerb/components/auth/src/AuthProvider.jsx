@@ -11,7 +11,7 @@ export default function AuthProvider({
   response_type,
   scope,
   post_logout_redirect_uri,
-  loginCallbackPath = '/auth/loginCallback',
+  loginCallbackPath = '/auth/callback',
 }) {
   // Merge props with environment fallbacks
   // Use Vite's import.meta.env directly; in our app this exists at runtime
@@ -46,7 +46,7 @@ export default function AuthProvider({
         // metadataUrl can provide discovery; if both provided, metadataUrl wins in oidc-client-ts
         metadataUrl: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LYMkghVWo/.well-known/openid-configuration',
         client_id: '2n884r9p79em3u2gfack27lvme',
-        redirect_uri: 'https://ggp-store.com/auth/loginCallback',
+        redirect_uri: 'https://ggp-store.com/auth/callback',
         response_type: 'code',
         scope: 'openid profile email',
         post_logout_redirect_uri:'https://ggp-store.com/auth/logout',
