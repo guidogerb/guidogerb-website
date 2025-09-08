@@ -8,6 +8,7 @@
     "@guidogerb/components/menu",
     "@guidogerb/components/pages/*",
     "@guidogerb/components/router/*",
+    "@guidogerb/components/sw",
     "@guidogerb/css",
     "@guidogerb/footer",
     "@guidogerb/header",
@@ -38,9 +39,12 @@
     "ai:check:readme": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json README.md",
     "ai:check:spec": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json SPEC.md",
     "ai:check:publishing": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json PUBLISHING.md",
-    "ai:check:tasks": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json TASKS.md"
+    "ai:check:tasks": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json TASKS.md",
+    "format": "prettier -w .",
+    "format:check": "prettier -c ."
   },
   "devDependencies": {
-    "rimraf": "^6.0.1"
+    "rimraf": "^6.0.1",
+    "prettier": "^3.3.3"
   }
 }

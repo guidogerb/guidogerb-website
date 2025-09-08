@@ -1,5 +1,4 @@
 packages:
-  # Components
   - '@guidogerb/components/api-client'
   - '@guidogerb/components/auth'
   - '@guidogerb/components/menu'
@@ -9,9 +8,11 @@ packages:
   - '@guidogerb/css'
   - '@guidogerb/footer'
   - '@guidogerb/header'
-  # Websites
-  - 'websites/garygerber.com'
-  - 'websites/guidogerbpublishing.com'
-  - 'websites/picklecheeze.com'
-  - 'websites/this-is-my-story.org'
-  - 'websites/stream4cloud.com'
+  - websites/garygerber.com
+  - websites/guidogerbpublishing.com
+  - websites/picklecheeze.com
+  - websites/this-is-my-story.org
+  - websites/stream4cloud.com
+
+ignoredBuiltDependencies:
+  - esbuild

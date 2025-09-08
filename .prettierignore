@@ -1,0 +1,9 @@
+# Build artifacts
+**/dist/
+**/node_modules/
+**/.venv/
+# Generated
+**/public/sitemap.xml
+# Lockfiles
+pnpm-lock.yaml
+

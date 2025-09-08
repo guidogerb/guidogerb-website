@@ -1,213 +1,63 @@
-name: Multi-Tenant Build and Deploy
+name: deploy
 
 on:
-  push:
-    branches: [ "main", "prod" ]
   workflow_dispatch:
     inputs:
-      sites:
-        description: 'Sites to deploy (comma-separated: guidogerbpublishing.com,garygerber.com,picklecheeze.com,this-is-my-story.org,stream4cloud.com)'
-        required: false
-        default: 'all'
-        type: string
-      environment:
-        description: 'Environment to deploy to'
-        required: false
-        default: 'auto'
+      site:
+        description: 'Site to deploy (folder under websites)'
+        required: true
+        default: 'stream4cloud.com'
         type: choice
-        options:
-        - auto
-        - staging
-        - production
-
-permissions:
-  contents: read
-  id-token: write
-
-env:
-  NODE_VERSION: '20.19.0'
-  AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
-  NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
+        options: [stream4cloud.com, garygerber.com, guidogerbpublishing.com, picklecheeze.com, this-is-my-story.org]
+      aws_region:
+        description: 'AWS region'
+        required: true
+        default: 'us-east-1'
+      bucket:
+        description: 'Target S3 bucket name'
+        required: true
+      distribution_id:
+        description: 'CloudFront Distribution ID'
+        required: true
 
 jobs:
-  # Build all websites
-  build:
-    name: Build All Websites
+  deploy:
     runs-on: ubuntu-latest
-    outputs:
-      sites: ${{ steps.sites.outputs.sites }}
-      environment: ${{ steps.env.outputs.environment }}
-
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
         with:
           version: 9
 
-      - name: Configure npm for GitHub Packages
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ env.NPMRC_TOKEN }}" >> ~/.npmrc
-          echo "@guidogerb:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Determine sites to deploy
-        id: sites
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.sites }}" != "all" ]; then
-            # Convert comma-separated input to JSON array
-            sites_input="${{ github.event.inputs.sites }}"
-            sites_json=$(echo "$sites_input" | sed 's/,/","/g' | sed 's/^/["/' | sed 's/$/"]/')
-          else
-            sites_json='["garygerber.com","picklecheeze.com","this-is-my-story.org","stream4cloud.com"]'
-          fi
-          echo "sites=$sites_json" >> $GITHUB_OUTPUT
-          echo "Deploying sites: $sites_json"
-
-      - name: Determine environment
-        id: env
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.environment }}" != "auto" ]; then
-            environment="${{ github.event.inputs.environment }}"
-          elif [ "${{ github.ref_name }}" = "prod" ]; then
-            environment="production"
-          else
-            environment="staging"
-          fi
-          echo "environment=$environment" >> $GITHUB_OUTPUT
-          echo "Environment: $environment"
-
-      - name: Build components
-        run: pnpm -r build
-
-      - name: Build guidogerbpublishing.com
-        if: contains(fromJson(steps.sites.outputs.sites), 'guidogerbpublishing.com')
-        run: |
-          if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
-            pnpm --filter websites/guidogerbpublishing.com build:prod-bundle
-          else
-            pnpm --filter websites/guidgerbpublishing.com build:staging
-          fi
-
-      - name: Build garygerber.com
-        if: contains(fromJson(steps.sites.outputs.sites), 'garygerber.com')
-        run: |
-          if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
-            pnpm --filter websites/garygerber.com build:prod-bundle
-          else
-            pnpm --filter websites/garygerber.com build:staging
-          fi
-
-      - name: Build picklecheeze.com
-        if: contains(fromJson(steps.sites.outputs.sites), 'picklecheeze.com')
-        run: |
-          if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
-            pnpm --filter websites/picklecheeze.com build:prod-bundle
-          else
-            pnpm --filter websites/picklecheeze.com build:staging
-          fi
-
-      - name: Build this-is-my-story.org
-        if: contains(fromJson(steps.sites.outputs.sites), 'this-is-my-story.org')
-        run: |
-          if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
-            pnpm --filter websites/this-is-my-story.org build:prod-bundle
-          else
-            pnpm --filter websites/this-is-my-story.org build:staging
-          fi
-
-      - name: Build stream4cloud.com
-        if: contains(fromJson(steps.sites.outputs.sites), 'stream4cloud.com')
-        run: |
-          if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
-            pnpm --filter websites/stream4cloud.com build:prod-bundle
-          else
-            pnpm --filter websites/stream4cloud.com build:staging
-          fi
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          name: website-builds-${{ github.ref_name }}-${{ github.run_id }}
-          path: websites/*/dist
-          retention-days: 7
+          node-version: '20'
+          cache: 'pnpm'
 
-  # Deploy each site
-  deploy:
-    name: Deploy ${{ matrix.site }}
-    runs-on: ubuntu-latest
-    needs: build
-    if: success()
-    strategy:
-      matrix:
-        site: ${{ fromJson(needs.build.outputs.sites) }}
-      fail-fast: false
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Build selected site
+        run: pnpm --filter websites/${{ inputs.site }} build
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: website-builds-${{ github.ref_name }}-${{ github.run_id }}
-          path: websites/
-
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: github-actions-${{ matrix.site }}-${{ github.ref_name }}
+          aws-region: ${{ inputs.aws_region }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
 
-      - name: Get CloudFormation stack outputs
-        id: cfn-outputs
+      - name: Upload to S3
         run: |
-          site_name=$(echo "${{ matrix.site }}" | sed 's/\./-/g')
-          stack_name="s4c-edge-${site_name}"
+          aws s3 sync websites/${{ inputs.site }}/dist s3://${{ inputs.bucket }}/ --delete
 
-          # Get stack outputs
-          outputs=$(aws cloudformation describe-stacks \
-            --stack-name "$stack_name" \
-            --region ${{ env.AWS_REGION }} \
-            --query 'Stacks[0].Outputs' \
-            --output json 2>/dev/null || echo '[]')
-
-          # Extract bucket name and distribution ID
-          bucket=$(echo "$outputs" | jq -r '.[] | select(.OutputKey=="SiteBucketName") | .OutputValue // empty')
-          distribution=$(echo "$outputs" | jq -r '.[] | select(.OutputKey=="DistributionId") | .OutputValue // empty')
-
-          if [ -z "$bucket" ] || [ -z "$distribution" ]; then
-            echo "Warning: Could not find bucket or distribution for ${{ matrix.site }}"
-            echo "Stack outputs: $outputs"
-          fi
-
-          echo "bucket=$bucket" >> $GITHUB_OUTPUT
-          echo "distribution=$distribution" >> $GITHUB_OUTPUT
-          echo "Site: ${{ matrix.site }}, Bucket: $bucket, Distribution: $distribution"
-
-      - name: Sync to S3
-        if: steps.cfn-outputs.outputs.bucket != ''
+      - name: Invalidate CloudFront
         run: |
-          site_dir="websites/${{ matrix.site }}"
-          aws s3 sync "${site_dir}/dist" "s3://${{ steps.cfn-outputs.outputs.bucket }}" \
-            --delete \
-            --cache-control "public, max-age=300" \
-            --exclude "*.map"
+          aws cloudfront create-invalidation --distribution-id ${{ inputs.distribution_id }} --paths "/*"
 
-      - name: Create CloudFront invalidation
-        if: steps.cfn-outputs.outputs.distribution != ''
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id "${{ steps.cfn-outputs.outputs.distribution }}" \
-            --paths "/*"

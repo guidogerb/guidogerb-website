@@ -1,12 +1,20 @@
-# React + Vite
+# GuidogerbPublishing.com — Web App (Vite + React)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Quickstart
+- Copy env template: `.env.example` → `.env` and fill VITE_* values.
+- Dev: `pnpm --filter websites/guidogerbpublishing.com dev`
+- Build: `pnpm --filter websites/guidogerbpublishing.com build`
 
-Currently, two official plugins are available:
+Required env (VITE_*)
+- VITE_ENABLE_SW=false|true (gate service worker)
+- VITE_COGNITO_CLIENT_ID, VITE_COGNITO_AUTHORITY or VITE_COGNITO_METADATA_URL
+- VITE_REDIRECT_URI, VITE_RESPONSE_TYPE=code, VITE_COGNITO_SCOPE, VITE_COGNITO_POST_LOGOUT_REDIRECT_URI
+- VITE_LOGIN_CALLBACK_PATH=/auth/callback
+- VITE_API_BASE_URL
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+PWA/offline
+- Set VITE_ENABLE_SW=true to register /sw.js; offline.html is served as fallback for navigations when offline.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Notes
+- Uses shared packages under @guidogerb/* (workspace linked).
+- See repo PUBLISHING.md for deploy steps (S3 upload + CloudFront invalidation).

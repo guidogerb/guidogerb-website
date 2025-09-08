@@ -44,6 +44,9 @@ jobs:
         run: npm run lint
         continue-on-error: true
 
+      - name: Format check
+        run: pnpm format:check
+
       - name: Build components
         run: pnpm -r build
 
