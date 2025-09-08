@@ -21,8 +21,8 @@
   "scripts": {
     "clean": "rimraf --glob \"node_modules\" \"@guidogerb/**/node_modules\" \"websites/**/node_modules\" \"@guidogerb/**/dist\" \"websites/**/dist\" \"pnpm-lock.yaml\" \"package-lock.json\" \"yarn.lock\" \"npm-shrinkwrap.json\" \"**/pnpm-lock.yaml\" \"**/package-lock.json\" \"**/yarn.lock\" \"**/npm-shrinkwrap.json\"",
     "cleani": "pnpm run clean && pnpm install",
-    "cleanr": "pnpm run cleani && pnpm -r build",
     "build": "pnpm -r build",
+    "cleanr": "pnpm run cleani && pnpm run build",
     "dev": "pnpm -r --parallel dev",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",

@@ -22,7 +22,7 @@ self.addEventListener('fetch', (event) => {
       try {
         const net = await fetch(req);
         return net;
-      } catch (e) {
+      } catch { // removed unused error param
         const cache = await caches.open(CACHE_NAME);
         const offline = await cache.match('/offline.html');
         return offline || new Response('Offline', { status: 503 });
@@ -30,4 +30,3 @@ self.addEventListener('fetch', (event) => {
     })());
   }
 });
-
