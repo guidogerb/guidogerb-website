@@ -19,7 +19,7 @@
     "websites/stream4cloud.com"
   ],
   "scripts": {
-    "clean": "rimraf --glob \"@guidogerb/**/dist\"  \"@guidogerb/**/node_modules\" \"websites/**/dist\" \"websites/**/node_modules\" \"pnpm-lock.yaml\"",
+    "clean": "rimraf --glob \"@guidogerb/**/dist\" \"websites/**/dist\"",
     "cleani": "pnpm run clean && pnpm install",
     "cleanr": "pnpm run cleani && pnpm -r build",
     "build": "pnpm -r build",
@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "@vitejs/plugin-react": "^5.0.0"
   }
 }
