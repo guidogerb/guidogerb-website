@@ -1,8 +1,14 @@
-export default function App() {
+import './App.css'
+
+function App() {
+
   return (
-    <div style={{ padding: 16 }}>
-      <h1>PickleCheeze</h1>
-      <p>Site scaffold is up. Replace this with real routes/components.</p>
-    </div>
+    <>
+      <div className="card">
+          Hello picklecheeze World
+      </div>
+    </>
   )
 }
+
+export default App;

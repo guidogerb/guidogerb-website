@@ -180,7 +180,7 @@ VITE_BASE_PATH=/
 *(Prod redirect must exactly match a Cognito Hosted UI Callback URL; never include client secrets in the SPA.)*
 
 **Localhost Cognito fix (redirect_mismatch)**
-- Ensure dev server port matches `.env.development` (e.g., `VITE_SITE_PORT=4173`).  
+- Ensure dev server port matches `.env.development` (e.g., `VITE_SITE_PORT=443`).  
 - Set `VITE_LOGIN_CALLBACK_PATH=/auth/callback` and `VITE_REDIRECT_URI=http://localhost:4173/auth/callback`.  
 - Add the exact callback/sign‑out URLs in Cognito App Client.
 

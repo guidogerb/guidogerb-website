@@ -1,5 +1,6 @@
-import { defineConfig, loadEnv } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+import mkcert from 'vite-plugin-mkcert';
 
 export default ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -39,7 +40,12 @@ export default ({ mode }) => {
   }
 
   return defineConfig({
-    plugins: [react()],
+    plugins: [react(),
+        mkcert({
+            force: true,
+            hosts: ['local.this-is-my-story.org', '*.local.this-is-my-story.org','127.0.0.3'],
+        }),
+    ],
     base: env.VITE_BASE_PATH || '/',
     server: {
       port: env.VITE_SITE_PORT ? parseInt(env.VITE_SITE_PORT) : 4173,

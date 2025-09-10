@@ -5,7 +5,7 @@ function App() {
   return (
     <>
       <div className="card">
-          <H3>Hello This Is My Story World</H3>
+          Hello garygerber World
       </div>
     </>
   )

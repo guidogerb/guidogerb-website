@@ -1,9 +1,9 @@
-# PickleCheeze.com — Web App (Vite + React)
+# GaryGerber.com — Web App (Vite + React)
 
 Quickstart
 - Copy env template: `.env.example` → `.env` and fill VITE_* values.
-- Dev: `pnpm --filter websites/picklecheeze.com dev`
-- Build: `pnpm --filter websites/picklecheeze.com build`
+- Dev: `pnpm --filter websites/garygerber.com dev`
+- Build: `pnpm --filter websites/garygerber.com build`
 
 Required env (VITE_*)
 - VITE_ENABLE_SW=false|true (gate service worker)

@@ -37,8 +37,8 @@ function loadEnvLikeVite() {
 }
 
 const env = loadEnvLikeVite();
-const sitePort = env.VITE_SITE_PORT || (mode === 'production' ? '' : '4173');
-const siteUrl = env.VITE_SITE_URL || (mode === 'production' ? 'https://ggp-store.com' : 'http://localhost:' + sitePort);
+const sitePort = env.VITE_SITE_PORT || (mode === 'production' ? '' : '443');
+const siteUrl = env.VITE_SITE_URL || (mode === 'production' ? 'https://garygerber.com' : 'https://local.garygerber.com');
 
 // Define your public routes here. Start minimal; expand as you add pages.
 const routes = [

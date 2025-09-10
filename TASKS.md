@@ -31,6 +31,7 @@ Create minimal package stubs for listed shared packages so that builds resolve d
   - Acceptance: `pnpm -r build` succeeds (packages can export placeholders).
 
 ## 3) Websites — Vite App Baseline
+- [ ] Verify that error handling routes exist for each tenent website i.e. If any site should throw a 404 error, the app should have a route for that page.;
 - [ ] Confirm websites/garygerber.com runs locally (vite dev) with placeholder routes using shared packages.
 - [ ] Create similar scaffolds for other sites listed in workspaces (copy garygerber.com as baseline) or remove from workspaces until ready.
   - Acceptance: Each included website can `pnpm --filter <site> dev` and `build` successfully.
