@@ -311,6 +311,9 @@ importers:
       vite:
         specifier: ^7.1.2
         version: 7.1.5
+      vite-plugin-mkcert:
+        specifier: ^1.17.8
+        version: 1.17.8(vite@7.1.5)
 
   websites/stream4cloud.com:
     dependencies:

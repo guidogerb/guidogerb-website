@@ -1,2 +1,2 @@
 // Re-export library entry for consumers that import from the package root
-export * from './src/index.js';
+export * from './src/index.js'

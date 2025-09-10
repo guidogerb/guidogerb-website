@@ -1,6 +1,6 @@
-import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react';
-import mkcert from 'vite-plugin-mkcert';
+import { defineConfig, loadEnv } from 'vite'
+import react from '@vitejs/plugin-react'
+import mkcert from 'vite-plugin-mkcert'
 
 export default ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -8,7 +8,7 @@ export default ({ mode }) => {
   // Defaults for dev/normal builds
   let buildOptions = {
     sourcemap: mode === 'development',
-    minify: mode === 'production' ? 'esbuild' : false
+    minify: mode === 'production' ? 'esbuild' : false,
   }
 
   // Staging (main branch): readable output (no minify) + sourcemaps
@@ -16,7 +16,7 @@ export default ({ mode }) => {
     buildOptions = {
       sourcemap: true,
       minify: false,
-      cssCodeSplit: true
+      cssCodeSplit: true,
     }
   }
 
@@ -33,24 +33,25 @@ export default ({ mode }) => {
           manualChunks: undefined,
           entryFileNames: 'assets/app.[hash].js',
           chunkFileNames: 'assets/app.[hash].js',
-          assetFileNames: 'assets/[name].[hash][extname]'
-        }
-      }
+          assetFileNames: 'assets/[name].[hash][extname]',
+        },
+      },
     }
   }
 
   return defineConfig({
-    plugins: [react(),
-        mkcert({
-            force: true,
-            hosts: ['local.guidogerbpublishing.com', '*.local.guidogerbpublishing.com','127.0.0.1'],
-        }),
+    plugins: [
+      react(),
+      mkcert({
+        force: true,
+        hosts: ['local.guidogerbpublishing.com', '*.local.guidogerbpublishing.com', '127.0.0.1'],
+      }),
     ],
     base: env.VITE_BASE_PATH || '/',
     server: {
       port: env.VITE_SITE_PORT ? parseInt(env.VITE_SITE_PORT) : 4173,
-      strictPort: true
+      strictPort: true,
     },
-    build: buildOptions
+    build: buildOptions,
   })
 }

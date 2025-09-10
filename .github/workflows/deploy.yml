@@ -6,9 +6,16 @@ on:
       site:
         description: 'Site to deploy (folder under websites)'
         required: true
-        default: 'stream4cloud.com'
+        default: 'guidogerbpublishing.com'
         type: choice
-        options: [stream4cloud.com, garygerber.com, guidogerbpublishing.com, picklecheeze.com, this-is-my-story.org]
+        options:
+          [
+            stream4cloud.com,
+            garygerber.com,
+            guidogerbpublishing.com,
+            picklecheeze.com,
+            this-is-my-story.org,
+          ]
       aws_region:
         description: 'AWS region'
         required: true
@@ -16,9 +23,11 @@ on:
       bucket:
         description: 'Target S3 bucket name'
         required: true
+        default: 'ggp-websites'
       distribution_id:
         description: 'CloudFront Distribution ID'
         required: true
+        default: 'E1MM1G0JP81M1R'
 
 jobs:
   deploy:
@@ -55,10 +64,31 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
 
-      - name: Upload to S3
+      - name: Upload to S3 (tenant prefix)
+        env:
+          SITE: ${{ inputs.site }}
+          BUCKET: ${{ inputs.bucket }}
         run: |
-          aws s3 sync websites/${{ inputs.site }}/dist s3://${{ inputs.bucket }}/ --delete
+          set -euo pipefail
+          SRC="websites/${SITE}/dist"
+          DEST="s3://${BUCKET}/${SITE}/"
+          aws s3 sync "$SRC" "$DEST" --delete
+
+      - name: Compute invalidation path
+        id: inv
+        env:
+          SITE: ${{ inputs.site }}
+          PREFIX_ONLY: ${{ inputs.invalidate_prefix_only }}
+        run: |
+          if [ "${PREFIX_ONLY}" = "true" ]; then
+            echo "paths=/${SITE}/*" >> "$GITHUB_OUTPUT"
+          else
+            echo "paths=/*" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Invalidate CloudFront
+        env:
+          DIST_ID: ${{ inputs.distribution_id }}
+          PATHS: ${{ steps.inv.outputs.paths }}
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ inputs.distribution_id }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id "${DIST_ID}" --paths "${PATHS}"

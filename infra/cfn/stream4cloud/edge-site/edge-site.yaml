@@ -9,21 +9,21 @@ Parameters:
     Description: ACM certificate ARN in us-east-1 for CloudFront
   HostedZoneId:
     Type: String
-    Default: ""
+    Default: ''
     Description: Optional Route53 HostedZoneId for SiteDomainName. Leave blank to skip DNS record creation.
   BucketName:
     Type: String
-    Default: ""
+    Default: ''
     Description: Optional custom S3 bucket name (auto-generated if blank)
   LoggingBucketName:
     Type: String
-    Default: ""
+    Default: ''
     Description: Optional S3 bucket name for CloudFront logs (if blank, logging disabled)
 
 Conditions:
-  HasHostedZone: !Not [ !Equals [ !Ref HostedZoneId, "" ] ]
-  HasCustomBucketName: !Not [ !Equals [ !Ref BucketName, "" ] ]
-  HasLogging: !Not [ !Equals [ !Ref LoggingBucketName, "" ] ]
+  HasHostedZone: !Not [!Equals [!Ref HostedZoneId, '']]
+  HasCustomBucketName: !Not [!Equals [!Ref BucketName, '']]
+  HasLogging: !Not [!Equals [!Ref LoggingBucketName, '']]
 
 Resources:
   SiteBucket:
@@ -56,18 +56,18 @@ Resources:
               - s3:GetObject
               - s3:ListBucket
             Resource:
-              - !Sub "${SiteBucket.Arn}"
-              - !Sub "${SiteBucket.Arn}/*"
+              - !Sub '${SiteBucket.Arn}'
+              - !Sub '${SiteBucket.Arn}/*'
             Condition:
               StringEquals:
-                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
     DependsOn: Distribution
 
   OriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Name: !Sub "oac-${SiteDomainName}"
+        Name: !Sub 'oac-${SiteDomainName}'
         Description: Access control for S3 origin
         OriginAccessControlOriginType: s3
         SigningBehavior: always
@@ -79,7 +79,7 @@ Resources:
       DistributionConfig:
         Enabled: true
         IPV6Enabled: true
-        Comment: !Sub "Stream4Cloud edge for ${SiteDomainName}"
+        Comment: !Sub 'Stream4Cloud edge for ${SiteDomainName}'
         DefaultRootObject: index.html
         Aliases:
           - !Ref SiteDomainName
@@ -91,16 +91,15 @@ Resources:
         DefaultCacheBehavior:
           TargetOriginId: s3-origin
           ViewerProtocolPolicy: redirect-to-https
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6   # CachingOptimized
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
           Compress: true
         PriceClass: PriceClass_100
-        Logging:
-          !If
-            - HasLogging
-            - Bucket: !Sub "${LoggingBucketName}.s3.amazonaws.com"
-              IncludeCookies: false
-              Prefix: !Sub "cloudfront/${SiteDomainName}/"
-            - !Ref AWS::NoValue
+        Logging: !If
+          - HasLogging
+          - Bucket: !Sub '${LoggingBucketName}.s3.amazonaws.com'
+            IncludeCookies: false
+            Prefix: !Sub 'cloudfront/${SiteDomainName}/'
+          - !Ref AWS::NoValue
         ViewerCertificate:
           AcmCertificateArn: !Ref CertificateArn
           SslSupportMethod: sni-only
@@ -119,7 +118,7 @@ Resources:
       Type: A
       AliasTarget:
         DNSName: !GetAtt Distribution.DomainName
-        HostedZoneId: Z2FDTNDATAQYW2   # CloudFront hosted zone ID (global)
+        HostedZoneId: Z2FDTNDATAQYW2 # CloudFront hosted zone ID (global)
 
 Outputs:
   SiteBucketName:

@@ -2,7 +2,7 @@ name: Build and Test (CI)
 
 on:
   pull_request:
-    branches: [ "main", "prod" ]
+    branches: ['main', 'prod']
   workflow_dispatch:
 
 permissions:
@@ -26,6 +26,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Configure npm auth for GitHub Packages
+        run: echo "//npm.pkg.github.com/:_authToken=${NPMRC_TOKEN}" >> ~/.npmrc
+        env:
+          NPMRC_TOKEN: ${{ env.NPMRC_TOKEN }}
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -43,6 +48,14 @@ jobs:
 
       - name: Build components
         run: pnpm -r build
+
+      - name: Test branch-specific build (guidogerbpublishing.com)
+        run: |
+          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
+            pnpm --filter websites/guidogerbpublishing.com build:prod-bundle
+          else
+            pnpm --filter websites/guidogerbpublishing.com build:staging
+          fi
 
       - name: Test branch-specific build (garygerber.com)
         run: |

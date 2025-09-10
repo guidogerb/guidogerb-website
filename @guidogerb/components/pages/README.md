@@ -3,6 +3,7 @@
 Page‑level shells shared by all four sites.
 
 ## Structure
+
 ```
 pages/
   public/       # open routes

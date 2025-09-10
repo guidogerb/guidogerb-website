@@ -1,68 +1,66 @@
-import { useEffect, useRef } from 'react';
-import { useAuth as useOidcAuth } from 'react-oidc-context';
+import { useEffect, useRef } from 'react'
+import { useAuth as useOidcAuth } from 'react-oidc-context'
 
 // Auth wrapper component: guards its children behind OIDC authentication
 // Usage: <Auth autoSignIn><Protected /></Auth>
 function Auth({ children, autoSignIn = false, logoutUri }) {
-    const auth = useOidcAuth();
-    const redirectStartedRef = useRef(false);
+  const auth = useOidcAuth()
+  const redirectStartedRef = useRef(false)
 
-    // Avoid calling signinRedirect in render and guard for StrictMode double-invocation
-    useEffect(() => {
-        if (autoSignIn && !auth?.isAuthenticated && !auth?.isLoading && !redirectStartedRef.current) {
-            redirectStartedRef.current = true;
-            auth?.signinRedirect();
-        }
-    }, [autoSignIn, auth?.isAuthenticated, auth?.isLoading]); // removed "auth" object from deps
-
-    const signOutRedirect = () => {
-        const url = logoutUri;
-        if (url) {
-            window.location.href = url;
-        } else {
-            // fallback: just remove user if logout URL isn't configured
-            auth?.removeUser();
-        }
-    };
-
-    if (auth?.isLoading) {
-        return <div>Loading...</div>;
+  // Avoid calling signinRedirect in render and guard for StrictMode double-invocation
+  useEffect(() => {
+    if (autoSignIn && !auth?.isAuthenticated && !auth?.isLoading && !redirectStartedRef.current) {
+      redirectStartedRef.current = true
+      auth?.signinRedirect()
     }
+  }, [autoSignIn, auth?.isAuthenticated, auth?.isLoading]) // removed "auth" object from deps
 
-    if (auth?.error) {
-        return (
-            <div>
-                Encountering error... {auth?.error?.message}
-                <div style={{ marginTop: 8, color: '#a00' }}>
-                    Hint: ensure OIDC is configured.
-                </div>
-            </div>
-        );
+  const signOutRedirect = () => {
+    const url = logoutUri
+    if (url) {
+      window.location.href = url
+    } else {
+      // fallback: just remove user if logout URL isn't configured
+      auth?.removeUser()
     }
+  }
 
-    if (auth?.isAuthenticated) {
-        return (
-            <div>
-                {children ?? null}
-                <div style={{ marginTop: 12 }}>
-                    <button onClick={signOutRedirect}>Sign out</button>
-                </div>
-            </div>
-        );
-    }
+  if (auth?.isLoading) {
+    return <div>Loading...</div>
+  }
 
-    if (autoSignIn) {
-        // Redirect will be triggered by effect
-        return null;
-    }
-
-    // Fallback UI when not authenticated
+  if (auth?.error) {
     return (
-        <div>
-            <button onClick={() => auth?.signinRedirect()}>Sign in</button>
+      <div>
+        Encountering error... {auth?.error?.message}
+        <div style={{ marginTop: 8, color: '#a00' }}>Hint: ensure OIDC is configured.</div>
+      </div>
+    )
+  }
+
+  if (auth?.isAuthenticated) {
+    return (
+      <div>
+        {children ?? null}
+        <div style={{ marginTop: 12 }}>
+          <button onClick={signOutRedirect}>Sign out</button>
         </div>
-    );
+      </div>
+    )
+  }
+
+  if (autoSignIn) {
+    // Redirect will be triggered by effect
+    return null
+  }
+
+  // Fallback UI when not authenticated
+  return (
+    <div>
+      <button onClick={() => auth?.signinRedirect()}>Sign in</button>
+    </div>
+  )
 }
 
-export { useAuth } from 'react-oidc-context';
-export default Auth;
+export { useAuth } from 'react-oidc-context'
+export default Auth

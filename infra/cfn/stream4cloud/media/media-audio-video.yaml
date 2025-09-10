@@ -35,27 +35,27 @@ Resources:
                 Action:
                   - s3:ListBucket
                 Resource:
-                  - !Sub "arn:aws:s3:::${InputBucketName}"
-                  - !Sub "arn:aws:s3:::${OutputBucketName}"
+                  - !Sub 'arn:aws:s3:::${InputBucketName}'
+                  - !Sub 'arn:aws:s3:::${OutputBucketName}'
               - Effect: Allow
                 Action:
                   - s3:GetObject
                   - s3:PutObject
                 Resource:
-                  - !Sub "arn:aws:s3:::${InputBucketName}/*"
-                  - !Sub "arn:aws:s3:::${OutputBucketName}/*"
+                  - !Sub 'arn:aws:s3:::${InputBucketName}/*'
+                  - !Sub 'arn:aws:s3:::${OutputBucketName}/*'
 
   AudioJobTemplate:
     Type: AWS::MediaConvert::JobTemplate
     Properties:
-      Name: !Sub "s4c-audio-aac-hls-${AWS::Region}"
+      Name: !Sub 's4c-audio-aac-hls-${AWS::Region}'
       SettingsJson:
         OutputGroups:
           - Name: HLS
             OutputGroupSettings:
               Type: HLS_GROUP_SETTINGS
               HlsGroupSettings:
-                Destination: !Sub "s3://${OutputBucketName}/audio/"
+                Destination: !Sub 's3://${OutputBucketName}/audio/'
                 SegmentLength: 4
                 MinSegmentLength: 0
                 ManifestDurationFormat: FLOATING_POINT
@@ -83,14 +83,14 @@ Resources:
   VideoJobTemplate:
     Type: AWS::MediaConvert::JobTemplate
     Properties:
-      Name: !Sub "s4c-video-h264-hls-${AWS::Region}"
+      Name: !Sub 's4c-video-h264-hls-${AWS::Region}'
       SettingsJson:
         OutputGroups:
           - Name: HLS
             OutputGroupSettings:
               Type: HLS_GROUP_SETTINGS
               HlsGroupSettings:
-                Destination: !Sub "s3://${OutputBucketName}/video/"
+                Destination: !Sub 's3://${OutputBucketName}/video/'
                 SegmentLength: 4
                 MinSegmentLength: 0
                 ManifestDurationFormat: FLOATING_POINT
@@ -151,7 +151,7 @@ Resources:
                 Action:
                   - mediaconvert:CreateJob
                   - mediaconvert:DescribeEndpoints
-                Resource: "*"
+                Resource: '*'
               - Effect: Allow
                 Action:
                   - iam:PassRole
@@ -162,10 +162,10 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                 Resource:
-                  - !Sub "arn:aws:s3:::${InputBucketName}"
-                  - !Sub "arn:aws:s3:::${OutputBucketName}"
-                  - !Sub "arn:aws:s3:::${InputBucketName}/*"
-                  - !Sub "arn:aws:s3:::${OutputBucketName}/*"
+                  - !Sub 'arn:aws:s3:::${InputBucketName}'
+                  - !Sub 'arn:aws:s3:::${OutputBucketName}'
+                  - !Sub 'arn:aws:s3:::${InputBucketName}/*'
+                  - !Sub 'arn:aws:s3:::${OutputBucketName}/*'
 
   SubmitAudioJob:
     Type: AWS::Lambda::Function
@@ -223,7 +223,7 @@ Resources:
                 Action:
                   - mediaconvert:CreateJob
                   - mediaconvert:DescribeEndpoints
-                Resource: "*"
+                Resource: '*'
               - Effect: Allow
                 Action:
                   - iam:PassRole
@@ -234,10 +234,10 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                 Resource:
-                  - !Sub "arn:aws:s3:::${InputBucketName}"
-                  - !Sub "arn:aws:s3:::${OutputBucketName}"
-                  - !Sub "arn:aws:s3:::${InputBucketName}/*"
-                  - !Sub "arn:aws:s3:::${OutputBucketName}/*"
+                  - !Sub 'arn:aws:s3:::${InputBucketName}'
+                  - !Sub 'arn:aws:s3:::${OutputBucketName}'
+                  - !Sub 'arn:aws:s3:::${InputBucketName}/*'
+                  - !Sub 'arn:aws:s3:::${OutputBucketName}/*'
 
   SubmitVideoJob:
     Type: AWS::Lambda::Function
@@ -300,33 +300,32 @@ Resources:
     Properties:
       RoleArn: !GetAtt MediaStateMachineRole.Arn
       StateMachineName: s4c-media-pipeline
-      DefinitionString:
-        !Sub |
-          {
-            "Comment": "Media pipeline (audio/video)",
-            "StartAt": "Decide",
-            "States": {
-              "Decide": {
-                "Type": "Choice",
-                "Choices": [
-                  { "Variable": "$.mediaType", "StringEquals": "audio", "Next": "SubmitAudio" },
-                  { "Variable": "$.mediaType", "StringEquals": "video", "Next": "SubmitVideo" }
-                ],
-                "Default": "FailState"
-              },
-              "SubmitAudio": {
-                "Type": "Task",
-                "Resource": "${SubmitAudioJob.Arn}",
-                "End": true
-              },
-              "SubmitVideo": {
-                "Type": "Task",
-                "Resource": "${SubmitVideoJob.Arn}",
-                "End": true
-              },
-              "FailState": { "Type": "Fail", "Error": "InvalidMediaType", "Cause": "mediaType must be 'audio' or 'video'" }
-            }
+      DefinitionString: !Sub |
+        {
+          "Comment": "Media pipeline (audio/video)",
+          "StartAt": "Decide",
+          "States": {
+            "Decide": {
+              "Type": "Choice",
+              "Choices": [
+                { "Variable": "$.mediaType", "StringEquals": "audio", "Next": "SubmitAudio" },
+                { "Variable": "$.mediaType", "StringEquals": "video", "Next": "SubmitVideo" }
+              ],
+              "Default": "FailState"
+            },
+            "SubmitAudio": {
+              "Type": "Task",
+              "Resource": "${SubmitAudioJob.Arn}",
+              "End": true
+            },
+            "SubmitVideo": {
+              "Type": "Task",
+              "Resource": "${SubmitVideoJob.Arn}",
+              "End": true
+            },
+            "FailState": { "Type": "Fail", "Error": "InvalidMediaType", "Cause": "mediaType must be 'audio' or 'video'" }
           }
+        }
 
 Outputs:
   AudioJobTemplateName:

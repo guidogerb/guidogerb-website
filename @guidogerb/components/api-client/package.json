@@ -18,6 +18,5 @@
   "peerDependencies": {
     "react": ">=19"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

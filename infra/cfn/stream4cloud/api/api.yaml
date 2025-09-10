@@ -12,13 +12,13 @@ Parameters:
     Description: e.g., https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXX
   CognitoAudienceClientIds:
     Type: String
-    Description: JSON array string of allowed audience client IDs (e.g., ["abc123"]) 
+    Description: JSON array string of allowed audience client IDs (e.g., ["abc123"])
 
 Resources:
   HelloLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-hello"
+      LogGroupName: !Sub '/aws/lambda/${AWS::StackName}-hello'
       RetentionInDays: 14
 
   HelloFunctionRole:
@@ -37,7 +37,7 @@ Resources:
   HelloFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${AWS::StackName}-hello"
+      FunctionName: !Sub '${AWS::StackName}-hello'
       Role: !GetAtt HelloFunctionRole.Arn
       Runtime: python3.12
       Handler: index.handler
@@ -58,24 +58,24 @@ Resources:
       Name: !Ref ApiName
       ProtocolType: HTTP
       CorsConfiguration:
-        AllowOrigins: ["*"]
-        AllowMethods: ["GET","POST","OPTIONS"]
-        AllowHeaders: ["authorization","content-type"]
+        AllowOrigins: ['*']
+        AllowMethods: ['GET', 'POST', 'OPTIONS']
+        AllowHeaders: ['authorization', 'content-type']
 
   LambdaIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref HttpApi
       IntegrationType: AWS_PROXY
-      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloFunction.Arn}/invocations"
-      PayloadFormatVersion: "2.0"
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloFunction.Arn}/invocations'
+      PayloadFormatVersion: '2.0'
 
   HealthRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref HttpApi
-      RouteKey: "GET /health"
-      Target: !Sub "integrations/${LambdaIntegration}"
+      RouteKey: 'GET /health'
+      Target: !Sub 'integrations/${LambdaIntegration}'
 
   InvokePermission:
     Type: AWS::Lambda::Permission
@@ -83,7 +83,7 @@ Resources:
       FunctionName: !Ref HelloFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*/*/health"
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*/*/health'
 
   JwtAuthorizer:
     Type: AWS::ApiGatewayV2::Authorizer
@@ -91,7 +91,7 @@ Resources:
       ApiId: !Ref HttpApi
       AuthorizerType: JWT
       IdentitySource:
-        - "$request.header.Authorization"
+        - '$request.header.Authorization'
       Name: cognito-jwt
       JwtConfiguration:
         Audience: !Ref CognitoAudienceClientIds
@@ -106,4 +106,4 @@ Resources:
 
 Outputs:
   ApiEndpoint:
-    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'

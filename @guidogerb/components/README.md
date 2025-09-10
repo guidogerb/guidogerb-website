@@ -3,6 +3,7 @@
 Cross‑site React components organized by feature area.
 
 ## Layout
+
 ```
 components/
   menu/
@@ -20,6 +21,7 @@ components/
 ```
 
 Core rules:
+
 - Compose visuals from `@guidogerb/ui`.
 - No site‑specific imports.
 - All exports SSR‑safe and accessible.

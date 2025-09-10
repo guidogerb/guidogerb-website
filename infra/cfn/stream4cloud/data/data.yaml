@@ -6,11 +6,11 @@ Parameters:
     Default: Stream4Cloud
   EnablePITR:
     Type: String
-    AllowedValues: ["true","false"]
-    Default: "true"
+    AllowedValues: ['true', 'false']
+    Default: 'true'
 
 Conditions:
-  PITR: !Equals [!Ref EnablePITR, "true"]
+  PITR: !Equals [!Ref EnablePITR, 'true']
 
 Resources:
   Table:

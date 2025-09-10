@@ -5,6 +5,7 @@ This document consolidates all install and deployment instructions for **Stream4
 ---
 
 ## Architecture summary (SPEC-1)
+
 - Core stack: Vite, React, TypeScript; AWS with API Gateway, Lambda, DynamoDB, CloudFront, S3, Cognito; Stripe for payments.
 - Multi-tenant + custom domains via CloudFront; TLS with ACM; DNS records with Route 53.
 - PWA with a service worker: offline precache of shell, Background Sync for writes, offline.html fallback.
@@ -22,12 +23,14 @@ This document consolidates all install and deployment instructions for **Stream4
 
 ## 2) Monorepo Setup
 
-1) Install deps
+1. Install deps
+
 ```bash
 pnpm install
 ```
 
-2) Recommended workspace scripts (root `package.json`)
+2. Recommended workspace scripts (root `package.json`)
+
 ```json
 {
   "scripts": {
@@ -39,8 +42,9 @@ pnpm install
 }
 ```
 
-3) Environment variables per site
-Create `websites/<site>/.env`:
+3. Environment variables per site
+   Create `websites/<site>/.env`:
+
 ```ini
 VITE_COGNITO_CLIENT_ID=...
 VITE_COGNITO_AUTHORITY=https://cognito-idp.<region>.amazonaws.com/<userPoolId>
@@ -58,6 +62,7 @@ VITE_API_BASE_URL=https://<api-id>.execute-api.<region>.amazonaws.com
 All templates are under `infra/cfn/stream4cloud/`. Parameters live in `infra/cfn/stream4cloud/params/`.
 
 ### 3.1 Fill parameter files
+
 - `edge-<domain>.json` → set `CertificateArn` (ACM) and `HostedZoneId` for Route 53 (or skip DNS record creation).
 - `auth.json` → choose unique `HostedUIDomainPrefix`; set Google IdP if desired.
 - `api.json` → placeholders for now (auto-filled via script).
@@ -65,7 +70,9 @@ All templates are under `infra/cfn/stream4cloud/`. Parameters live in `infra/cfn
 - `opensearch.json` → Admin principal ARN.
 
 ### 3.2 Deploy sequence (PowerShell)
+
 From `infra/cfn/stream4cloud/`:
+
 ```powershell
 .\deploy.ps1 -Action DeployEdgeAll -Region us-east-1
 .\deploy.ps1 -Action DeployAuth -Region us-east-1
@@ -77,6 +84,7 @@ From `infra/cfn/stream4cloud/`:
 ```
 
 Or with Make:
+
 ```bash
 make deploy-edge-all REGION=us-east-1
 make deploy-auth REGION=us-east-1
@@ -87,12 +95,14 @@ make deploy-search REGION=us-east-1
 ```
 
 ### 3.3 Verify stacks
+
 - CloudFront distributions = Enabled/Deployed; alternate domain names configured for multi-tenant custom domains.
 - Route 53 DNS records created (if HostedZoneId provided) and ACM certs issued.
 - Cognito Hosted UI domain reachable.
 - API `GET /health` returns `{"ok": true}`.
 
 ### 3.4 Tear-down (reverse order)
+
 ```powershell
 .\deploy.ps1 -Action DeleteSearch -Region us-east-1
 .\deploy.ps1 -Action DeleteMedia -Region us-east-1
@@ -107,21 +117,25 @@ make deploy-search REGION=us-east-1
 ## 4) Web Build & Publish
 
 ### 4.1 Build a site
+
 ```bash
 pnpm --filter websites/stream4cloud.com build
 ```
 
 ### 4.2 Upload to S3 (static hosting bucket from `edge-site.yaml`)
+
 ```bash
 aws s3 sync websites/stream4cloud.com/dist s3://<SiteBucketName>/ --delete
 ```
 
 ### 4.3 Invalidate CloudFront
+
 ```bash
 aws cloudfront create-invalidation --distribution-id <DistributionId> --paths "/*"
 ```
 
 ### 4.4 Repeat for each site
+
 - `garygerber.com`
 - `guidogerbpublishing.com`
 - `picklecheeze.com`
@@ -136,6 +150,7 @@ aws cloudfront create-invalidation --distribution-id <DistributionId> --paths "/
 Use the shared package `@guidogerb/components-auth` (Cognito Hosted UI + PKCE) to initiate login and retrieve access tokens.
 
 Minimal flow:
+
 ```ts
 import { loginWithHostedUI, handleRedirect, getAccessToken } from '@guidogerb/components-auth'
 handleRedirect()
@@ -156,11 +171,13 @@ const token = await getAccessToken()
 ## 7) Media Ingest & Transcode (Audio + Video)
 
 The `media-audio-video.yaml` stack provisions:
+
 - MediaConvert JobTemplates (audio AAC/HLS, video H.264/HLS)
 - Two minimal submitter Lambdas
 - Step Functions State Machine (`s4c-media-pipeline`)
 
 Invoke example
+
 ```json
 {
   "mediaType": "audio",
@@ -197,7 +214,8 @@ Downloads must use pre-signed URLs from S3 and a permission-hash token with TTL 
 
 ---
 
-## 11) Appendix: Required build-time env (VITE_*)
+## 11) Appendix: Required build-time env (VITE\_\*)
+
 ```
 VITE_COGNITO_CLIENT_ID=...
 VITE_COGNITO_AUTHORITY=...

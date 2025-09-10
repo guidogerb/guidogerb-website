@@ -7,6 +7,7 @@ Here’s a reduced version of your **SPEC-1 Creative Assets Marketplace** docume
 > Consolidated spec reflecting confirmed recommendations (multi-tenant + custom domains at launch; global sales enablement).
 
 ## 1) Background & Objectives
+
 Build a scalable, offline-capable marketplace for digital/physical creative products (music, albums, books/e-books, videos, podcasts) plus subscriptions/tokens.
 Frontend: Vite + React (PWA, offline public routes) on S3/CloudFront.
 Backend: Serverless (API Gateway + Python Lambdas), DynamoDB single-table. Stripe powers payments/subscriptions; crypto is Phase 2.
@@ -15,52 +16,52 @@ Backend: Serverless (API Gateway + Python Lambdas), DynamoDB single-table. Strip
 
 ### Must
 
-* Multi-tenant storefronts on shared + BYO domains at launch; auto-TLS; per-tenant/region price lists.
-* Global sales: multi-currency, region-aware tax (US, EU, CA), inclusive/exclusive display, compliant invoices.
-* Regional POS behavior: local methods, address/ID rules, rounding, localized checkout.
-* Vite + React (TS strict), monorepo packages, ESLint/Prettier.
-* Offline PWA: app shell precache, cached assets, fallback offline pages, versioning.
-* Hosting: S3 + CloudFront (SPA routing, security headers, WAF).
-* AuthN/AuthZ: Cognito Hosted UI + JWT (Google/Apple/Facebook/MS); role/claim-based.
-* APIs: API GW → Python Lambdas; validation, throttling, error model.
-* Secure downloads: presigned S3 URLs (short TTL), rate limits, logging.
-* Catalog: artists/authors, works, products; search + autocomplete; SEO.
-* Commerce: cart (digital/physical), discounts, tax/shipping, Stripe checkout, refunds/disputes.
-* Post-purchase: My Products, EULA, invoices.
-* Admin: users/roles, stores, catalog, pricing, orders/refunds, payouts, reporting.
-* Tokens/subscriptions: packs + subs with usage metering, alerts.
-* Data: DynamoDB Global Tables, streams for audit/events.
-* Observability: logs/metrics/traces, dashboards/alerts.
-* Security: PCI SAQ-A, GDPR/CCPA, encryption, IAM least privilege, secrets in SSM.
-* Quality: WCAG 2.1 AA, i18n/l10n, perf budgets.
-* Reliability: SLOs, RPO/RTO, DR runbooks.
-* Abuse prevention: rate limits, link-abuse detection, captchas.
+- Multi-tenant storefronts on shared + BYO domains at launch; auto-TLS; per-tenant/region price lists.
+- Global sales: multi-currency, region-aware tax (US, EU, CA), inclusive/exclusive display, compliant invoices.
+- Regional POS behavior: local methods, address/ID rules, rounding, localized checkout.
+- Vite + React (TS strict), monorepo packages, ESLint/Prettier.
+- Offline PWA: app shell precache, cached assets, fallback offline pages, versioning.
+- Hosting: S3 + CloudFront (SPA routing, security headers, WAF).
+- AuthN/AuthZ: Cognito Hosted UI + JWT (Google/Apple/Facebook/MS); role/claim-based.
+- APIs: API GW → Python Lambdas; validation, throttling, error model.
+- Secure downloads: presigned S3 URLs (short TTL), rate limits, logging.
+- Catalog: artists/authors, works, products; search + autocomplete; SEO.
+- Commerce: cart (digital/physical), discounts, tax/shipping, Stripe checkout, refunds/disputes.
+- Post-purchase: My Products, EULA, invoices.
+- Admin: users/roles, stores, catalog, pricing, orders/refunds, payouts, reporting.
+- Tokens/subscriptions: packs + subs with usage metering, alerts.
+- Data: DynamoDB Global Tables, streams for audit/events.
+- Observability: logs/metrics/traces, dashboards/alerts.
+- Security: PCI SAQ-A, GDPR/CCPA, encryption, IAM least privilege, secrets in SSM.
+- Quality: WCAG 2.1 AA, i18n/l10n, perf budgets.
+- Reliability: SLOs, RPO/RTO, DR runbooks.
+- Abuse prevention: rate limits, link-abuse detection, captchas.
 
 ### Should
 
-* PWA installability, Background Sync, optional push.
-* Edge logic (geo prices, redirects, A/B).
-* Managed search (OpenSearch/Algolia).
-* Bulk import/export APIs.
-* Physical fulfilment (3PL).
-* Analytics/BI (S3 + Athena + QuickSight).
-* Media processing (renditions, transcode).
-* DRM/watermarking for videos/e-books.
-* Stripe Connect payouts.
-* Custom domain automation, webhooks.
+- PWA installability, Background Sync, optional push.
+- Edge logic (geo prices, redirects, A/B).
+- Managed search (OpenSearch/Algolia).
+- Bulk import/export APIs.
+- Physical fulfilment (3PL).
+- Analytics/BI (S3 + Athena + QuickSight).
+- Media processing (renditions, transcode).
+- DRM/watermarking for videos/e-books.
+- Stripe Connect payouts.
+- Custom domain automation, webhooks.
 
 ### Could
 
-* Headless CMS for marketing.
-* Community features (reviews, comments).
-* Gift cards/referrals.
-* Native wrappers.
-* WYSIWYG editor for profiles.
+- Headless CMS for marketing.
+- Community features (reviews, comments).
+- Gift cards/referrals.
+- Native wrappers.
+- WYSIWYG editor for profiles.
 
 ### Won’t (MVP)
 
-* On-prem/self-hosted.
-* Custom DRM beyond watermarking unless required.
+- On-prem/self-hosted.
+- Custom DRM beyond watermarking unless required.
 
 ## 3) Architecture Overview
 
@@ -163,16 +164,16 @@ Localhost: match port, add callback URLs in Cognito.
 
 ## 12) Milestones
 
-* M0: Foundations & CI/CD (2w).
-* M1: Catalog + Offline (3w).
-* M2: Commerce core (3w).
-* M3: Multi-Tenant + Domains (3w).
-* M4: Creator stores/media (3w).
-* M5: AI (RAG) (2w).
-* M6: Admin/reporting v1 (2w).
-* M7: i18n + Shipping (2w).
-* M8: Phase 2: Crypto + WYSIWYG (3w).
-* M9: Hardening & Launch (2w).
+- M0: Foundations & CI/CD (2w).
+- M1: Catalog + Offline (3w).
+- M2: Commerce core (3w).
+- M3: Multi-Tenant + Domains (3w).
+- M4: Creator stores/media (3w).
+- M5: AI (RAG) (2w).
+- M6: Admin/reporting v1 (2w).
+- M7: i18n + Shipping (2w).
+- M8: Phase 2: Crypto + WYSIWYG (3w).
+- M9: Hardening & Launch (2w).
 
 Cross-milestone gates: observability, docs/ADRs, threat model, CWV budgets.
 
@@ -202,7 +203,7 @@ Cross-milestone gates: observability, docs/ADRs, threat model, CWV budgets.
 
 ```ts
 import { registerSW } from 'virtual:pwa-register'
-registerSW({ immediate: true, onNeedRefresh(){}, onOfflineReady(){} })
+registerSW({ immediate: true, onNeedRefresh() {}, onOfflineReady() {} })
 ```
 
 ### Appendix B — Lambda permission-hash

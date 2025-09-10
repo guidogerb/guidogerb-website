@@ -9,20 +9,20 @@ on:
         default: 'deploy'
         type: choice
         options:
-        - deploy
-        - delete
-        - deploy-all
-        - delete-all
+          - deploy
+          - delete
+          - deploy-all
+          - delete-all
       domain:
         description: 'Specific domain to deploy (if not using deploy-all)'
         required: false
         type: choice
         options:
-        - garygerber.com
-        - stream4cloud.com
-        - picklecheeze.com
-        - this-is-my-story.org
-        - guidogerbpublishing.com
+          - garygerber.com
+          - stream4cloud.com
+          - picklecheeze.com
+          - this-is-my-story.org
+          - guidogerbpublishing.com
 
 permissions:
   contents: read

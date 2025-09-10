@@ -11,7 +11,7 @@
     "build:prod-bundle": "node generate-sitemap.mjs production && vite build --mode production-bundle",
     "prepreview": "npm run build",
     "preview": "vite preview --strictPort",
-    "lint": "node_modules/.bin/eslint . --ext .js,.jsx --max-warnings=0",
+    "lint": "pnpm exec eslint . --ext .js,.jsx --max-warnings=0",
     "sitemap:dev": "node generate-sitemap.mjs development",
     "sitemap:prod": "node generate-sitemap.mjs production"
   },

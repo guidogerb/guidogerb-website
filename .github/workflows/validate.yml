@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -39,4 +39,3 @@ jobs:
           node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json README.md
           node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json PUBLISHING.md
           node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json TASKS.md
-

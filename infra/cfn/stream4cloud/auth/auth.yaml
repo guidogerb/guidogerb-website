@@ -6,35 +6,35 @@ Parameters:
     Default: Stream4CloudUsers
   CreateHostedUIDomain:
     Type: String
-    AllowedValues: ["true","false"]
-    Default: "true"
+    AllowedValues: ['true', 'false']
+    Default: 'true'
   HostedUIDomainPrefix:
     Type: String
-    Default: "s4c-auth-domain"
+    Default: 's4c-auth-domain'
     Description: Unique prefix for Cognito Hosted UI domain (must be globally unique in region)
   EnableGoogleIdP:
     Type: String
-    AllowedValues: ["true","false"]
-    Default: "false"
+    AllowedValues: ['true', 'false']
+    Default: 'false'
   GoogleClientId:
     Type: String
-    Default: ""
+    Default: ''
   GoogleClientSecret:
     Type: String
-    Default: ""
+    Default: ''
     NoEcho: true
 
 Conditions:
-  WantHostedUiDomain: !Equals [!Ref CreateHostedUIDomain, "true"]
-  WantGoogle: !Equals [!Ref EnableGoogleIdP, "true"]
+  WantHostedUiDomain: !Equals [!Ref CreateHostedUIDomain, 'true']
+  WantGoogle: !Equals [!Ref EnableGoogleIdP, 'true']
 
 Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: !Ref UserPoolName
-      UsernameAttributes: ["email"]
-      AutoVerifiedAttributes: ["email"]
+      UsernameAttributes: ['email']
+      AutoVerifiedAttributes: ['email']
       AccountRecoverySetting:
         RecoveryMechanisms:
           - Name: verified_email
@@ -49,16 +49,16 @@ Resources:
       TokenValidityUnits:
         AccessToken: minutes
         IdToken: minutes
-      AllowedOAuthFlows: ["code"]
+      AllowedOAuthFlows: ['code']
       AllowedOAuthFlowsUserPoolClient: true
-      AllowedOAuthScopes: ["email","openid","profile"]
+      AllowedOAuthScopes: ['email', 'openid', 'profile']
       CallbackURLs:
         - https://example.com/auth/callback
       LogoutURLs:
         - https://example.com/auth/logout
       SupportedIdentityProviders:
         - COGNITO
-        - !If [WantGoogle, GOOGLE, !Ref "AWS::NoValue"]
+        - !If [WantGoogle, GOOGLE, !Ref 'AWS::NoValue']
       PreventUserExistenceErrors: ENABLED
 
   HostedUIDomain:
@@ -82,7 +82,7 @@ Resources:
       ProviderDetails:
         client_id: !Ref GoogleClientId
         client_secret: !Ref GoogleClientSecret
-        authorize_scopes: "openid email profile"
+        authorize_scopes: 'openid email profile'
 
 Outputs:
   UserPoolId:
@@ -90,4 +90,4 @@ Outputs:
   UserPoolClientId:
     Value: !Ref UserPoolClient
   HostedUIIssuer:
-    Value: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
+    Value: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'

@@ -1,46 +1,45 @@
 variable "aws_region" {
 description = "AWS region to deploy resources"
-type        = string
-default     = "us-east-1"
+type = string
+default = "us-east-1"
 }
 
 variable "vpc_cidr" {
 description = "CIDR block for the VPC"
-type        = string
-default     = "10.0.0.0/16"
+type = string
+default = "10.0.0.0/16"
 }
 
 variable "availability_zones" {
 description = "List of availability zones to use"
-type        = list(string)
-default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
+type = list(string)
+default = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
 variable "private_subnets" {
 description = "CIDR blocks for private subnets"
-type        = list(string)
-default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+type = list(string)
+default = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 }
 
 variable "public_subnets" {
 description = "CIDR blocks for public subnets"
-type        = list(string)
-default     = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+type = list(string)
+default = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 }
-
 
 Got it—here’s a clean, production-ready Terraform setup that builds:
 
-* A VPC with 1 public and 1 private subnet, IGW, and a NAT Gateway
-* A minimal Ubuntu SMTP relay EC2 in the public subnet with an Elastic IP
-* Security groups for SMTP/SMTPS/Submission + SSH (locked down by variables)
-* **Option A (default off):** AWS Site-to-Site VPN (VGW + Customer Gateway)
-* **Option B (default off):** AWS Client VPN endpoint + association to the private subnet
-* Optional Route 53 A + MX (and SPF TXT) records for `mail.<your-domain>`
+- A VPC with 1 public and 1 private subnet, IGW, and a NAT Gateway
+- A minimal Ubuntu SMTP relay EC2 in the public subnet with an Elastic IP
+- Security groups for SMTP/SMTPS/Submission + SSH (locked down by variables)
+- **Option A (default off):** AWS Site-to-Site VPN (VGW + Customer Gateway)
+- **Option B (default off):** AWS Client VPN endpoint + association to the private subnet
+- Optional Route 53 A + MX (and SPF TXT) records for `mail.<your-domain>`
 
 > ⚠️ Quick accuracy note:
-> *Site-to-Site VPN* does **not** assign a VPC private-subnet IP to your Synology. Your NAS keeps its on-prem IP, reachable over the tunnel.
-> *Client VPN* assigns an IP from a **separate client CIDR**, not from the private-subnet CIDR. Routing/SGs grant access to the VPC subnets.
+> _Site-to-Site VPN_ does **not** assign a VPC private-subnet IP to your Synology. Your NAS keeps its on-prem IP, reachable over the tunnel.
+> _Client VPN_ assigns an IP from a **separate client CIDR**, not from the private-subnet CIDR. Routing/SGs grant access to the VPC subnets.
 
 ---
 
@@ -660,15 +659,15 @@ terraform apply
 
 ## Notes & hardening checklist
 
-* **Open relay prevention:** Keep `allowed_smtp_cidrs` tight (specific sending hosts only) or enforce SASL auth (not shown) before opening 587 to the world.
-* **DKIM/DMARC:** Add DKIM (via your mail system signing) and a DMARC TXT in Route 53.
-* **NACLs:** Security Groups usually suffice; add explicit NACL rules if your org requires them.
-* **Monitoring:** Consider CloudWatch Agent + alarms on CPU/disk and log-based alarms on postfix rejects/bounces.
-* **SSM:** Add an instance profile for SSM Session Manager (safer than exposing SSH).
-* **Client VPN vs S2S:**
+- **Open relay prevention:** Keep `allowed_smtp_cidrs` tight (specific sending hosts only) or enforce SASL auth (not shown) before opening 587 to the world.
+- **DKIM/DMARC:** Add DKIM (via your mail system signing) and a DMARC TXT in Route 53.
+- **NACLs:** Security Groups usually suffice; add explicit NACL rules if your org requires them.
+- **Monitoring:** Consider CloudWatch Agent + alarms on CPU/disk and log-based alarms on postfix rejects/bounces.
+- **SSM:** Add an instance profile for SSM Session Manager (safer than exposing SSH).
+- **Client VPN vs S2S:**
+  - _S2S:_ your Synology remains on its LAN IP(s), reachable over the tunnel; add those LAN CIDRs in `on_prem_cidrs`.
+  - _Client VPN:_ client receives an IP from `client_vpn_client_cidr`; routes/authorization allow access to `private_subnet_cidr`.
 
-    * *S2S:* your Synology remains on its LAN IP(s), reachable over the tunnel; add those LAN CIDRs in `on_prem_cidrs`.
-    * *Client VPN:* client receives an IP from `client_vpn_client_cidr`; routes/authorization allow access to `private_subnet_cidr`.
-* **Synology config:** For S2S, configure IPsec (route-based) to match AWS proposals; for Client VPN, configure OpenVPN (mutual TLS) using the AWS-generated client config & certificates.
+- **Synology config:** For S2S, configure IPsec (route-based) to match AWS proposals; for Client VPN, configure OpenVPN (mutual TLS) using the AWS-generated client config & certificates.
 
 If you want, I can tailor this to your exact CIDR plan, add SSM/IAM, DKIM/DMARC records, or flip it to ARM (`t4g.micro`) + Ubuntu ARM AMI.

@@ -26,6 +26,7 @@
     "dev": "pnpm -r --parallel dev",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
+    "build:site:guidogerbpublishing": "pnpm --filter websites/guidogerbpublishing.com build",
     "build:site:stream4cloud": "pnpm --filter websites/stream4cloud.com build",
     "build:site:garygerber": "pnpm --filter websites/garygerber.com build",
     "build:site:picklecheeze": "pnpm --filter websites/picklecheeze.com build",

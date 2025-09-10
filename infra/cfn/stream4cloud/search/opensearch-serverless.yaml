@@ -12,7 +12,7 @@ Resources:
   EncryptionPolicy:
     Type: AWS::OpenSearchServerless::SecurityPolicy
     Properties:
-      Name: !Sub "${CollectionName}-enc"
+      Name: !Sub '${CollectionName}-enc'
       Type: encryption
       Policy: !Sub |
         {
@@ -25,7 +25,7 @@ Resources:
   NetworkPolicy:
     Type: AWS::OpenSearchServerless::SecurityPolicy
     Properties:
-      Name: !Sub "${CollectionName}-net"
+      Name: !Sub '${CollectionName}-net'
       Type: network
       Policy: |
         {"Rules":[{"ResourceType":"collection","Resource":["collection/*"]},{"ResourceType":"dashboard","Resource":["dashboard/*"]}],"AllowFromPublic":true}
@@ -33,7 +33,7 @@ Resources:
   DataAccessPolicy:
     Type: AWS::OpenSearchServerless::AccessPolicy
     Properties:
-      Name: !Sub "${CollectionName}-data"
+      Name: !Sub '${CollectionName}-data'
       Type: data
       Policy: !Sub |
         [
