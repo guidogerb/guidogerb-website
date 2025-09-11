@@ -57,6 +57,9 @@ jobs:
             pnpm --filter websites/guidogerbpublishing.com build:staging
           fi
 
+      - name: List guidogerbpublishing.com build output
+        run: ls -l websites/guidogerbpublishing.com
+
       - name: Test branch-specific build (garygerber.com)
         run: |
           if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
