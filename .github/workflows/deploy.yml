@@ -1,11 +1,15 @@
 name: deploy
 
 on:
+  workflow_run:
+    workflows: [ "build" ]
+    types: [ completed ]
+    branches: [ main, prod ]
   workflow_dispatch:
     inputs:
       site:
         description: 'Site to deploy (folder under websites)'
-        required: true
+        required: false
         default: 'guidogerbpublishing.com'
         type: choice
         options:
@@ -18,19 +22,33 @@ on:
           ]
       aws_region:
         description: 'AWS region'
-        required: true
+        required: false
         default: 'us-east-1'
       bucket:
         description: 'Target S3 bucket name'
-        required: true
+        required: false
         default: 'websites'
       distribution_id:
         description: 'CloudFront Distribution ID'
-        required: true
+        required: false
         default: 'E1MM1G0JP81M1R'
+      invalidate_prefix_only:
+        description: 'Invalidate only the site prefix'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+env:
+  SITE: ${{ inputs.site || vars.SITE || 'guidogerbpublishing.com' }}
+  AWS_REGION: ${{ inputs.aws_region || vars.AWS_REGION || 'us-east-1' }}
+  BUCKET: ${{ inputs.bucket || vars.BUCKET || 'websites' }}
+  DISTRIBUTION_ID: ${{ inputs.distribution_id || vars.DISTRIBUTION_ID || 'E1MM1G0JP81M1R' }}
+  INVALIDATE_PREFIX_ONLY: ${{ inputs.invalidate_prefix_only || vars.INVALIDATE_PREFIX_ONLY || 'false' }}
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -56,18 +74,15 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build selected site
-        run: pnpm --filter websites/${{ inputs.site }} build
+        run: pnpm --filter websites/${{ env.SITE }} build
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: ${{ inputs.aws_region }}
+          aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
 
       - name: Upload to S3 (tenant prefix)
-        env:
-          SITE: ${{ inputs.site }}
-          BUCKET: ${{ inputs.bucket }}
         run: |
           set -euo pipefail
           SRC="websites/${SITE}/dist"
@@ -76,11 +91,8 @@ jobs:
 
       - name: Compute invalidation path
         id: inv
-        env:
-          SITE: ${{ inputs.site }}
-          PREFIX_ONLY: ${{ inputs.invalidate_prefix_only }}
         run: |
-          if [ "${PREFIX_ONLY}" = "true" ]; then
+          if [ "${INVALIDATE_PREFIX_ONLY}" = "true" ]; then
             echo "paths=/${SITE}/*" >> "$GITHUB_OUTPUT"
           else
             echo "paths=/*" >> "$GITHUB_OUTPUT"
@@ -88,7 +100,6 @@ jobs:
 
       - name: Invalidate CloudFront
         env:
-          DIST_ID: ${{ inputs.distribution_id }}
           PATHS: ${{ steps.inv.outputs.paths }}
         run: |
-          aws cloudfront create-invalidation --distribution-id "${DIST_ID}" --paths "${PATHS}"
+          aws cloudfront create-invalidation --distribution-id "${DISTRIBUTION_ID}" --paths "${PATHS}"
