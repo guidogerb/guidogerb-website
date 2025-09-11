@@ -27,7 +27,7 @@ on:
       bucket:
         description: 'Target S3 bucket name'
         required: false
-        default: 'websites'
+        default: 'ggp-websites'
       distribution_id:
         description: 'CloudFront Distribution ID'
         required: false
@@ -42,7 +42,7 @@ on:
 env:
   SITE: ${{ inputs.site || vars.SITE || 'guidogerbpublishing.com' }}
   AWS_REGION: ${{ inputs.aws_region || vars.AWS_REGION || 'us-east-1' }}
-  BUCKET: ${{ inputs.bucket || vars.BUCKET || 'websites' }}
+  BUCKET: ${{ inputs.bucket || vars.BUCKET || 'ggp-websites' }}
   DISTRIBUTION_ID: ${{ inputs.distribution_id || vars.DISTRIBUTION_ID || 'E1MM1G0JP81M1R' }}
   INVALIDATE_PREFIX_ONLY: ${{ inputs.invalidate_prefix_only || vars.INVALIDATE_PREFIX_ONLY || 'false' }}
 
@@ -73,6 +73,9 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: List build output
+        run: ls -l websites/${{ env.SITE }}
+
       - name: Build selected site
         run: pnpm --filter websites/${{ env.SITE }} build
 
@@ -82,7 +85,7 @@ jobs:
           aws-region:  ${{ env.AWS_REGION }}
           ## the following creates an ARN based on the values entered into github secrets
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
-          role-session-name: myGitHubActions
+          role-session-name: github-actions-deploy
 
       - name: Upload to S3 (tenant prefix)
         run: |
