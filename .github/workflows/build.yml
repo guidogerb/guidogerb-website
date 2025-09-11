@@ -55,41 +55,41 @@ jobs:
       - name: Test branch-specific build (guidogerbpublishing.com)
         run: |
           if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites/guidogerbpublishing.com build:prod-bundle
+            pnpm --filter websites-guidogerbpublishing build:prod-bundle
           else
-            pnpm --filter websites/guidogerbpublishing.com build:staging
+            pnpm --filter websites-guidogerbpublishing build:staging
           fi
 
       - name: Test branch-specific build (garygerber.com)
         run: |
           if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites/garygerber.com build:prod-bundle
+            pnpm --filter websites-garygerber build:prod-bundle
           else
-            pnpm --filter websites/garygerber.com build:staging
+            pnpm --filter websites-garygerber build:staging
           fi
 
       - name: Test branch-specific build (picklecheeze.com)
         run: |
           if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites/picklecheeze.com build:prod-bundle
+            pnpm --filter websites-picklecheeze build:prod-bundle
           else
-            pnpm --filter websites/picklecheeze.com build:staging
+            pnpm --filter websites-picklecheeze build:staging
           fi
 
       - name: Test branch-specific build (this-is-my-story.org)
         run: |
           if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites/this-is-my-story.org build:prod-bundle
+            pnpm --filter websites-this-is-my-story build:prod-bundle
           else
-            pnpm --filter websites/this-is-my-story.org build:staging
+            pnpm --filter websites-this-is-my-story build:staging
           fi
 
       - name: Test branch-specific build (stream4cloud.com)
         run: |
           if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites/stream4cloud.com build:prod-bundle
+            pnpm --filter websites-stream4cloud build:prod-bundle
           else
-            pnpm --filter websites/stream4cloud.com build:staging
+            pnpm --filter websites-stream4cloud build:staging
           fi
 
       - name: Save build artifacts
