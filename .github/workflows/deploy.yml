@@ -91,7 +91,6 @@ jobs:
         run: |
           echo "SRC=websites/${SITE}/dist"
           echo "DEST=s3://${BUCKET}/${SITE}/"
-          set -euo pipefail
           SRC="websites/${SITE}/dist"
           DEST="s3://${BUCKET}/${SITE}/"
           aws s3 sync "$SRC" "$DEST" --delete
@@ -102,7 +101,7 @@ jobs:
           if [ "${INVALIDATE_PREFIX_ONLY}" = "true" ]; then
             echo "paths=/${SITE}/*" >> "$GITHUB_OUTPUT"
           else
-            echo "paths=/*" >> "$GITHUB_OUTPUT"
+           echo "paths=/*" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Invalidate CloudFront
