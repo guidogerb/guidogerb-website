@@ -1,0 +1,93 @@
+@media screen and (max-width: media-size__tablet-landscape__PLACEHOLDER) {
+  /* put your media query here for tablet landscape */
+  .ui-system .search-modal__input[type='text'] {
+    width: 75vw;
+  }
+}
+
+@media screen and (max-width: media-size__tablet-portrait__PLACEHOLDER) {
+  .header-desktop--hidden {
+    display: block !important;
+  }
+  .header-mobile--hidden {
+    display: none !important;
+  }
+  .header {
+    height: 60px;
+    padding: var(--spacing-xs) var(--spacing);
+  }
+  .title-wrapper {
+    font-size: var(--font-size-xl);
+  }
+  .citizen-experience-wrapper {
+    display: none;
+  }
+  .citizen-experience-wrapper--mobile {
+    display: flex;
+  }
+  .ui-system .main-menu__wrapper {
+    padding: 0 var(--spacing);
+    /* The id button is this tall, but without it, the menu doesn't fill the space up to the mobile menu content popup */
+    min-height: 46px;
+  }
+  .ui-system .main-menu__nav {
+    display: none;
+  }
+  .ui-system.header-mobile-menu,
+  .ui-system .header-mobile__id-wrapper {
+    display: block;
+  }
+  .ui-system .icon-button.main-menu__hamburger,
+  .ui-system .header-mobile__vip-action-items--left,
+  .ui-system .header-mobile__vip-action-items--right,
+  .ui-system .main-menu__search-placeholder {
+    display: flex;
+  }
+
+  .ui-system .search-modal__input[type='text'] {
+    width: 80vw;
+    padding: var(--spacing) var(--spacing) var(--spacing) var(--spacing-3xl);
+  }
+  .ui-system .search-modal__button-wrapper {
+    right: unset;
+    left: 50%;
+    transform: translateX(-50%) translateY(110%);
+  }
+  .ui-system .search-modal__button.button--solid.button--primary-color {
+    border-color: white;
+    width: max-content;
+  }
+
+  .ui-system .official-website-popup__content {
+    flex-wrap: wrap;
+    gap: var(--spacing-l);
+  }
+  .ui-system .official-website-popup__col {
+    width: 100%;
+  }
+  .ui-system .official-website-popup__address-bar {
+    width: auto;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .color-example {
+    flex-direction: column;
+  }
+  .color-example > div:not(:last-child) {
+    margin-bottom: var(--spacing-l);
+  }
+
+  .search-page {
+    .search-modal__form {
+      margin-bottom: var(--spacing-4xl);
+    }
+    .search-modal__input[type='text'] {
+      padding: var(--spacing) var(--spacing) var(--spacing) var(--spacing-3xl);
+    }
+  }
+}
+
+@media screen and (max-width: media-size__mobile__PLACEHOLDER) {
+  /* put your media query here for mobile */
+}

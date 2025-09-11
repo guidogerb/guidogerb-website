@@ -27,7 +27,7 @@ function Remove-CFN { param([string]$StackName)
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $here
 
-$domains = @('garygerber.com','ggp-store.com','picklecheeze.com','this-is-my-story.org')
+$domains = @('garygerber.com','store.com','picklecheeze.com','this-is-my-story.org')
 function StackName-Edge($domain){ return ('s4c-edge-' + $domain -replace '\.','-') }
 
 function Deploy-EdgeAll {

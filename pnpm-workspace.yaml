@@ -5,6 +5,7 @@ packages:
   - '@guidogerb/components/pages/*'
   - '@guidogerb/components/router/*'
   - '@guidogerb/components/sw'
+  - '@guidogerb/components/ui'
   - '@guidogerb/css'
   - '@guidogerb/footer'
   - '@guidogerb/header'

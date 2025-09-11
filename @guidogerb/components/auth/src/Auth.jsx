@@ -42,9 +42,9 @@ function Auth({ children, autoSignIn = false, logoutUri }) {
     return (
       <div>
         {children ?? null}
-        <div style={{ marginTop: 12 }}>
+        {/*        <div style={{ marginTop: 12 }}>
           <button onClick={signOutRedirect}>Sign out</button>
-        </div>
+        </div>*/}
       </div>
     )
   }

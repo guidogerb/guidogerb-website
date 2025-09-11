@@ -1,10 +1,10 @@
-# GuidogerbPublishing.com — Web App (Vite + React)
+# Stream4Cloud.com — Web App (Vite + React)
 
 Quickstart
 
 - Copy env template: `.env.example` → `.env` and fill VITE\_\* values.
-- Dev: `pnpm --filter websites/guidogerbpublishing.com dev`
-- Build: `pnpm --filter websites/guidogerbpublishing.com build`
+- Dev: `pnpm --filter websites/stream4cloud.com dev`
+- Build: `pnpm --filter websites/stream4cloud.com build`
 
 Required env (VITE\_\*)
 
@@ -16,7 +16,7 @@ Required env (VITE\_\*)
 
 PWA/offline
 
-- Set VITE_ENABLE_SW=true to register /sw.js; offline.html is served as fallback for navigations when offline.
+- Set VITE_ENABLE_SW=true to register /sw.js; offline.html is served as a fallback for navigations when offline.
 
 Notes
 

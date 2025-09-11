@@ -38,27 +38,11 @@ export default function AuthProvider({
     client_id: norm(client_id) ?? norm(env?.VITE_COGNITO_CLIENT_ID),
     redirect_uri: norm(effectiveRedirectUri),
     response_type: norm(response_type) ?? norm(env?.VITE_RESPONSE_TYPE) ?? 'code',
-    scope: norm(scope) ?? norm(env?.VITE_COGNITO_SCOPE) ?? 'openid profile email',
+    scope: norm(scope) ?? norm(env?.VITE_COGNITO_SCOPE) ?? 'openid email phone profile',
     post_logout_redirect_uri:
       norm(post_logout_redirect_uri) ?? norm(env?.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI),
+    loadUserInfo: true,
   }
-  // If authority is still undefined but metadataUrl exists, that's acceptable; if neither, we will show a helpful message.
-
-  /*
-    const cfg = {
-        // Accept authority from props, VITE_COGNITO_AUTHORITY, or alias VITE_COGNITO_DOMAIN
-        authority:'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LYMkghVWo',
-        // metadataUrl can provide discovery; if both provided, metadataUrl wins in oidc-client-ts
-        metadataUrl: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LYMkghVWo/.well-known/openid-configuration',
-        client_id: '2n884r9p79em3u2gfack27lvme',
-        redirect_uri: 'https://stream4cloud.com/auth/callback',
-        response_type: 'code',
-        scope: 'openid profile email',
-        post_logout_redirect_uri:'https://stream4cloud.com/auth/logout',
-    };
-*/
-
-  console.log('[AuthProvider] Configuring OIDC with:', JSON.stringify(cfg))
 
   // Validate required settings (either authority OR metadataUrl must be provided)
   const missing = []
@@ -94,11 +78,7 @@ export default function AuthProvider({
     const origin = currentOrigin
     const url = new URL(cfg.redirect_uri, origin)
     const originMatches = cfg.redirect_uri.startsWith(origin)
-    const hostAliasMatches =
-      !originMatches &&
-      origin.includes('localhost') &&
-      url.hostname === '127.0.0.1' &&
-      cfg.redirect_uri.startsWith(`${url.protocol}//127.0.0.1:${url.port || ''}`)
+    const hostAliasMatches = !originMatches && origin.includes('local.')
     if (!originMatches && !hostAliasMatches) {
       // eslint-disable-next-line no-console
       console.error(

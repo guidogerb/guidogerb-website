@@ -23,7 +23,7 @@ on:
       bucket:
         description: 'Target S3 bucket name'
         required: true
-        default: 'ggp-websites'
+        default: 'websites'
       distribution_id:
         description: 'CloudFront Distribution ID'
         required: true

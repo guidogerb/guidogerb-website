@@ -16,7 +16,7 @@ $dirs = @(
   'infra\scripts',
   '.github\workflows',
 
-  # Normalize the other three websites to match ggp-store.com’s structure
+  # Normalize the other three websites to match store.com’s structure
   'websites\garygerber.com\public',
   'websites\garygerber.com\src',
   'websites\garygerber.com\src\assets',

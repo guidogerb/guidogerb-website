@@ -1,5 +1,5 @@
 {
-  "name": "websites-this-is-my-story",
+  "name": "websites-this-is-my-story-org",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -24,11 +24,13 @@
     "@guidogerb/components-router-protected": "workspace:*",
     "@guidogerb/components-router-public": "workspace:*",
     "@guidogerb/components-sw": "workspace:*",
+    "@guidogerb/components-ui": "workspace:*",
     "@guidogerb/css": "workspace:*",
     "@guidogerb/footer": "workspace:*",
     "@guidogerb/header": "workspace:*",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-json-view": "^1.21.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

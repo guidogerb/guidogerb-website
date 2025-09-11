@@ -3,15 +3,59 @@ import react from '@vitejs/plugin-react'
 import mkcert from 'vite-plugin-mkcert'
 
 export default ({ mode }) => {
+  // Single source of truth for the base domain
+  const ip = '127.0.0.4'
+  const host = 'stream4cloud.com'
+  const localHost = `local.${host}`
+  const wildcardLocalHost = `*.local.${host}`
+
+  function restrictHosts(allowed) {
+    return {
+      name: 'restrict-hosts',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          const reqHost = (req.headers.host || '').split(':')[0].toLowerCase()
+          if (reqHost && !allowed.includes(reqHost)) {
+            res.statusCode = 403
+            res.end('Forbidden')
+            return
+          }
+          next()
+        })
+      },
+      configurePreviewServer(server) {
+        server.middlewares.use((req, res, next) => {
+          const reqHost = (req.headers.host || '').split(':')[0].toLowerCase()
+          if (reqHost && !allowed.includes(reqHost)) {
+            res.statusCode = 403
+            res.end('Forbidden')
+            return
+          }
+          next()
+        })
+      },
+    }
+  }
+
+  function printPreviewUrls() {
+    return {
+      name: 'print-preview-urls',
+      configurePreviewServer(server) {
+        server.httpServer?.once('listening', () => {
+          console.log(`  ➜  Local: https://${localHost}/`)
+        })
+      },
+    }
+  }
+
+  const allowedHosts = [localHost]
   const env = loadEnv(mode, process.cwd(), '')
 
-  // Defaults for dev/normal builds
   let buildOptions = {
     sourcemap: mode === 'development',
     minify: mode === 'production' ? 'esbuild' : false,
   }
 
-  // Staging (main branch): readable output (no minify) + sourcemaps
   if (mode === 'staging') {
     buildOptions = {
       sourcemap: true,
@@ -20,15 +64,13 @@ export default ({ mode }) => {
     }
   }
 
-  // Production single-file bundle (prod branch)
   if (mode === 'production-bundle') {
     buildOptions = {
       sourcemap: false,
       minify: 'esbuild',
-      cssCodeSplit: false, // merge CSS
+      cssCodeSplit: false,
       rollupOptions: {
         output: {
-          // Inline all dynamic imports and avoid manual chunking
           inlineDynamicImports: true,
           manualChunks: undefined,
           entryFileNames: 'assets/app.[hash].js',
@@ -40,17 +82,34 @@ export default ({ mode }) => {
   }
 
   return defineConfig({
+    logLevel: 'silent',
+    resolve: {
+      conditions: [mode],
+    },
     plugins: [
       react(),
       mkcert({
         force: true,
-        hosts: ['local.stream4cloud.com', '*.local.stream4cloud.com', '127.0.0.4'],
+        hosts: [localHost, wildcardLocalHost, ip],
       }),
+      restrictHosts(allowedHosts),
+      printPreviewUrls(),
     ],
     base: env.VITE_BASE_PATH || '/',
     server: {
-      port: env.VITE_SITE_PORT ? parseInt(env.VITE_SITE_PORT) : 443,
+      https: true,
+      host: true,
+      port: 443,
       strictPort: true,
+      open: false,
+      allowedHosts,
+    },
+    preview: {
+      https: true,
+      host: true,
+      port: 443,
+      strictPort: true,
+      open: false,
     },
     build: buildOptions,
   })

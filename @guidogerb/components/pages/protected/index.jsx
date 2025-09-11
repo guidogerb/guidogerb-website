@@ -1,18 +1,16 @@
 import { Auth, useAuth } from '@guidogerb/components-auth'
 
-function EmailLine() {
+function Guard({ children }) {
   const auth = useAuth()
-  return (
-    <div>
-      <pre>Email: {auth?.user?.profile?.email || '(not logged in)'} </pre>
-    </div>
-  )
+  if (auth?.error) return <div>Sign-in failed: {auth.error.message}</div>
+  if (!auth?.isAuthenticated) return <div>Protected Loading...</div>
+  return <>{children}</>
 }
+
 export default function Protected({ children, logoutUri }) {
   return (
     <Auth autoSignIn logoutUri={logoutUri}>
-      <EmailLine />
-      {children}
+      <Guard>{children}</Guard>
     </Auth>
   )
 }

@@ -1,0 +1,26 @@
+{
+  "name": "@guidogerb/components-ui",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "JsonViewer.jsx"
+  ],
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "dependencies": {
+    "oidc-client-ts": "^3.3.0",
+    "react-json-view": "^1.21.3",
+    "react-oidc-context": "^3.3.0"
+  }
+}

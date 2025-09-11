@@ -1,46 +1,57 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
 
-export default function LoginCallback() {
+export default function LoginCallback({ redirectTo, storageKey = 'auth:returnTo' }) {
   const auth = useAuth()
+  const callbackDoneRef = useRef(false)
 
   useEffect(() => {
     let canceled = false
 
-    ;(async () => {
+    const finalize = async () => {
+      if (canceled) return
+
+      const hasAuthResponse = /[?&#](code|id_token|access_token|state)=/.test(window.location.href)
+
       try {
-        // If already authenticated, just go to home
-        if (auth?.isAuthenticated) {
-          window.history.replaceState({}, document.title, '/')
-          return
-        }
-
-        // If the URL contains an authorization response, explicitly finalize it
-        const hasAuthCode =
-          /[?&#](code|id_token|access_token)=/.test(window.location.href) ||
-          /[?&#]state=/.test(window.location.href)
-        if (hasAuthCode && typeof auth?.signinRedirectCallback === 'function') {
+        // Finalize the redirect response once
+        if (
+          hasAuthResponse &&
+          typeof auth?.signinRedirectCallback === 'function' &&
+          !callbackDoneRef.current
+        ) {
+          callbackDoneRef.current = true
           await auth.signinRedirectCallback()
-          if (!canceled) {
-            window.history.replaceState({}, document.title, '/')
-          }
-          return
         }
 
-        // Otherwise, give the provider a brief moment to process automatically
-        await new Promise((r) => setTimeout(r, 150))
-        if (!canceled && auth?.isAuthenticated) {
-          window.history.replaceState({}, document.title, '/')
+        // When authenticated, compute destination and redirect
+        if (auth?.isAuthenticated) {
+          const fromState =
+            auth?.user?.state?.returnTo || auth?.user?.state?.url || auth?.user?.state?.path
+
+          const fromStorage = sessionStorage.getItem(storageKey) || localStorage.getItem(storageKey)
+
+          const target = redirectTo || fromState || fromStorage || '/'
+
+          // Cleanup any stored hint
+          sessionStorage.removeItem(storageKey)
+          localStorage.removeItem(storageKey)
+
+          if (!canceled) {
+            // Replace to avoid keeping the callback URL in history
+            window.location.replace(target)
+          }
         }
       } catch (e) {
         console.error('Error during login callback handling:', e)
       }
-    })()
+    }
 
+    finalize()
     return () => {
       canceled = true
     }
-  }, [auth])
+  }, [auth, redirectTo, storageKey])
 
   if (auth?.error) {
     return <div>Sign-in failed: {auth.error.message}</div>
