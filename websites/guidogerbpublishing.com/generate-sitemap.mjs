@@ -42,7 +42,9 @@ function loadEnvLikeVite() {
 const env = loadEnvLikeVite()
 const siteUrl =
   env.VITE_SITE_URL ||
-  (mode === 'production' ? 'https://guidogerbpublishing.com' : 'https://local.guidogerbpublishing.com')
+  (mode === 'production'
+    ? 'https://guidogerbpublishing.com'
+    : 'https://local.guidogerbpublishing.com')
 
 // Define your public routes here. Start minimal; expand as you add pages.
 const routes = [

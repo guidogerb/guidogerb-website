@@ -7,13 +7,15 @@ This document describes all the IAM roles and permissions necessary for the S3 d
 **Primary Role**: `GitHubActionsDeployRole` (OIDC role for GitHub Actions)
 
 **Required Secrets in GitHub**:
-- `AWS_ACCOUNT_ID` - Your AWS account ID  
+
+- `AWS_ACCOUNT_ID` - Your AWS account ID
 - `AWS_DEPLOY_ROLE` - Role name (e.g., `GitHubActionsDeployRole`)
 - `AWS_REGION` - AWS region (default: `us-east-1`)
 
 **Key Permissions Needed**:
+
 - S3: Read/write access to website buckets
-- CloudFront: Create invalidations 
+- CloudFront: Create invalidations
 - CloudFormation: Manage infrastructure stacks
 - Route53: Manage DNS records (optional)
 
@@ -30,6 +32,7 @@ The deployment system uses GitHub Actions with OIDC (OpenID Connect) to securely
 **Purpose**: This is the primary role that GitHub Actions assumes to perform deployments.
 
 **Trust Policy**:
+
 ```json
 {
   "Version": "2012-10-17",
@@ -56,6 +59,7 @@ The deployment system uses GitHub Actions with OIDC (OpenID Connect) to securely
 **Required Permissions**:
 
 #### S3 Permissions
+
 ```json
 {
   "Version": "2012-10-17",
@@ -89,6 +93,7 @@ The deployment system uses GitHub Actions with OIDC (OpenID Connect) to securely
 ```
 
 #### CloudFront Permissions
+
 ```json
 {
   "Version": "2012-10-17",
@@ -107,6 +112,7 @@ The deployment system uses GitHub Actions with OIDC (OpenID Connect) to securely
 ```
 
 #### CloudFormation Permissions
+
 ```json
 {
   "Version": "2012-10-17",
@@ -140,6 +146,7 @@ The deployment system uses GitHub Actions with OIDC (OpenID Connect) to securely
 **Note**: The deployment workflow queries CloudFormation stacks to get outputs like `SiteBucketName` and `DistributionId`, which are used for S3 sync and CloudFront invalidation operations.
 
 #### Route53 Permissions (Optional)
+
 ```json
 {
   "Version": "2012-10-17",
@@ -158,6 +165,7 @@ The deployment system uses GitHub Actions with OIDC (OpenID Connect) to securely
 ```
 
 #### Additional CloudFormation Service Permissions
+
 ```json
 {
   "Version": "2012-10-17",
@@ -208,7 +216,7 @@ Here's a comprehensive IAM policy that includes all the required permissions for
         "arn:aws:s3:::websites/*",
         "arn:aws:s3:::*-garygerber-com",
         "arn:aws:s3:::*-garygerber-com/*",
-        "arn:aws:s3:::*-stream4cloud-com", 
+        "arn:aws:s3:::*-stream4cloud-com",
         "arn:aws:s3:::*-stream4cloud-com/*",
         "arn:aws:s3:::*-picklecheeze-com",
         "arn:aws:s3:::*-picklecheeze-com/*",
@@ -233,7 +241,7 @@ Here's a comprehensive IAM policy that includes all the required permissions for
       "Effect": "Allow",
       "Action": [
         "cloudformation:CreateStack",
-        "cloudformation:UpdateStack", 
+        "cloudformation:UpdateStack",
         "cloudformation:DeleteStack",
         "cloudformation:DescribeStacks",
         "cloudformation:DescribeStackResources",
@@ -256,7 +264,7 @@ Here's a comprehensive IAM policy that includes all the required permissions for
       "Effect": "Allow",
       "Action": [
         "route53:ChangeResourceRecordSets",
-        "route53:GetHostedZone", 
+        "route53:GetHostedZone",
         "route53:ListResourceRecordSets"
       ],
       "Resource": "arn:aws:route53:::hostedzone/*"
@@ -292,6 +300,7 @@ If you want to use a dedicated CloudFormation service role instead of having the
 **Role Name**: `CloudFormationServiceRole`
 
 **Trust Policy**:
+
 ```json
 {
   "Version": "2012-10-17",
@@ -349,12 +358,13 @@ aws iam attach-role-policy \
 Set these secrets in your GitHub repository:
 
 - `AWS_ACCOUNT_ID`: Your AWS account ID
-- `AWS_DEPLOY_ROLE`: `GitHubActionsDeployRole` 
+- `AWS_DEPLOY_ROLE`: `GitHubActionsDeployRole`
 - `AWS_REGION`: `us-east-1` (or your preferred region)
 
 ### 4. Configure GitHub Variables (Optional)
 
 Set these variables for default values:
+
 - `SITE`: Default site to deploy (e.g., `guidogerbpublishing.com`)
 - `BUCKET`: Default S3 bucket name
 - `DISTRIBUTION_ID`: Default CloudFront distribution ID
@@ -388,8 +398,9 @@ The system uses a predictable naming convention for CloudFormation stacks:
 ## Supported Domains
 
 The deployment system currently supports these domains:
+
 - `garygerber.com`
-- `stream4cloud.com`  
+- `stream4cloud.com`
 - `picklecheeze.com`
 - `this-is-my-story.org`
 - `guidogerbpublishing.com`
@@ -399,6 +410,7 @@ The deployment system currently supports these domains:
 The GitHub Actions workflows automatically use these roles:
 
 ### Deploy Workflow (`.github/workflows/deploy.yml`)
+
 - Uses OIDC to assume the GitHub Actions role
 - Builds the specified website using pnpm
 - Syncs built websites to S3 buckets using `aws s3 sync`
@@ -406,6 +418,7 @@ The GitHub Actions workflows automatically use these roles:
 - Supports both automatic deployment (on successful builds) and manual deployment
 
 ### Infrastructure Deployment (`.github/workflows/deploy-infrastructure.yml`)
+
 - Uses OIDC to assume the GitHub Actions role
 - Manages CloudFormation stacks for website infrastructure using the Makefile in `infra/cfn/`
 - Creates S3 buckets, CloudFront distributions, and Route53 records
@@ -428,7 +441,7 @@ The GitHub Actions workflows automatically use these roles:
 ### Debugging Steps
 
 1. Check GitHub Actions logs for specific permission errors
-2. Verify role trust relationships in AWS IAM console  
+2. Verify role trust relationships in AWS IAM console
 3. Test role assumptions manually using AWS CLI
 4. Review CloudFormation stack events for deployment issues
 
@@ -443,11 +456,12 @@ The GitHub Actions workflows automatically use these roles:
 For S3 deployment to work, you need:
 
 1. **One primary IAM role**: `GitHubActionsDeployRole` with OIDC trust policy
-2. **Five main permission areas**: S3, CloudFront, CloudFormation, Route53, and IAM 
+2. **Five main permission areas**: S3, CloudFront, CloudFormation, Route53, and IAM
 3. **Three GitHub secrets**: `AWS_ACCOUNT_ID`, `AWS_DEPLOY_ROLE`, `AWS_REGION`
 4. **Proper CloudFormation stacks**: Following the `s4c-edge-{domain}` naming convention
 
 The role must be able to:
+
 - Upload files to S3 buckets (for website content)
 - Invalidate CloudFront distributions (for cache updates)
 - Query and manage CloudFormation stacks (for infrastructure)
