@@ -9,11 +9,7 @@ packages:
   - '@guidogerb/css'
   - '@guidogerb/footer'
   - '@guidogerb/header'
-  - websites/garygerber.com
-  - websites/guidogerbpublishing.com
-  - websites/picklecheeze.com
-  - websites/this-is-my-story.org
-  - websites/stream4cloud.com
+  - 'websites/*'
 
 ignoredBuiltDependencies:
   - esbuild
