@@ -448,7 +448,7 @@ The GitHub Actions workflows automatically use these roles:
 ## Related Documentation
 
 - [CICD.md](./CICD.md) - Overall CI/CD workflow guide
-- [infra/cfn/DEPLOY_GUIDE.md](./infra/cfn/DEPLOY_GUIDE.md) - CloudFormation deployment guide
+- [infra/cfn/DEPLOY_GUIDE.md](infra/cfn/backup/DEPLOY_GUIDE.md) - CloudFormation deployment guide
 - [GitHub Actions OIDC Documentation](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
 
 ## Summary
