@@ -69,8 +69,11 @@ Configure these in your GitHub repository settings:
 
 ### AWS Integration
 
-- `AWS_ROLE_ARN` - IAM role for GitHub Actions OIDC
+- `AWS_ACCOUNT_ID` - Your AWS account ID
+- `AWS_DEPLOY_ROLE` - IAM role name for GitHub Actions OIDC deployment
 - `AWS_REGION` - AWS region (default: us-east-1)
+
+**Note**: For detailed information about IAM roles and permissions required for deployment, see [S3_DEPLOYMENT_ROLES.md](./S3_DEPLOYMENT_ROLES.md).
 
 ### Package Registry
 
