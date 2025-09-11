@@ -4,15 +4,15 @@
 >
 
   <url>
-    <loc>https://store.com</loc>
-    <lastmod>2025-09-11T22:36:43.080Z</lastmod>
+    <loc>https://picklecheeze.com</loc>
+    <lastmod>2025-09-11T22:49:11.067Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://store.com/auth/callback</loc>
-    <lastmod>2025-09-11T22:36:43.080Z</lastmod>
+    <loc>https://picklecheeze.com/auth/callback</loc>
+    <lastmod>2025-09-11T22:49:11.067Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

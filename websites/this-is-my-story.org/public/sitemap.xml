@@ -4,15 +4,15 @@
 >
 
   <url>
-    <loc>https://store.com</loc>
-    <lastmod>2025-09-11T22:36:44.141Z</lastmod>
+    <loc>https://this-is-my-story.org</loc>
+    <lastmod>2025-09-11T22:49:12.244Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://store.com/auth/callback</loc>
-    <lastmod>2025-09-11T22:36:44.141Z</lastmod>
+    <loc>https://this-is-my-story.org/auth/callback</loc>
+    <lastmod>2025-09-11T22:49:12.244Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

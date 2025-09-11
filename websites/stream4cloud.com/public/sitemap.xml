@@ -4,15 +4,15 @@
 >
 
   <url>
-    <loc>https://store.com</loc>
-    <lastmod>2025-09-11T22:36:43.084Z</lastmod>
+    <loc>https://stream4cloud.com</loc>
+    <lastmod>2025-09-11T22:49:11.073Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://store.com/auth/callback</loc>
-    <lastmod>2025-09-11T22:36:43.084Z</lastmod>
+    <loc>https://stream4cloud.com/auth/callback</loc>
+    <lastmod>2025-09-11T22:49:11.073Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
