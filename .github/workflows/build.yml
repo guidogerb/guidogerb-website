@@ -54,7 +54,6 @@ jobs:
           ls -l websites/guidogerbpublishing.com
           ls -l websites/guidogerbpublishing.com/dist || echo "dist folder missing"
 
-
       - name: Test branch-specific build (guidogerbpublishing.com)
         run: |
           if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
