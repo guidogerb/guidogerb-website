@@ -41,6 +41,7 @@ Coding standards: TS strict, a11y-first components, no secret material in browse
 - CI/CD rules: adjust GitHub Actions workflows in .github/workflows/
   - build.yml controls PR CI and basic build/lint.
   - deploy.yml controls the multi-tenant build and deploy matrix (branches main/prod, environment selection, S3/CloudFront steps).
+  - See [S3_DEPLOYMENT_ROLES.md](./S3_DEPLOYMENT_ROLES.md) for complete IAM roles and permissions needed for deployment.
 - Formatting rules: Prettier is not configured yet in the repo. If/when added, place the config at the repo root (e.g., .prettierrc) and a format script in package.json, or per workspace.
 - TypeScript rules: when TypeScript is introduced, place compiler options in tsconfig.json at the root (and extend per package as needed), and enable type-aware linting in the eslint configs.
 

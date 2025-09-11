@@ -2,6 +2,21 @@
 
 This document describes all the IAM roles and permissions necessary for the S3 deployment pipeline to work in the guidogerb-website repository.
 
+## Quick Reference
+
+**Primary Role**: `GitHubActionsDeployRole` (OIDC role for GitHub Actions)
+
+**Required Secrets in GitHub**:
+- `AWS_ACCOUNT_ID` - Your AWS account ID  
+- `AWS_DEPLOY_ROLE` - Role name (e.g., `GitHubActionsDeployRole`)
+- `AWS_REGION` - AWS region (default: `us-east-1`)
+
+**Key Permissions Needed**:
+- S3: Read/write access to website buckets
+- CloudFront: Create invalidations 
+- CloudFormation: Manage infrastructure stacks
+- Route53: Manage DNS records (optional)
+
 ## Overview
 
 The deployment system uses GitHub Actions with OIDC (OpenID Connect) to securely deploy websites to AWS S3 buckets with CloudFront distributions. The system supports multiple websites and uses CloudFormation for infrastructure management.
@@ -422,3 +437,20 @@ The GitHub Actions workflows automatically use these roles:
 - [CICD.md](./CICD.md) - Overall CI/CD workflow guide
 - [infra/cfn/DEPLOY_GUIDE.md](./infra/cfn/DEPLOY_GUIDE.md) - CloudFormation deployment guide
 - [GitHub Actions OIDC Documentation](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
+
+## Summary
+
+For S3 deployment to work, you need:
+
+1. **One primary IAM role**: `GitHubActionsDeployRole` with OIDC trust policy
+2. **Five main permission areas**: S3, CloudFront, CloudFormation, Route53, and IAM 
+3. **Three GitHub secrets**: `AWS_ACCOUNT_ID`, `AWS_DEPLOY_ROLE`, `AWS_REGION`
+4. **Proper CloudFormation stacks**: Following the `s4c-edge-{domain}` naming convention
+
+The role must be able to:
+- Upload files to S3 buckets (for website content)
+- Invalidate CloudFront distributions (for cache updates)
+- Query and manage CloudFormation stacks (for infrastructure)
+- Create DNS records in Route53 (for custom domains)
+
+This setup enables secure, automated deployment of multiple websites from a single GitHub repository to AWS S3 with CloudFront CDN.
