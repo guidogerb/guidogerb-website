@@ -49,8 +49,11 @@ jobs:
       - name: Build components
         run: pnpm -r build
 
-      - name: List guidogerbpublishing.com build output
-        run: ls -l websites/guidogerbpublishing.com
+      - name: Debug dist folder
+        run: |
+          ls -l websites/guidogerbpublishing.com
+          ls -l websites/guidogerbpublishing.com/dist || echo "dist folder missing"
+
 
       - name: Test branch-specific build (guidogerbpublishing.com)
         run: |
