@@ -73,13 +73,15 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Build selected site
+        run: |
+          SITE_NO_EXT="${{ env.SITE%.* }}"
+          pnpm --filter "websites-${SITE_NO_EXT}" build
+
       - name: List build output
         run: |
           ls -l websites/${{ env.SITE }}
           ls -l websites/${{ env.SITE }}/dist || echo "dist folder missing"
-
-      - name: Build selected site
-        run: pnpm --filter websites/${{ env.SITE }} build
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v5

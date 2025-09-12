@@ -46,10 +46,18 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: Write .env files
+        run: |
+          echo "${{ secrets.GARYGERBER_VITE_ENV }}" > websites/garygerber.com/.env
+          echo "${{ secrets.GUIDOGERBPUBLISHING_VITE_ENV }}" > websites/guidogerbpublishing.com/.env
+          echo "${{ secrets.PICKLECHEEZE_VITE_ENV }}" > websites/picklecheeze.com/.env
+          echo "${{ secrets.STREAM4CLOUD_VITE_ENV }}" > websites/stream4cloud.com/.env
+          echo "${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}" > websites/this-is-my-story.com/.env
+
       - name: Build components
         run: pnpm -r build
 
-      - name: Debug dist folder
+      - name: Check a dist folder for existence after builds
         run: |
           ls -l websites/guidogerbpublishing.com
           ls -l websites/guidogerbpublishing.com/dist || echo "dist folder missing"
