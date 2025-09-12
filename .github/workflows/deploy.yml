@@ -99,17 +99,8 @@ jobs:
           DEST="s3://${BUCKET}/${SITE}/"
           aws s3 sync "$SRC" "$DEST" --delete
 
-      - name: Compute invalidation path
-        id: inv
+      - name: Create CloudFront invalidation
         run: |
-          if [ "${INVALIDATE_PREFIX_ONLY}" = "true" ]; then
-            echo "paths=/${SITE}/*" >> "$GITHUB_OUTPUT"
-          else
-           echo "paths=/*" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Invalidate CloudFront
-        env:
-          PATHS: ${{ steps.inv.outputs.paths }}
-        run: |
-          aws cloudfront create-invalidation --distribution-id "${DISTRIBUTION_ID}" --paths "${PATHS}"
+          aws cloudfront create-invalidation \
+            --distribution-id "${DISTRIBUTION_ID}" \
+            --paths "/${SITE}/*"
