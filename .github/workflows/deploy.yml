@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ['Build and Test (CI)']
     types: [completed]
-    branches: [main, prod]
+    branches: ['main', 'prod']
   workflow_dispatch:
     inputs:
       site:
