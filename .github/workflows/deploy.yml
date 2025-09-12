@@ -75,8 +75,9 @@ jobs:
 
       - name: Build selected site
         run: |
-          SITE_NO_EXT="${{ env.SITE%.* }}"
+          SITE_NO_EXT="${SITE%.*}"
           pnpm --filter "websites-${SITE_NO_EXT}" build
+
 
       - name: List build output
         run: |
