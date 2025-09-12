@@ -4,57 +4,52 @@ on:
   workflow_run:
     workflows: ['Build and Test (CI)']
     types: [completed]
-    branches: ['main', 'prod']
   workflow_dispatch:
     inputs:
-      site:
-        description: 'Site to deploy (folder under websites)'
-        required: false
-        default: 'guidogerbpublishing.com'
-        type: choice
-        options:
-          [
-            stream4cloud.com,
-            garygerber.com,
-            guidogerbpublishing.com,
-            picklecheeze.com,
-            this-is-my-story.org,
-          ]
       aws_region:
         description: 'AWS region'
         required: false
         default: 'us-east-1'
       bucket:
-        description: 'Target S3 bucket name'
+        description: 'S3 bucket name'
         required: false
         default: 'ggp-websites'
       distribution_id:
-        description: 'CloudFront Distribution ID'
+        description: 'CloudFront distribution ID'
         required: false
         default: 'E1MM1G0JP81M1R'
       invalidate_prefix_only:
-        description: 'Invalidate only the site prefix'
+        description: 'Invalidate prefix only'
         required: false
-        default: 'false'
-        type: choice
-        options: ['false', 'true']
+        default: 'true'
 
 env:
-  SITE: ${{ inputs.site || vars.SITE || 'guidogerbpublishing.com' }}
   AWS_REGION: ${{ inputs.aws_region || vars.AWS_REGION || 'us-east-1' }}
   BUCKET: ${{ inputs.bucket || vars.BUCKET || 'ggp-websites' }}
   DISTRIBUTION_ID: ${{ inputs.distribution_id || vars.DISTRIBUTION_ID || 'E1MM1G0JP81M1R' }}
-  INVALIDATE_PREFIX_ONLY: ${{ inputs.invalidate_prefix_only || vars.INVALIDATE_PREFIX_ONLY || 'false' }}
+  INVALIDATE_PREFIX_ONLY: ${{ inputs.invalidate_prefix_only || vars.INVALIDATE_PREFIX_ONLY || 'true' }}
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: >
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'prod'))
+      || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
     env:
       NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
+    strategy:
+      matrix:
+        site:
+          - stream4cloud.com
+          - garygerber.com
+          - guidogerbpublishing.com
+          - picklecheeze.com
+          - this-is-my-story.org
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,33 +69,33 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build selected site
+        env:
+          MATRIX_SITE: ${{ matrix.site }}
         run: |
-          SITE_NO_EXT="${SITE%.*}"
+          SITE_NO_EXT="${MATRIX_SITE%.*}"
           pnpm --filter "websites-${SITE_NO_EXT}" build
 
       - name: List build output
         run: |
-          ls -l websites/${{ env.SITE }}
-          ls -l websites/${{ env.SITE }}/dist || echo "dist folder missing"
+          ls -l "websites/${{ matrix.site }}" || true
+          ls -l "websites/${{ matrix.site }}/dist" || echo "dist folder missing"
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: ${{ env.AWS_REGION }}
-          ## the following creates an ARN based on the values entered into github secrets
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
           role-session-name: github-actions-deploy
 
       - name: Upload to S3 (tenant prefix)
         run: |
-          echo "SRC=websites/${SITE}/dist"
-          echo "DEST=s3://${BUCKET}/${SITE}/"
-          SRC="websites/${SITE}/dist"
-          DEST="s3://${BUCKET}/${SITE}/"
+          SRC="websites/${{ matrix.site }}/dist"
+          DEST="s3://${{ env.BUCKET }}/${{ matrix.site }}/"
+          echo "Syncing $SRC to $DEST"
           aws s3 sync "$SRC" "$DEST" --delete
 
       - name: Create CloudFront invalidation
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id "${DISTRIBUTION_ID}" \
-            --paths "/${SITE}/*"
+            --distribution-id "${{ env.DISTRIBUTION_ID }}" \
+            --paths "/${{ matrix.site }}/*"
