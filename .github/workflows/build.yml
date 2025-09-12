@@ -52,7 +52,7 @@ jobs:
           echo "${{ secrets.GUIDOGERBPUBLISHING_VITE_ENV }}" > websites/guidogerbpublishing.com/.env
           echo "${{ secrets.PICKLECHEEZE_VITE_ENV }}" > websites/picklecheeze.com/.env
           echo "${{ secrets.STREAM4CLOUD_VITE_ENV }}" > websites/stream4cloud.com/.env
-          echo "${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}" > websites/this-is-my-story.com/.env
+          echo "${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}" > websites/this-is-my-story.org/.env
 
       - name: Build components
         run: pnpm -r build
