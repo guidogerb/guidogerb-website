@@ -74,7 +74,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: List build output
-        run: ls -l websites/${{ env.SITE }}
+        run: |
+          ls -l websites/${{ env.SITE }}
+          ls -l websites/${{ env.SITE }}/dist || echo "dist folder missing"
 
       - name: Build selected site
         run: pnpm --filter websites/${{ env.SITE }} build
