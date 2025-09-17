@@ -5,6 +5,10 @@
   "type": "module",
   "main": "./index.js",
   "module": "./index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "exports": {
     ".": {
       "import": "./index.js",
@@ -22,5 +26,9 @@
     "oidc-client-ts": "^3.3.0",
     "react-json-view": "^1.21.3",
     "react-oidc-context": "^3.3.0"
+  },
+  "devDependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   }
 }
