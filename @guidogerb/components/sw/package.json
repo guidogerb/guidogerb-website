@@ -18,5 +18,8 @@
   "files": [
     "index.js",
     "src"
-  ]
+  ],
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
 }
