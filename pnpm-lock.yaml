@@ -69,9 +69,13 @@ importers:
       '@guidogerb/components-auth':
         specifier: workspace:*
         version: link:../../auth
+    devDependencies:
       react:
-        specifier: '>=19'
+        specifier: ^19.1.1
         version: 19.1.1
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.1.1(react@19.1.1)
 
   '@guidogerb/components/pages/public':
     dependencies:
@@ -102,15 +106,19 @@ importers:
       oidc-client-ts:
         specifier: ^3.3.0
         version: 3.3.0
-      react:
-        specifier: '>=19'
-        version: 19.1.1
       react-json-view:
         specifier: ^1.21.3
         version: 1.21.3(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-oidc-context:
         specifier: ^3.3.0
         version: 3.3.0(oidc-client-ts@3.3.0)(react@19.1.1)
+    devDependencies:
+      react:
+        specifier: ^19.1.1
+        version: 19.1.1
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.1.1(react@19.1.1)
 
   '@guidogerb/css':
     dependencies:
