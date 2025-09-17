@@ -6,7 +6,7 @@ This backlog enumerates every application-facing workspace in the monorepo and c
 
 | Package | Current coverage | Follow-up tasks |
 | --- | --- | --- |
-| `@guidogerb/components/api-client` | _None_ | Build unit tests around request configuration, token injection, retry/backoff helpers, and error normalization once the client is implemented. |
+| `@guidogerb/components/api-client` | ✅ HTTP client unit tests cover configuration, token injection, retries, and error normalization. | Plan contract tests once additional endpoints ship (e.g., pagination helpers, error mapping). |
 | `@guidogerb/components/auth` | ✅ Auth flow tests cover the provider, wrapper, and callback utilities. | Add integration tests that exercise real OIDC context mocks (refresh, logout) and ensure redirect guards work inside consuming apps. |
 | `@guidogerb/components/menu` | _None_ | Outline snapshot/interaction tests after the menu component is built; verify ARIA roles and keyboard navigation. |
 | `@guidogerb/components/pages-public` | _None_ | When the public page shells are available, verify that required routes render without protected context. |
