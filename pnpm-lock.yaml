@@ -36,11 +36,7 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
 
-  '@guidogerb/components/api-client':
-    dependencies:
-      react:
-        specifier: '>=19'
-        version: 19.1.1
+  '@guidogerb/components/api-client': {}
 
   '@guidogerb/components/auth':
     dependencies:
@@ -95,23 +91,13 @@ importers:
         specifier: '>=19'
         version: 19.1.1
 
-  '@guidogerb/components/sw':
-    dependencies:
-      react:
-        specifier: '>=19'
-        version: 19.1.1
+  '@guidogerb/components/sw': {}
 
   '@guidogerb/components/ui':
     dependencies:
-      oidc-client-ts:
-        specifier: ^3.3.0
-        version: 3.3.0
       react-json-view:
         specifier: ^1.21.3
         version: 1.21.3(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
-      react-oidc-context:
-        specifier: ^3.3.0
-        version: 3.3.0(oidc-client-ts@3.3.0)(react@19.1.1)
     devDependencies:
       react:
         specifier: ^19.1.1

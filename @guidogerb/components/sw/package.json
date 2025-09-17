@@ -18,8 +18,5 @@
   "files": [
     "index.js",
     "src"
-  ],
-  "peerDependencies": {
-    "react": ">=19"
-  }
+  ]
 }
