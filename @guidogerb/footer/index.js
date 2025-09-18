@@ -1,2 +1,2 @@
-// Re-export library entry for consumers that import from the package root
-export default () => {}
+export { Footer } from './src/Footer.jsx'
+export { Footer as default } from './src/Footer.jsx'

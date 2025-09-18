@@ -1,0 +1,98 @@
+import { render, screen } from '@testing-library/react'
+import { createMemoryRouter } from 'react-router-dom'
+import { vi } from 'vitest'
+import { ProtectedRouter } from '../ProtectedRouter.jsx'
+
+const guardSpy = vi.fn()
+
+vi.mock('@guidogerb/components-pages-protected', () => ({
+  __esModule: true,
+  default: ({ children, label }) => {
+    guardSpy(label)
+    return (
+      <div data-testid="default-guard" data-label={label}>
+        {children}
+      </div>
+    )
+  },
+}))
+
+describe('ProtectedRouter', () => {
+  beforeEach(() => {
+    guardSpy.mockClear()
+  })
+
+  it('wraps protected routes in the default guard', () => {
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/dashboard'] }}
+        routes={[{ path: '/dashboard', element: <div>Dashboard</div> }]}
+      />,
+    )
+
+    expect(screen.getByTestId('default-guard')).toHaveTextContent('Dashboard')
+  })
+
+  it('skips the guard for public routes and fallback by default', () => {
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/login'] }}
+        routes={[{ path: '/login', element: <div>Login</div>, isProtected: false }]}
+        fallback={<div>Missing</div>}
+      />,
+    )
+
+    expect(screen.queryByTestId('default-guard')).not.toBeInTheDocument()
+    expect(screen.getByText('Login')).toBeInTheDocument()
+  })
+
+  it('allows overriding the guard component and props', () => {
+    const CustomGuard = ({ children, tone }) => (
+      <div data-testid="custom-guard" data-tone={tone}>
+        {children}
+      </div>
+    )
+
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/secure'] }}
+        routes={[{ path: '/secure', element: <div>Secure</div> }]}
+        guard={CustomGuard}
+        guardProps={{ tone: 'warm' }}
+      />,
+    )
+
+    expect(screen.getByTestId('custom-guard')).toHaveAttribute('data-tone', 'warm')
+  })
+
+  it('supports additional wrapping via the wrapElement prop', () => {
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+        wrapElement={(element) => <div data-testid="decorator">{element}</div>}
+      />,
+    )
+
+    expect(screen.getByTestId('decorator')).toBeInTheDocument()
+    expect(screen.getByTestId('default-guard')).toHaveTextContent('Home')
+  })
+
+  it('guards the fallback route when requested', () => {
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/missing'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+        fallback={<div>Missing</div>}
+        protectFallback
+      />,
+    )
+
+    expect(screen.getByTestId('default-guard')).toHaveTextContent('Missing')
+  })
+})

@@ -1,2 +1,2 @@
-// Re-export library entry for consumers that import from the package root
-export default () => {}
+export { ProtectedRouter } from './src/ProtectedRouter.jsx'
+export { createProtectedRouteObjects } from './src/createProtectedRouteObjects.jsx'
