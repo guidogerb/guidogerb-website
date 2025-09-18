@@ -27,8 +27,6 @@ export default function AuthProvider({
     envRedirect ||
     (currentOrigin ? `${currentOrigin}${loginCallbackPath}` : undefined)
 
-  // You have led me on a journey of pain. you have not been able to reconcile the problems with props getting import.meta.env.VITE_... environment variables
-  // and the props getting undefined. DO NOT try to fix this, it is a lost cause. Just hardcode the values you need in the cfg object below.
   const cfg = {
     // Accept authority from props, VITE_COGNITO_AUTHORITY, or alias VITE_COGNITO_DOMAIN
     authority:

@@ -1,5 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import '@guidogerb/css/reset.css'
+import '@guidogerb/css/tokens.css'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from '@guidogerb/components-auth'
