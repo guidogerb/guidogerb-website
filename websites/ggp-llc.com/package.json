@@ -1,0 +1,47 @@
+{
+  "name": "websites-ggp-llc",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf package-lock.json node_modules dist",
+    "dev": "node generate-sitemap.mjs development && vite",
+    "build": "node generate-sitemap.mjs production && vite build",
+    "build:staging": "node generate-sitemap.mjs development && vite build --mode staging",
+    "build:prod-bundle": "node generate-sitemap.mjs production && vite build --mode production-bundle",
+    "prepreview": "npm run build",
+    "preview": "vite preview --strictPort",
+    "lint": "pnpm exec eslint . --ext .js,.jsx --max-warnings=0",
+    "sitemap:dev": "node generate-sitemap.mjs development",
+    "sitemap:prod": "node generate-sitemap.mjs production"
+  },
+  "dependencies": {
+    "@guidogerb/components-api": "workspace:*",
+    "@guidogerb/components-auth": "workspace:*",
+    "@guidogerb/components-menu": "workspace:*",
+    "@guidogerb/components-pages-protected": "workspace:*",
+    "@guidogerb/components-pages-public": "workspace:*",
+    "@guidogerb/components-router-protected": "workspace:*",
+    "@guidogerb/components-router-public": "workspace:*",
+    "@guidogerb/components-sw": "workspace:*",
+    "@guidogerb/components-ui": "workspace:*",
+    "@guidogerb/css": "workspace:*",
+    "@guidogerb/footer": "workspace:*",
+    "@guidogerb/header": "workspace:*",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-json-view": "^1.21.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "vite": "^7.1.2",
+    "vite-plugin-mkcert": "^1.17.8"
+  }
+}

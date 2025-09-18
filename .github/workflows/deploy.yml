@@ -50,6 +50,7 @@ jobs:
           - guidogerbpublishing.com
           - picklecheeze.com
           - this-is-my-story.org
+          - ggp-llm.com
     steps:
       - name: Checkout
         uses: actions/checkout@v4

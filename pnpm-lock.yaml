@@ -280,6 +280,85 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
 
+  websites/ggp-llc.com:
+    dependencies:
+      '@guidogerb/components-api':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/api-client
+      '@guidogerb/components-auth':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/auth
+      '@guidogerb/components-menu':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/menu
+      '@guidogerb/components-pages-protected':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/pages/protected
+      '@guidogerb/components-pages-public':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/pages/public
+      '@guidogerb/components-router-protected':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/router/protected
+      '@guidogerb/components-router-public':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/router/public
+      '@guidogerb/components-sw':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/sw
+      '@guidogerb/components-ui':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/ui
+      '@guidogerb/css':
+        specifier: workspace:*
+        version: link:../../@guidogerb/css
+      '@guidogerb/footer':
+        specifier: workspace:*
+        version: link:../../@guidogerb/footer
+      '@guidogerb/header':
+        specifier: workspace:*
+        version: link:../../@guidogerb/header
+      react:
+        specifier: ^19.1.1
+        version: 19.1.1
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.1.1(react@19.1.1)
+      react-json-view:
+        specifier: ^1.21.3
+        version: 1.21.3(@types/react@19.1.13)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.35.0
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.1.13
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.1.9(@types/react@19.1.13)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.0.3(vite@7.1.6)
+      eslint:
+        specifier: ^9.33.0
+        version: 9.35.0
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.35.0)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.20(eslint@9.35.0)
+      globals:
+        specifier: ^16.3.0
+        version: 16.4.0
+      vite:
+        specifier: ^7.1.2
+        version: 7.1.6
+      vite-plugin-mkcert:
+        specifier: ^1.17.8
+        version: 1.17.8(vite@7.1.6)
+
   websites/guidogerbpublishing.com:
     dependencies:
       '@guidogerb/components-api':
@@ -1252,8 +1331,8 @@ packages:
   base16@1.0.0:
     resolution: {integrity: sha512-pNdYkNPiJUnEhnfXV56+sQy8+AaPcG3POZAUnwr4EeqCUZFz4u2PePbo3e5Gj4ziYPCWGUZT9RHisvJKnwFuBQ==}
 
-  baseline-browser-mapping@2.8.5:
-    resolution: {integrity: sha512-TiU4qUT9jdCuh4aVOG7H1QozyeI2sZRqoRPdqBIaslfNt4WUSanRBueAwl2x5jt4rXBMim3lIN2x6yT8PDi24Q==}
+  baseline-browser-mapping@2.8.6:
+    resolution: {integrity: sha512-wrH5NNqren/QMtKUEEJf7z86YjfqW/2uw3IL3/xpqZUC95SSVIFXYQeeGjL6FT/X68IROu6RMehZQS5foy2BXw==}
     hasBin: true
 
   bidi-js@1.0.3:
@@ -1376,8 +1455,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  electron-to-chromium@1.5.221:
-    resolution: {integrity: sha512-/1hFJ39wkW01ogqSyYoA4goOXOtMRy6B+yvA1u42nnsEGtHzIzmk93aPISumVQeblj47JUHLC9coCjUxb1EvtQ==}
+  electron-to-chromium@1.5.222:
+    resolution: {integrity: sha512-gA7psSwSwQRE60CEoLz6JBCQPIxNeuzB2nL8vE03GK/OHxlvykbLyeiumQy1iH5C2f3YbRAZpGCMT12a/9ih9w==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -2854,7 +2933,7 @@ snapshots:
 
   base16@1.0.0: {}
 
-  baseline-browser-mapping@2.8.5: {}
+  baseline-browser-mapping@2.8.6: {}
 
   bidi-js@1.0.3:
     dependencies:
@@ -2867,9 +2946,9 @@ snapshots:
 
   browserslist@4.26.2:
     dependencies:
-      baseline-browser-mapping: 2.8.5
+      baseline-browser-mapping: 2.8.6
       caniuse-lite: 1.0.30001743
-      electron-to-chromium: 1.5.221
+      electron-to-chromium: 1.5.222
       node-releases: 2.0.21
       update-browserslist-db: 1.1.3(browserslist@4.26.2)
 
@@ -2973,7 +3052,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  electron-to-chromium@1.5.221: {}
+  electron-to-chromium@1.5.222: {}
 
   emoji-regex@8.0.0: {}
 
