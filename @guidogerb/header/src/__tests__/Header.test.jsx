@@ -35,12 +35,8 @@ describe('Header', () => {
         { label: 'Stories', href: '/stories' },
         { label: 'Events', href: '/events' },
       ],
-      secondaryLinks: [
-        { label: 'Docs', href: '/docs' },
-      ],
-      utilityLinks: [
-        { label: 'Support', href: '/support' },
-      ],
+      secondaryLinks: [{ label: 'Docs', href: '/docs' }],
+      utilityLinks: [{ label: 'Support', href: '/support' }],
       actions: [
         { label: 'Contact', href: '/contact', variant: 'secondary' },
         { label: 'Subscribe', href: '/subscribe', variant: 'primary', external: true },
@@ -66,15 +62,24 @@ describe('Header', () => {
     expect(within(primaryNav).getAllByRole('link')).toHaveLength(2)
 
     const utilityNav = screen.getByRole('navigation', { name: 'Utility navigation' })
-    expect(within(utilityNav).getByRole('link', { name: 'Support' })).toHaveAttribute('href', '/support')
+    expect(within(utilityNav).getByRole('link', { name: 'Support' })).toHaveAttribute(
+      'href',
+      '/support',
+    )
 
     const secondaryNav = screen.getByRole('navigation', { name: 'Secondary navigation' })
-    expect(within(secondaryNav).getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '/docs')
+    expect(within(secondaryNav).getByRole('link', { name: 'Docs' })).toHaveAttribute(
+      'href',
+      '/docs',
+    )
 
     const subscribeLink = screen.getByRole('link', { name: 'Subscribe' })
     expect(subscribeLink).toHaveAttribute('data-variant', 'primary')
     expect(subscribeLink).toHaveAttribute('target', '_blank')
-    expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute('data-variant', 'secondary')
+    expect(screen.getByRole('link', { name: 'Contact' })).toHaveAttribute(
+      'data-variant',
+      'secondary',
+    )
   })
 
   it('omits optional sections when data collections are empty', () => {
@@ -111,9 +116,15 @@ describe('Header', () => {
       },
     )
 
-    expect(renderAuthControls).toHaveBeenCalledWith({ settings: expect.objectContaining({ showAuthControls: true }) })
-    expect(renderTenantSwitcher).toHaveBeenCalledWith({ settings: expect.objectContaining({ showTenantSwitcher: true }) })
-    expect(renderThemeToggle).toHaveBeenCalledWith({ settings: expect.objectContaining({ showThemeToggle: true }) })
+    expect(renderAuthControls).toHaveBeenCalledWith({
+      settings: expect.objectContaining({ showAuthControls: true }),
+    })
+    expect(renderTenantSwitcher).toHaveBeenCalledWith({
+      settings: expect.objectContaining({ showTenantSwitcher: true }),
+    })
+    expect(renderThemeToggle).toHaveBeenCalledWith({
+      settings: expect.objectContaining({ showThemeToggle: true }),
+    })
 
     expect(screen.getByTestId('auth-controls')).toBeInTheDocument()
     expect(screen.getByTestId('tenant-switcher')).toBeInTheDocument()
@@ -148,9 +159,7 @@ describe('Header', () => {
 
     renderHeader(
       {
-        primaryLinks: [
-          { label: 'Stories', href: '/stories' },
-        ],
+        primaryLinks: [{ label: 'Stories', href: '/stories' }],
       },
       { onNavigate },
     )
@@ -165,9 +174,7 @@ describe('Header', () => {
   it('marks active navigation links based on the activePath prop', () => {
     renderHeader(
       {
-        primaryLinks: [
-          { label: 'Stories', href: '/stories' },
-        ],
+        primaryLinks: [{ label: 'Stories', href: '/stories' }],
       },
       { activePath: '/stories' },
     )

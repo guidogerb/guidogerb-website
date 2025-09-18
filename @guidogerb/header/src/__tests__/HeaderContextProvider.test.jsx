@@ -42,9 +42,7 @@ describe('HeaderContextProvider', () => {
     const onRender = vi.fn()
     const overrides = {
       brand: { title: 'Tenant', tagline: 'Stories worth sharing', href: '/tenant' },
-      primaryLinks: [
-        { label: 'Home', href: '/' },
-      ],
+      primaryLinks: [{ label: 'Home', href: '/' }],
       showTenantSwitcher: true,
     }
 
@@ -61,7 +59,11 @@ describe('HeaderContextProvider', () => {
 
     await waitFor(() => {
       const stored = getHeaderSettings()
-      expect(stored.brand).toMatchObject({ title: 'Tenant', href: '/tenant', tagline: 'Stories worth sharing' })
+      expect(stored.brand).toMatchObject({
+        title: 'Tenant',
+        href: '/tenant',
+        tagline: 'Stories worth sharing',
+      })
       expect(stored.primaryLinks).toHaveLength(1)
       expect(stored.showTenantSwitcher).toBe(true)
     })
