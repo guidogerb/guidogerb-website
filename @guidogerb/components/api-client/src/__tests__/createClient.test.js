@@ -64,11 +64,12 @@ describe('createClient', () => {
   })
 
   it('does not retry non-idempotent methods', async () => {
-    const fetch = vi
-      .fn()
-      .mockResolvedValue(
-        jsonResponse({ message: 'boom' }, { status: 500, statusText: 'Internal Server Error' }),
-      )
+    const fetch = vi.fn().mockResolvedValue(
+      jsonResponse(
+        { message: 'boom' },
+        { status: 500, statusText: 'Internal Server Error' },
+      ),
+    )
 
     const client = createClient({
       baseUrl: 'https://api.example.com',
@@ -130,11 +131,12 @@ describe('createClient', () => {
   })
 
   it('throws ApiError with response details for error statuses', async () => {
-    const fetch = vi
-      .fn()
-      .mockResolvedValue(
-        jsonResponse({ error: 'not allowed' }, { status: 403, statusText: 'Forbidden' }),
-      )
+    const fetch = vi.fn().mockResolvedValue(
+      jsonResponse(
+        { error: 'not allowed' },
+        { status: 403, statusText: 'Forbidden' },
+      ),
+    )
 
     const client = createClient({ baseUrl: 'https://api.example.com', fetch })
 

@@ -6,7 +6,11 @@ const providerPropsLog = vi.hoisted(() => [])
 vi.mock('react-oidc-context', () => ({
   AuthProvider: ({ children, ...props }) => {
     providerPropsLog.push(props)
-    return <div data-testid="oidc-provider">{children}</div>
+    return (
+      <div data-testid="oidc-provider">
+        {children}
+      </div>
+    )
   },
 }))
 
@@ -46,7 +50,9 @@ describe('AuthProvider', () => {
       </AuthProvider>,
     )
 
-    expect(screen.getByText(/missing required oidc settings/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/missing required oidc settings/i),
+    ).toBeInTheDocument()
     expect(screen.getByText(/authority or metadataUrl/i)).toBeInTheDocument()
     expect(providerPropsLog).toHaveLength(0)
     expect(consoleErrorSpy).toHaveBeenCalled()
@@ -85,7 +91,10 @@ describe('AuthProvider', () => {
   })
 
   it('renders the login callback screen on the configured callback path', () => {
-    vi.stubEnv('VITE_COGNITO_METADATA_URL', 'https://env.example/.well-known/openid-configuration')
+    vi.stubEnv(
+      'VITE_COGNITO_METADATA_URL',
+      'https://env.example/.well-known/openid-configuration',
+    )
     vi.stubEnv('VITE_COGNITO_CLIENT_ID', 'env-client')
 
     setMockLocation('http://localhost/auth/callback')
@@ -101,7 +110,10 @@ describe('AuthProvider', () => {
   })
 
   it('derives redirect_uri from the current origin when configuration omits it', () => {
-    vi.stubEnv('VITE_COGNITO_METADATA_URL', 'https://env.example/.well-known/openid-configuration')
+    vi.stubEnv(
+      'VITE_COGNITO_METADATA_URL',
+      'https://env.example/.well-known/openid-configuration',
+    )
     vi.stubEnv('VITE_COGNITO_CLIENT_ID', 'env-client')
 
     setMockLocation('https://app.example/dashboard')
