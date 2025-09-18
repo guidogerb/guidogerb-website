@@ -5,18 +5,26 @@
   "type": "module",
   "main": "./index.js",
   "module": "./index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "exports": {
     ".": {
       "import": "./index.js",
       "require": "./index.js"
-    }
+    },
+    "./reset.css": "./reset.css",
+    "./tokens.css": "./tokens.css",
+    "./package.json": "./package.json"
   },
   "files": [
     "index.js",
-    "src"
+    "reset.css",
+    "tokens.css"
   ],
-  "peerDependencies": {
-    "react": ">=19"
-  },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
 }
