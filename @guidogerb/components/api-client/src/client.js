@@ -109,15 +109,15 @@ const parseBody = async (response) => {
 const shouldRetryResponse = (method, response) => {
   if (!RETRYABLE_METHODS.has(method.toUpperCase())) return false
   if (!response) return false
-  if (RETRYABLE_STATUS_CODES.has(response.status)) return true
-  return false
+  return RETRYABLE_STATUS_CODES.has(response.status);
+
 }
 
 const shouldRetryError = (method, error) => {
   if (!RETRYABLE_METHODS.has(method.toUpperCase())) return false
   if (!error) return false
-  if (error.name === 'AbortError') return false
-  return true
+  return error.name !== 'AbortError';
+
 }
 
 export class ApiError extends Error {
