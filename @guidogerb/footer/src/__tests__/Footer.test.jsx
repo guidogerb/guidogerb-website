@@ -20,9 +20,7 @@ describe('Footer', () => {
         },
         {
           title: 'Contact',
-          links: [
-            { label: 'Email', href: 'mailto:hello@guidogerb.com' },
-          ],
+          links: [{ label: 'Email', href: 'mailto:hello@guidogerb.com' }],
         },
       ],
       socialLinks: [
@@ -40,7 +38,9 @@ describe('Footer', () => {
       'href',
       'https://guidogerb.com',
     )
-    expect(screen.getByText('Story-driven performances and publishing partners.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Story-driven performances and publishing partners.'),
+    ).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Programs' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Concerts/ })).toHaveAttribute('href', '/concerts')
     expect(screen.getByText('Seasonal residencies')).toBeInTheDocument()
@@ -73,9 +73,7 @@ describe('Footer', () => {
   it('invokes onNavigate when provided', () => {
     const handleNavigate = vi.fn()
     renderFooter({
-      sections: [
-        { title: 'Company', links: [{ label: 'About', href: '/about' }] },
-      ],
+      sections: [{ title: 'Company', links: [{ label: 'About', href: '/about' }] }],
       onNavigate: handleNavigate,
     })
 

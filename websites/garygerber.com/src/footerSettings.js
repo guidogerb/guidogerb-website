@@ -19,7 +19,11 @@ export default {
       id: 'studio',
       title: 'Studio resources',
       links: [
-        { label: 'Rehearsal room', href: '/rehearsal', description: 'Protected collaborator portal' },
+        {
+          label: 'Rehearsal room',
+          href: '/rehearsal',
+          description: 'Protected collaborator portal',
+        },
         { label: 'Newsletter', href: '/newsletter' },
         { label: 'Contact', href: '/contact' },
       ],

@@ -40,7 +40,9 @@ const normalizeSections = (sections) => {
       return {
         id: isNonEmptyString(section?.id) ? section.id : undefined,
         title: isNonEmptyString(section?.title) ? section.title.trim() : undefined,
-        description: isNonEmptyString(section?.description) ? section.description.trim() : undefined,
+        description: isNonEmptyString(section?.description)
+          ? section.description.trim()
+          : undefined,
         links,
       }
     })
@@ -172,7 +174,8 @@ export function Footer({
 } = {}) {
   const normalizedSections = useMemo(() => normalizeSections(sections), [sections])
   const normalizedSocial = useMemo(() => normalizeLinks(socialLinks), [socialLinks])
-  const hasBrand = isNonEmptyString(brand?.name) || isNonEmptyString(description) || normalizedSocial.length > 0
+  const hasBrand =
+    isNonEmptyString(brand?.name) || isNonEmptyString(description) || normalizedSocial.length > 0
 
   const footerClassName = [BASE_CLASS, className].filter(Boolean).join(' ')
 

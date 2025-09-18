@@ -54,16 +54,16 @@ function SiteFooter() {
 
 ## Props
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `brand` | `{ name?: string; href?: string; logo?: ReactNode }` | Optional brand name and link rendered at the top of the footer. |
-| `description` | `string` | Supporting copy below the brand name. |
-| `sections` | `Array<{ id?: string; title?: string; description?: string; links: FooterLink[] }>` | Grouped navigation links. Empty titles are ignored. |
-| `socialLinks` | `FooterLink[]` | Rendered as icon/text buttons beneath the brand. |
-| `legalLinks` | `FooterLink[]` | Inline links rendered in the meta row (privacy, terms, etc.). |
-| `copyright` | `string` | Small-print copyright text displayed beneath the legal links. |
-| `onNavigate` | `(payload: { link: FooterLink; event: MouseEvent }) => void` | Called when any footer link is clicked. When provided, default navigation is prevented. |
-| `children` | `ReactNode` | Optional extra content rendered between the link grid and the legal row (e.g., newsletter signup form). |
+| Prop          | Type                                                                                | Description                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `brand`       | `{ name?: string; href?: string; logo?: ReactNode }`                                | Optional brand name and link rendered at the top of the footer.                                         |
+| `description` | `string`                                                                            | Supporting copy below the brand name.                                                                   |
+| `sections`    | `Array<{ id?: string; title?: string; description?: string; links: FooterLink[] }>` | Grouped navigation links. Empty titles are ignored.                                                     |
+| `socialLinks` | `FooterLink[]`                                                                      | Rendered as icon/text buttons beneath the brand.                                                        |
+| `legalLinks`  | `FooterLink[]`                                                                      | Inline links rendered in the meta row (privacy, terms, etc.).                                           |
+| `copyright`   | `string`                                                                            | Small-print copyright text displayed beneath the legal links.                                           |
+| `onNavigate`  | `(payload: { link: FooterLink; event: MouseEvent }) => void`                        | Called when any footer link is clicked. When provided, default navigation is prevented.                 |
+| `children`    | `ReactNode`                                                                         | Optional extra content rendered between the link grid and the legal row (e.g., newsletter signup form). |
 
 `FooterLink` objects accept the following fields:
 

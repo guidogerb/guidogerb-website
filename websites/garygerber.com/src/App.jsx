@@ -86,7 +86,8 @@ function App() {
         }
 
         const targetPath = url.pathname || '/'
-        const sectionId = SECTION_MAP[targetPath] || (url.hash ? url.hash.replace('#', '') : undefined)
+        const sectionId =
+          SECTION_MAP[targetPath] || (url.hash ? url.hash.replace('#', '') : undefined)
 
         window.history.pushState({}, '', targetPath)
         setActivePath(targetPath)
@@ -111,10 +112,13 @@ function App() {
         <main className="app-main">
           <section className="hero" id="programs">
             <p className="eyebrow">Seasonal programs crafted for story-driven concerts</p>
-            <h1>Gary Gerber shapes performances that stay with audiences long after the final encore.</h1>
+            <h1>
+              Gary Gerber shapes performances that stay with audiences long after the final encore.
+            </h1>
             <p className="lede">
-              From symphony halls to intimate salons, Gary partners with presenters to build immersive concerts,
-              residencies, and education series that highlight local composers and community voices.
+              From symphony halls to intimate salons, Gary partners with presenters to build
+              immersive concerts, residencies, and education series that highlight local composers
+              and community voices.
             </p>
             <dl className="hero-highlights" aria-label="Program highlights">
               <div>
@@ -136,15 +140,17 @@ function App() {
             <article>
               <h2>Residencies &amp; masterclasses</h2>
               <p>
-                Partner with Gary to curate multi-day engagements that pair public performances with student workshops,
-                collaborative rehearsals, and composer roundtables tailored to your campus or festival.
+                Partner with Gary to curate multi-day engagements that pair public performances with
+                student workshops, collaborative rehearsals, and composer roundtables tailored to
+                your campus or festival.
               </p>
             </article>
             <article>
               <h2>Program development</h2>
               <p>
-                Need a fresh recital concept or community outreach program? Gary works alongside artistic directors to
-                develop thematic concerts, interactive talks, and outreach experiences that resonate with your audience.
+                Need a fresh recital concept or community outreach program? Gary works alongside
+                artistic directors to develop thematic concerts, interactive talks, and outreach
+                experiences that resonate with your audience.
               </p>
             </article>
           </section>
@@ -155,23 +161,32 @@ function App() {
               <ul className="feature-list">
                 <li>
                   <h3>"Northern Lights"</h3>
-                  <p>Atmospheric piano works inspired by Nordic folklore, featuring collaborations with string quartet Pulse.</p>
+                  <p>
+                    Atmospheric piano works inspired by Nordic folklore, featuring collaborations
+                    with string quartet Pulse.
+                  </p>
                 </li>
                 <li>
                   <h3>"Stories in Transit"</h3>
-                  <p>A live album captured during the 2024 Rail Lines residency, blending improvisation with commuter soundscapes.</p>
+                  <p>
+                    A live album captured during the 2024 Rail Lines residency, blending
+                    improvisation with commuter soundscapes.
+                  </p>
                 </li>
                 <li>
                   <h3>"Field Notes"</h3>
-                  <p>Commissioned pieces for wind ensemble documenting national park sound walks with student composers.</p>
+                  <p>
+                    Commissioned pieces for wind ensemble documenting national park sound walks with
+                    student composers.
+                  </p>
                 </li>
               </ul>
             </article>
             <article id="education">
               <h2>Studio resources</h2>
               <p>
-                Access curriculum guides, repertoire suggestions, and rehearsal exercises crafted from decades of teaching
-                in conservatories and community programs.
+                Access curriculum guides, repertoire suggestions, and rehearsal exercises crafted
+                from decades of teaching in conservatories and community programs.
               </p>
               <ul className="feature-list">
                 <li>Weekly warm-up sequences for mixed-ability ensembles</li>
@@ -185,14 +200,18 @@ function App() {
             <article>
               <h2>About Gary</h2>
               <p>
-                Gary Gerber is an award-winning composer and pianist whose work bridges classical traditions with
-                contemporary storytelling. He has collaborated with the Minnesota Orchestra, Banff Centre for Arts and
-                Creativity, and community ensembles around the globe.
+                Gary Gerber is an award-winning composer and pianist whose work bridges classical
+                traditions with contemporary storytelling. He has collaborated with the Minnesota
+                Orchestra, Banff Centre for Arts and Creativity, and community ensembles around the
+                globe.
               </p>
             </article>
             <article id="press">
               <h2>Press highlights</h2>
-              <p className="quote">“Gerber’s performances invite the audience into the score—equal parts virtuosity and welcome.”</p>
+              <p className="quote">
+                “Gerber’s performances invite the audience into the score—equal parts virtuosity and
+                welcome.”
+              </p>
               <p className="quote-attribution">— The Chronicle of Chamber Music</p>
             </article>
           </section>
@@ -201,8 +220,8 @@ function App() {
             <div>
               <h2>Join the studio letter</h2>
               <p>
-                Get quarterly notes on upcoming programs, new recordings, and behind-the-scenes stories from Gary’s
-                collaborations with composers, dancers, and filmmakers.
+                Get quarterly notes on upcoming programs, new recordings, and behind-the-scenes
+                stories from Gary’s collaborations with composers, dancers, and filmmakers.
               </p>
             </div>
             <form
@@ -213,7 +232,13 @@ function App() {
               <label htmlFor="newsletter-email" className="visually-hidden">
                 Email address
               </label>
-              <input id="newsletter-email" type="email" name="email" placeholder="you@example.com" autoComplete="email" />
+              <input
+                id="newsletter-email"
+                type="email"
+                name="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+              />
               <button type="submit">Notify me</button>
             </form>
           </section>
@@ -221,8 +246,8 @@ function App() {
           <section className="protected" id="client-access">
             <h2>Client rehearsal room</h2>
             <p className="protected-copy">
-              Presenters and collaborators can review rehearsal notes, download scores, and coordinate logistics once
-              signed in.
+              Presenters and collaborators can review rehearsal notes, download scores, and
+              coordinate logistics once signed in.
             </p>
             <Protected logoutUri={import.meta.env.VITE_LOGOUT_URI}>
               <Welcome />
@@ -235,7 +260,8 @@ function App() {
             <h2>Bookings &amp; inquiries</h2>
             <p>
               Email <a href="mailto:hello@garygerber.com">hello@garygerber.com</a> or call{' '}
-              <a href="tel:+16125550123">+1 (612) 555-0123</a> for availability and partnership details.
+              <a href="tel:+16125550123">+1 (612) 555-0123</a> for availability and partnership
+              details.
             </p>
             <p>Based in Minneapolis, performing worldwide.</p>
           </div>
