@@ -32,5 +32,12 @@ export function ProtectedRouter({
     [guard, guardProps, protectFallback, wrapElement],
   )
 
-  return <PublicRouter {...rest} routes={routes} fallback={fallback} wrapElement={guardWrapper} />
+  return (
+    <PublicRouter
+      {...rest}
+      routes={routes}
+      fallback={fallback}
+      wrapElement={guardWrapper}
+    />
+  )
 }
