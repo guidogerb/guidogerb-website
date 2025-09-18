@@ -1,2 +1,13 @@
-// Re-export library entry for consumers that import from the package root
-export default () => {}
+export {
+  DEFAULT_HEADER_SETTINGS,
+  createHeaderSettings,
+  getDefaultHeaderSettings,
+  getHeaderSettings,
+  resetHeaderSettings,
+  setHeaderSettings,
+  updateHeaderSettings,
+} from './src/settings.js'
+export { HeaderContext } from './src/HeaderContext.js'
+export { HeaderContextProvider } from './src/HeaderContextProvider.jsx'
+export { useHeaderContext } from './src/useHeaderContext.js'
+export { HeaderContextProvider as default } from './src/HeaderContextProvider.jsx'
