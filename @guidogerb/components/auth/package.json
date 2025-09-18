@@ -25,7 +25,8 @@
   },
   "dependencies": {
     "oidc-client-ts": "^3.3.0",
-    "react-oidc-context": "^3.3.0"
+    "react-oidc-context": "^3.3.0",
+    "vitest": "^3.2.4"
   },
   "devDependencies": {
     "react": "^19.1.1",
