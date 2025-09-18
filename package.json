@@ -18,7 +18,7 @@
     "websites/picklecheeze.com",
     "websites/this-is-my-story.org",
     "websites/stream4cloud.com",
-    "websites/ggp-llc.com"
+    "websites/ggp.llc"
   ],
   "scripts": {
     "clean": "rimraf --glob \"node_modules\" \"@guidogerb/**/node_modules\" \"websites/**/node_modules\" \"@guidogerb/**/dist\" \"websites/**/dist\" \"pnpm-lock.yaml\" \"package-lock.json\" \"yarn.lock\" \"npm-shrinkwrap.json\" \"**/pnpm-lock.yaml\" \"**/package-lock.json\" \"**/yarn.lock\" \"**/npm-shrinkwrap.json\"",
