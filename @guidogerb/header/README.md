@@ -6,7 +6,11 @@ brand, navigation, and localized metadata.
 ## Usage
 
 ```tsx
-import { HeaderContextProvider, createHeaderSettings, useHeaderContext } from '@guidogerb/header'
+import {
+  HeaderContextProvider,
+  createHeaderSettings,
+  useHeaderContext,
+} from '@guidogerb/header'
 
 const tenantSettings = createHeaderSettings({
   brand: {
@@ -22,7 +26,11 @@ const tenantSettings = createHeaderSettings({
 })
 
 export function AppShell({ children }) {
-  return <HeaderContextProvider defaultSettings={tenantSettings}>{children}</HeaderContextProvider>
+  return (
+    <HeaderContextProvider defaultSettings={tenantSettings}>
+      {children}
+    </HeaderContextProvider>
+  )
 }
 
 function BrandTitle() {
