@@ -1,2 +1,2 @@
-// Re-export library entry for consumers that import from the package root
-export default () => {}
+export { NavigationMenu } from './src/NavigationMenu.jsx'
+export { NavigationMenu as default } from './src/NavigationMenu.jsx'

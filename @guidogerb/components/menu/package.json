@@ -5,6 +5,10 @@
   "type": "module",
   "main": "./index.js",
   "module": "./index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "exports": {
     ".": {
       "import": "./index.js",
@@ -18,5 +22,10 @@
   "peerDependencies": {
     "react": ">=19"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "vitest": "^3.2.4"
+  }
 }
