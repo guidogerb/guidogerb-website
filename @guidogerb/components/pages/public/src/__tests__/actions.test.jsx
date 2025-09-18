@@ -5,7 +5,9 @@ import { createElement } from 'react'
 describe('actions helpers', () => {
   it('renders link and button actions with sensible defaults', () => {
     const button = renderAction({ label: 'Retry', onClick: () => {} }, 0, { scope: 'shell' })
-    const link = renderAction({ label: 'Docs', href: 'https://example.com/docs' }, 1, { scope: 'shell' })
+    const link = renderAction({ label: 'Docs', href: 'https://example.com/docs' }, 1, {
+      scope: 'shell',
+    })
 
     const { getByRole } = render(
       <div>
