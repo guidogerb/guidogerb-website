@@ -56,12 +56,7 @@ export const headerSettings = createHeaderSettings({
   ],
   utilityLinks: [
     { id: 'partner-portal', label: 'Partner portal', href: '/partner-portal' },
-    {
-      id: 'support',
-      label: 'Support',
-      href: 'mailto:support@guidogerbpublishing.com',
-      external: true,
-    },
+    { id: 'support', label: 'Support', href: 'mailto:support@guidogerbpublishing.com', external: true },
     { id: 'contact', label: 'Contact', href: '/contact' },
   ],
   actions: [

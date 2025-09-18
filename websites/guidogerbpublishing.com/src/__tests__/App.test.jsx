@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -121,6 +121,32 @@ describe('GuidoGerb Publishing website App', () => {
     await waitFor(() => {
       expect(platformLink).toHaveAttribute('aria-current', 'page')
     })
+
+    pushStateSpy.mockRestore()
+  })
+
+  it('renders the shared footer and routes footer navigation through the handler', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+
+    const pushStateSpy = vi.spyOn(window.history, 'pushState')
+
+    await renderApp()
+
+    const footer = screen.getByRole('contentinfo')
+    expect(footer).toHaveTextContent('Work with GuidoGerb Publishing')
+    expect(screen.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/company/guidogerb',
+    )
+
+    const user = userEvent.setup()
+    const partnerLink = await within(footer).findByRole('link', { name: /Partner portal/i })
+
+    await user.click(partnerLink)
+
+    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/partner-portal')
+    const lastScrollCall = scrollSpy.mock.calls.at(-1)
+    expect(lastScrollCall?.[0]).toHaveProperty('id', 'partner-portal')
 
     pushStateSpy.mockRestore()
   })

@@ -23,7 +23,9 @@ const tenantSettings = createHeaderSettings({
     { label: 'Menu', href: '/menu' },
     { label: 'Order', href: '/order' },
   ],
-  actions: [{ label: 'Order now', href: '/order', variant: 'primary' }],
+  actions: [
+    { label: 'Order now', href: '/order', variant: 'primary' },
+  ],
 })
 
 export function AppShell({ children }) {

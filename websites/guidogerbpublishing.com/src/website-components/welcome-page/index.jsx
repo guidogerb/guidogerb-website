@@ -20,8 +20,8 @@ export default function Welcome({ children }) {
       <h3>Welcome back, {name}!</h3>
       {email ? <p className="welcome-subhead">Signed in as {email}</p> : null}
       <p>
-        Access launch calendars, royalty statements, and marketing assets to keep upcoming releases
-        on schedule. Let us know if you need additional formats or updated metadata.
+        Access launch calendars, royalty statements, and marketing assets to keep upcoming releases on schedule.
+        Let us know if you need additional formats or updated metadata.
       </p>
       <ul className="welcome-links">
         <li>

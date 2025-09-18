@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -122,6 +122,32 @@ describe('Gary Gerber website App', () => {
     await waitFor(() => {
       expect(programsLink).toHaveAttribute('aria-current', 'page')
     })
+
+    pushStateSpy.mockRestore()
+  })
+
+  it('renders the shared footer and routes footer links through the navigation handler', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+
+    const pushStateSpy = vi.spyOn(window.history, 'pushState')
+
+    await renderApp()
+
+    const footer = screen.getByRole('contentinfo')
+    expect(footer).toHaveTextContent('Bookings & inquiries')
+    expect(screen.getByRole('link', { name: 'Instagram' })).toHaveAttribute(
+      'href',
+      'https://instagram.com/garygerbermusic',
+    )
+
+    const user = userEvent.setup()
+    const rehearsalLink = await within(footer).findByRole('link', { name: /Rehearsal room/i })
+
+    await user.click(rehearsalLink)
+
+    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/rehearsal')
+    const lastScrollCall = scrollSpy.mock.calls.at(-1)
+    expect(lastScrollCall?.[0]).toHaveProperty('id', 'client-access')
 
     pushStateSpy.mockRestore()
   })
