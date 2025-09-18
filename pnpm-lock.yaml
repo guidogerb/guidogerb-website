@@ -143,6 +143,9 @@ importers:
 
   '@guidogerb/header':
     dependencies:
+      '@guidogerb/components-menu':
+        specifier: workspace:*
+        version: link:../components/menu
       use-immer:
         specifier: ^0.11.0
         version: 0.11.0(immer@10.1.3)(react@19.1.1)

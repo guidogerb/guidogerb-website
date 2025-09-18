@@ -171,20 +171,13 @@ function normalizeBrand(brand, fallback) {
   const merged = { ...fallbackBrand, ...value }
 
   return {
-    title:
-      typeof merged.title === 'string' && merged.title.trim().length > 0
-        ? merged.title
-        : fallbackBrand.title,
-    href:
-      typeof merged.href === 'string' && merged.href.trim().length > 0
-        ? merged.href
-        : fallbackBrand.href,
-    tagline:
-      typeof merged.tagline === 'string'
-        ? merged.tagline
-        : typeof fallbackBrand.tagline === 'string'
-          ? fallbackBrand.tagline
-          : DEFAULT_HEADER_SETTINGS.brand.tagline,
+    title: typeof merged.title === 'string' && merged.title.trim().length > 0 ? merged.title : fallbackBrand.title,
+    href: typeof merged.href === 'string' && merged.href.trim().length > 0 ? merged.href : fallbackBrand.href,
+    tagline: typeof merged.tagline === 'string'
+      ? merged.tagline
+      : typeof fallbackBrand.tagline === 'string'
+        ? fallbackBrand.tagline
+        : DEFAULT_HEADER_SETTINGS.brand.tagline,
     logoSrc: merged.logoSrc ?? null,
   }
 }
@@ -221,12 +214,11 @@ function normalizeNavItem(item, fallback) {
     label: typeof label === 'string' ? label : '',
     href: typeof href === 'string' && href.length > 0 ? href : '#',
     external: Boolean(external),
-    description:
-      typeof description === 'string'
-        ? description
-        : typeof fallbackItem.description === 'string'
-          ? fallbackItem.description
-          : undefined,
+    description: typeof description === 'string'
+      ? description
+      : typeof fallbackItem.description === 'string'
+        ? fallbackItem.description
+        : undefined,
     children: normalizeNavCollection(childSource, fallbackItem.children),
   }
 }
@@ -255,9 +247,7 @@ function normalizeAction(action, fallback) {
   const resolvedVariant =
     variant === 'primary' || variant === 'secondary' || variant === 'link'
       ? variant
-      : fallbackAction.variant === 'primary' ||
-          fallbackAction.variant === 'secondary' ||
-          fallbackAction.variant === 'link'
+      : fallbackAction.variant === 'primary' || fallbackAction.variant === 'secondary' || fallbackAction.variant === 'link'
         ? fallbackAction.variant
         : NAV_VARIANT_DEFAULT
 
@@ -278,9 +268,7 @@ function normalizeAction(action, fallback) {
 function normalizeAnnouncementCollection(collection, fallback) {
   const fallbackAnnouncements = Array.isArray(fallback) ? fallback : []
   const source = Array.isArray(collection) ? collection : fallbackAnnouncements
-  return source.map((announcement, index) =>
-    normalizeAnnouncement(announcement, index, fallbackAnnouncements[index]),
-  )
+  return source.map((announcement, index) => normalizeAnnouncement(announcement, index, fallbackAnnouncements[index]))
 }
 
 /**
@@ -297,24 +285,21 @@ function normalizeAnnouncement(announcement, index, fallback) {
 
   return {
     ...rest,
-    id:
-      typeof id === 'string' && id.trim().length > 0
-        ? id
-        : typeof fallbackAnnouncement.id === 'string' && fallbackAnnouncement.id.trim().length > 0
-          ? fallbackAnnouncement.id
-          : `announcement-${index}`,
-    message:
-      typeof message === 'string' && message.length > 0
-        ? message
-        : typeof fallbackAnnouncement.message === 'string'
-          ? fallbackAnnouncement.message
-          : '',
-    href:
-      typeof href === 'string' && href.length > 0
-        ? href
-        : typeof fallbackAnnouncement.href === 'string'
-          ? fallbackAnnouncement.href
-          : undefined,
+    id: typeof id === 'string' && id.trim().length > 0
+      ? id
+      : typeof fallbackAnnouncement.id === 'string' && fallbackAnnouncement.id.trim().length > 0
+        ? fallbackAnnouncement.id
+        : `announcement-${index}`,
+    message: typeof message === 'string' && message.length > 0
+      ? message
+      : typeof fallbackAnnouncement.message === 'string'
+        ? fallbackAnnouncement.message
+        : '',
+    href: typeof href === 'string' && href.length > 0
+      ? href
+      : typeof fallbackAnnouncement.href === 'string'
+        ? fallbackAnnouncement.href
+        : undefined,
     tone: ANNOUNCEMENT_TONES.has(tone)
       ? /** @type {'info' | 'warning' | 'success' | 'neutral'} */ (tone)
       : ANNOUNCEMENT_TONES.has(fallbackAnnouncement.tone)
@@ -334,18 +319,9 @@ function normalizeI18n(i18n, fallback) {
   const merged = { ...fallbackI18n, ...value }
 
   return {
-    locale:
-      typeof merged.locale === 'string' && merged.locale.length > 0
-        ? merged.locale
-        : fallbackI18n.locale,
-    currency:
-      typeof merged.currency === 'string' && merged.currency.length > 0
-        ? merged.currency
-        : fallbackI18n.currency,
-    timezone:
-      typeof merged.timezone === 'string' && merged.timezone.length > 0
-        ? merged.timezone
-        : fallbackI18n.timezone,
+    locale: typeof merged.locale === 'string' && merged.locale.length > 0 ? merged.locale : fallbackI18n.locale,
+    currency: typeof merged.currency === 'string' && merged.currency.length > 0 ? merged.currency : fallbackI18n.currency,
+    timezone: typeof merged.timezone === 'string' && merged.timezone.length > 0 ? merged.timezone : fallbackI18n.timezone,
   }
 }
 

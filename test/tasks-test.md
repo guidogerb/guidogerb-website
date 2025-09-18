@@ -4,30 +4,30 @@ This backlog enumerates every application-facing workspace in the monorepo and c
 
 ## Shared component packages
 
-| Package                                  | Current coverage                                                                                    | Follow-up tasks                                                                                                                      |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `@guidogerb/components/api-client`       | ✅ HTTP client unit tests cover configuration, token injection, retries, and error normalization.   | Plan contract tests once additional endpoints ship (e.g., pagination helpers, error mapping).                                        |
-| `@guidogerb/components/auth`             | ✅ Auth flow tests cover the provider, wrapper, and callback utilities.                             | Add integration tests that exercise real OIDC context mocks (refresh, logout) and ensure redirect guards work inside consuming apps. |
-| `@guidogerb/components/menu`             | ✅ Navigation menu tests cover hierarchical rendering, active state, and custom link rendering.     | Plan keyboard and focus management tests once interactive disclosures or drawers are implemented.                                    |
-| `@guidogerb/components/pages-public`     | _None_                                                                                              | When the public page shells are available, verify that required routes render without protected context.                             |
-| `@guidogerb/components/pages-protected`  | _None_                                                                                              | After dashboard/page stubs ship, add tests for auth gating and feature flag rendering.                                               |
-| `@guidogerb/components/router-public`    | _None_                                                                                              | Plan routing smoke tests to ensure the public router exposes expected paths and fallbacks.                                           |
-| `@guidogerb/components/router-protected` | _None_                                                                                              | Add tests validating protected route guards, redirects, and breadcrumb helpers.                                                      |
-| `@guidogerb/components/sw`               | _None_                                                                                              | Once the service worker gains caching logic, create unit tests for precache manifest wiring and update notifications.                |
-| `@guidogerb/components/ui`               | _None_                                                                                              | After real UI widgets are implemented, cover them with accessibility checks and regression snapshots.                                |
-| `@guidogerb/css`                         | _None_                                                                                              | Capture token regression tests (e.g., CSS variables) with a style snapshot once tokens stabilize.                                    |
-| `@guidogerb/footer`                      | _None_                                                                                              | Add render tests verifying link sets per tenant once the footer is implemented.                                                      |
-| `@guidogerb/header`                      | ✅ Settings store and provider tests cover context hydration, mutation helpers, and global syncing. | Add UI/component integration tests once the rendered header shell exists.                                                            |
+| Package | Current coverage | Follow-up tasks |
+| --- | --- | --- |
+| `@guidogerb/components/api-client` | ✅ HTTP client unit tests cover configuration, token injection, retries, and error normalization. | Plan contract tests once additional endpoints ship (e.g., pagination helpers, error mapping). |
+| `@guidogerb/components/auth` | ✅ Auth flow tests cover the provider, wrapper, and callback utilities. | Add integration tests that exercise real OIDC context mocks (refresh, logout) and ensure redirect guards work inside consuming apps. |
+| `@guidogerb/components/menu` | ✅ Navigation menu tests cover hierarchical rendering, active state, and custom link rendering. | Plan keyboard and focus management tests once interactive disclosures or drawers are implemented. |
+| `@guidogerb/components/pages-public` | _None_ | When the public page shells are available, verify that required routes render without protected context. |
+| `@guidogerb/components/pages-protected` | _None_ | After dashboard/page stubs ship, add tests for auth gating and feature flag rendering. |
+| `@guidogerb/components/router-public` | _None_ | Plan routing smoke tests to ensure the public router exposes expected paths and fallbacks. |
+| `@guidogerb/components/router-protected` | _None_ | Add tests validating protected route guards, redirects, and breadcrumb helpers. |
+| `@guidogerb/components/sw` | _None_ | Once the service worker gains caching logic, create unit tests for precache manifest wiring and update notifications. |
+| `@guidogerb/components/ui` | _None_ | After real UI widgets are implemented, cover them with accessibility checks and regression snapshots. |
+| `@guidogerb/css` | _None_ | Capture token regression tests (e.g., CSS variables) with a style snapshot once tokens stabilize. |
+| `@guidogerb/footer` | _None_ | Add render tests verifying link sets per tenant once the footer is implemented. |
+| `@guidogerb/header` | ✅ Settings store, provider, and header component tests cover context hydration, navigation wiring, announcements, and render hooks. | Plan responsive/mobile interaction tests (disclosure menus, toggle wiring) once interactive behaviour ships. |
 
 ## Tenant websites
 
-| Package                            | Current coverage | Follow-up tasks                                                                                                                  |
-| ---------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `websites/garygerber.com`          | _None_           | Add route smoke tests that ensure the landing page renders with shared header/footer and protected sections defer to auth mocks. |
-| `websites/guidogerbpublishing.com` | _None_           | Mirror the Gary Gerber site checks and verify publishing-specific copy renders.                                                  |
-| `websites/picklecheeze.com`        | _None_           | Add snapshot/interaction tests for unique theming once components exist.                                                         |
-| `websites/this-is-my-story.org`    | _None_           | Add tests for story navigation flows and ensure 404 handling works.                                                              |
-| `websites/stream4cloud.com`        | _None_           | Cover the landing page hero, CTA wiring, and route guards once the app shell exists.                                             |
+| Package | Current coverage | Follow-up tasks |
+| --- | --- | --- |
+| `websites/garygerber.com` | _None_ | Add route smoke tests that ensure the landing page renders with shared header/footer and protected sections defer to auth mocks. |
+| `websites/guidogerbpublishing.com` | _None_ | Mirror the Gary Gerber site checks and verify publishing-specific copy renders. |
+| `websites/picklecheeze.com` | _None_ | Add snapshot/interaction tests for unique theming once components exist. |
+| `websites/this-is-my-story.org` | _None_ | Add tests for story navigation flows and ensure 404 handling works. |
+| `websites/stream4cloud.com` | _None_ | Cover the landing page hero, CTA wiring, and route guards once the app shell exists. |
 
 ## Cross-cutting infrastructure
 
