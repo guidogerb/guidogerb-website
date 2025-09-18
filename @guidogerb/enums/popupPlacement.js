@@ -1,6 +1,5 @@
-// !! This file exists twice !! //
-// this file also is in the header!
-// see the header twin file for an explanation
+// Shared Popper.js-style placement tokens that keep the enums aligned between the header
+// package and any downstream consumers without duplicating string literals everywhere.
 
 /** @typedef {import('@guidogerb/header').PopupPlacement} PopupPlacement */
 
