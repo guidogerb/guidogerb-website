@@ -40,9 +40,7 @@ describe('header settings store', () => {
         { label: 'Start trial', href: '/start', variant: 'primary' },
         { label: 'Contact', href: '/contact', variant: 'secondary' },
       ],
-      announcements: [
-        { id: 'launch', message: 'Launching soon!', href: '/launch', tone: 'warning' },
-      ],
+      announcements: [{ id: 'launch', message: 'Launching soon!', href: '/launch', tone: 'warning' }],
       i18n: { currency: 'EUR' },
       showAuthControls: false,
       showTenantSwitcher: true,
@@ -79,19 +77,17 @@ describe('header settings store', () => {
 
   it('updates settings via callback updaters', () => {
     updateHeaderSettings((current) => ({
-      primaryLinks: [...current.primaryLinks, { label: 'Stories', href: '/stories' }],
+      primaryLinks: [
+        ...current.primaryLinks,
+        { label: 'Stories', href: '/stories' },
+      ],
       showThemeToggle: false,
     }))
 
     const settings = getHeaderSettings()
 
     expect(settings.primaryLinks).toHaveLength(1)
-    expect(settings.primaryLinks[0]).toEqual({
-      label: 'Stories',
-      href: '/stories',
-      external: false,
-      children: [],
-    })
+    expect(settings.primaryLinks[0]).toEqual({ label: 'Stories', href: '/stories', external: false, children: [] })
     expect(settings.showThemeToggle).toBe(false)
   })
 

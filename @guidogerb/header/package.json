@@ -13,7 +13,8 @@
     ".": {
       "import": "./index.js",
       "require": "./index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "index.js",

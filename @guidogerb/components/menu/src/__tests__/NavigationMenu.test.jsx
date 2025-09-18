@@ -45,7 +45,12 @@ describe('NavigationMenu', () => {
   })
 
   it('marks the active item and supports external links', () => {
-    render(<NavigationMenu items={buildItems()} activePath="https://tenant.test/catalog" />)
+    render(
+      <NavigationMenu
+        items={buildItems()}
+        activePath="https://tenant.test/catalog"
+      />,
+    )
 
     const activeLink = screen.getByRole('link', { name: /Catalog/ })
     expect(activeLink).toHaveAttribute('aria-current', 'page')
