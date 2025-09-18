@@ -2,7 +2,13 @@ import Protected from '@guidogerb/components-pages-protected'
 import { createRouteObjects } from '@guidogerb/components-router-public'
 
 export function createProtectedRouteObjects(routes, options = {}) {
-  const { fallback, guard = Protected, guardProps, protectFallback = false, wrapElement } = options
+  const {
+    fallback,
+    guard = Protected,
+    guardProps,
+    protectFallback = false,
+    wrapElement,
+  } = options
 
   const guardWrapper = (element, route = {}) => {
     let output = element

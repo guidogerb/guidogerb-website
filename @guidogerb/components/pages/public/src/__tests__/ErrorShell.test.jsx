@@ -8,10 +8,7 @@ describe('ErrorShell', () => {
         statusCode={500}
         title="Unexpected error"
         description="Something went wrong while loading the rehearsal portal."
-        actions={[
-          { label: 'Try again', onClick: () => {} },
-          { label: 'Contact support', href: 'mailto:help@example.com' },
-        ]}
+        actions={[{ label: 'Try again', onClick: () => {} }, { label: 'Contact support', href: 'mailto:help@example.com' }]}
       >
         <p>Reference ID: abc123</p>
       </ErrorShell>,
@@ -20,14 +17,9 @@ describe('ErrorShell', () => {
     const alert = screen.getByRole('alert')
     expect(alert).toHaveTextContent('500')
     expect(screen.getByRole('heading', { name: 'Unexpected error' })).toBeInTheDocument()
-    expect(
-      screen.getByText('Something went wrong while loading the rehearsal portal.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Something went wrong while loading the rehearsal portal.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Contact support' })).toHaveAttribute(
-      'href',
-      'mailto:help@example.com',
-    )
+    expect(screen.getByRole('link', { name: 'Contact support' })).toHaveAttribute('href', 'mailto:help@example.com')
     expect(screen.getByText('Reference ID: abc123')).toBeInTheDocument()
   })
 

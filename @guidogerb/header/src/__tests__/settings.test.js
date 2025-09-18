@@ -41,7 +41,7 @@ describe('header settings store', () => {
         { label: 'Contact', href: '/contact', variant: 'secondary' },
       ],
       announcements: [
-        { id: 'launch', message: 'Launching soon!', href: '/launch', tone: 'warning' },
+        { id: 'launch', message: 'Launching soon!', href: '/launch', tone: 'highlight' },
       ],
       i18n: { currency: 'EUR' },
       showAuthControls: false,
@@ -64,7 +64,7 @@ describe('header settings store', () => {
     ])
 
     expect(settings.announcements).toEqual([
-      { id: 'launch', message: 'Launching soon!', href: '/launch', tone: 'warning' },
+      { id: 'launch', message: 'Launching soon!', href: '/launch', tone: 'highlight' },
     ])
 
     expect(settings.i18n).toEqual({

@@ -28,7 +28,7 @@
  * @property {string} id
  * @property {string} message
  * @property {string} [href]
- * @property {'info' | 'warning' | 'success' | 'neutral'} [tone]
+ * @property {'info' | 'warning' | 'success' | 'neutral' | 'highlight'} [tone]
  */
 
 /**
@@ -53,7 +53,7 @@
  */
 
 const NAV_VARIANT_DEFAULT = 'link'
-const ANNOUNCEMENT_TONES = new Set(['info', 'warning', 'success', 'neutral'])
+const ANNOUNCEMENT_TONES = new Set(['info', 'warning', 'success', 'neutral', 'highlight'])
 
 /** @type {HeaderSettings} */
 const DEFAULT_HEADER_SETTINGS = Object.freeze({
@@ -316,9 +316,11 @@ function normalizeAnnouncement(announcement, index, fallback) {
           ? fallbackAnnouncement.href
           : undefined,
     tone: ANNOUNCEMENT_TONES.has(tone)
-      ? /** @type {'info' | 'warning' | 'success' | 'neutral'} */ (tone)
+      ? /** @type {'info' | 'warning' | 'success' | 'neutral' | 'highlight'} */ (tone)
       : ANNOUNCEMENT_TONES.has(fallbackAnnouncement.tone)
-        ? /** @type {'info' | 'warning' | 'success' | 'neutral'} */ (fallbackAnnouncement.tone)
+        ? /** @type {'info' | 'warning' | 'success' | 'neutral' | 'highlight'} */ (
+            fallbackAnnouncement.tone
+          )
         : 'info',
   }
 }

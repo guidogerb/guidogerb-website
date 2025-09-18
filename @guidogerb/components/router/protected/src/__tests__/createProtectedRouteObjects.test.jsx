@@ -22,7 +22,9 @@ describe('createProtectedRouteObjects', () => {
   })
 
   it('wraps protected routes with the configured guard', () => {
-    const routes = createProtectedRouteObjects([{ path: '/', element: <div>Home</div> }])
+    const routes = createProtectedRouteObjects([
+      { path: '/', element: <div>Home</div> },
+    ])
 
     render(routes[0].element)
     expect(screen.getByTestId('guard')).toHaveTextContent('Home')
@@ -38,19 +40,20 @@ describe('createProtectedRouteObjects', () => {
   })
 
   it('respects fallback guard preference', () => {
-    const routes = createProtectedRouteObjects([{ path: '/', element: <div>Home</div> }], {
-      fallback: <div>Not found</div>,
-    })
+    const routes = createProtectedRouteObjects(
+      [{ path: '/', element: <div>Home</div> }],
+      { fallback: <div>Not found</div> },
+    )
 
     expect(routes).toHaveLength(2)
 
     render(routes[1].element)
     expect(screen.queryByTestId('guard')).not.toBeInTheDocument()
 
-    const guardedFallback = createProtectedRouteObjects([{ path: '/', element: <div>Home</div> }], {
-      fallback: <div>Not found</div>,
-      protectFallback: true,
-    })
+    const guardedFallback = createProtectedRouteObjects(
+      [{ path: '/', element: <div>Home</div> }],
+      { fallback: <div>Not found</div>, protectFallback: true },
+    )
 
     render(guardedFallback[1].element)
     expect(screen.getByTestId('guard')).toHaveTextContent('Not found')
@@ -58,13 +61,13 @@ describe('createProtectedRouteObjects', () => {
 
   it('merges global and route-specific guard props', () => {
     const CustomGuard = ({ children, label }) => (
-      <div data-testid="custom-guard">
-        {label || 'none'}- {children}
-      </div>
+      <div data-testid="custom-guard">{label || 'none'}- {children}</div>
     )
 
     const routes = createProtectedRouteObjects(
-      [{ path: '/', element: <div>Home</div>, guard: CustomGuard, guardProps: { label: 'route' } }],
+      [
+        { path: '/', element: <div>Home</div>, guard: CustomGuard, guardProps: { label: 'route' } },
+      ],
       { guardProps: { label: 'global' } },
     )
 

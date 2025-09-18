@@ -12,10 +12,7 @@ describe('MarketingShell', () => {
         description="Immersive residencies and concerts."
         media={<img alt="Gary at the piano" src="/piano.jpg" />}
         aside={<p>Availability updated monthly.</p>}
-        actions={[
-          { label: 'Book a consultation', href: '/contact' },
-          { label: 'Download program', href: '/program.pdf', download: true },
-        ]}
+        actions={[{ label: 'Book a consultation', href: '/contact' }, { label: 'Download program', href: '/program.pdf', download: true }]}
       >
         <ul>
           <li>Residencies</li>
@@ -30,10 +27,7 @@ describe('MarketingShell', () => {
     expect(screen.getByText('Immersive residencies and concerts.')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Gary at the piano' })).toBeInTheDocument()
     expect(screen.getByText('Availability updated monthly.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Book a consultation' })).toHaveAttribute(
-      'href',
-      '/contact',
-    )
+    expect(screen.getByRole('link', { name: 'Book a consultation' })).toHaveAttribute('href', '/contact')
     expect(screen.getByRole('link', { name: 'Download program' })).toHaveAttribute('download')
     expect(screen.getByText('Residencies')).toBeInTheDocument()
   })
