@@ -53,10 +53,7 @@ describe('service worker helpers', () => {
     const unregisterA = vi.fn(() => Promise.resolve())
     const unregisterB = vi.fn(() => Promise.resolve())
     const getRegistrations = vi.fn(() =>
-      Promise.resolve([
-        { unregister: unregisterA },
-        { unregister: unregisterB },
-      ]),
+      Promise.resolve([{ unregister: unregisterA }, { unregister: unregisterB }]),
     )
 
     Object.defineProperty(window.navigator, 'serviceWorker', {

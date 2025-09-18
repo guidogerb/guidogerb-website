@@ -52,18 +52,12 @@ export const NavigationMenu = forwardRef(function NavigationMenu(
   ref,
 ) {
   const orientationValue = orientation === 'vertical' ? 'vertical' : 'horizontal'
-  const navClassName = [
-    BASE_CLASS,
-    `${BASE_CLASS}--${orientationValue}`,
-    className,
-  ]
+  const navClassName = [BASE_CLASS, `${BASE_CLASS}--${orientationValue}`, className]
     .filter(Boolean)
     .join(' ')
 
   const { className: listClassName, ...restListProps } = listProps ?? {}
-  const mergedListClassName = [`${BASE_CLASS}__list`, listClassName]
-    .filter(Boolean)
-    .join(' ')
+  const mergedListClassName = [`${BASE_CLASS}__list`, listClassName].filter(Boolean).join(' ')
 
   const handleLinkClick = (item) => (event) => {
     if (typeof onNavigate === 'function') {
