@@ -46,10 +46,13 @@ describe('PublicRouter', () => {
       />,
     )
 
-    expect(factory).toHaveBeenCalledWith(expect.any(Array), expect.objectContaining({
-      basename: '/app',
-      initialEntries: ['/app/dashboard'],
-    }))
+    expect(factory).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({
+        basename: '/app',
+        initialEntries: ['/app/dashboard'],
+      }),
+    )
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
   })
 
