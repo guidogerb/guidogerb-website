@@ -50,7 +50,7 @@ const buildUrl = (baseUrl, path = '', searchParams) => {
   const base = ensureTrailingSlash(baseUrl)
   const isAbsolute = typeof path === 'string' && /^https?:\/\//i.test(path)
   const normalizedPath =
-    !path || isAbsolute ? path ?? '' : path.startsWith('/') ? path.slice(1) : path
+    !path || isAbsolute ? (path ?? '') : path.startsWith('/') ? path.slice(1) : path
   const url = new URL(normalizedPath || '', base)
   if (searchParams) {
     if (typeof searchParams === 'string') {
