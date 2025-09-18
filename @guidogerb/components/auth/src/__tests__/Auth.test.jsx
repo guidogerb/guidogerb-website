@@ -28,7 +28,9 @@ describe('Auth', () => {
     render(<Auth />)
 
     expect(screen.getByText(/network down/i)).toBeInTheDocument()
-    expect(screen.getByText(/hint: ensure oidc is configured/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/hint: ensure oidc is configured/i),
+    ).toBeInTheDocument()
   })
 
   it('renders the protected children once the session is authenticated', () => {

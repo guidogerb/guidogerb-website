@@ -2,9 +2,9 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(140% 120% at 20% 20%, rgba(59, 130, 246, 0.28), transparent 55%),
-    radial-gradient(120% 140% at 80% 0%, rgba(34, 197, 94, 0.18), transparent 60%), var(--color-bg);
+  background: radial-gradient(140% 120% at 20% 20%, rgba(59, 130, 246, 0.28), transparent 55%),
+    radial-gradient(120% 140% at 80% 0%, rgba(34, 197, 94, 0.18), transparent 60%),
+    var(--color-bg);
   color: var(--color-text);
 }
 

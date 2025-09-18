@@ -16,9 +16,7 @@ const getActionKey = (action, index) => {
 
 const defaultRenderAction = ({ action }) => {
   if (!isNonEmptyString(action?.label) || !isNonEmptyString(action?.href)) return null
-  const variant = ['primary', 'secondary', 'link'].includes(action?.variant)
-    ? action.variant
-    : 'link'
+  const variant = ['primary', 'secondary', 'link'].includes(action?.variant) ? action.variant : 'link'
 
   const anchorProps = {
     className: `${BASE_CLASS}__action ${BASE_CLASS}__action--${variant}`,

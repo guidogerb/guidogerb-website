@@ -20,8 +20,8 @@ export default function Welcome({ children }) {
       <h3>Welcome back, {name}!</h3>
       {email ? <p className="welcome-subhead">Signed in as {email}</p> : null}
       <p>
-        You now have access to scores, stage plots, and rehearsal notes for upcoming engagements.
-        Reach out if anything looks out of date before the next planning session.
+        You now have access to scores, stage plots, and rehearsal notes for upcoming engagements. Reach out if anything
+        looks out of date before the next planning session.
       </p>
       <ul className="welcome-links">
         <li>
@@ -31,9 +31,7 @@ export default function Welcome({ children }) {
           <a href="/files/rehearsal-checklist.pdf">Rehearsal checklist</a>
         </li>
         <li>
-          <a href="mailto:hello@garygerber.com?subject=Collaboration%20Notes">
-            Email production team
-          </a>
+          <a href="mailto:hello@garygerber.com?subject=Collaboration%20Notes">Email production team</a>
         </li>
       </ul>
       {children}
