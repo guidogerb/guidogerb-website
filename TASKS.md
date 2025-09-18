@@ -2,49 +2,56 @@
 
 This document captures a prioritized, actionable task list derived from SPEC.md and the current repository state. Aim for small, verifiable increments. Items are grouped by area with suggested owners and acceptance criteria.
 
+## Prioritized Next Tasks
+
+1. **Ship the PWA foundation** — Integrate `vite-plugin-pwa`, wire up the shared `@guidogerb/sw` package, and add offline/sitemap generators under `infra/scripts/writeHtml` to satisfy SPEC offline requirements (see §5).
+2. **Add tenant error handling routes** — Ensure every website defines explicit 404/error boundaries so broken links resolve gracefully instead of falling through to the SPA (see §3).
+3. **Deploy a reference site** — Use the existing CI/CD pipeline to publish at least one tenant (e.g., garygerber.com) to S3/CloudFront as a validation step for milestone M0 (see §9).
+4. **Tighten documentation scaffolding** — Cross-link SPEC, PUBLISHING, README, and TASKS and stand up an ADR log to capture architectural decisions (see §8).
+
 ## 0) Repo Hygiene & Tooling
 
-- [ ] Switch root scripts to pnpm (SPEC + README recommend pnpm; current scripts use npm workspaces)
+- [x] Switch root scripts to pnpm (SPEC + README recommend pnpm; current scripts use npm workspaces)
   - Update root package.json scripts to: build/dev/lint/test using `pnpm -r`
   - Acceptance: `pnpm -r build` builds all workspaces; `pnpm -r dev` runs watchers where present.
-- [ ] Align workspace naming and versions
+- [x] Align workspace naming and versions
   - Current workspaces include `@guidogerb/components/*` but packages are not present. Either add stubs (see 2) or remove until ready.
   - Acceptance: `pnpm install` succeeds with no missing workspace warnings.
-- [ ] Add baseline lint/format config (ESLint + Prettier, TS config once TS is introduced)
+- [x] Add baseline lint/format config (ESLint + Prettier, TS config once TS is introduced)
   - Acceptance: `pnpm -r lint` runs and passes (or reports real linting issues).
 
 ## 1) CSS Tokens & Reset (Low Effort, Immediate Value)
 
-- [ ] Populate `@guidogerb/css/reset.css` with a modern reset (e.g., Andy Bell / Josh Comeau / normalize.css-inspired)
-- [ ] Populate `@guidogerb/css/tokens.css` with CSS variables for colors, spacing, radii, typography, etc.
+- [x] Populate `@guidogerb/css/reset.css` with a modern reset (e.g., Andy Bell / Josh Comeau / normalize.css-inspired)
+- [x] Populate `@guidogerb/css/tokens.css` with CSS variables for colors, spacing, radii, typography, etc.
   - Acceptance: Importing these files applies baseline styles; sample page renders with tokens available under `:root`.
 
 ## 2) Workspace Stubs (Unblock Builds)
 
 Create minimal package stubs for listed shared packages so that builds resolve dependencies. Each package: package.json, src/index.(ts|js), and README.
 
-- [ ] `@guidogerb/components-api`
-- [ ] `@guidogerb/components-auth`
-- [ ] `@guidogerb/components-menu`
-- [ ] `@guidogerb/components-pages-public`
-- [ ] `@guidogerb/components-pages-protected`
-- [ ] `@guidogerb/components-router-public`
-- [ ] `@guidogerb/components-router-protected`
-- [ ] `@guidogerb/footer`
-- [ ] `@guidogerb/header`
+- [x] `@guidogerb/components-api`
+- [x] `@guidogerb/components-auth`
+- [x] `@guidogerb/components-menu`
+- [x] `@guidogerb/components-pages-public`
+- [x] `@guidogerb/components-pages-protected`
+- [x] `@guidogerb/components-router-public`
+- [x] `@guidogerb/components-router-protected`
+- [x] `@guidogerb/footer`
+- [x] `@guidogerb/header`
   - Acceptance: `pnpm -r build` succeeds (packages can export placeholders).
 
 ## 3) Websites — Vite App Baseline
 
 - [ ] Verify that error handling routes exist for each tenent website i.e. If any site should throw a 404 error, the app should have a route for that page.;
-- [ ] Confirm websites/garygerber.com runs locally (vite dev) with placeholder routes using shared packages.
-- [ ] Create similar scaffolds for other sites listed in workspaces (copy garygerber.com as baseline) or remove from workspaces until ready.
+- [x] Confirm websites/garygerber.com runs locally (vite dev) with placeholder routes using shared packages.
+- [x] Create similar scaffolds for other sites listed in workspaces (copy garygerber.com as baseline) or remove from workspaces until ready.
   - Acceptance: Each included website can `pnpm --filter <site> dev` and `build` successfully.
 
 ## 4) Environment & Secrets
 
-- [ ] Document and template `.env` requirements per site (see SPEC §11 and PUBLISHING.md §11)
-- [ ] Add `.env.example` for each website with VITE\_\* keys.
+- [x] Document and template `.env` requirements per site (see SPEC §11 and PUBLISHING.md §11)
+- [x] Add `.env.example` for each website with VITE\_\* keys.
   - Acceptance: New dev can copy `.env.example` → `.env` and run dev server.
 
 ## 5) PWA & Offline Shell
@@ -55,13 +62,13 @@ Create minimal package stubs for listed shared packages so that builds resolve d
 
 ## 6) CI/CD Scaffolding (GitHub Actions + AWS OIDC)
 
-- [ ] Add basic GitHub Actions workflow that builds workspaces and artifacts for one website (stream4cloud.com or garygerber.com)
-- [ ] Add placeholder for AWS OIDC role assumption (no secrets in repo)
+- [x] Add basic GitHub Actions workflow that builds workspaces and artifacts for one website (stream4cloud.com or garygerber.com)
+- [x] Add placeholder for AWS OIDC role assumption (no secrets in repo)
   - Acceptance: Workflow passes on pull requests; produces build artifacts.
 
 ## 7) Infra Notes & Placeholders
 
-- [ ] Validate `infra/cfn/` presence vs PUBLISHING.md steps; if missing, create directory structure and README placeholders
+- [x] Validate `infra/cfn/` presence vs PUBLISHING.md steps; if missing, create directory structure and README placeholders
   - Acceptance: Clear path for infra deployment; no build coupling.
 
 ## 8) Documentation Upkeep
@@ -72,10 +79,10 @@ Create minimal package stubs for listed shared packages so that builds resolve d
 
 ## 9) Milestone M0 Deliverables (per SPEC §12)
 
-- [ ] Monorepo structure finalized; pnpm workspaces stable
+- [x] Monorepo structure finalized; pnpm workspaces stable
 - [ ] One Vite app deployed to S3/CloudFront (manual steps OK)
-- [ ] Cognito Hosted UI integrated at least for local login flow (redirect handler stub)
-- [ ] DynamoDB table + API skeleton noted in infra (no BE code required yet)
+- [x] Cognito Hosted UI integrated at least for local login flow (redirect handler stub)
+- [x] DynamoDB table + API skeleton noted in infra (no BE code required yet)
   - Acceptance: Public routes render; auth redirect works; deployment documented and repeatable.
 
 ---
