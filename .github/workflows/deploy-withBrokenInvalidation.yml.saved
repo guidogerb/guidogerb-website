@@ -94,3 +94,9 @@ jobs:
           DEST="s3://${{ env.BUCKET }}/${{ matrix.site }}/"
           echo "Syncing $SRC to $DEST"
           aws s3 sync "$SRC" "$DEST" --delete
+
+      - name: Create CloudFront invalidation
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ env.DISTRIBUTION_ID }}" \
+            --paths "/${{ matrix.site }}/*"
