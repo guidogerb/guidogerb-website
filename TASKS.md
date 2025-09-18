@@ -56,8 +56,8 @@ Create minimal package stubs for listed shared packages so that builds resolve d
 
 ## 5) PWA & Offline Shell
 
-- [ ] Add vite-plugin-pwa and a minimal Workbox service worker package `@guidogerb/sw` (stub now; real logic later)
-- [ ] Provide `infra/scripts/writeHtml` utilities for offline.html and sitemap
+- [x] Add vite-plugin-pwa and a minimal Workbox service worker package `@guidogerb/sw` (stub now; real logic later)
+- [x] Provide `infra/scripts/writeHtml` utilities for offline.html and sitemap
   - Acceptance: Dev build includes manifest and registers SW behind a feature flag (can be disabled in dev).
 
 ## 6) CI/CD Scaffolding (GitHub Actions + AWS OIDC)

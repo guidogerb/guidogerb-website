@@ -8,7 +8,7 @@
     "@guidogerb/components/menu",
     "@guidogerb/components/pages/*",
     "@guidogerb/components/router/*",
-    "@guidogerb/components/sw",
+    "@guidogerb/sw",
     "@guidogerb/components/ui",
     "@guidogerb/css",
     "@guidogerb/footer",

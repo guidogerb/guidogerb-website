@@ -3,23 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Offline</title>
+    <title>Stream4Cloud — Offline</title>
     <style>
+      :root {
+        color-scheme: dark;
+      }
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          Segoe UI,
-          Roboto,
-          Ubuntu,
-          Cantarell,
-          Noto Sans,
-          Helvetica,
-          Arial,
-          'Apple Color Emoji',
-          'Segoe UI Emoji';
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial,
+          'Apple Color Emoji', 'Segoe UI Emoji';
         margin: 0;
-        padding: 2rem;
+        padding: 2.5rem;
         display: grid;
         place-items: center;
         min-height: 100vh;
@@ -27,28 +20,35 @@
         color: #eaeef3;
       }
       .card {
-        max-width: 36rem;
-        padding: 1.5rem;
-        border-radius: 12px;
+        max-width: 38rem;
+        padding: 2rem;
+        border-radius: 16px;
         background: #12161f;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
       }
       h1 {
-        margin: 0 0 0.5rem;
+        margin: 0 0 0.75rem;
         font-weight: 650;
+        font-size: clamp(1.75rem, 3vw + 1rem, 2.5rem);
       }
       p {
-        opacity: 0.85;
+        opacity: 0.9;
+        line-height: 1.6;
+      }
+      .hint {
+        margin-top: 1.5rem;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        background: color-mix(in srgb, #6ea8fe 14%, transparent);
+        border: 1px solid color-mix(in srgb, #6ea8fe 40%, #12161f);
       }
     </style>
   </head>
   <body>
     <div class="card">
       <h1>You're offline</h1>
-      <p>
-        Some pages may be unavailable without a connection. Please try again when you're back
-        online.
-      </p>
+      <p>Some pages may be unavailable without a connection. Please try again when you're back online.</p>
+      <p class="hint">Reload once you're reconnected to access the latest content.</p>
     </div>
   </body>
 </html>

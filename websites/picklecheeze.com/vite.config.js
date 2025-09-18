@@ -1,6 +1,8 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import mkcert from 'vite-plugin-mkcert'
+import { createPwaPlugin } from '@guidogerb/sw/vite'
+import { pwaConfig } from './pwa.config.js'
 
 export default ({ mode }) => {
   // Single source of truth for the base domain
@@ -51,6 +53,19 @@ export default ({ mode }) => {
   const allowedHosts = [localHost]
   const env = loadEnv(mode, process.cwd(), '')
 
+  const basePath = env.VITE_BASE_PATH || '/'
+  const manifest = {
+    name: pwaConfig.siteName,
+    short_name: pwaConfig.shortName,
+    description: pwaConfig.description,
+    theme_color: pwaConfig.themeColor,
+    background_color: pwaConfig.backgroundColor,
+    icons: [
+      { src: '/pwa-icon.svg', sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
+      { src: '/pwa-icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' },
+    ],
+  }
+
   let buildOptions = {
     sourcemap: mode === 'development',
     minify: mode === 'production' ? 'esbuild' : false,
@@ -93,6 +108,14 @@ export default ({ mode }) => {
   }
 
   plugins.push(restrictHosts(allowedHosts), printPreviewUrls())
+  plugins.push(
+    createPwaPlugin({
+      mode,
+      base: basePath,
+      manifest,
+      includeAssets: ['pwa-icon.svg'],
+    }),
+  )
 
   return defineConfig({
     logLevel: 'silent',
@@ -100,7 +123,7 @@ export default ({ mode }) => {
       conditions: [mode],
     },
     plugins,
-    base: env.VITE_BASE_PATH || '/',
+    base: basePath,
     server: {
       https: true,
       host: true,

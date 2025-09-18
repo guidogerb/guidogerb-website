@@ -5,17 +5,21 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf package-lock.json node_modules dist",
-    "dev": "node generate-sitemap.mjs development && vite",
-    "build": "node generate-sitemap.mjs production && vite build",
-    "build:staging": "node generate-sitemap.mjs development && vite build --mode staging",
-    "build:prod-bundle": "node generate-sitemap.mjs production && vite build --mode production-bundle",
+    "pwa:assets:dev": "node ../../infra/scripts/writeHtml/runSiteAssets.mjs --config ./pwa.config.js --mode development",
+    "pwa:assets:staging": "node ../../infra/scripts/writeHtml/runSiteAssets.mjs --config ./pwa.config.js --mode staging",
+    "pwa:assets:prod": "node ../../infra/scripts/writeHtml/runSiteAssets.mjs --config ./pwa.config.js --mode production",
+    "pwa:assets": "pnpm run pwa:assets:dev",
+    "dev": "pnpm run pwa:assets && vite",
+    "build": "pnpm run pwa:assets:prod && vite build",
+    "build:staging": "pnpm run pwa:assets:staging && vite build --mode staging",
+    "build:prod-bundle": "pnpm run pwa:assets:prod && vite build --mode production-bundle",
     "prepreview": "npm run build",
     "preview": "vite preview --strictPort",
     "lint": "pnpm exec eslint . --ext .js,.jsx --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sitemap:dev": "node generate-sitemap.mjs development",
-    "sitemap:prod": "node generate-sitemap.mjs production"
+    "sitemap:dev": "pnpm run pwa:assets:dev",
+    "sitemap:prod": "pnpm run pwa:assets:prod"
   },
   "dependencies": {
     "@guidogerb/components-api": "workspace:*",
@@ -25,14 +29,14 @@
     "@guidogerb/components-pages-public": "workspace:*",
     "@guidogerb/components-router-protected": "workspace:*",
     "@guidogerb/components-router-public": "workspace:*",
-    "@guidogerb/components-sw": "workspace:*",
     "@guidogerb/components-ui": "workspace:*",
     "@guidogerb/css": "workspace:*",
     "@guidogerb/footer": "workspace:*",
     "@guidogerb/header": "workspace:*",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-json-view": "^1.21.3"
+    "react-json-view": "^1.21.3",
+    "@guidogerb/sw": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

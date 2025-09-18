@@ -5,7 +5,7 @@ import '@guidogerb/css/tokens.css'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from '@guidogerb/components-auth'
-import { registerSW } from '@guidogerb/components-sw'
+import { registerSW } from '@guidogerb/sw'
 
 if (import.meta.env.VITE_ENABLE_SW === 'true') {
   registerSW({ url: '/sw.js' })
