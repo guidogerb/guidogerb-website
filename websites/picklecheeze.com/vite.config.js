@@ -81,20 +81,25 @@ export default ({ mode }) => {
     }
   }
 
+  const plugins = [react()]
+
+  if (mode !== 'test') {
+    plugins.push(
+      mkcert({
+        force: true,
+        hosts: [localHost, wildcardLocalHost, ip],
+      }),
+    )
+  }
+
+  plugins.push(restrictHosts(allowedHosts), printPreviewUrls())
+
   return defineConfig({
     logLevel: 'silent',
     resolve: {
       conditions: [mode],
     },
-    plugins: [
-      react(),
-      mkcert({
-        force: true,
-        hosts: [localHost, wildcardLocalHost, ip],
-      }),
-      restrictHosts(allowedHosts),
-      printPreviewUrls(),
-    ],
+    plugins,
     base: env.VITE_BASE_PATH || '/',
     server: {
       https: true,

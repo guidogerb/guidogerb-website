@@ -54,3 +54,10 @@ Coding standards: TS strict, a11y-first components, no secret material in browse
 - Secure downloads use a pre-signed URL plus a permission-hash with TTL, limited uses, and audit logging.
 - Search: OpenSearch Serverless (BM25) to start; vector/RAG optional later.
 - Observability: Lambda Powertools, CloudWatch + X-Ray; performance KPIs (p95) and Core Web Vitals (LCP/INP/CLS).
+
+```bash
+node -v
+corepack enable
+corepack prepare pnpm@latest --activate
+pnpm -v
+```

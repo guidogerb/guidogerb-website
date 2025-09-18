@@ -18,7 +18,7 @@ export function useGlobalKeyEvent({ whichKeyCode, onKeyDown, onKeyUp }) {
     keydownFuncRef.current = (e) => {
       if (
         e.code === whichKeyCode ||
-        // @ts-expect-error probably shouldn't use keyCode anymore?
+        // @ts-expect-error keyCode is deprecated but still exposed for legacy hardware support
         e.keyCode === whichKeyCode ||
         e.key === whichKeyCode
       ) {
@@ -35,16 +35,16 @@ export function useGlobalKeyEvent({ whichKeyCode, onKeyDown, onKeyUp }) {
         }
       }
     }
-    // @ts-expect-error event typing here is weird
+    // @ts-expect-error DOM KeyboardEvent typing differs from the React handler signature here
     document.addEventListener('keydown', keydownFuncRef.current)
-    // @ts-expect-error event typing here is weird
+    // @ts-expect-error DOM KeyboardEvent typing differs from the React handler signature here
     document.addEventListener('keyup', keydownFuncRef.current)
 
     return () => {
       if (keydownFuncRef.current) {
-        // @ts-expect-error event typing here is weird
+        // @ts-expect-error DOM KeyboardEvent typing differs from the React handler signature here
         document.removeEventListener('keydown', keydownFuncRef.current)
-        // @ts-expect-error event typing here is weird
+        // @ts-expect-error DOM KeyboardEvent typing differs from the React handler signature here
         document.removeEventListener('keyup', keydownFuncRef.current)
       }
       keydownFuncRef.current = null
