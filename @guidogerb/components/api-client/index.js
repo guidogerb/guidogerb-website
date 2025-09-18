@@ -1,2 +1,2 @@
-// Re-export library entry for consumers that import from the package root
-export default () => {}
+export { createClient, ApiError } from './src/client.js'
+export { createClient as default } from './src/client.js'
