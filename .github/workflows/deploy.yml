@@ -73,7 +73,13 @@ jobs:
         env:
           MATRIX_SITE: ${{ matrix.site }}
         run: |
-          SITE_NO_EXT="${MATRIX_SITE%.*}"
+          if [[ "$MATRIX_SITE" == *.llc ]]; then
+            # Replace all dots with hyphens, e.g., ggp.llc -> ggp-llc
+            SITE_NO_EXT="${MATRIX_SITE//./-}"
+          else
+            # Strip last dot segment, e.g., example.com -> example
+            SITE_NO_EXT="${MATRIX_SITE%.*}"
+          fi
           pnpm --filter "websites-${SITE_NO_EXT}" build
 
       - name: List build output
