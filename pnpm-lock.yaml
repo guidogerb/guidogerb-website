@@ -90,22 +90,54 @@ importers:
         version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
 
   '@guidogerb/components/pages/public':
-    dependencies:
+    devDependencies:
       react:
-        specifier: '>=19'
+        specifier: ^19.1.1
         version: 19.1.1
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.1.1(react@19.1.1)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
 
   '@guidogerb/components/router/protected':
     dependencies:
+      '@guidogerb/components-pages-protected':
+        specifier: workspace:*
+        version: link:../../pages/protected
+      '@guidogerb/components-router-public':
+        specifier: workspace:*
+        version: link:../public
+      react-router-dom:
+        specifier: ^6.28.0
+        version: 6.30.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+    devDependencies:
       react:
-        specifier: '>=19'
+        specifier: ^19.1.1
         version: 19.1.1
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.1.1(react@19.1.1)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
 
   '@guidogerb/components/router/public':
     dependencies:
+      react-router-dom:
+        specifier: ^6.28.0
+        version: 6.30.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+    devDependencies:
       react:
-        specifier: '>=19'
+        specifier: ^19.1.1
         version: 19.1.1
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.1.1(react@19.1.1)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
 
   '@guidogerb/components/sw':
     devDependencies:
@@ -939,6 +971,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@remix-run/router@1.23.0':
+    resolution: {integrity: sha512-O3rHJzAQKamUz1fvE0Qaw0xSFqsA/yafi2iqeE0pvdFtCO1viYx8QL6f3Ln/aCCTLxs68SLf0KPM9eSeM8yBnA==}
+    engines: {node: '>=14.0.0'}
 
   '@rolldown/pluginutils@1.0.0-beta.35':
     resolution: {integrity: sha512-slYrCpoxJUqzFDDNlvrOYRazQUNRvWPjXA17dAOISY3rDMxX6k8K4cj2H+hEYMHF81HO3uNd5rHVigAWRM5dSg==}
@@ -1873,6 +1909,19 @@ packages:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
     engines: {node: '>=0.10.0'}
 
+  react-router-dom@6.30.1:
+    resolution: {integrity: sha512-llKsgOkZdbPU1Eg3zK8lCn+sjD9wMRZZPuzmdWWX5SUs8OFkN5HnFVC0u5KMeMaC9aoancFI/KoLuKPqN+hxHw==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+
+  react-router@6.30.1:
+    resolution: {integrity: sha512-X1m21aEmxGXqENEPG3T6u0Th7g0aS4ZmoNynhbs+Cn+q+QGTLt+d5IQ2bHAXKzKcxGJjxACpVbnYQSCRcfxHlQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+
   react-textarea-autosize@8.5.9:
     resolution: {integrity: sha512-U1DGlIQN5AwgjTyOEnI1oCcMuEr1pv1qOtklB2l4nyMGbHzWrI0eFsYK0zos2YWqAolJyG0IWJaqWmWj5ETh0A==}
     engines: {node: '>=10'}
@@ -2552,6 +2601,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@remix-run/router@1.23.0': {}
 
   '@rolldown/pluginutils@1.0.0-beta.35': {}
 
@@ -3465,6 +3516,18 @@ snapshots:
       react: 19.1.1
 
   react-refresh@0.17.0: {}
+
+  react-router-dom@6.30.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
+    dependencies:
+      '@remix-run/router': 1.23.0
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
+      react-router: 6.30.1(react@19.1.1)
+
+  react-router@6.30.1(react@19.1.1):
+    dependencies:
+      '@remix-run/router': 1.23.0
+      react: 19.1.1
 
   react-textarea-autosize@8.5.9(@types/react@19.1.13)(react@19.1.1):
     dependencies:
