@@ -4,15 +4,7 @@ import { Navigate } from 'react-router-dom'
 function toRouteObject(route, wrapElement) {
   if (!route) return null
 
-  const {
-    children,
-    element,
-    redirectTo,
-    replace,
-    state,
-    isFallback = false,
-    ...rest
-  } = route
+  const { children, element, redirectTo, replace, state, isFallback = false, ...rest } = route
 
   const definitionForCallback = {
     ...rest,
@@ -26,13 +18,7 @@ function toRouteObject(route, wrapElement) {
   let finalElement = element
 
   if (redirectTo !== undefined && redirectTo !== null) {
-    finalElement = (
-      <Navigate
-        to={redirectTo}
-        replace={replace !== false}
-        state={state}
-      />
-    )
+    finalElement = <Navigate to={redirectTo} replace={replace !== false} state={state} />
   }
 
   if (wrapElement && finalElement !== undefined) {
@@ -58,9 +44,7 @@ function toRouteObject(route, wrapElement) {
   }
 
   if (Array.isArray(children) && children.length > 0) {
-    const childObjects = children
-      .map((child) => toRouteObject(child, wrapElement))
-      .filter(Boolean)
+    const childObjects = children.map((child) => toRouteObject(child, wrapElement)).filter(Boolean)
 
     if (childObjects.length > 0) {
       routeObject.children = childObjects
@@ -80,7 +64,10 @@ export function createRouteObjects(routes, { fallback, wrapElement } = {}) {
 
   if (fallback && !hasCatchAll) {
     const fallbackDefinition =
-      typeof fallback === 'object' && fallback !== null && !Array.isArray(fallback) && !isValidElement(fallback)
+      typeof fallback === 'object' &&
+      fallback !== null &&
+      !Array.isArray(fallback) &&
+      !isValidElement(fallback)
         ? { path: fallback.path ?? '*', ...fallback, isFallback: true }
         : { path: '*', element: fallback, isFallback: true }
 

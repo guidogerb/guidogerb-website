@@ -138,9 +138,9 @@ function App() {
             <article>
               <h2>Cheeze lab experiments</h2>
               <p>
-                Rind-aged wheels develop in our temperature-controlled lab with cultures we propagate
-                from the very produce we ferment. Expect washed rinds, cave-aged blues, and creamy
-                spreads ready for service.
+                Rind-aged wheels develop in our temperature-controlled lab with cultures we
+                propagate from the very produce we ferment. Expect washed rinds, cave-aged blues,
+                and creamy spreads ready for service.
               </p>
               <ul className="feature-list">
                 <li>Cashew and sunflower bases cultured with koji, rejuvelac, and lactic blends</li>
@@ -167,8 +167,9 @@ function App() {
             <article>
               <h2>Pop-up tastings</h2>
               <p>
-                We host immersive tasting menus with natural wine pairings, collaborations with local
-                bakers, and fermentation demos that send you home with your own starter cultures.
+                We host immersive tasting menus with natural wine pairings, collaborations with
+                local bakers, and fermentation demos that send you home with your own starter
+                cultures.
               </p>
               <ul className="feature-list">
                 <li>Interactive stations for kraut pounding and cheeze shaping</li>
@@ -194,8 +195,8 @@ function App() {
             <div>
               <h2>Marketplace preview</h2>
               <p>
-                Subscribe for early access to market drops featuring cult-favorite jars, cheeze kits,
-                pantry toppers, and pairing bundles curated with local makers.
+                Subscribe for early access to market drops featuring cult-favorite jars, cheeze
+                kits, pantry toppers, and pairing bundles curated with local makers.
               </p>
             </div>
             <ul className="market-items" aria-label="Marketplace teasers">
@@ -218,8 +219,8 @@ function App() {
             <div>
               <h2>Join the brine dispatch</h2>
               <p>
-                Monthly emails share fermentation tips, release calendars, and behind-the-scenes looks
-                at experiments happening in the cheeze lab.
+                Monthly emails share fermentation tips, release calendars, and behind-the-scenes
+                looks at experiments happening in the cheeze lab.
               </p>
             </div>
             <form

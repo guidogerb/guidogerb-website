@@ -37,5 +37,8 @@ export default {
     { label: 'Privacy', href: '/privacy' },
     { label: 'Terms', href: '/terms' },
   ],
-  copyright: '© ' + new Date().getFullYear() + ' PickleCheeze Fermentation Cooperative. All rights reserved.',
+  copyright:
+    '© ' +
+    new Date().getFullYear() +
+    ' PickleCheeze Fermentation Cooperative. All rights reserved.',
 }
