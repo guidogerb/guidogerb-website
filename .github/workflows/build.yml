@@ -53,6 +53,7 @@ jobs:
           echo "${{ secrets.PICKLECHEEZE_VITE_ENV }}" > websites/picklecheeze.com/.env
           echo "${{ secrets.STREAM4CLOUD_VITE_ENV }}" > websites/stream4cloud.com/.env
           echo "${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}" > websites/this-is-my-story.org/.env
+          echo "${{ secrets.GGP_LLC_VITE_ENV }}" > websites/ggp.llc/.env
 
       - name: Build components
         run: pnpm -r build
@@ -100,6 +101,14 @@ jobs:
             pnpm --filter websites-stream4cloud build:prod-bundle
           else
             pnpm --filter websites-stream4cloud build:staging
+          fi
+
+      - name: Test branch-specific build (ggp.llc)
+        run: |
+          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
+            pnpm --filter websites-ggp-llc build:prod-bundle
+          else
+            pnpm --filter websites-ggp-llc build:staging
           fi
 
       - name: Save build artifacts
