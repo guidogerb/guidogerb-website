@@ -26,7 +26,8 @@ const sanitizeStoredThemes = (value) => {
     .map((entry) => {
       if (!entry || typeof entry !== 'object') return null
       const id = typeof entry.id === 'string' && entry.id.trim().length > 0 ? entry.id : null
-      const name = typeof entry.name === 'string' && entry.name.trim().length > 0 ? entry.name : null
+      const name =
+        typeof entry.name === 'string' && entry.name.trim().length > 0 ? entry.name : null
       if (!id && !name) return null
       const tokens = {}
       if (entry.tokens && typeof entry.tokens === 'object') {

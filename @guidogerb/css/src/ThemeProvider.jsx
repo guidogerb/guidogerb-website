@@ -41,7 +41,8 @@ const applyThemeToDocument = (theme) => {
   }
 }
 
-const coerceThemesArray = (themes) => (Array.isArray(themes) && themes.length > 0 ? themes : DEFAULT_THEMES)
+const coerceThemesArray = (themes) =>
+  Array.isArray(themes) && themes.length > 0 ? themes : DEFAULT_THEMES
 
 /**
  * Provides theme state, helpers, and persistence for Guido & Gerber web apps.
@@ -112,10 +113,7 @@ export function ThemeProvider({
   }, [allThemes])
 
   const resolvedActiveTheme =
-    themesById.get(activeThemeIdState) ??
-    themesById.get(defaultThemeId) ??
-    allThemes[0] ??
-    null
+    themesById.get(activeThemeIdState) ?? themesById.get(defaultThemeId) ?? allThemes[0] ?? null
 
   const resolvedActiveThemeId = resolvedActiveTheme?.id ?? null
 

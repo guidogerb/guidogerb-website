@@ -49,9 +49,7 @@ describe('ThemeProvider', () => {
       </ThemeProvider>,
     )
 
-    await waitFor(() =>
-      expect(document.documentElement.getAttribute('data-theme')).toBe('sunrise'),
-    )
+    await waitFor(() => expect(document.documentElement.getAttribute('data-theme')).toBe('sunrise'))
     expect(screen.getByTestId('theme')).toHaveTextContent(/sunrise/i)
   })
 
@@ -64,9 +62,7 @@ describe('ThemeProvider', () => {
       </ThemeProvider>,
     )
 
-    await waitFor(() =>
-      expect(document.documentElement.getAttribute('data-theme')).toBe('forest'),
-    )
+    await waitFor(() => expect(document.documentElement.getAttribute('data-theme')).toBe('forest'))
     expect(screen.getByTestId('theme')).toHaveAttribute('data-active', 'forest')
   })
 })
@@ -92,9 +88,7 @@ describe('ThemeSelect', () => {
 
     await user.selectOptions(select, 'sunrise')
 
-    await waitFor(() =>
-      expect(document.documentElement.getAttribute('data-theme')).toBe('sunrise'),
-    )
+    await waitFor(() => expect(document.documentElement.getAttribute('data-theme')).toBe('sunrise'))
 
     expect(localStorage.getItem(SELECTED_THEME_STORAGE_KEY)).toBe('sunrise')
   })

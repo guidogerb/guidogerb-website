@@ -25,7 +25,8 @@ const buildClassName = (...values) => values.filter(Boolean).join(' ')
 
 const sanitizeString = (value) => (typeof value === 'string' ? value : '')
 
-const getThemeTokens = (theme) => (theme?.tokens && typeof theme.tokens === 'object' ? theme.tokens : {})
+const getThemeTokens = (theme) =>
+  theme?.tokens && typeof theme.tokens === 'object' ? theme.tokens : {}
 
 /**
  * Theme selector and custom theme creation form suitable for embedding inside the header.
@@ -42,7 +43,8 @@ export function ThemeSelect({
   const themeContext = useTheme()
   const availableThemes = themeContext?.themes ?? []
   const activeThemeId = themeContext?.activeThemeId ?? availableThemes[0]?.id ?? ''
-  const activeTheme = themeContext?.activeTheme ?? availableThemes.find((theme) => theme.id === activeThemeId)
+  const activeTheme =
+    themeContext?.activeTheme ?? availableThemes.find((theme) => theme.id === activeThemeId)
   const setActiveThemeId = themeContext?.setActiveThemeId
   const createCustomTheme = themeContext?.createCustomTheme
   const canCreateCustom = typeof createCustomTheme === 'function'
@@ -192,7 +194,11 @@ export function ThemeSelect({
 
           <div className={`${BASE_CLASS}__grid`} role="group" aria-label="Theme colors">
             {CUSTOM_THEME_FIELDS.map((field) => (
-              <label key={field.key} className={`${BASE_CLASS}__field`} htmlFor={`${controlId}-${field.name}`}>
+              <label
+                key={field.key}
+                className={`${BASE_CLASS}__field`}
+                htmlFor={`${controlId}-${field.name}`}
+              >
                 <span className={`${BASE_CLASS}__field-label`}>{field.label}</span>
                 <input
                   id={`${controlId}-${field.name}`}

@@ -22,11 +22,7 @@ import { Header } from '@guidogerb/header'
 export function AppShell({ children }) {
   return (
     <ThemeProvider defaultThemeId="midnight">
-      <Header
-        renderThemeToggle={() => (
-          <ThemeSelect label="Theme" createLabel="New theme" />
-        )}
-      />
+      <Header renderThemeToggle={() => <ThemeSelect label="Theme" createLabel="New theme" />} />
       {children}
     </ThemeProvider>
   )
