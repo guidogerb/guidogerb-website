@@ -85,4 +85,50 @@ describe('LoginCallback', () => {
 
     await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/from-prop'))
   })
+
+  it('falls back to user.url_state when no explicit return hints are provided', async () => {
+    const location = setMockLocation('http://localhost/auth/callback?code=abc')
+
+    sessionStorage.setItem(
+      'auth:returnTo',
+      JSON.stringify({ pathname: '/from-session', search: '?tab=billing', hash: '#invoices' }),
+    )
+    localStorage.setItem('auth:returnTo', '/from-local')
+
+    authState.current = {
+      isAuthenticated: true,
+      user: { url_state: '/from-url-state?foo=bar' },
+    }
+
+    render(<LoginCallback storageKey="auth:returnTo" />)
+
+    await waitFor(() =>
+      expect(location.replace).toHaveBeenCalledWith('/from-url-state?foo=bar'),
+    )
+
+    expect(sessionStorage.getItem('auth:returnTo')).toBeNull()
+    expect(localStorage.getItem('auth:returnTo')).toBeNull()
+  })
+
+  it('parses serialized storage hints to construct the redirect target', async () => {
+    const location = setMockLocation('http://localhost/auth/callback?code=abc')
+
+    sessionStorage.setItem(
+      'auth:returnTo',
+      JSON.stringify({ pathname: '/from-session', search: '?pane=reports', hash: '#q1' }),
+    )
+
+    authState.current = {
+      isAuthenticated: true,
+      user: {},
+    }
+
+    render(<LoginCallback storageKey="auth:returnTo" />)
+
+    await waitFor(() =>
+      expect(location.replace).toHaveBeenCalledWith('/from-session?pane=reports#q1'),
+    )
+
+    expect(sessionStorage.getItem('auth:returnTo')).toBeNull()
+  })
 })
