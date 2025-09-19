@@ -2,6 +2,7 @@ packages:
   - '@guidogerb/components/api-client'
   - '@guidogerb/components/auth'
   - '@guidogerb/components/menu'
+  - '@guidogerb/components/ai-support'
   - '@guidogerb/components/pages/*'
   - '@guidogerb/components/router/*'
   - '@guidogerb/components/sw'

@@ -6,6 +6,7 @@
     "@guidogerb/components/app",
     "@guidogerb/components/api-client",
     "@guidogerb/components/auth",
+    "@guidogerb/components/ai-support",
     "@guidogerb/components/menu",
     "@guidogerb/components/pages/*",
     "@guidogerb/components/router/*",
