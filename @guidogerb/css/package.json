@@ -21,10 +21,16 @@
   "files": [
     "index.js",
     "reset.css",
-    "tokens.css"
+    "tokens.css",
+    "src"
   ],
+  "peerDependencies": {
+    "react": ">=19"
+  },
   "dependencies": {},
   "devDependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "vitest": "^3.2.4"
   }
 }
