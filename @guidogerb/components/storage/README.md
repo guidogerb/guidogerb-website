@@ -17,12 +17,12 @@ caching policies applied by `@guidogerb/components/sw`.
 
 ## Planned surface
 
-| Area | Goals |
-| --- | --- |
-| Storage controller | Factory function that returns scoped accessors (`get`, `set`, `remove`, `list`) and gracefully falls back when `window` is unavailable. |
-| Cookie utilities | Lightweight encoder/decoder helpers plus batched update support for multi-cookie workflows. |
-| Cache governance | Shared channel (e.g., BroadcastChannel, event emitter, or observable store) that exposes caching preferences for the service worker to consume. |
-| Diagnostics | Optional logging hooks so apps can trace cache/storage mutations during development. |
+| Area               | Goals                                                                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Storage controller | Factory function that returns scoped accessors (`get`, `set`, `remove`, `list`) and gracefully falls back when `window` is unavailable.         |
+| Cookie utilities   | Lightweight encoder/decoder helpers plus batched update support for multi-cookie workflows.                                                     |
+| Cache governance   | Shared channel (e.g., BroadcastChannel, event emitter, or observable store) that exposes caching preferences for the service worker to consume. |
+| Diagnostics        | Optional logging hooks so apps can trace cache/storage mutations during development.                                                            |
 
 ## Integration with `@guidogerb/components/sw`
 
