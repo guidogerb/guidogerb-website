@@ -148,18 +148,18 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
           role-session-name: github-actions-deploy
 
-      - name: Create CloudFront invalidation
-        shell: bash
-        env:
-          DISTRIBUTION_ID: ${{ secrets.CF_DISTRIBUTION_MAIN }}
-          PREFIX: ${{ steps.targets.outputs.prefix }}
-        run: |
-          set -euo pipefail
-
-          paths='/*'
-          if [[ -n "$PREFIX" ]]; then
-            paths="/$PREFIX/*"
-          fi
-
-          echo "Creating CloudFront invalidation on $DISTRIBUTION_ID for paths: $paths"
-          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "$paths"
+#      - name: Create CloudFront invalidation
+#        shell: bash
+#        env:
+#          DISTRIBUTION_ID: ${{ secrets.CF_DISTRIBUTION_MAIN }}
+#          PREFIX: ${{ steps.targets.outputs.prefix }}
+#        run: |
+#          set -euo pipefail
+#
+#          paths='/*'
+#          if [[ -n "$PREFIX" ]]; then
+#            paths="/$PREFIX/*"
+#          fi
+#
+#          echo "Creating CloudFront invalidation on $DISTRIBUTION_ID for paths: $paths"
+#          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "$paths"
