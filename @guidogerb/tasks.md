@@ -1,14 +1,8 @@
 # @guidogerb Package Follow-ups
 
-## Component library
-
-- [ ] Stand up the `storage`, `analytics`, and `catalog` component packages referenced in the shared components README so the documented layout matches the repository structure.
-- [ ] Flesh out `@guidogerb/components/api-client` with typed client helpers for the planned API surface beyond the `/health` stub called out in the package README.
-
-## Authentication
-
-- [ ] Deliver a first-class sign-out control inside `Auth`—the implementation is currently commented out around `signOutRedirect` and needs a production-ready UI.
-
-## Responsive layout system
-
-- [ ] Resolve the open questions in `ResponsiveSlot.spec.md` (design token integration, per-tenant registry overrides, and design tool alignment) to complete the responsive slot roadmap.
+| name                                                 | createdDate | lastUpdatedDate | completedDate | status | description |
+| ---------------------------------------------------- | ----------- | --------------- | ------------- | ------ | ----------- |
+| Stand up analytics, catalog, and storage packages    | 2025-09-19  | 2025-09-19      | -             | todo   | Create the missing shared component packages so README references are accurate. |
+| Build typed helpers in `@guidogerb/components/api-client` | 2025-09-19  | 2025-09-19      | -             | todo   | Expand the API client with typed helpers that cover the planned surface beyond the `/health` stub. |
+| Ship production sign-out control in Auth             | 2025-09-19  | 2025-09-19      | -             | todo   | Implement and style the sign-out UI around `signOutRedirect` for production readiness. |
+| Finalize ResponsiveSlot design decisions             | 2025-09-19  | 2025-09-19      | -             | todo   | Resolve open questions in `ResponsiveSlot.spec.md` on tokens, registry overrides, and design tool alignment. |

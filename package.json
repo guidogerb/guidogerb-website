@@ -58,6 +58,7 @@
     "ai:check:spec": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json docs/SPEC.md",
     "ai:check:publishing": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json docs/PUBLISHING.md",
     "ai:check:tasks": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json global-tasks.md",
+    "ai:check:files": "node .aiassistant/check-files.mjs",
     "format": "prettier -w .",
     "format:check": "prettier -c ."
   },
