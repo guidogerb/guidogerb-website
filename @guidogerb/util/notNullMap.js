@@ -1,13 +1,11 @@
 /**
- * https://docs.joshuatz.com/cheatsheets/js/jsdoc/#non-null-assertion-in-jsdoc
- * Exclude in JSDoc removes a type from another type. The returned `T` no longer has `null` nor `undefined` in its type
+ * Convenience wrapper for {@link notNull} that throws a generic message and is therefore easy to pass to `map`.
  *
- * This function is not as nice as its cousin notNull() because it does not require a message
- * This function is nice to pass to a map function where you know FOR SURE that all the value are not null/undefined.
- * ie myValuesArray.filter(identity).map(notNullMap) so that the type system now knows that all the values are not null
+ * Usage pattern: `values.filter(Boolean).map(notNullMap)`.
+ *
  * @template T
- * @param {T} value
- * @returns {NonNullable<T>}
+ * @param {T} value Value that must be defined.
+ * @returns {NonNullable<T>} The same value with a narrowed type signature.
  */
 export function notNullMap(value) {
   if (value === null || value === undefined) {

@@ -1,9 +1,14 @@
 import { castArray, identity, trim } from 'lodash'
 
 /**
- * pass in comma separated list of class name strings to be trimmed, filtered, and joined together with a space
- * @param {(string | boolean | any[] | null | undefined)[]} classNames really can be anything, but should be string if truey
- * @returns {string}
+ * Accepts any combination of strings, arrays, booleans, nulls or undefined values and joins the truthy class names into a
+ * single space-delimited string.
+ *
+ * The utility is deliberately forgiving – anything that is not a string simply passes through the filtering stage and is
+ * ignored.  Arrays are flattened recursively so nested lists of classes are supported.
+ *
+ * @param {(string | boolean | any[] | null | undefined)[]} classNames Values representing CSS class names.
+ * @returns {string} A string safe to pass to React's `className` prop.
  */
 export function joinClassNames(...classNames) {
   return (

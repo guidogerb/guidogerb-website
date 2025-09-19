@@ -1,8 +1,21 @@
 /**
- * Oftentimes you want to sort by multiple levels so that if the first level of sorting results in an equals result then compare the next level
- * @param {((a: any, b: any, ...rest: any[]) => number)[]} sorters sorter funcs in sort order; ie (a, b) => a - b
- * @param {any} [sorterParams] can add extra parameters to pass in to each sorter; these are spread in to the sorter
- * @returns {(a: any, b: any) => number} func that takes a & b parameters and if the comparison result is zero then calls the next sorter in the array
+ * Creates a comparison function that tries several comparator callbacks in sequence until one returns a non-zero result.
+ *
+ * This is helpful when sorting complex objects by more than one criterion.  For example:
+ *
+ * ```js
+ * const peopleSorter = chainSorters([
+ *   (a, b) => a.lastName.localeCompare(b.lastName),
+ *   (a, b) => a.firstName.localeCompare(b.firstName),
+ *   (a, b) => a.age - b.age,
+ * ])
+ *
+ * people.sort(peopleSorter)
+ * ```
+ *
+ * @param {((a: any, b: any, ...rest: any[]) => number)[]} sorters Comparator callbacks ordered by priority.
+ * @param {any[]} sorterParams Additional parameters spread into every sorter invocation (useful for dependency injection).
+ * @returns {(a: any, b: any) => number} Comparison function suitable for `Array.prototype.sort`.
  */
 export function chainSorters(sorters, ...sorterParams) {
   return (

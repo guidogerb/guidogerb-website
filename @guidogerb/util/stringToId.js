@@ -1,7 +1,11 @@
 /**
- * Convert an input string such as a title to a valid html id
- * @param {string} inputString The string to convert to an html id string
- * @returns {string}
+ * Converts human-readable text into a lowercase, hyphenated string that is safe to use as an HTML id attribute.
+ *
+ * The function strips non-alphanumeric characters (except for hyphens) and collapses whitespace into single hyphen
+ * separators.
+ *
+ * @param {string} inputString The string to convert into an identifier.
+ * @returns {string} Sanitised id that can be used in the DOM.
  */
 export function stringToId(inputString) {
   let retVal

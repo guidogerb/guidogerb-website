@@ -2,38 +2,34 @@ import { cloneDeep, isArray, isObject } from 'lodash'
 import { notNull } from '../notNull'
 
 /**
- * Deep cloning the entire state is rarely the desired functionality, especially
- * if there are large chunks of data in the state causing the clone to be slow.
- * Keep in mind that React does pointer comparison to see if an object has changed
- * so shallow cloning all objects in the path notifies React of changes along that path.
- * Methodology
- * 1) do a shallow clone of the state
- * 2) shallow clone the object that is changing and all the objects in the path to that object
- * 3) deep clone the new value
+ * Returns a new object where the value at the provided path has been replaced while cloning only the nodes along that path.
  *
- * note: if path to the object doesn't exist then it won't be created; but if the field in the object doesn't exist then it will be created
+ * Deep cloning entire state objects can be costly and breaks referential equality for unaffected branches.  This helper
+ * therefore performs the minimal cloning required for React's change detection:
  *
- * ie field not there
- * state = { a: { b: { c: 3 } } }
- * path = a.b
- * field = d
- * value = 4
- * result: { a: { b: { d: 4, c: 3 } } }
- * note that the 'd' field did get created
+ * 1. Clone the root object.
+ * 2. Clone each nested object on the way to the target.
+ * 3. Deep clone the new value so mutations do not leak out of the state container.
  *
- * ie object not there
- * state = { a: { b: { c: 3 } } }
- * path = a.b.d
- * field = e
- * value = 4
- * result: { a: { b: { c: 3 } } }
- * note that the 'e' field did not get created because there is no 'd' object
+ * If any segment of the path is missing the function stops without creating new objects, but it will create a new field on
+ * the final object if that field did not previously exist.
+ *
+ * @example
+ * ```js
+ * setValueAtPath({
+ *   object: { a: { b: { c: 1 } } },
+ *   path: 'a.b',
+ *   value: { c: 2 },
+ * })
+ * // => { a: { b: { c: 2 } } }
+ * ```
+ *
  * @template SetValueAtPathT
  * @param {object} params
- * @param {Record<string, any>} params.object
- * @param {string} params.path
- * @param {SetValueAtPathT} params.value
- * @returns {Record<string, any>}
+ * @param {Record<string, any>} params.object Source object to clone and update.
+ * @param {string} params.path Dot-delimited path to the nested object that should receive the update.
+ * @param {SetValueAtPathT} params.value Value to assign to the target field.
+ * @returns {Record<string, any>} A copy of the original object with the updated value.
  */
 export function setValueAtPath({ object, path, value }) {
   // not a deep clone; does not create a new object because immer will do that

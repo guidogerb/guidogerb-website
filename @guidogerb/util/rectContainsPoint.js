@@ -1,8 +1,9 @@
 /**
- * determines if a point is inclusively within a rectangle. helpful for checking if a click was on an element.
- * @param {DOMRect} rect ({top, bottom, left, right}) defines an area
- * @param {{ x: number, y: number }} point ({x, y}) defines a point
- * @returns {boolean}
+ * Determines whether a point lies within the inclusive bounds of a `DOMRect`.
+ *
+ * @param {DOMRect} rect Rectangle whose boundaries will be checked.
+ * @param {{ x: number, y: number }} point Coordinates to test, usually `MouseEvent` positions.
+ * @returns {boolean} True if the point is inside or on the edge of the rectangle.
  */
 export function rectContainsPoint(rect, point) {
   return (
