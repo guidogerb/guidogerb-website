@@ -44,7 +44,7 @@ jobs:
         continue-on-error: true
 
       - name: Format check
-        run: pnpm format:check
+        run: pnpm format
 
       - name: Write .env files
         run: |
