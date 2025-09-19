@@ -47,16 +47,21 @@ export function CommandPalette() {
 
   return (
     <div ref={anchorRef}>
-      <button data-active={open || slashHeld} onMouseEnter={() => startPopupTimer(() => setOpen(true))}>
+      <button
+        data-active={open || slashHeld}
+        onMouseEnter={() => startPopupTimer(() => setOpen(true))}
+      >
         Search
       </button>
       {open ? (
         <dialog
           ref={dialogRef}
-          onMouseLeave={() => scheduleClose(() => {
-            setOpen(false)
-            startNoPopupTimer()
-          })}
+          onMouseLeave={() =>
+            scheduleClose(() => {
+              setOpen(false)
+              startNoPopupTimer()
+            })
+          }
           onClose={() => {
             setOpen(false)
             startNoPopupTimer()
