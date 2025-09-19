@@ -1,0 +1,162 @@
+{
+  "DistributionTenantList": [
+    {
+      "Id": "dt_32t4XvXr82ATjst1gWnCBS2MlqL",
+      "DistributionId": "EGG1850W4K2XV",
+      "Name": "ggp-ggp-llc",
+      "Arn": "arn:aws:cloudfront::471112830678:distribution-tenant/dt_32t4XvXr82ATjst1gWnCBS2MlqL",
+      "Domains": [
+        {
+          "Domain": "llc.guidogerbpublishing.com",
+          "Status": "active"
+        }
+      ],
+      "ConnectionGroupId": "cg_32sfxmSASFzUylWCyWaN5vOLKgv",
+      "Customizations": {
+        "Certificate": {
+          "Arn": "arn:aws:acm:us-east-1:471112830678:certificate/472e747b-76c8-41d1-93de-d491e924c06a"
+        }
+      },
+      "CreatedTime": "2025-09-18T20:16:18.589000+00:00",
+      "LastModifiedTime": "2025-09-18T20:16:18.589000+00:00",
+      "ETag": "E23ZP02F085DFQ",
+      "Enabled": true,
+      "Status": "Deployed"
+    },
+    {
+      "Id": "dt_32sgZgqtD6aKSFyNGcbnPabA9U0",
+      "DistributionId": "EGG1850W4K2XV",
+      "Name": "ggp-this-is-my-story.org",
+      "Arn": "arn:aws:cloudfront::471112830678:distribution-tenant/dt_32sgZgqtD6aKSFyNGcbnPabA9U0",
+      "Domains": [
+        {
+          "Domain": "www.this-is-my-story.org",
+          "Status": "active"
+        },
+        {
+          "Domain": "this-is-my-story.org",
+          "Status": "active"
+        }
+      ],
+      "ConnectionGroupId": "cg_32sfxmSASFzUylWCyWaN5vOLKgv",
+      "Customizations": {
+        "Certificate": {
+          "Arn": "arn:aws:acm:us-east-1:471112830678:certificate/472e747b-76c8-41d1-93de-d491e924c06a"
+        }
+      },
+      "CreatedTime": "2025-09-18T16:59:11.866000+00:00",
+      "LastModifiedTime": "2025-09-18T16:59:11.866000+00:00",
+      "ETag": "E23ZP02F085DFQ",
+      "Enabled": true,
+      "Status": "Deployed"
+    },
+    {
+      "Id": "dt_32sgTjXmvRixVhwcvqFpN5YdWSi",
+      "DistributionId": "EGG1850W4K2XV",
+      "Name": "ggp-stream4cloud.com",
+      "Arn": "arn:aws:cloudfront::471112830678:distribution-tenant/dt_32sgTjXmvRixVhwcvqFpN5YdWSi",
+      "Domains": [
+        {
+          "Domain": "www.stream4cloud.com",
+          "Status": "active"
+        },
+        {
+          "Domain": "stream4cloud.com",
+          "Status": "active"
+        }
+      ],
+      "ConnectionGroupId": "cg_32sfxmSASFzUylWCyWaN5vOLKgv",
+      "Customizations": {
+        "Certificate": {
+          "Arn": "arn:aws:acm:us-east-1:471112830678:certificate/472e747b-76c8-41d1-93de-d491e924c06a"
+        }
+      },
+      "CreatedTime": "2025-09-18T16:58:24.338000+00:00",
+      "LastModifiedTime": "2025-09-18T16:58:24.338000+00:00",
+      "ETag": "E23ZP02F085DFQ",
+      "Enabled": true,
+      "Status": "Deployed"
+    },
+    {
+      "Id": "dt_32sgNs4ZTHZ6Q5yQtBTZa0AFzfC",
+      "DistributionId": "EGG1850W4K2XV",
+      "Name": "ggp-picklecheeze.com",
+      "Arn": "arn:aws:cloudfront::471112830678:distribution-tenant/dt_32sgNs4ZTHZ6Q5yQtBTZa0AFzfC",
+      "Domains": [
+        {
+          "Domain": "picklecheeze.com",
+          "Status": "active"
+        },
+        {
+          "Domain": "www.picklecheeze.com",
+          "Status": "active"
+        }
+      ],
+      "ConnectionGroupId": "cg_32sfxmSASFzUylWCyWaN5vOLKgv",
+      "Customizations": {
+        "Certificate": {
+          "Arn": "arn:aws:acm:us-east-1:471112830678:certificate/472e747b-76c8-41d1-93de-d491e924c06a"
+        }
+      },
+      "CreatedTime": "2025-09-18T16:57:36.984000+00:00",
+      "LastModifiedTime": "2025-09-18T16:57:36.984000+00:00",
+      "ETag": "E23ZP02F085DFQ",
+      "Enabled": true,
+      "Status": "Deployed"
+    },
+    {
+      "Id": "dt_32sgGiqYklJBVctStUNgG7Yr5C0",
+      "DistributionId": "EGG1850W4K2XV",
+      "Name": "ggp-garygerber.com",
+      "Arn": "arn:aws:cloudfront::471112830678:distribution-tenant/dt_32sgGiqYklJBVctStUNgG7Yr5C0",
+      "Domains": [
+        {
+          "Domain": "www.garygerber.com",
+          "Status": "active"
+        },
+        {
+          "Domain": "garygerber.com",
+          "Status": "active"
+        }
+      ],
+      "ConnectionGroupId": "cg_32sfxmSASFzUylWCyWaN5vOLKgv",
+      "Customizations": {
+        "Certificate": {
+          "Arn": "arn:aws:acm:us-east-1:471112830678:certificate/472e747b-76c8-41d1-93de-d491e924c06a"
+        }
+      },
+      "CreatedTime": "2025-09-18T16:56:39.989000+00:00",
+      "LastModifiedTime": "2025-09-18T16:56:39.989000+00:00",
+      "ETag": "E23ZP02F085DFQ",
+      "Enabled": true,
+      "Status": "Deployed"
+    },
+    {
+      "Id": "dt_32sg7ajzut8PQfojAV9nIyZSxUX",
+      "DistributionId": "EGG1850W4K2XV",
+      "Name": "ggp-guidogerbpublishing.com",
+      "Arn": "arn:aws:cloudfront::471112830678:distribution-tenant/dt_32sg7ajzut8PQfojAV9nIyZSxUX",
+      "Domains": [
+        {
+          "Domain": "www.guidogerbpublishing.com",
+          "Status": "active"
+        },
+        {
+          "Domain": "guidogerbpublishing.com",
+          "Status": "active"
+        }
+      ],
+      "ConnectionGroupId": "cg_32sfxmSASFzUylWCyWaN5vOLKgv",
+      "Customizations": {
+        "Certificate": {
+          "Arn": "arn:aws:acm:us-east-1:471112830678:certificate/472e747b-76c8-41d1-93de-d491e924c06a"
+        }
+      },
+      "CreatedTime": "2025-09-18T16:55:28.604000+00:00",
+      "LastModifiedTime": "2025-09-18T16:55:28.604000+00:00",
+      "ETag": "E23ZP02F085DFQ",
+      "Enabled": true,
+      "Status": "Deployed"
+    }
+  ]
+}
