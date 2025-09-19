@@ -3,12 +3,14 @@
 A lightweight React integration for Google Analytics 4 (GA4). The `<Analytics>` component automatically loads the GA4 tag, configures consent/debug options, and exposes a hook-based API so applications can track events without manually pasting `<script>` snippets or prop-drilling helpers through the tree.
 
 ## Why this package?
+
 - **No-script install:** Drop the component near the root of your app and it injects the GA tag for you—no manual copy/paste from the GA UI.
 - **Centralized helpers:** Use the `useAnalytics()` hook anywhere in your component tree to send events, fire page views, update consent, or set user properties.
 - **Configurable by props:** Toggle debug mode, send initial events, and merge in any GA config overrides without leaving JSX.
 - **Consent-aware:** Provide default consent values and update them later based on user preferences or CMP responses.
 
 ## Get a Google Analytics account & measurement ID
+
 Follow these steps once per website/tenant. GA4 requires a Google account with Analytics access.
 
 1. Visit [analytics.google.com](https://analytics.google.com/) and sign in (or create an account if you do not have one).
@@ -22,6 +24,7 @@ Follow these steps once per website/tenant. GA4 requires a Google account with A
 > **Tip:** If you are onboarding multiple tenants, repeat steps 4–7 per domain so each property reports independently.
 
 ## Wiring the component (no manual script tags required)
+
 1. Install/ensure the analytics package is available via the monorepo workspace.
 2. Load the measurement ID from configuration—e.g., `import.meta.env.VITE_GA_MEASUREMENT_ID` in a Vite application.
 3. Wrap your application shell with the `<Analytics>` component. The component loads the GA tag script, configures GA, and renders its children.
@@ -48,6 +51,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 Because the component injects the GA tag, **do not** add the GA snippet to your HTML template—doing so would double-count traffic.
 
 ## Tracking SPA navigations
+
 Single-page apps need to emit a page view when the router changes routes. Combine the hook with your router of choice:
 
 ```jsx
@@ -72,18 +76,21 @@ function AnalyticsRouterBridge() {
 Place `<AnalyticsRouterBridge />` anywhere inside the `<Analytics>` provider.
 
 ## Component API
+
 ### `<Analytics />`
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `measurementId` | `string` | **Required** | The GA4 measurement ID (`G-XXXXXXX`). When omitted, the component becomes a no-op. |
-| `debugMode` | `boolean` | `false` | Enables GA debug output via the Network panel. |
-| `sendPageView` | `boolean` | `true` | When `false`, prevents GA from sending the automatic initial `page_view`. Useful when you plan to manage page views manually. |
-| `defaultConsent` | `object` | `undefined` | Consent defaults passed to `gtag('consent', 'default', ...)` before configuration. |
-| `config` | `object` | `{}` | Additional GA configuration merged into `gtag('config', measurementId, config)`. |
-| `initialEvents` | `Array<{ name: string, params?: object }>` | `[]` | Events dispatched immediately after GA is configured (e.g., to record the first page view manually). |
-| `children` | `ReactNode` | `null` | The subtree that should have access to analytics helpers. |
+
+| Prop             | Type                                       | Default      | Description                                                                                                                   |
+| ---------------- | ------------------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `measurementId`  | `string`                                   | **Required** | The GA4 measurement ID (`G-XXXXXXX`). When omitted, the component becomes a no-op.                                            |
+| `debugMode`      | `boolean`                                  | `false`      | Enables GA debug output via the Network panel.                                                                                |
+| `sendPageView`   | `boolean`                                  | `true`       | When `false`, prevents GA from sending the automatic initial `page_view`. Useful when you plan to manage page views manually. |
+| `defaultConsent` | `object`                                   | `undefined`  | Consent defaults passed to `gtag('consent', 'default', ...)` before configuration.                                            |
+| `config`         | `object`                                   | `{}`         | Additional GA configuration merged into `gtag('config', measurementId, config)`.                                              |
+| `initialEvents`  | `Array<{ name: string, params?: object }>` | `[]`         | Events dispatched immediately after GA is configured (e.g., to record the first page view manually).                          |
+| `children`       | `ReactNode`                                | `null`       | The subtree that should have access to analytics helpers.                                                                     |
 
 ### `useAnalytics()`
+
 Returns helper methods bound to the current analytics instance:
 
 - `trackEvent(name, params?)` — Fire a custom GA event.
@@ -96,6 +103,7 @@ Returns helper methods bound to the current analytics instance:
 All helpers safely no-op when the measurement ID is missing or the code executes outside the browser (SSR).
 
 ## Initial event examples
+
 Send initial events by passing the `initialEvents` prop:
 
 ```jsx
@@ -111,8 +119,10 @@ Send initial events by passing the `initialEvents` prop:
 ```
 
 ## Testing & maintenance
+
 - Run the package tests with `pnpm vitest run @guidogerb/components/analytics/src/__tests__/Analytics.test.jsx`.
 - Review [`tasks.md`](./tasks.md) for upcoming enhancements and operational follow-ups.
 
 ## Support
+
 If you need access to the GA property or help wiring a new tenant, file an issue referencing this package or reach out to the analytics maintainer listed in the project directory.

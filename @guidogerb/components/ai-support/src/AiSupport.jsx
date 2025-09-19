@@ -347,10 +347,11 @@ export function AiSupport({
       }
 
       const data = await response.json()
-      const assistantPayload =
-        (data && data.choices && data.choices[0] && data.choices[0].message) ||
-        data?.message ||
-        { role: 'assistant', content: data?.content ?? '' }
+      const assistantPayload = (data &&
+        data.choices &&
+        data.choices[0] &&
+        data.choices[0].message) ||
+        data?.message || { role: 'assistant', content: data?.content ?? '' }
 
       const assistantMessage = normalizeMessage(assistantPayload, 'assistant')
 
@@ -399,7 +400,11 @@ export function AiSupport({
             rows={3}
           />
         </label>
-        <button type="submit" disabled={isLoading || !inputValue.trim()} className="ai-support__submit">
+        <button
+          type="submit"
+          disabled={isLoading || !inputValue.trim()}
+          className="ai-support__submit"
+        >
           {isLoading ? 'Sending…' : 'Send'}
         </button>
       </form>

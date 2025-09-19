@@ -24,10 +24,7 @@ describe('AiSupport', () => {
 
     const guardrail = vi.fn().mockResolvedValue({ allow: true })
     const embeddingRetriever = vi.fn().mockResolvedValue({
-      messages: [
-        { role: 'system', content: 'Document excerpt A' },
-        'Document excerpt B',
-      ],
+      messages: [{ role: 'system', content: 'Document excerpt A' }, 'Document excerpt B'],
       metadata: { chunkCount: 2 },
     })
 
@@ -89,7 +86,10 @@ describe('AiSupport', () => {
     expect(payload.messages[0].content).toContain('user-123')
     expect(payload.messages[1]).toMatchObject({ role: 'system', content: 'Document excerpt A' })
     expect(payload.messages[2]).toMatchObject({ role: 'system', content: 'Document excerpt B' })
-    expect(payload.messages[3]).toMatchObject({ role: 'system', content: 'You are a helpful assistant.' })
+    expect(payload.messages[3]).toMatchObject({
+      role: 'system',
+      content: 'You are a helpful assistant.',
+    })
     expect(payload.messages[4]).toMatchObject({
       role: 'user',
       content: 'I need help resetting my password.',
@@ -164,6 +164,8 @@ describe('AiSupport', () => {
     const renderedMessages = screen.getAllByTestId('ai-support-message')
     expect(renderedMessages).toHaveLength(3)
     expect(renderedMessages[0]).toHaveTextContent('system')
-    expect(renderedMessages.map((node) => node.textContent).join(' ')).not.toContain('First question?')
+    expect(renderedMessages.map((node) => node.textContent).join(' ')).not.toContain(
+      'First question?',
+    )
   })
 })

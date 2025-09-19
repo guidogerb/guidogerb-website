@@ -38,7 +38,9 @@ describe('Analytics', () => {
       />,
     )
 
-    const configEntry = window.dataLayer.find((entry) => entry[0] === 'config' && entry[1] === 'G-CONFIG')
+    const configEntry = window.dataLayer.find(
+      (entry) => entry[0] === 'config' && entry[1] === 'G-CONFIG',
+    )
     expect(configEntry).toBeDefined()
     expect(configEntry[2]).toMatchObject({
       allow_ad_personalization_signals: false,
@@ -56,7 +58,9 @@ describe('Analytics', () => {
     )
 
     const consentIndex = window.dataLayer.findIndex((entry) => entry[0] === 'consent')
-    const configIndex = window.dataLayer.findIndex((entry) => entry[0] === 'config' && entry[1] === 'G-CONSENT')
+    const configIndex = window.dataLayer.findIndex(
+      (entry) => entry[0] === 'config' && entry[1] === 'G-CONSENT',
+    )
 
     expect(consentIndex).toBeGreaterThan(-1)
     expect(configIndex).toBeGreaterThan(-1)
@@ -90,7 +94,9 @@ describe('Analytics', () => {
     )
 
     await waitFor(() => {
-      const eventEntry = window.dataLayer.find((entry) => entry[0] === 'event' && entry[1] === 'test_event')
+      const eventEntry = window.dataLayer.find(
+        (entry) => entry[0] === 'event' && entry[1] === 'test_event',
+      )
       expect(eventEntry).toBeDefined()
     })
 

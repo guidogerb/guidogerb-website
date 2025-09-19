@@ -5,7 +5,8 @@ const SCRIPT_ATTR = 'data-gg-analytics-loader'
 
 const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined'
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0
-const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+const isPlainObject = (value) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
 
 const noop = () => {}
 
@@ -167,7 +168,9 @@ const Analytics = ({
     return undefined
   }, [measurementId, debugMode, sendPageView, defaultConsent, config, initialEvents])
 
-  return <AnalyticsContext.Provider value={contextValue}>{children ?? null}</AnalyticsContext.Provider>
+  return (
+    <AnalyticsContext.Provider value={contextValue}>{children ?? null}</AnalyticsContext.Provider>
+  )
 }
 
 export default Analytics
