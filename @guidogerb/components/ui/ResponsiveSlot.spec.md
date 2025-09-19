@@ -51,27 +51,27 @@ The provider exposes this breakpoint list so custom slots can be defined by cons
 ```tsx
 // ResponsiveSlotProvider.tsx
 export interface SlotSizeMap {
-  inline: number | string; // width/flex-basis, e.g., `320`, `"320px"`, `"min(100%, 420px)"`
-  block: number | string;  // height/min-height token
-  maxInline?: string;
-  maxBlock?: string;
+  inline: number | string // width/flex-basis, e.g., `320`, `"320px"`, `"min(100%, 420px)"`
+  block: number | string // height/min-height token
+  maxInline?: string
+  maxBlock?: string
 }
 
-type BreakpointKey = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type BreakpointKey = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
-type Registry = Record<string, Partial<Record<BreakpointKey, SlotSizeMap>>>;
+type Registry = Record<string, Partial<Record<BreakpointKey, SlotSizeMap>>>
 
 export interface ResponsiveSlotProviderProps {
-  registry?: Registry;     // merges with defaults
-  defaultBreakpoint?: BreakpointKey; // SSR fallback, default `md`
-  children: React.ReactNode;
+  registry?: Registry // merges with defaults
+  defaultBreakpoint?: BreakpointKey // SSR fallback, default `md`
+  children: React.ReactNode
 }
 
 export interface ResponsiveSlotProps extends React.HTMLAttributes<HTMLElement> {
-  as?: keyof JSX.IntrinsicElements; // default `div`
-  slot: string;                     // looks up registry entry
-  sizes?: Partial<Record<BreakpointKey, SlotSizeMap>>; // optional per-instance override
-  inherit?: boolean;                // use parent slot sizing when nesting
+  as?: keyof JSX.IntrinsicElements // default `div`
+  slot: string // looks up registry entry
+  sizes?: Partial<Record<BreakpointKey, SlotSizeMap>> // optional per-instance override
+  inherit?: boolean // use parent slot sizing when nesting
 }
 ```
 
@@ -149,7 +149,7 @@ export const baseSlots: Registry = {
     xs: { inline: '100%', block: 'auto' },
     md: { inline: '100%', block: '5rem' },
   },
-};
+}
 ```
 
 The registry encourages consistent footprinting while staying extensible. Product teams can register additional slots by
@@ -183,4 +183,3 @@ passing a merged registry into the provider (e.g., via site shell or layout rout
 - Should slot sizes live in design tokens (CSS custom properties) rather than JS objects for easier theming?
 - Do we need per-tenant overrides (multi-tenant theming) at runtime, implying registry hydration from API?
 - How does this approach interact with auto-layout features in design tools (Figma) — do we need translation utilities?
-
