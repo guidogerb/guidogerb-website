@@ -140,17 +140,15 @@ jobs:
           retention-days: 7
 
       - name: Create CloudFront invalidation
-        if: steps.site-filter.outputs.run_site == 'true' && steps.targets.outputs.distribution != ''
         shell: bash
         env:
-          DISTRIBUTION_ID: ${{ steps.targets.outputs.distribution }}
+          DISTRIBUTION_ID: ${{ secrets.CF_DISTRIBUTION_MAIN }}
           PREFIX: ${{ steps.targets.outputs.prefix }}
-          INVALIDATE_PREFIX_ONLY: ${{ env.INVALIDATE_PREFIX_ONLY }}
         run: |
           set -euo pipefail
 
           paths='/*'
-          if [[ "$INVALIDATE_PREFIX_ONLY" == 'true' && -n "$PREFIX" ]]; then
+          if [[ -n "$PREFIX" ]]; then
             paths="/$PREFIX/*"
           fi
 
