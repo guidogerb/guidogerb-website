@@ -64,9 +64,9 @@ describe('Catalog', () => {
     })
 
     const client = {
-      post: vi.fn().mockResolvedValue(
-        buildGraphQLPayload({ items: [digitalProduct, physicalProduct] }),
-      ),
+      post: vi
+        .fn()
+        .mockResolvedValue(buildGraphQLPayload({ items: [digitalProduct, physicalProduct] })),
     }
 
     const storage = createStorageController({ namespace: 'test.catalog' })
@@ -77,23 +77,24 @@ describe('Catalog', () => {
       expect(client.post).toHaveBeenCalledTimes(1)
     })
 
-    expect(client.post).toHaveBeenCalledWith('/graphql', expect.objectContaining({
-      json: expect.objectContaining({
-        query: expect.stringContaining('query Catalog'),
-        variables: expect.objectContaining({
-          pagination: expect.objectContaining({ first: 24 }),
+    expect(client.post).toHaveBeenCalledWith(
+      '/graphql',
+      expect.objectContaining({
+        json: expect.objectContaining({
+          query: expect.stringContaining('query Catalog'),
+          variables: expect.objectContaining({
+            pagination: expect.objectContaining({ first: 24 }),
+          }),
         }),
       }),
-    }))
+    )
 
-    expect(
-      screen.getByRole('heading', { name: 'Digital delivery' }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { name: 'Physical shipment' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Digital delivery' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Physical shipment' })).toBeInTheDocument()
 
-    const digitalSection = screen.getByRole('heading', { name: 'Digital delivery' }).closest('section')
+    const digitalSection = screen
+      .getByRole('heading', { name: 'Digital delivery' })
+      .closest('section')
     expect(
       within(digitalSection).getByRole('heading', { name: digitalProduct.title }),
     ).toBeInTheDocument()
@@ -101,7 +102,9 @@ describe('Catalog', () => {
     expect(within(digitalSection).getByText('Streaming')).toBeInTheDocument()
     expect(within(digitalSection).getByText('$19.99 / month', { exact: false })).toBeInTheDocument()
 
-    const physicalSection = screen.getByRole('heading', { name: 'Physical shipment' }).closest('section')
+    const physicalSection = screen
+      .getByRole('heading', { name: 'Physical shipment' })
+      .closest('section')
     expect(
       within(physicalSection).getByRole('heading', { name: 'Limited Edition Vinyl' }),
     ).toBeInTheDocument()

@@ -175,12 +175,11 @@ const computeFacets = (items) => {
 
     const fulfillmentChannel = item.availability?.fulfillment
     if (fulfillmentChannel) {
-      const entry =
-        fulfillment.get(fulfillmentChannel) ?? {
-          value: fulfillmentChannel,
-          label: getFulfillmentLabel(fulfillmentChannel),
-          count: 0,
-        }
+      const entry = fulfillment.get(fulfillmentChannel) ?? {
+        value: fulfillmentChannel,
+        label: getFulfillmentLabel(fulfillmentChannel),
+        count: 0,
+      }
       entry.count += 1
       fulfillment.set(fulfillmentChannel, entry)
     }
@@ -220,7 +219,9 @@ const buildVariables = ({ filters, search, sortKey, pageSize, cursor }) => {
 
   return {
     search: search || undefined,
-    filters: Object.values(filterPayload).some((value) => value !== undefined) ? filterPayload : undefined,
+    filters: Object.values(filterPayload).some((value) => value !== undefined)
+      ? filterPayload
+      : undefined,
     pagination: {
       first: pageSize,
       after: cursor ?? undefined,
@@ -298,7 +299,9 @@ const defaultRenderProduct = ({ product, onSelect, viewMode }) => {
     >
       <header className="gg-catalog__product-header">
         <h3 className="gg-catalog__product-title">{product.title}</h3>
-        {product.subtitle ? <p className="gg-catalog__product-subtitle">{product.subtitle}</p> : null}
+        {product.subtitle ? (
+          <p className="gg-catalog__product-subtitle">{product.subtitle}</p>
+        ) : null}
         {badgeList ? <p className="gg-catalog__product-badges">{badgeList}</p> : null}
       </header>
       <p className="gg-catalog__product-description">{product.description}</p>
@@ -375,7 +378,9 @@ export function Catalog({
 
   const [viewMode, setViewMode] = useState(() => storedPreferences.viewMode ?? initialView)
   const [sortKey, setSortKey] = useState(() => storedPreferences.sortKey ?? initialSort)
-  const [search, setSearch] = useState(() => storedPreferences.search ?? initialFilters.search ?? '')
+  const [search, setSearch] = useState(
+    () => storedPreferences.search ?? initialFilters.search ?? '',
+  )
   const [filters, setFilters] = useState(() => ({
     types: storedPreferences.types ?? initialFilters.types ?? [],
     fulfillment: storedPreferences.fulfillment ?? initialFilters.fulfillment ?? [],
@@ -423,7 +428,16 @@ export function Catalog({
       }
     })
     return unsubscribe
-  }, [initialFilters, initialSort, initialView, resolvedStorage, search, sortKey, storageKey, viewMode])
+  }, [
+    initialFilters,
+    initialSort,
+    initialView,
+    resolvedStorage,
+    search,
+    sortKey,
+    storageKey,
+    viewMode,
+  ])
 
   const requestCatalog = useCallback(
     async ({ cursor, append } = {}) => {
@@ -478,7 +492,9 @@ export function Catalog({
   const handleToggleType = (value) => {
     setFilters((prev) => {
       const exists = prev.types.includes(value)
-      const nextTypes = exists ? prev.types.filter((item) => item !== value) : [...prev.types, value]
+      const nextTypes = exists
+        ? prev.types.filter((item) => item !== value)
+        : [...prev.types, value]
       return { ...prev, types: nextTypes }
     })
   }
@@ -601,7 +617,10 @@ export function Catalog({
                 <h2>{group.label}</h2>
                 <p>{group.products.length} products</p>
               </header>
-              <ul className={`gg-catalog__list gg-catalog__list--${viewMode}`} data-fulfillment={group.id}>
+              <ul
+                className={`gg-catalog__list gg-catalog__list--${viewMode}`}
+                data-fulfillment={group.id}
+              >
                 {group.products.map((product) => (
                   <li key={product.id} className="gg-catalog__item">
                     {renderProduct({ product, onSelect: onProductSelect, viewMode })}
