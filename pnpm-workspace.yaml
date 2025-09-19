@@ -1,4 +1,5 @@
 packages:
+  - '@guidogerb/components/analytics'
   - '@guidogerb/components/api-client'
   - '@guidogerb/components/auth'
   - '@guidogerb/components/menu'

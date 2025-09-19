@@ -3,6 +3,7 @@
 // import from a single entry point.
 
 export * from './ai-support/index.js'
+export * from './analytics/index.js'
 export * from './api-client/index.js'
 export * from './auth/index.js'
 export * from './menu/index.js'
