@@ -138,3 +138,21 @@ jobs:
           path: websites/${{ matrix.site }}/dist
           if-no-files-found: error
           retention-days: 7
+
+      - name: Create CloudFront invalidation
+        if: steps.site-filter.outputs.run_site == 'true' && steps.targets.outputs.distribution != ''
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ steps.targets.outputs.distribution }}
+          PREFIX: ${{ steps.targets.outputs.prefix }}
+          INVALIDATE_PREFIX_ONLY: ${{ env.INVALIDATE_PREFIX_ONLY }}
+        run: |
+          set -euo pipefail
+
+          paths='/*'
+          if [[ "$INVALIDATE_PREFIX_ONLY" == 'true' && -n "$PREFIX" ]]; then
+            paths="/$PREFIX/*"
+          fi
+
+          echo "Creating CloudFront invalidation on $DISTRIBUTION_ID for paths: $paths"
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "$paths"
