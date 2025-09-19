@@ -11,11 +11,7 @@ vi.mock('@stripe/react-stripe-js', () => {
       getElement: vi.fn(),
       options,
     }
-    return React.createElement(
-      Context.Provider,
-      { value: { stripe, elements } },
-      children,
-    )
+    return React.createElement(Context.Provider, { value: { stripe, elements } }, children)
   }
   const useStripe = () => React.useContext(Context).stripe
   const useElements = () => React.useContext(Context).elements
@@ -54,9 +50,7 @@ describe('PointOfSale', () => {
           availability: { status: 'AVAILABLE', fulfillment: 'PHYSICAL' },
         },
       ]),
-      createPaymentIntent: vi
-        .fn()
-        .mockResolvedValue({ id: 'pi_123', clientSecret: 'cs_test_123' }),
+      createPaymentIntent: vi.fn().mockResolvedValue({ id: 'pi_123', clientSecret: 'cs_test_123' }),
       createInvoice: vi.fn().mockImplementation(({ cart, paymentIntent, user }) => {
         const invoice = {
           id: 'inv_001',
@@ -93,15 +87,13 @@ describe('PointOfSale', () => {
       recordOrder: vi.fn().mockResolvedValue({}),
     }
 
-    const mockConfirmPayment = vi
-      .fn()
-      .mockImplementation(async ({ clientSecret }) => ({
-        paymentIntent: {
-          id: 'pi_123',
-          status: 'succeeded',
-          client_secret: clientSecret,
-        },
-      }))
+    const mockConfirmPayment = vi.fn().mockImplementation(async ({ clientSecret }) => ({
+      paymentIntent: {
+        id: 'pi_123',
+        status: 'succeeded',
+        client_secret: clientSecret,
+      },
+    }))
 
     const onOrderComplete = vi.fn()
     const onInvoiceCreate = vi.fn()

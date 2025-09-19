@@ -22,13 +22,7 @@ const computeBadges = (product) => {
   return Array.from(badges)
 }
 
-export function ProductCard({
-  product,
-  viewMode = 'grid',
-  onAdd,
-  onViewDetails,
-  disabled,
-}) {
+export function ProductCard({ product, viewMode = 'grid', onAdd, onViewDetails, disabled }) {
   const { addItem } = useCart()
   const priceLabel = useMemo(
     () => formatCurrency(product?.price?.amount ?? 0, product?.price?.currency),

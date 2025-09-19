@@ -36,8 +36,7 @@ export function OrderHistory({
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const matchesStatus =
-        statusFilter === 'all' || order.status?.toLowerCase() === statusFilter
+      const matchesStatus = statusFilter === 'all' || order.status?.toLowerCase() === statusFilter
       const matchesSearch = search
         ? order.number?.toLowerCase().includes(search.toLowerCase()) ||
           order.customer?.email?.toLowerCase().includes(search.toLowerCase())
@@ -111,10 +110,17 @@ export function OrderHistory({
               <tr key={order.id ?? order.number}>
                 <td>{order.number ?? order.invoiceNumber ?? order.id}</td>
                 <td>{order.customer?.email ?? order.customer?.name}</td>
-                <td className={`gg-pos__history-status gg-pos__history-status--${order.status?.toLowerCase()}`}>
+                <td
+                  className={`gg-pos__history-status gg-pos__history-status--${order.status?.toLowerCase()}`}
+                >
                   {order.status ?? 'Paid'}
                 </td>
-                <td>{formatMoney(order.total?.amount ?? order.total ?? 0, order.total?.currency ?? order.currency ?? 'USD')}</td>
+                <td>
+                  {formatMoney(
+                    order.total?.amount ?? order.total ?? 0,
+                    order.total?.currency ?? order.currency ?? 'USD',
+                  )}
+                </td>
                 <td>{formatDate(order.createdAt ?? order.placedAt)}</td>
                 <td>
                   {onSelectInvoice && (

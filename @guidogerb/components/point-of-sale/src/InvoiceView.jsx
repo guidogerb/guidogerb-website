@@ -21,12 +21,7 @@ const formatDate = (value) => {
   }
 }
 
-export function InvoiceView({
-  invoice,
-  onDownload,
-  onSend,
-  onClose,
-}) {
+export function InvoiceView({ invoice, onDownload, onSend, onClose }) {
   if (!invoice) {
     return (
       <section className="gg-pos__invoice">
@@ -95,8 +90,18 @@ export function InvoiceView({
                 {item.description && <p>{item.description}</p>}
               </td>
               <td>{item.quantity ?? 1}</td>
-              <td>{formatMoney(item.unitPrice?.amount ?? item.price?.amount ?? 0, item.unitPrice?.currency ?? item.price?.currency ?? totals.currency)}</td>
-              <td>{formatMoney(item.total?.amount ?? item.total ?? 0, item.total?.currency ?? totals.currency)}</td>
+              <td>
+                {formatMoney(
+                  item.unitPrice?.amount ?? item.price?.amount ?? 0,
+                  item.unitPrice?.currency ?? item.price?.currency ?? totals.currency,
+                )}
+              </td>
+              <td>
+                {formatMoney(
+                  item.total?.amount ?? item.total ?? 0,
+                  item.total?.currency ?? totals.currency,
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

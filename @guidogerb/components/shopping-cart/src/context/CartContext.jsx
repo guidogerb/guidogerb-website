@@ -88,9 +88,7 @@ const cartReducer = (state, action) => {
         ...action.payload,
       }
       next.items = Array.isArray(action.payload?.items)
-        ? action.payload.items
-            .map(normalizeItem)
-            .filter((item) => item && item.id)
+        ? action.payload.items.map(normalizeItem).filter((item) => item && item.id)
         : []
       next.updatedAt = Date.now()
       return next
@@ -102,9 +100,7 @@ const cartReducer = (state, action) => {
       let items
       if (existingIndex >= 0) {
         items = state.items.map((entry, index) =>
-          index === existingIndex
-            ? { ...entry, quantity: entry.quantity + item.quantity }
-            : entry,
+          index === existingIndex ? { ...entry, quantity: entry.quantity + item.quantity } : entry,
         )
       } else {
         items = [...state.items, item]
@@ -120,9 +116,7 @@ const cartReducer = (state, action) => {
       if (!id) return state
       const nextQuantity = Math.max(ensureNumber(quantity, 1), 0)
       const items = state.items
-        .map((item) =>
-          item.id === id ? { ...item, quantity: nextQuantity || 1 } : item,
-        )
+        .map((item) => (item.id === id ? { ...item, quantity: nextQuantity || 1 } : item))
         .filter((item) => item.quantity > 0)
       return {
         ...state,
@@ -199,10 +193,8 @@ export function CartProvider({
   storageKey = 'guidogerb.pos.cart',
   onChange,
 } = {}) {
-  const [state, dispatch] = useReducer(
-    cartReducer,
-    defaultState,
-    () => initCartState(defaultState, initialCart),
+  const [state, dispatch] = useReducer(cartReducer, defaultState, () =>
+    initCartState(defaultState, initialCart),
   )
 
   useEffect(() => {

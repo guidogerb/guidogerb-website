@@ -39,10 +39,7 @@ configured to query the tenant's catalog GraphQL endpoint.
 
 ```tsx
 import { useMemo } from 'react'
-import {
-  PointOfSale,
-  createPOSApi,
-} from '@guidogerb/components-point-of-sale'
+import { PointOfSale, createPOSApi } from '@guidogerb/components-point-of-sale'
 
 export function StorefrontPOS({ apiBaseUrl, initialUser }) {
   const api = useMemo(() => createPOSApi({ baseUrl: apiBaseUrl }), [apiBaseUrl])
@@ -103,31 +100,31 @@ contexts or service helpers inside bespoke UI.
 
 ## Props – `PointOfSale`
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `api` | `ReturnType<typeof createPOSApi>` | `null` | API gateway used to list products, create PaymentIntents, issue invoices, and fetch order history. |
-| `apiBaseUrl` | `string` | — | Convenience passed to `createPOSApi` when `api` is omitted. |
-| `catalog` | `object` | `null` | When provided, `ProductList` will hydrate products using `@guidogerb/components-catalog`. Supports every prop the catalog component accepts. |
-| `stripePromise` | `Promise<Stripe \| null>` | — | Preloaded Stripe instance. Required when `stripePublicKey` is absent. |
-| `stripePublicKey` | `string` | — | Publishable key used to lazily load Stripe if `stripePromise` is not provided. |
-| `stripeOptions` | `StripeConstructorOptions` | `{}` | Options forwarded to `loadStripe`. |
-| `confirmPayment` | `function` | `confirmStripePayment` | Hook allowing tenants to override how payments are confirmed. Receives `{ stripe, elements, clientSecret, billingDetails, savePaymentMethod }`. |
-| `currency` | `string` | `'USD'` | Currency code passed to the cart pricing engine and PaymentIntent requests. |
-| `taxRate` | `number` | `0` | Default tax rate applied by the cart provider. |
-| `discountRate` | `number` | `0` | Default discount applied to the subtotal before tax. |
-| `promoCodes` | `Record<string, PromoRule>` | `{}` | Promo code catalog recognized by the cart provider. |
-| `initialCart` | `{ items: CartItem[]; promoCode?: string }` | `{}` | Seeds the cart state. |
-| `initialUser` | `User` | `null` | Seed user profile. Forwarded to `UserProvider`. |
-| `cartStorage` | `StorageController` | — | Storage controller used to persist cart state. Works seamlessly with `@guidogerb/components-storage`. |
-| `cartStorageKey` | `string` | `'guidogerb.pos.cart'` | Storage key used by the cart provider. |
-| `onOrderComplete` | `(payload: { invoice, paymentIntent, order }) => void` | — | Fired after the order and invoice have been successfully recorded. |
-| `onInvoiceCreate` | `(invoice) => void` | — | Invoked once invoices are persisted. |
-| `onPaymentError` | `(error) => void` | — | Called whenever payment confirmation fails. |
-| `renderPOSPage` | `(props) => ReactNode` | `POSPage` | Override for the default POS layout. |
-| `renderInvoicePage` | `(props) => ReactNode` | `InvoicePage` | Override for the invoice viewer. |
-| `renderHistoryPage` | `(props) => ReactNode` | `HistoryPage` | Override for the order history view. |
-| `renderProfile` | `(props) => ReactNode` | `UserProfile` | Override for the profile sidebar. |
-| `shouldAutoCreatePaymentIntent` | `boolean` | `true` | When `true`, new PaymentIntents are created whenever the cart total changes. |
+| Prop                            | Type                                                   | Default                | Description                                                                                                                                     |
+| ------------------------------- | ------------------------------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api`                           | `ReturnType<typeof createPOSApi>`                      | `null`                 | API gateway used to list products, create PaymentIntents, issue invoices, and fetch order history.                                              |
+| `apiBaseUrl`                    | `string`                                               | —                      | Convenience passed to `createPOSApi` when `api` is omitted.                                                                                     |
+| `catalog`                       | `object`                                               | `null`                 | When provided, `ProductList` will hydrate products using `@guidogerb/components-catalog`. Supports every prop the catalog component accepts.    |
+| `stripePromise`                 | `Promise<Stripe \| null>`                              | —                      | Preloaded Stripe instance. Required when `stripePublicKey` is absent.                                                                           |
+| `stripePublicKey`               | `string`                                               | —                      | Publishable key used to lazily load Stripe if `stripePromise` is not provided.                                                                  |
+| `stripeOptions`                 | `StripeConstructorOptions`                             | `{}`                   | Options forwarded to `loadStripe`.                                                                                                              |
+| `confirmPayment`                | `function`                                             | `confirmStripePayment` | Hook allowing tenants to override how payments are confirmed. Receives `{ stripe, elements, clientSecret, billingDetails, savePaymentMethod }`. |
+| `currency`                      | `string`                                               | `'USD'`                | Currency code passed to the cart pricing engine and PaymentIntent requests.                                                                     |
+| `taxRate`                       | `number`                                               | `0`                    | Default tax rate applied by the cart provider.                                                                                                  |
+| `discountRate`                  | `number`                                               | `0`                    | Default discount applied to the subtotal before tax.                                                                                            |
+| `promoCodes`                    | `Record<string, PromoRule>`                            | `{}`                   | Promo code catalog recognized by the cart provider.                                                                                             |
+| `initialCart`                   | `{ items: CartItem[]; promoCode?: string }`            | `{}`                   | Seeds the cart state.                                                                                                                           |
+| `initialUser`                   | `User`                                                 | `null`                 | Seed user profile. Forwarded to `UserProvider`.                                                                                                 |
+| `cartStorage`                   | `StorageController`                                    | —                      | Storage controller used to persist cart state. Works seamlessly with `@guidogerb/components-storage`.                                           |
+| `cartStorageKey`                | `string`                                               | `'guidogerb.pos.cart'` | Storage key used by the cart provider.                                                                                                          |
+| `onOrderComplete`               | `(payload: { invoice, paymentIntent, order }) => void` | —                      | Fired after the order and invoice have been successfully recorded.                                                                              |
+| `onInvoiceCreate`               | `(invoice) => void`                                    | —                      | Invoked once invoices are persisted.                                                                                                            |
+| `onPaymentError`                | `(error) => void`                                      | —                      | Called whenever payment confirmation fails.                                                                                                     |
+| `renderPOSPage`                 | `(props) => ReactNode`                                 | `POSPage`              | Override for the default POS layout.                                                                                                            |
+| `renderInvoicePage`             | `(props) => ReactNode`                                 | `InvoicePage`          | Override for the invoice viewer.                                                                                                                |
+| `renderHistoryPage`             | `(props) => ReactNode`                                 | `HistoryPage`          | Override for the order history view.                                                                                                            |
+| `renderProfile`                 | `(props) => ReactNode`                                 | `UserProfile`          | Override for the profile sidebar.                                                                                                               |
+| `shouldAutoCreatePaymentIntent` | `boolean`                                              | `true`                 | When `true`, new PaymentIntents are created whenever the cart total changes.                                                                    |
 
 ## Data flow
 
@@ -171,8 +168,8 @@ use native `fetch` against `apiBaseUrl`.
 ## Contexts
 
 - `CartProvider` (re-exported from `@guidogerb/components-shopping-cart`) exposes `useCart()` with `{ items, subtotal,
-  tax, discount, total, addItem, updateQuantity, removeItem, clearCart, applyPromoCode, setTaxRate, setDiscountRate,
-  setShipping }` and persists state when a storage controller is provided.
+tax, discount, total, addItem, updateQuantity, removeItem, clearCart, applyPromoCode, setTaxRate, setDiscountRate,
+setShipping }` and persists state when a storage controller is provided.
 - `UserProvider` exposes `useUser()` with `{ user, status, login, logout, updateProfile, setStripeCustomerId }`.
 
 ## Pages

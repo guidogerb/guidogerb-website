@@ -1,14 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useUser } from './context/UserContext.jsx'
 
-export function UserProfile({
-  onUpdate,
-  onLogout,
-  onLinkCustomer,
-  showCustomerId = true,
-}) {
-  const { user, status, loading, updateProfile, logout, setStripeCustomerId } =
-    useUser()
+export function UserProfile({ onUpdate, onLogout, onLinkCustomer, showCustomerId = true }) {
+  const { user, status, loading, updateProfile, logout, setStripeCustomerId } = useUser()
   const [name, setName] = useState(user?.name ?? '')
   const [email, setEmail] = useState(user?.email ?? '')
   const [customerId, setCustomerId] = useState(user?.stripeCustomerId ?? '')
@@ -48,19 +42,11 @@ export function UserProfile({
       <form className="gg-pos__profile-form" onSubmit={handleSubmit}>
         <label>
           Name
-          <input
-            type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
+          <input type="text" value={name} onChange={(event) => setName(event.target.value)} />
         </label>
         <label>
           Email
-          <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
+          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
         </label>
         <button type="submit">Save profile</button>
       </form>

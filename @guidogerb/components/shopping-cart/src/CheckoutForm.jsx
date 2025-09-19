@@ -38,11 +38,10 @@ export function CheckoutForm({
     setName(billingDetails.name ?? '')
   }, [billingDetails.email, billingDetails.name])
 
-  const isReady = useMemo(() => Boolean(stripe && elements && clientSecret), [
-    clientSecret,
-    elements,
-    stripe,
-  ])
+  const isReady = useMemo(
+    () => Boolean(stripe && elements && clientSecret),
+    [clientSecret, elements, stripe],
+  )
 
   const submitPayment = async () => {
     if (!stripe || !elements) {
@@ -169,13 +168,7 @@ export function CheckoutForm({
       <footer className="gg-pos__checkout-actions">
         <button
           type="submit"
-          disabled={
-            disabled ||
-            status === 'processing' ||
-            !clientSecret ||
-            !stripe ||
-            !elements
-          }
+          disabled={disabled || status === 'processing' || !clientSecret || !stripe || !elements}
         >
           {status === 'processing' ? 'Processing…' : 'Confirm payment'}
         </button>

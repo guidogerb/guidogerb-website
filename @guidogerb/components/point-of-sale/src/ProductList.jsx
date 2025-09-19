@@ -95,11 +95,7 @@ export function ProductList({
           <h3>{section}</h3>
           <div className="gg-pos__product-grid">
             {items.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAdd={() => handleSelect(product)}
-              />
+              <ProductCard key={product.id} product={product} onAdd={() => handleSelect(product)} />
             ))}
           </div>
         </section>

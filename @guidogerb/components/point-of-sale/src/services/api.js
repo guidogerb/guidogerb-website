@@ -86,13 +86,7 @@ export function createPOSApi({ baseUrl, client } = {}) {
     return Array.isArray(response?.products) ? response.products : response
   }
 
-  const createPaymentIntent = async ({
-    amount,
-    currency,
-    cart,
-    customerId,
-    metadata,
-  }) => {
+  const createPaymentIntent = async ({ amount, currency, cart, customerId, metadata }) => {
     return resolvedClient.post('/pos/payments/intents', {
       amount,
       currency,
@@ -112,9 +106,7 @@ export function createPOSApi({ baseUrl, client } = {}) {
   }
 
   const listInvoices = async ({ userId, status } = {}) => {
-    const response = await resolvedClient.get(
-      `/pos/invoices${toQuery({ userId, status })}`,
-    )
+    const response = await resolvedClient.get(`/pos/invoices${toQuery({ userId, status })}`)
     return Array.isArray(response?.invoices) ? response.invoices : response
   }
 

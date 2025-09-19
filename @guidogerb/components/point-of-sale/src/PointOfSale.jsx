@@ -16,10 +16,7 @@ import { InvoicePage } from './pages/InvoicePage.jsx'
 import { HistoryPage } from './pages/HistoryPage.jsx'
 import { UserProfile } from './UserProfile.jsx'
 import { createPOSApi } from './services/api.js'
-import {
-  confirmStripePayment,
-  loadStripeInstance,
-} from './services/stripe.js'
+import { confirmStripePayment, loadStripeInstance } from './services/stripe.js'
 
 const formatMoney = (amount, currency = 'USD') => {
   try {
@@ -268,8 +265,8 @@ const PointOfSaleExperience = ({
           })
         }
 
-        const resolvedInvoice =
-          invoiceResponse?.invoice ?? invoiceResponse ?? {
+        const resolvedInvoice = invoiceResponse?.invoice ??
+          invoiceResponse ?? {
             id: paymentIntentResult?.id,
             number: paymentIntentResult?.id,
             status: paymentIntentResult?.status ?? 'SUCCEEDED',
@@ -286,21 +283,20 @@ const PointOfSaleExperience = ({
           return exists ? prev : [resolvedInvoice, ...prev]
         })
 
-        const orderRecord =
-          invoiceResponse?.order ?? {
-            id: resolvedInvoice?.id ?? paymentIntentResult?.id,
-            number: resolvedInvoice?.number ?? resolvedInvoice?.id,
-            status: resolvedInvoice?.status ?? paymentIntentResult?.status ?? 'SUCCEEDED',
-            total: {
-              amount: resolvedInvoice?.totals?.total ?? totals.total,
-              currency: resolvedInvoice?.totals?.currency ?? totals.currency,
-            },
-            customer: resolvedInvoice?.customer ?? {
-              email: user?.email,
-              name: user?.name,
-            },
-            createdAt: resolvedInvoice?.issuedAt ?? new Date().toISOString(),
-          }
+        const orderRecord = invoiceResponse?.order ?? {
+          id: resolvedInvoice?.id ?? paymentIntentResult?.id,
+          number: resolvedInvoice?.number ?? resolvedInvoice?.id,
+          status: resolvedInvoice?.status ?? paymentIntentResult?.status ?? 'SUCCEEDED',
+          total: {
+            amount: resolvedInvoice?.totals?.total ?? totals.total,
+            currency: resolvedInvoice?.totals?.currency ?? totals.currency,
+          },
+          customer: resolvedInvoice?.customer ?? {
+            email: user?.email,
+            name: user?.name,
+          },
+          createdAt: resolvedInvoice?.issuedAt ?? new Date().toISOString(),
+        }
 
         setOrders((prev) => [orderRecord, ...prev])
 
@@ -424,10 +420,7 @@ const PointOfSaleExperience = ({
     [totals.promoCode, totals.total, user?.id],
   )
 
-  const confirmPaymentHandler = useCallback(
-    (params) => confirmPayment(params),
-    [confirmPayment],
-  )
+  const confirmPaymentHandler = useCallback((params) => confirmPayment(params), [confirmPayment])
 
   const checkoutForm = (
     <CheckoutForm
@@ -459,9 +452,7 @@ const PointOfSaleExperience = ({
           key={paymentIntent.clientSecret ?? 'stripe-elements'}
           stripe={stripe}
           options={
-            paymentIntent.clientSecret
-              ? { clientSecret: paymentIntent.clientSecret }
-              : undefined
+            paymentIntent.clientSecret ? { clientSecret: paymentIntent.clientSecret } : undefined
           }
         >
           {checkoutForm}
@@ -595,11 +586,7 @@ export function PointOfSale({
   }
 
   return (
-    <UserProvider
-      initialUser={initialUser}
-      storage={userStorage}
-      storageKey={userStorageKey}
-    >
+    <UserProvider initialUser={initialUser} storage={userStorage} storageKey={userStorageKey}>
       <CartProvider
         initialCart={initialCart}
         storage={cartStorage}

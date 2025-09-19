@@ -18,14 +18,7 @@ export function ShoppingCart({
   promoPlaceholder = 'Promo code',
   readOnly = false,
 }) {
-  const {
-    items,
-    totals,
-    updateQuantity,
-    removeItem,
-    clearCart,
-    applyPromoCode,
-  } = useCart()
+  const { items, totals, updateQuantity, removeItem, clearCart, applyPromoCode } = useCart()
 
   const [promoInput, setPromoInput] = useState('')
   const [promoError, setPromoError] = useState(null)
@@ -65,17 +58,11 @@ export function ShoppingCart({
                   type="number"
                   min="1"
                   value={item.quantity}
-                  onChange={(event) =>
-                    updateQuantity(item.id, Number(event.target.value))
-                  }
+                  onChange={(event) => updateQuantity(item.id, Number(event.target.value))}
                   disabled={readOnly}
                 />
               </label>
-              <button
-                type="button"
-                onClick={() => removeItem(item.id)}
-                disabled={readOnly}
-              >
+              <button type="button" onClick={() => removeItem(item.id)} disabled={readOnly}>
                 Remove
               </button>
             </div>
@@ -131,11 +118,7 @@ export function ShoppingCart({
             Clear cart
           </button>
           {onCheckout && (
-            <button
-              type="button"
-              onClick={onCheckout}
-              disabled={readOnly || items.length === 0}
-            >
+            <button type="button" onClick={onCheckout} disabled={readOnly || items.length === 0}>
               Proceed to checkout
             </button>
           )}

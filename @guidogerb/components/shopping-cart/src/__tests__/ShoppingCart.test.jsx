@@ -66,9 +66,7 @@ describe('ShoppingCart package', () => {
 
     expect(screen.getByText('Vinyl')).toBeInTheDocument()
     expect(screen.getByText('$50.00 each')).toBeInTheDocument()
-    await waitFor(() =>
-      expect(screen.getByLabelText(/qty/i)).toHaveValue(2),
-    )
+    await waitFor(() => expect(screen.getByLabelText(/qty/i)).toHaveValue(2))
 
     const promoInput = screen.getByLabelText(/promo code/i)
     await user.type(promoInput, 'vip')
@@ -86,15 +84,13 @@ describe('ShoppingCart package', () => {
 
   it('confirms payments with CheckoutForm and surfaces success state', async () => {
     const user = userEvent.setup()
-    const confirmPayment = vi
-      .fn()
-      .mockResolvedValue({
-        paymentIntent: {
-          id: 'pi_123',
-          status: 'succeeded',
-          client_secret: 'pi_secret',
-        },
-      })
+    const confirmPayment = vi.fn().mockResolvedValue({
+      paymentIntent: {
+        id: 'pi_123',
+        status: 'succeeded',
+        client_secret: 'pi_secret',
+      },
+    })
     const onPaymentSuccess = vi.fn()
     const onPaymentError = vi.fn()
     const stripe = { id: 'stripe' }
@@ -132,20 +128,20 @@ describe('ShoppingCart package', () => {
       savePaymentMethod: false,
     })
 
-    await waitFor(() => expect(onPaymentSuccess).toHaveBeenCalledWith(
-      {
-        id: 'pi_123',
-        status: 'succeeded',
-        client_secret: 'pi_secret',
-      },
-      {
-        billingDetails: { name: 'Ada Lovelace', email: 'ada@example.com' },
-        savePaymentMethod: false,
-      },
-    ))
+    await waitFor(() =>
+      expect(onPaymentSuccess).toHaveBeenCalledWith(
+        {
+          id: 'pi_123',
+          status: 'succeeded',
+          client_secret: 'pi_secret',
+        },
+        {
+          billingDetails: { name: 'Ada Lovelace', email: 'ada@example.com' },
+          savePaymentMethod: false,
+        },
+      ),
+    )
     expect(onPaymentError).not.toHaveBeenCalled()
-    expect(
-      await screen.findByText(/Payment completed successfully/i),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/Payment completed successfully/i)).toBeInTheDocument()
   })
 })

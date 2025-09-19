@@ -1,11 +1,6 @@
 import { InvoiceView } from '../InvoiceView.jsx'
 
-export function InvoicePage({
-  invoice,
-  renderInvoice,
-  onBack,
-  onHistory,
-}) {
+export function InvoicePage({ invoice, renderInvoice, onBack, onHistory }) {
   const content = renderInvoice ? renderInvoice(invoice) : <InvoiceView invoice={invoice} />
   return (
     <div className="gg-pos__page gg-pos__page--invoice">

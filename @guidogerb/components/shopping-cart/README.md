@@ -33,17 +33,10 @@ lists them as direct dependencies). React 19+ is required.
 
 ```tsx
 import { useMemo } from 'react'
-import {
-  CartProvider,
-  ShoppingCart,
-  CheckoutForm,
-} from '@guidogerb/components-shopping-cart'
+import { CartProvider, ShoppingCart, CheckoutForm } from '@guidogerb/components-shopping-cart'
 
 function CartExperience({ items, promoCodes, onCheckout }) {
-  const initialCart = useMemo(
-    () => ({ items }),
-    [items],
-  )
+  const initialCart = useMemo(() => ({ items }), [items])
 
   return (
     <CartProvider
@@ -89,12 +82,12 @@ function Checkout({ clientSecret, confirmPayment }) {
 
 ## `ShoppingCart` props
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `onCheckout` | `() => void` | — | Called when the operator presses “Proceed to checkout”. Useful for swapping to the `CheckoutForm` view. |
-| `allowPromoCodes` | `boolean` | `true` | Shows the promo entry form when promos are enabled. |
-| `promoPlaceholder` | `string` | `'Promo code'` | Placeholder text for the promo input. |
-| `readOnly` | `boolean` | `false` | Disables all cart interactions when `true`. |
+| Prop               | Type         | Default        | Description                                                                                             |
+| ------------------ | ------------ | -------------- | ------------------------------------------------------------------------------------------------------- |
+| `onCheckout`       | `() => void` | —              | Called when the operator presses “Proceed to checkout”. Useful for swapping to the `CheckoutForm` view. |
+| `allowPromoCodes`  | `boolean`    | `true`         | Shows the promo entry form when promos are enabled.                                                     |
+| `promoPlaceholder` | `string`     | `'Promo code'` | Placeholder text for the promo input.                                                                   |
+| `readOnly`         | `boolean`    | `false`        | Disables all cart interactions when `true`.                                                             |
 
 The component consumes state from `useCart()` and therefore must be rendered within a `CartProvider`.
 

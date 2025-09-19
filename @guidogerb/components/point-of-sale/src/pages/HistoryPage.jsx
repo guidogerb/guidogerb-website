@@ -1,10 +1,6 @@
 import { OrderHistory } from '../OrderHistory.jsx'
 
-export function HistoryPage({
-  orders,
-  renderHistory,
-  onBack,
-}) {
+export function HistoryPage({ orders, renderHistory, onBack }) {
   const content = renderHistory ? renderHistory(orders) : <OrderHistory orders={orders} />
   return (
     <div className="gg-pos__page gg-pos__page--history">
