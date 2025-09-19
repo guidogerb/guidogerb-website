@@ -173,7 +173,9 @@ describe('LoginCallback', () => {
       />,
     )
 
-    await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/from-prop?mode=prop#anchor'))
+    await waitFor(() =>
+      expect(location.replace).toHaveBeenCalledWith('/from-prop?mode=prop#anchor'),
+    )
     expect(signinRedirectCallback).toHaveBeenCalledTimes(1)
   })
 

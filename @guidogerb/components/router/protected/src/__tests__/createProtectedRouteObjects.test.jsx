@@ -79,10 +79,9 @@ describe('createProtectedRouteObjects', () => {
       </div>
     ))
 
-    const routes = createProtectedRouteObjects(
-      [{ path: '/', element: <div>Home</div> }],
-      { wrapElement },
-    )
+    const routes = createProtectedRouteObjects([{ path: '/', element: <div>Home</div> }], {
+      wrapElement,
+    })
 
     render(routes[0].element)
 

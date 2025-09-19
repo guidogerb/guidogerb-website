@@ -77,9 +77,11 @@ describe('ThemeProvider', () => {
 
     render(
       <ThemeProvider>
-        <ThemeCapture onTheme={(theme) => {
-          themeRef.current = theme
-        }} />
+        <ThemeCapture
+          onTheme={(theme) => {
+            themeRef.current = theme
+          }}
+        />
         <TestConsumer />
       </ThemeProvider>,
     )
@@ -126,9 +128,11 @@ describe('ThemeProvider', () => {
 
     render(
       <ThemeProvider>
-        <ThemeCapture onTheme={(theme) => {
-          themeRef.current = theme
-        }} />
+        <ThemeCapture
+          onTheme={(theme) => {
+            themeRef.current = theme
+          }}
+        />
         <TestConsumer />
       </ThemeProvider>,
     )

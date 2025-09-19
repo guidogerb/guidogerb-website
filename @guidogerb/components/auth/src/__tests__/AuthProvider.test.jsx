@@ -148,7 +148,10 @@ describe('AuthProvider', () => {
 
   it('derives authority from the Cognito domain alias and honors metadata overrides', () => {
     vi.stubEnv('VITE_COGNITO_DOMAIN', 'https://tenant-domain.example')
-    vi.stubEnv('VITE_COGNITO_METADATA_URL', 'https://tenant-domain.example/.well-known/openid-configuration')
+    vi.stubEnv(
+      'VITE_COGNITO_METADATA_URL',
+      'https://tenant-domain.example/.well-known/openid-configuration',
+    )
     vi.stubEnv('VITE_COGNITO_CLIENT_ID', 'env-client')
     vi.stubEnv('VITE_REDIRECT_URI', '')
 
@@ -171,7 +174,10 @@ describe('AuthProvider', () => {
   it('ignores blank environment values and still produces a valid configuration', () => {
     vi.stubEnv('VITE_COGNITO_AUTHORITY', '')
     vi.stubEnv('VITE_COGNITO_DOMAIN', '')
-    vi.stubEnv('VITE_COGNITO_METADATA_URL', 'https://metadata.example/.well-known/openid-configuration')
+    vi.stubEnv(
+      'VITE_COGNITO_METADATA_URL',
+      'https://metadata.example/.well-known/openid-configuration',
+    )
     vi.stubEnv('VITE_COGNITO_CLIENT_ID', 'env-client')
     vi.stubEnv('VITE_REDIRECT_URI', '')
 
