@@ -41,4 +41,23 @@ describe('actions helpers', () => {
     const contactLink = getByRole('link', { name: 'Contact' })
     expect(contactLink).toHaveClass('page-action--secondary')
   })
+
+  it('supports numeric labels and preserves explicit link targets', () => {
+    const rendered = renderAction(
+      { label: 0, href: '/zero', external: false, target: '_self', rel: 'external' },
+      0,
+      { scope: 'shell' },
+    )
+
+    const { getByRole } = render(rendered)
+    const link = getByRole('link', { name: '0' })
+    expect(link).toHaveAttribute('href', '/zero')
+    expect(link).toHaveAttribute('target', '_self')
+    expect(link).toHaveAttribute('rel', 'external')
+  })
+
+  it('returns null when no actions remain after filtering', () => {
+    const actions = renderActions([null, undefined, false], { scope: 'shell' })
+    expect(actions).toBeNull()
+  })
 })

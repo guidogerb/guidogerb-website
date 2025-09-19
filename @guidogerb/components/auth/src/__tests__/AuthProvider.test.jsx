@@ -145,4 +145,48 @@ describe('AuthProvider', () => {
       'https://app.local/auth/callback',
     )
   })
+
+  it('derives authority from the Cognito domain alias and honors metadata overrides', () => {
+    vi.stubEnv('VITE_COGNITO_DOMAIN', 'https://tenant-domain.example')
+    vi.stubEnv('VITE_COGNITO_METADATA_URL', 'https://tenant-domain.example/.well-known/openid-configuration')
+    vi.stubEnv('VITE_COGNITO_CLIENT_ID', 'env-client')
+    vi.stubEnv('VITE_REDIRECT_URI', '')
+
+    render(
+      <AuthProvider loginCallbackPath="/auth/callback">
+        <div>child</div>
+      </AuthProvider>,
+    )
+
+    expect(providerPropsLog).toHaveLength(1)
+    expect(providerPropsLog[0]).toMatchObject({
+      authority: 'https://tenant-domain.example',
+      metadataUrl: 'https://tenant-domain.example/.well-known/openid-configuration',
+      client_id: 'env-client',
+      redirect_uri: 'http://localhost/auth/callback',
+    })
+    expect(consoleErrorSpy).not.toHaveBeenCalled()
+  })
+
+  it('ignores blank environment values and still produces a valid configuration', () => {
+    vi.stubEnv('VITE_COGNITO_AUTHORITY', '')
+    vi.stubEnv('VITE_COGNITO_DOMAIN', '')
+    vi.stubEnv('VITE_COGNITO_METADATA_URL', 'https://metadata.example/.well-known/openid-configuration')
+    vi.stubEnv('VITE_COGNITO_CLIENT_ID', 'env-client')
+    vi.stubEnv('VITE_REDIRECT_URI', '')
+
+    render(
+      <AuthProvider authority="" client_id="" loginCallbackPath="/auth/callback">
+        <div>child</div>
+      </AuthProvider>,
+    )
+
+    expect(providerPropsLog).toHaveLength(1)
+    expect(providerPropsLog[0].authority).toBeUndefined()
+    expect(providerPropsLog[0]).toMatchObject({
+      metadataUrl: 'https://metadata.example/.well-known/openid-configuration',
+      client_id: 'env-client',
+      redirect_uri: 'http://localhost/auth/callback',
+    })
+  })
 })

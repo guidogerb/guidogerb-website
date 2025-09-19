@@ -1,7 +1,11 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
 
-import { ResponsiveSlot, ResponsiveSlotProvider } from '../responsive-slot.jsx'
+import {
+  ResponsiveSlot,
+  ResponsiveSlotProvider,
+  useResponsiveSlotSize,
+} from '../responsive-slot.jsx'
 
 function createMatchMedia(initialWidth) {
   let width = initialWidth
@@ -131,6 +135,96 @@ describe('ResponsiveSlot', () => {
       })
     } finally {
       window.matchMedia = originalMatchMedia
+    }
+  })
+
+  it('renders content-only slots without applying CSS variables', () => {
+    render(
+      <ResponsiveSlotProvider>
+        <ResponsiveSlot slot="catalog.card" sizes="content" data-testid="slot">
+          <div>Child</div>
+        </ResponsiveSlot>
+      </ResponsiveSlotProvider>,
+    )
+
+    const slot = screen.getByTestId('slot')
+    expect(slot.getAttribute('role')).toBe('presentation')
+    expect(slot.style.display).toBe('contents')
+    expect(slot.style.getPropertyValue('--slot-inline-size')).toBe('')
+  })
+
+  it('exposes responsive size data through the hook with registry overrides', () => {
+    function SizeProbe() {
+      const size = useResponsiveSlotSize('custom.card', { xl: { inline: 40 } })
+      return (
+        <div
+          data-testid="size"
+          data-inline={size.inline}
+          data-block={size.block}
+          data-max-inline={size.maxInline}
+        />
+      )
+    }
+
+    render(
+      <ResponsiveSlotProvider
+        defaultBreakpoint="xl"
+        registry={{
+          'custom.card': {
+            md: { inline: '18rem', block: '20rem' },
+            xl: { inline: '26rem', block: 28, maxInline: '30rem' },
+            xxl: { inline: 'ignored' },
+          },
+        }}
+      >
+        <SizeProbe />
+      </ResponsiveSlotProvider>,
+    )
+
+    const probe = screen.getByTestId('size')
+    expect(probe.dataset.inline).toBe('40px')
+    expect(probe.dataset.block).toBe('28px')
+    expect(probe.dataset.maxInline).toBe('30rem')
+  })
+
+  it('inherits parent slot sizing when inherit is enabled', () => {
+    render(
+      <ResponsiveSlotProvider defaultBreakpoint="md">
+        <ResponsiveSlot slot="catalog.card" data-testid="parent">
+          <ResponsiveSlot slot="nested.slot" inherit data-testid="child">
+            <span>Nested</span>
+          </ResponsiveSlot>
+        </ResponsiveSlot>
+      </ResponsiveSlotProvider>,
+    )
+
+    const parent = screen.getByTestId('parent')
+    const child = screen.getByTestId('child')
+    expect(child.style.getPropertyValue('--slot-inline-size')).toBe(
+      parent.style.getPropertyValue('--slot-inline-size'),
+    )
+    expect(child.style.getPropertyValue('--slot-block-size')).toBe(
+      parent.style.getPropertyValue('--slot-block-size'),
+    )
+  })
+
+  it('warns when a slot is missing from the registry in development', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    try {
+      render(
+        <ResponsiveSlotProvider>
+          <ResponsiveSlot slot="unknown.slot" data-testid="missing">
+            <div>Missing</div>
+          </ResponsiveSlot>
+        </ResponsiveSlotProvider>,
+      )
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        'ResponsiveSlot: slot "unknown.slot" is not defined in the registry.',
+      )
+    } finally {
+      warnSpy.mockRestore()
     }
   })
 })

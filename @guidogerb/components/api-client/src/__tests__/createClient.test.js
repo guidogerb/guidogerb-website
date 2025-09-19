@@ -148,4 +148,188 @@ describe('createClient', () => {
     expect(error.statusText).toBe('Forbidden')
     expect(error.data).toEqual({ error: 'not allowed' })
   })
+
+  it('logs a warning when access token retrieval fails and continues without auth header', async () => {
+    const fetch = vi.fn().mockResolvedValue(jsonResponse({ ok: true }))
+    const logger = { debug: vi.fn(), warn: vi.fn() }
+
+    const client = createClient({
+      baseUrl: 'https://api.example.com',
+      fetch,
+      getAccessToken: () => {
+        throw new Error('token error')
+      },
+      logger,
+    })
+
+    await client.get('/profile')
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[api-client] Failed to retrieve access token',
+      expect.any(Error),
+    )
+
+    const [, init] = fetch.mock.calls[0]
+    const headers = headersToObject(init.headers)
+    expect(headers.authorization).toBeUndefined()
+  })
+
+  it('skips bodies on idempotent requests and warns when json is provided for GET', async () => {
+    const fetch = vi.fn().mockResolvedValue(jsonResponse({ ok: true }))
+    const logger = { debug: vi.fn(), warn: vi.fn() }
+
+    const client = createClient({ baseUrl: 'https://api.example.com', fetch, logger })
+
+    const data = await client.get('/items', { json: { foo: 'bar' } })
+
+    expect(data).toEqual({ ok: true })
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[api-client] Ignoring body on idempotent request',
+      expect.objectContaining({ method: 'GET', url: 'https://api.example.com/items' }),
+    )
+    const [, init] = fetch.mock.calls[0]
+    expect(init.body).toBeUndefined()
+  })
+
+  it('retries retryable status codes before succeeding', async () => {
+    const failing = jsonResponse({ message: 'busy' }, { status: 503, statusText: 'Unavailable' })
+    const success = jsonResponse({ status: 'ok' })
+    const fetch = vi.fn().mockResolvedValueOnce(failing).mockResolvedValueOnce(success)
+    const logger = { debug: vi.fn(), warn: vi.fn() }
+
+    const client = createClient({
+      baseUrl: 'https://api.example.com',
+      fetch,
+      logger,
+      retry: { attempts: 2, delayMs: 0 },
+    })
+
+    const data = await client.get('/health')
+    expect(data).toEqual({ status: 'ok' })
+    expect(fetch).toHaveBeenCalledTimes(2)
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[api-client] retrying request after response',
+      expect.objectContaining({
+        method: 'GET',
+        url: 'https://api.example.com/health',
+        status: 503,
+      }),
+    )
+  })
+
+  it('exposes raw response data when JSON parsing fails', async () => {
+    const fetch = vi.fn(() =>
+      Promise.resolve(
+        new Response('not-json', {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
+      ),
+    )
+
+    const client = createClient({ baseUrl: 'https://api.example.com', fetch })
+
+    await client.get('/bad-json').catch((error) => {
+      expect(error).toBeInstanceOf(ApiError)
+      expect(error.message).toBe('Failed to parse JSON response')
+      expect(error.data).toBe('not-json')
+      expect(error.cause).toBeInstanceOf(SyntaxError)
+    })
+  })
+
+  it('supports diverse search param inputs and header sources', async () => {
+    const fetch = vi.fn(() => Promise.resolve(jsonResponse({ ok: true })))
+    const headers = new Headers({ 'x-default': '1' })
+    const client = createClient({
+      baseUrl: 'https://api.example.com/v1/',
+      fetch,
+      defaultHeaders: headers,
+      userAgent: 'guidogerb-tests/1.0',
+    })
+
+    await client.get('reports', { searchParams: '?foo=1&bar=2' })
+    await client.get('reports', {
+      query: { foo: '1', tags: ['a', 'b'], empty: undefined },
+    })
+
+    expect(fetch).toHaveBeenCalledTimes(2)
+    const [firstUrl, firstInit] = fetch.mock.calls[0]
+    expect(firstUrl).toBe('https://api.example.com/v1/reports?foo=1&bar=2')
+    expect(headersToObject(firstInit.headers)['x-default']).toBe('1')
+    expect(headersToObject(firstInit.headers)['x-user-agent']).toBe('guidogerb-tests/1.0')
+
+    const [secondUrl] = fetch.mock.calls[1]
+    expect(secondUrl).toBe('https://api.example.com/v1/reports?foo=1&tags=a&tags=b')
+  })
+
+  it('treats empty responses as undefined for 204 and zero content-length payloads', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 204 }))
+      .mockResolvedValueOnce(
+        new Response('', {
+          status: 200,
+          headers: { 'content-type': 'application/json', 'content-length': '0' },
+        }),
+      )
+
+    const client = createClient({ baseUrl: 'https://api.example.com', fetch })
+
+    await expect(client.get('/no-content')).resolves.toBeUndefined()
+    await expect(client.get('/empty-json')).resolves.toBeUndefined()
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('returns text bodies untouched for non-JSON responses', async () => {
+    const fetch = vi.fn(() =>
+      Promise.resolve(
+        new Response('plain text payload', {
+          status: 200,
+          headers: { 'content-type': 'text/plain' },
+        }),
+      ),
+    )
+
+    const client = createClient({ baseUrl: 'https://api.example.com', fetch })
+
+    const data = await client.get('/text-response')
+    expect(data).toBe('plain text payload')
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not retry aborted requests and surfaces the abort cause', async () => {
+    const abortError = new Error('aborted')
+    abortError.name = 'AbortError'
+    const fetch = vi.fn().mockRejectedValue(abortError)
+
+    const client = createClient({
+      baseUrl: 'https://api.example.com',
+      fetch,
+      retry: { attempts: 5, delayMs: 0 },
+    })
+
+    await expect(client.get('/resource')).rejects.toMatchObject({
+      name: 'ApiError',
+      cause: abortError,
+    })
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('sends provided body payloads without JSON serialization', async () => {
+    const fetch = vi.fn(() => Promise.resolve(jsonResponse({ ok: true })))
+    const body = new Uint8Array([1, 2, 3])
+
+    const client = createClient({ baseUrl: 'https://api.example.com', fetch })
+
+    await client.post('/upload', {
+      body,
+      headers: { 'content-type': 'application/octet-stream' },
+    })
+
+    expect(fetch).toHaveBeenCalledTimes(1)
+    const [, init] = fetch.mock.calls[0]
+    expect(init.body).toBe(body)
+    const headers = headersToObject(init.headers)
+    expect(headers['content-type']).toBe('application/octet-stream')
+  })
 })
