@@ -3,6 +3,8 @@ name: Build and Test (CI)
 on:
   push:
     branches: ['main', 'prod']
+  pull_request:
+    branches: ['main', 'prod']
   workflow_dispatch:
 
 permissions:
@@ -25,9 +27,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
       - name: Configure npm auth for GitHub Packages
-        run: echo "//npm.pkg.github.com/:_authToken=${NPMRC_TOKEN}" >> ~/.npmrc
+        if: env.NPMRC_TOKEN != ''
+        run: |
+          printf '%s\n' "//npm.pkg.github.com/:_authToken=${NPMRC_TOKEN}" >> ~/.npmrc
         env:
           NPMRC_TOKEN: ${{ env.NPMRC_TOKEN }}
 
@@ -37,7 +42,7 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Lint all packages
         run: npm run lint
@@ -47,13 +52,22 @@ jobs:
         run: pnpm format:check
 
       - name: Write .env files
+        shell: bash
         run: |
-          echo "${{ secrets.GARYGERBER_VITE_ENV }}" > websites/garygerber.com/.env
-          echo "${{ secrets.GUIDOGERBPUBLISHING_VITE_ENV }}" > websites/guidogerbpublishing.com/.env
-          echo "${{ secrets.PICKLECHEEZE_VITE_ENV }}" > websites/picklecheeze.com/.env
-          echo "${{ secrets.STREAM4CLOUD_VITE_ENV }}" > websites/stream4cloud.com/.env
-          echo "${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}" > websites/this-is-my-story.org/.env
-          echo "${{ secrets.GGP_LLC_VITE_ENV }}" > websites/ggp.llc/.env
+          set -euo pipefail
+
+          write_env() {
+            local value="$1"
+            local target="$2"
+            printf '%s\n' "$value" > "$target"
+          }
+
+          write_env "${{ secrets.GARYGERBER_VITE_ENV }}" "websites/garygerber.com/.env"
+          write_env "${{ secrets.GUIDOGERBPUBLISHING_VITE_ENV }}" "websites/guidogerbpublishing.com/.env"
+          write_env "${{ secrets.PICKLECHEEZE_VITE_ENV }}" "websites/picklecheeze.com/.env"
+          write_env "${{ secrets.STREAM4CLOUD_VITE_ENV }}" "websites/stream4cloud.com/.env"
+          write_env "${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}" "websites/this-is-my-story.org/.env"
+          write_env "${{ secrets.GGP_LLC_VITE_ENV }}" "websites/ggp.llc/.env"
 
       - name: Build components
         run: pnpm -r build

@@ -1,4 +1,4 @@
-name: deploy
+name: Deploy Websites
 
 on:
   workflow_run:
@@ -6,28 +6,48 @@ on:
     types: [completed]
   workflow_dispatch:
     inputs:
+      sites:
+        description: 'Comma-separated list of sites to deploy (blank for all)'
+        required: false
+        default: ''
+      environment:
+        description: 'Deployment target (auto uses triggering branch)'
+        required: false
+        default: auto
+        type: choice
+        options:
+          - auto
+          - staging
+          - production
       aws_region:
         description: 'AWS region'
         required: false
         default: 'us-east-1'
       bucket:
-        description: 'S3 bucket name'
+        description: 'Fallback S3 bucket name (used if CloudFormation lookup fails)'
         required: false
         default: 'ggp-websites'
       distribution_id:
-        description: 'CloudFront distribution ID'
+        description: 'Fallback CloudFront distribution ID (used if CloudFormation lookup fails)'
         required: false
         default: 'E1MM1G0JP81M1R'
       invalidate_prefix_only:
-        description: 'Invalidate prefix only'
+        description: 'Limit CloudFront invalidation to the site prefix when using a shared distribution'
         required: false
         default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 env:
-  AWS_REGION: ${{ inputs.aws_region || vars.AWS_REGION || 'us-east-1' }}
-  BUCKET: ${{ inputs.bucket || vars.BUCKET || 'ggp-websites' }}
-  DISTRIBUTION_ID: ${{ inputs.distribution_id || vars.DISTRIBUTION_ID || 'E1MM1G0JP81M1R' }}
-  INVALIDATE_PREFIX_ONLY: ${{ inputs.invalidate_prefix_only || vars.INVALIDATE_PREFIX_ONLY || 'true' }}
+  NODE_VERSION: '20.19.0'
+  AWS_REGION: ${{ github.event.inputs.aws_region || vars.AWS_REGION || 'us-east-1' }}
+  BUCKET: ${{ github.event.inputs.bucket || vars.BUCKET || 'ggp-websites' }}
+  DISTRIBUTION_ID: ${{ github.event.inputs.distribution_id || vars.DISTRIBUTION_ID || 'E1MM1G0JP81M1R' }}
+  INVALIDATE_PREFIX_ONLY: ${{ github.event.inputs.invalidate_prefix_only || vars.INVALIDATE_PREFIX_ONLY || 'true' }}
+  DISPATCH_SITES: ${{ github.event.inputs.sites || '' }}
+  DISPATCH_ENVIRONMENT: ${{ github.event.inputs.environment || 'auto' }}
 
 jobs:
   deploy:
@@ -52,51 +72,259 @@ jobs:
           - this-is-my-story.org
           - ggp.llc
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Determine if site should deploy
+        id: site-filter
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run'
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_SITES: ${{ env.DISPATCH_SITES }}
+          MATRIX_SITE: ${{ matrix.site }}
+        run: |
+          set -euo pipefail
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2
+          run_site="true"
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            trimmed="${REQUESTED_SITES//[[:space:]]/}"
+            if [[ -n "$trimmed" ]]; then
+              run_site="false"
+              IFS=',' read -ra items <<< "$trimmed"
+              for item in "${items[@]}"; do
+                if [[ "${item,,}" == "${MATRIX_SITE,,}" ]]; then
+                  run_site="true"
+                  break
+                fi
+              done
+            fi
+          fi
+
+          echo "run_site=$run_site" >> "$GITHUB_OUTPUT"
+          if [[ "$run_site" == "false" ]]; then
+            echo "Skipping site $MATRIX_SITE (not requested in manual dispatch)."
+          fi
+
+      - name: Checkout
+        if: steps.site-filter.outputs.run_site == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup Node.js
+        if: steps.site-filter.outputs.run_site == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        if: steps.site-filter.outputs.run_site == 'true'
+        uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
+      - name: Configure npm auth for GitHub Packages
+        if: steps.site-filter.outputs.run_site == 'true' && env.NPMRC_TOKEN != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' "//npm.pkg.github.com/:_authToken=${NPMRC_TOKEN}" >> ~/.npmrc
 
-      - name: Install
+      - name: Install dependencies
+        if: steps.site-filter.outputs.run_site == 'true'
         run: pnpm install --frozen-lockfile
 
+      - name: Write .env files
+        if: steps.site-filter.outputs.run_site == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          write_env() {
+            local value="$1"
+            local target="$2"
+            printf '%s\n' "$value" > "$target"
+          }
+
+          write_env "${{ secrets.GARYGERBER_VITE_ENV }}" "websites/garygerber.com/.env"
+          write_env "${{ secrets.GUIDOGERBPUBLISHING_VITE_ENV }}" "websites/guidogerbpublishing.com/.env"
+          write_env "${{ secrets.PICKLECHEEZE_VITE_ENV }}" "websites/picklecheeze.com/.env"
+          write_env "${{ secrets.STREAM4CLOUD_VITE_ENV }}" "websites/stream4cloud.com/.env"
+          write_env "${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}" "websites/this-is-my-story.org/.env"
+          write_env "${{ secrets.GGP_LLC_VITE_ENV }}" "websites/ggp.llc/.env"
+
+      - name: Determine deployment mode
+        if: steps.site-filter.outputs.run_site == 'true'
+        id: deployment
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          REF_NAME: ${{ github.ref_name }}
+          MANUAL_ENV: ${{ env.DISPATCH_ENVIRONMENT }}
+        run: |
+          set -euo pipefail
+
+          branch="$REF_NAME"
+          if [[ "$EVENT_NAME" == "workflow_run" && -n "$WORKFLOW_BRANCH" ]]; then
+            branch="$WORKFLOW_BRANCH"
+          fi
+
+          selected_env="$MANUAL_ENV"
+          if [[ "$EVENT_NAME" != "workflow_dispatch" || "$selected_env" == "auto" || -z "$selected_env" ]]; then
+            if [[ "$branch" == "prod" ]]; then
+              selected_env="production"
+            else
+              selected_env="staging"
+            fi
+          fi
+
+          build_script="build"
+          if [[ "$selected_env" == "production" ]]; then
+            build_script="build:prod-bundle"
+          else
+            build_script="build:staging"
+          fi
+
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "environment=$selected_env" >> "$GITHUB_OUTPUT"
+          echo "build_script=$build_script" >> "$GITHUB_OUTPUT"
+
       - name: Build selected site
+        if: steps.site-filter.outputs.run_site == 'true'
+        shell: bash
         env:
           MATRIX_SITE: ${{ matrix.site }}
+          BUILD_SCRIPT: ${{ steps.deployment.outputs.build_script }}
         run: |
-          if [[ "$MATRIX_SITE" == *.llc ]]; then
-            # Replace all dots with hyphens, e.g., ggp.llc -> ggp-llc
-            SITE_NO_EXT="${MATRIX_SITE//./-}"
+          set -euo pipefail
+
+          site="$MATRIX_SITE"
+          if [[ "$site" == *.llc ]]; then
+            package="websites-${site//./-}"
           else
-            # Strip last dot segment, e.g., example.com -> example
-            SITE_NO_EXT="${MATRIX_SITE%.*}"
+            package="websites-${site%.*}"
           fi
-          pnpm --filter "websites-${SITE_NO_EXT}" build
+
+          echo "Building $package using script $BUILD_SCRIPT"
+          pnpm --filter "$package" "$BUILD_SCRIPT"
 
       - name: List build output
+        if: steps.site-filter.outputs.run_site == 'true'
+        shell: bash
         run: |
           ls -l "websites/${{ matrix.site }}" || true
           ls -l "websites/${{ matrix.site }}/dist" || echo "dist folder missing"
 
       - name: Configure AWS credentials (OIDC)
+        if: steps.site-filter.outputs.run_site == 'true'
         uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
           role-session-name: github-actions-deploy
 
-      - name: Upload to S3 (tenant prefix)
+      - name: Resolve deployment targets
+        if: steps.site-filter.outputs.run_site == 'true'
+        id: targets
+        shell: bash
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          SITE: ${{ matrix.site }}
+          FALLBACK_BUCKET: ${{ env.BUCKET }}
+          FALLBACK_DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
         run: |
-          SRC="websites/${{ matrix.site }}/dist"
-          DEST="s3://${{ env.BUCKET }}/${{ matrix.site }}/"
-          echo "Syncing $SRC to $DEST"
-          aws s3 sync "$SRC" "$DEST" --delete
+          set -euo pipefail
+
+          stack_suffix="${SITE//./-}"
+          stack_name="s4c-edge-${stack_suffix}"
+
+          bucket=""
+          distribution=""
+          prefix=""
+
+          if aws cloudformation describe-stacks --region "$AWS_REGION" --stack-name "$stack_name" --query 'Stacks[0].StackStatus' --output text >/dev/null 2>&1; then
+            bucket=$(aws cloudformation describe-stacks \
+              --region "$AWS_REGION" \
+              --stack-name "$stack_name" \
+              --query 'Stacks[0].Outputs[?OutputKey==`SiteBucketName`].OutputValue' \
+              --output text 2>/dev/null || true)
+            if [[ "$bucket" == "None" ]]; then
+              bucket=""
+            fi
+
+            distribution=$(aws cloudformation describe-stacks \
+              --region "$AWS_REGION" \
+              --stack-name "$stack_name" \
+              --query 'Stacks[0].Outputs[?OutputKey==`DistributionId` || OutputKey==`CloudFrontDistributionId`].OutputValue' \
+              --output text 2>/dev/null || true)
+            if [[ "$distribution" == "None" ]]; then
+              distribution=""
+            fi
+          else
+            echo "CloudFormation stack $stack_name not found; using fallback settings."
+          fi
+
+          if [[ -z "$bucket" ]]; then
+            bucket="$FALLBACK_BUCKET"
+            if [[ -n "$bucket" ]]; then
+              prefix="$SITE"
+              echo "Using fallback bucket $bucket with prefix $prefix"
+            fi
+          else
+            echo "Using bucket $bucket from CloudFormation"
+          fi
+
+          if [[ -z "$distribution" ]]; then
+            distribution="$FALLBACK_DISTRIBUTION"
+          fi
+
+          if [[ -z "$bucket" ]]; then
+            echo "Unable to determine S3 bucket for $SITE" >&2
+            exit 1
+          fi
+
+          echo "bucket=$bucket" >> "$GITHUB_OUTPUT"
+          echo "distribution=$distribution" >> "$GITHUB_OUTPUT"
+          echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to S3
+        if: steps.site-filter.outputs.run_site == 'true'
+        shell: bash
+        env:
+          SRC: websites/${{ matrix.site }}/dist
+          BUCKET: ${{ steps.targets.outputs.bucket }}
+          PREFIX: ${{ steps.targets.outputs.prefix }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! -d "$SRC" ]]; then
+            echo "Build output $SRC does not exist." >&2
+            exit 1
+          fi
+
+          destination="s3://$BUCKET"
+          if [[ -n "$PREFIX" ]]; then
+            destination="$destination/$PREFIX"
+          fi
+
+          echo "Syncing $SRC to $destination"
+          aws s3 sync "$SRC" "$destination" --delete
+
+      - name: Create CloudFront invalidation
+        if: steps.site-filter.outputs.run_site == 'true' && steps.targets.outputs.distribution != ''
+        shell: bash
+        env:
+          DISTRIBUTION_ID: ${{ steps.targets.outputs.distribution }}
+          PREFIX: ${{ steps.targets.outputs.prefix }}
+          INVALIDATE_PREFIX_ONLY: ${{ env.INVALIDATE_PREFIX_ONLY }}
+        run: |
+          set -euo pipefail
+
+          paths='/*'
+          if [[ "$INVALIDATE_PREFIX_ONLY" == 'true' && -n "$PREFIX" ]]; then
+            paths="/$PREFIX/*"
+          fi
+
+          echo "Creating CloudFront invalidation on $DISTRIBUTION_ID for paths: $paths"
+          aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "$paths"
