@@ -1,10 +1,7 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
 
-import {
-  ResponsiveSlot,
-  ResponsiveSlotProvider,
-} from '../responsive-slot.jsx'
+import { ResponsiveSlot, ResponsiveSlotProvider } from '../responsive-slot.jsx'
 
 function createMatchMedia(initialWidth) {
   let width = initialWidth
@@ -137,4 +134,3 @@ describe('ResponsiveSlot', () => {
     }
   })
 })
-

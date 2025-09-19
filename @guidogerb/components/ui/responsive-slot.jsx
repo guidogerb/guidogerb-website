@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 const BREAKPOINT_ORDER = ['xs', 'sm', 'md', 'lg', 'xl']
 
@@ -149,10 +142,7 @@ function mergeSlotRegistry(base = {}, overrides = {}) {
 
 function mergeSlotSizes(base = {}, overrides = {}) {
   const merged = {}
-  const keys = new Set([
-    ...Object.keys(base || {}),
-    ...Object.keys(overrides || {}),
-  ])
+  const keys = new Set([...Object.keys(base || {}), ...Object.keys(overrides || {})])
 
   for (const key of keys) {
     if (!ALLOWED_BREAKPOINTS.has(key)) continue
@@ -252,17 +242,10 @@ function useActiveBreakpoint(defaultBreakpoint) {
   return active
 }
 
-export function ResponsiveSlotProvider({
-  registry,
-  defaultBreakpoint = 'md',
-  children,
-}) {
+export function ResponsiveSlotProvider({ registry, defaultBreakpoint = 'md', children }) {
   const fallbackBreakpoint = normalizeBreakpointKey(defaultBreakpoint)
 
-  const mergedRegistry = useMemo(
-    () => mergeSlotRegistry(baseResponsiveSlots, registry),
-    [registry],
-  )
+  const mergedRegistry = useMemo(() => mergeSlotRegistry(baseResponsiveSlots, registry), [registry])
 
   const activeBreakpoint = useActiveBreakpoint(fallbackBreakpoint)
 
@@ -276,11 +259,7 @@ export function ResponsiveSlotProvider({
     [mergedRegistry, activeBreakpoint, fallbackBreakpoint],
   )
 
-  return (
-    <ResponsiveSlotContext.Provider value={value}>
-      {children}
-    </ResponsiveSlotContext.Provider>
-  )
+  return <ResponsiveSlotContext.Provider value={value}>{children}</ResponsiveSlotContext.Provider>
 }
 
 function useResponsiveSlotContext() {
@@ -320,7 +299,8 @@ export function ResponsiveSlot({
 
   const isContentOnly = sizes === 'content'
 
-  const baseSizes = inherit && parentContext?.byBreakpoint ? parentContext.byBreakpoint : registry?.[slot]
+  const baseSizes =
+    inherit && parentContext?.byBreakpoint ? parentContext.byBreakpoint : registry?.[slot]
 
   const mergedSizes = useMemo(() => {
     if (isContentOnly) return null
@@ -431,10 +411,5 @@ export function ResponsiveSlot({
     [slot, mergedSizes],
   )
 
-  return (
-    <SlotInstanceContext.Provider value={contextValue}>
-      {element}
-    </SlotInstanceContext.Provider>
-  )
+  return <SlotInstanceContext.Provider value={contextValue}>{element}</SlotInstanceContext.Provider>
 }
-
