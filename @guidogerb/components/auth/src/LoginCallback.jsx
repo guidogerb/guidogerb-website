@@ -12,14 +12,7 @@ const normalizeReturnTo = (value) => {
       return input.toString()
     }
 
-    const {
-      returnTo,
-      url,
-      path,
-      pathname,
-      search,
-      hash,
-    } = input
+    const { returnTo, url, path, pathname, search, hash } = input
 
     if (returnTo) {
       const normalized = normalizeReturnTo(returnTo)
@@ -66,17 +59,8 @@ const normalizeReturnTo = (value) => {
   return fromObject(value)
 }
 
-const computeTarget = ({
-  redirectTo,
-  user,
-  storageValue,
-}) => {
-  const hints = [
-    redirectTo,
-    user?.state,
-    user?.url_state,
-    storageValue,
-  ]
+const computeTarget = ({ redirectTo, user, storageValue }) => {
+  const hints = [redirectTo, user?.state, user?.url_state, storageValue]
 
   for (const hint of hints) {
     const normalized = normalizeReturnTo(hint)
@@ -114,8 +98,7 @@ export default function LoginCallback({ redirectTo, storageKey = 'auth:returnTo'
           const storageValue =
             sessionStorage.getItem(storageKey) || localStorage.getItem(storageKey)
 
-          const target =
-            computeTarget({ redirectTo, user: auth?.user, storageValue }) || '/'
+          const target = computeTarget({ redirectTo, user: auth?.user, storageValue }) || '/'
 
           // Cleanup any stored hint
           sessionStorage.removeItem(storageKey)

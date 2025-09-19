@@ -102,9 +102,7 @@ describe('LoginCallback', () => {
 
     render(<LoginCallback storageKey="auth:returnTo" />)
 
-    await waitFor(() =>
-      expect(location.replace).toHaveBeenCalledWith('/from-url-state?foo=bar'),
-    )
+    await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/from-url-state?foo=bar'))
 
     expect(sessionStorage.getItem('auth:returnTo')).toBeNull()
     expect(localStorage.getItem('auth:returnTo')).toBeNull()
