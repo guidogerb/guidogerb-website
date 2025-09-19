@@ -1,0 +1,39 @@
+{
+  "name": "@guidogerb/components-point-of-sale",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "src"
+  ],
+  "peerDependencies": {
+    "react": ">=19"
+  },
+  "dependencies": {
+    "@guidogerb/components-catalog": "workspace:*",
+    "@guidogerb/components-storage": "workspace:*",
+    "@stripe/react-stripe-js": "^3.3.0",
+    "@stripe/stripe-js": "^4.1.0"
+  },
+  "devDependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "vitest": "^3.2.4"
+  }
+}

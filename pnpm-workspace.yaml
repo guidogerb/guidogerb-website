@@ -3,6 +3,7 @@ packages:
   - '@guidogerb/components/api-client'
   - '@guidogerb/components/auth'
   - '@guidogerb/components/catalog'
+  - '@guidogerb/components/point-of-sale'
   - '@guidogerb/components/menu'
   - '@guidogerb/components/storage'
   - '@guidogerb/components/ai-support'
