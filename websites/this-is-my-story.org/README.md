@@ -15,16 +15,16 @@ Copy `.env.example` → `.env` and configure the Cognito values below.
 
 ### Required environment variables
 
-| Variable | Description |
-| --- | --- |
-| `VITE_COGNITO_CLIENT_ID` | Cognito app client ID for storytellers. |
-| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Hosted UI discovery endpoint. |
-| `VITE_REDIRECT_URI` | Callback URL (`https://tenant/.../auth/callback`). |
-| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI` | Logout destination. |
-| `VITE_RESPONSE_TYPE` | Usually `code`. |
-| `VITE_COGNITO_SCOPE` | Space-separated scopes. |
-| `VITE_LOGOUT_URI` | Optional override forwarded to the `<Protected />` wrapper. |
-| `VITE_ENABLE_SW` | Enables service-worker registration when `true`. |
+| Variable                                                | Description                                                 |
+| ------------------------------------------------------- | ----------------------------------------------------------- |
+| `VITE_COGNITO_CLIENT_ID`                                | Cognito app client ID for storytellers.                     |
+| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Hosted UI discovery endpoint.                               |
+| `VITE_REDIRECT_URI`                                     | Callback URL (`https://tenant/.../auth/callback`).          |
+| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI`                 | Logout destination.                                         |
+| `VITE_RESPONSE_TYPE`                                    | Usually `code`.                                             |
+| `VITE_COGNITO_SCOPE`                                    | Space-separated scopes.                                     |
+| `VITE_LOGOUT_URI`                                       | Optional override forwarded to the `<Protected />` wrapper. |
+| `VITE_ENABLE_SW`                                        | Enables service-worker registration when `true`.            |
 
 ## Structure
 

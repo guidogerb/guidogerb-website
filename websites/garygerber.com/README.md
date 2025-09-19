@@ -14,15 +14,15 @@ Create a `.env` file from `.env.example` and populate the Cognito credentials li
 
 ### Required environment variables
 
-| Variable | Description |
-| --- | --- |
-| `VITE_COGNITO_CLIENT_ID` | Cognito app client for the rehearsal portal. |
-| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Hosted UI discovery endpoint. |
-| `VITE_REDIRECT_URI` | Callback URL (e.g., `https://garygerber.com/auth/callback`). |
-| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI` | Logout destination. |
-| `VITE_RESPONSE_TYPE` | Typically `code`. |
-| `VITE_COGNITO_SCOPE` | Requested scopes. |
-| `VITE_ENABLE_SW` | Enables/disables service-worker registration. |
+| Variable                                                | Description                                                  |
+| ------------------------------------------------------- | ------------------------------------------------------------ |
+| `VITE_COGNITO_CLIENT_ID`                                | Cognito app client for the rehearsal portal.                 |
+| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Hosted UI discovery endpoint.                                |
+| `VITE_REDIRECT_URI`                                     | Callback URL (e.g., `https://garygerber.com/auth/callback`). |
+| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI`                 | Logout destination.                                          |
+| `VITE_RESPONSE_TYPE`                                    | Typically `code`.                                            |
+| `VITE_COGNITO_SCOPE`                                    | Requested scopes.                                            |
+| `VITE_ENABLE_SW`                                        | Enables/disables service-worker registration.                |
 
 ## Structure
 

@@ -15,16 +15,16 @@ Duplicate `.env.example` to `.env` and supply the Cognito + API credentials list
 
 ### Required environment variables
 
-| Variable | Description |
-| --- | --- |
-| `VITE_COGNITO_CLIENT_ID` | Publishing portal Cognito app client. |
-| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Hosted UI discovery endpoint. |
-| `VITE_REDIRECT_URI` | Callback URL (`https://publishing.../auth/callback`). |
-| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI` | Logout destination. |
-| `VITE_RESPONSE_TYPE` | Typically `code`. |
-| `VITE_COGNITO_SCOPE` | Cognito scopes requested at login. |
-| `VITE_API_BASE_URL` | Reserved for CMS/partner API integrations. |
-| `VITE_ENABLE_SW` | Toggles service-worker registration. |
+| Variable                                                | Description                                           |
+| ------------------------------------------------------- | ----------------------------------------------------- |
+| `VITE_COGNITO_CLIENT_ID`                                | Publishing portal Cognito app client.                 |
+| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Hosted UI discovery endpoint.                         |
+| `VITE_REDIRECT_URI`                                     | Callback URL (`https://publishing.../auth/callback`). |
+| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI`                 | Logout destination.                                   |
+| `VITE_RESPONSE_TYPE`                                    | Typically `code`.                                     |
+| `VITE_COGNITO_SCOPE`                                    | Cognito scopes requested at login.                    |
+| `VITE_API_BASE_URL`                                     | Reserved for CMS/partner API integrations.            |
+| `VITE_ENABLE_SW`                                        | Toggles service-worker registration.                  |
 
 ## Structure
 

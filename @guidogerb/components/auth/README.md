@@ -43,12 +43,12 @@ previous location.
 
 ## Components
 
-| Export | Description |
-| --- | --- |
-| `AuthProvider` | Configures `react-oidc-context` with Cognito-friendly defaults and renders `<LoginCallback />` when the current pathname matches `loginCallbackPath`. |
-| `Auth` | Lightweight guard that triggers `signinRedirect()` when `autoSignIn` is enabled, surfaces loading/error states, and otherwise renders its children. |
-| `LoginCallback` | Finalizes the PKCE redirect, restores `returnTo` targets from storage, and replaces the history entry so callback URLs do not linger. |
-| `useAuth` | Re-exported hook from `react-oidc-context` for teams that need direct access to the underlying context. |
+| Export          | Description                                                                                                                                           |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AuthProvider`  | Configures `react-oidc-context` with Cognito-friendly defaults and renders `<LoginCallback />` when the current pathname matches `loginCallbackPath`. |
+| `Auth`          | Lightweight guard that triggers `signinRedirect()` when `autoSignIn` is enabled, surfaces loading/error states, and otherwise renders its children.   |
+| `LoginCallback` | Finalizes the PKCE redirect, restores `returnTo` targets from storage, and replaces the history entry so callback URLs do not linger.                 |
+| `useAuth`       | Re-exported hook from `react-oidc-context` for teams that need direct access to the underlying context.                                               |
 
 ## Error handling & logging
 

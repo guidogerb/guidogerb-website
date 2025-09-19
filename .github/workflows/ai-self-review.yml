@@ -1,7 +1,14 @@
 name: ai-self-review
 on:
   push:
-    paths: ['.aiassistant/rules/**.md', 'SPEC.md', 'PUBLISHING.md', 'README.md', 'TASKS.md']
+    paths:
+      [
+        '.aiassistant/rules/**.md',
+        '../../docs/SPEC.md',
+        '../../docs/PUBLISHING.md',
+        'README.md',
+        '../../global-tasks.md',
+      ]
   workflow_dispatch: {}
 jobs:
   review:
