@@ -17,6 +17,7 @@ const IGNORED_DIRECTORIES = new Set([
 ]);
 const ALLOWED_STATUS = new Set(['todo', 'in progress', 'complete']);
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const EXCLUDED_PATH_SEGMENTS = new Set(['s3']);
 
 const errors = [];
 const validatedTasks = new Set();
@@ -172,7 +173,25 @@ async function validateTasksFile(filePath) {
   }
 }
 
+function shouldSkipDirectory(relativePath) {
+  if (!relativePath || relativePath === '.') {
+    return false;
+  }
+
+  const segments = relativePath
+    .split(/[\\/]+/)
+    .filter((segment) => segment.length > 0)
+    .map((segment) => segment.toLowerCase());
+
+  return segments.some((segment) => EXCLUDED_PATH_SEGMENTS.has(segment));
+}
+
 async function walkDirectories(currentDir) {
+  const relativeDir = path.relative(ROOT_DIR, currentDir) || '.';
+  if (shouldSkipDirectory(relativeDir)) {
+    return;
+  }
+
   const entries = await fs.readdir(currentDir, { withFileTypes: true });
 
   let hasIndexFile = false;
