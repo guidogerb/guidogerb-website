@@ -15,7 +15,6 @@ Composable AI support widget that orchestrates OpenAI-compatible REST calls thro
 
 ```tsx
 import { AiSupport } from '@guidogerb/components/ai-support'
-
 ;<AiSupport
   endpoint="/api/ai/support"
   model="gpt-4o-mini"
