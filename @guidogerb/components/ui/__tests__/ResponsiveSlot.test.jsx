@@ -5,7 +5,7 @@ import {
   ResponsiveSlot,
   ResponsiveSlotProvider,
   useResponsiveSlotSize,
-} from '../responsive-slot.jsx'
+} from '../src/ResponsiveSlot/ResponsiveSlot.jsx'
 
 function createMatchMedia(initialWidth) {
   let width = initialWidth

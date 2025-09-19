@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 
-import { JsonViewer } from '../JsonViewer.jsx'
+import { JsonViewer } from '../src/JsonViewer/JsonViewer.jsx'
 
 const ReactJsonMock = vi.hoisted(() => vi.fn(() => <div data-testid="json-viewer" />))
 
