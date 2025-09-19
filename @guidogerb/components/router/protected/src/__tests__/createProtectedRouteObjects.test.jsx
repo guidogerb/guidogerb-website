@@ -71,4 +71,26 @@ describe('createProtectedRouteObjects', () => {
     render(routes[0].element)
     expect(screen.getByTestId('custom-guard')).toHaveTextContent('route- Home')
   })
+
+  it('delegates to wrapElement after guarding the element', () => {
+    const wrapElement = vi.fn((element, route) => (
+      <div data-testid="wrapped" data-path={route.path}>
+        {element}
+      </div>
+    ))
+
+    const routes = createProtectedRouteObjects(
+      [{ path: '/', element: <div>Home</div> }],
+      { wrapElement },
+    )
+
+    render(routes[0].element)
+
+    expect(wrapElement).toHaveBeenCalledTimes(1)
+    const [elementArg, meta] = wrapElement.mock.calls[0]
+    expect(meta).toMatchObject({ path: '/', isFallback: false })
+    expect(screen.getByTestId('guard')).toBeInTheDocument()
+    expect(screen.getByTestId('wrapped')).toHaveAttribute('data-path', '/')
+    expect(screen.getByTestId('wrapped')).toHaveTextContent('Home')
+  })
 })

@@ -129,4 +129,67 @@ describe('LoginCallback', () => {
 
     expect(sessionStorage.getItem('auth:returnTo')).toBeNull()
   })
+
+  it('normalizes nested object hints in the OIDC user state', async () => {
+    const location = setMockLocation('http://localhost/auth/callback?code=abc')
+
+    authState.current = {
+      isAuthenticated: true,
+      user: {
+        state: {
+          returnTo: {
+            pathname: '/from-object',
+            search: '?view=metrics',
+            hash: '#section',
+          },
+        },
+      },
+    }
+
+    render(<LoginCallback storageKey="auth:returnTo" />)
+
+    await waitFor(() =>
+      expect(location.replace).toHaveBeenCalledWith('/from-object?view=metrics#section'),
+    )
+  })
+
+  it('handles redirectTo object props by composing pathname, search, and hash', async () => {
+    const signinRedirectCallback = vi.fn(() => Promise.resolve())
+    const location = setMockLocation('http://localhost/auth/callback?code=abc&state=xyz')
+
+    authState.current = {
+      signinRedirectCallback,
+      isAuthenticated: true,
+      user: {
+        state: {
+          returnTo: '/fallback',
+        },
+      },
+    }
+
+    render(
+      <LoginCallback
+        redirectTo={{ pathname: '/from-prop', search: '?mode=prop', hash: '#anchor' }}
+      />,
+    )
+
+    await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/from-prop?mode=prop#anchor'))
+    expect(signinRedirectCallback).toHaveBeenCalledTimes(1)
+  })
+
+  it('falls back to trimmed string hints when JSON parsing fails', async () => {
+    const location = setMockLocation('http://localhost/auth/callback?code=abc')
+
+    sessionStorage.setItem('auth:returnTo', '   /raw-destination  ')
+
+    authState.current = {
+      isAuthenticated: true,
+      user: {},
+    }
+
+    render(<LoginCallback storageKey="auth:returnTo" />)
+
+    await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/raw-destination'))
+    expect(sessionStorage.getItem('auth:returnTo')).toBeNull()
+  })
 })

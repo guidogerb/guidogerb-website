@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, beforeEach } from 'vitest'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import {
   CUSTOM_THEMES_STORAGE_KEY,
   DEFAULT_THEME_ID,
@@ -17,6 +17,12 @@ const TestConsumer = () => {
       {theme?.activeTheme?.name ?? 'None'}
     </div>
   )
+}
+
+const ThemeCapture = ({ onTheme }) => {
+  const theme = useTheme()
+  onTheme?.(theme)
+  return null
 }
 
 describe('ThemeProvider', () => {
@@ -64,6 +70,95 @@ describe('ThemeProvider', () => {
 
     await waitFor(() => expect(document.documentElement.getAttribute('data-theme')).toBe('forest'))
     expect(screen.getByTestId('theme')).toHaveAttribute('data-active', 'forest')
+  })
+
+  it('replaces custom themes with duplicate identifiers and activates the newest version', async () => {
+    const themeRef = { current: null }
+
+    render(
+      <ThemeProvider>
+        <ThemeCapture onTheme={(theme) => {
+          themeRef.current = theme
+        }} />
+        <TestConsumer />
+      </ThemeProvider>,
+    )
+
+    await waitFor(() => expect(themeRef.current).not.toBeNull())
+
+    act(() => {
+      themeRef.current.createCustomTheme({
+        id: 'ocean',
+        name: 'Ocean',
+        tokens: { '--color-primary': '#1fb6ff' },
+      })
+    })
+
+    await waitFor(() => {
+      expect(themeRef.current.customThemes).toHaveLength(1)
+      expect(themeRef.current.customThemes[0]).toMatchObject({ name: 'Ocean' })
+    })
+
+    const created = themeRef.current.customThemes[0]
+
+    act(() => {
+      themeRef.current.createCustomTheme({
+        id: created.id,
+        name: 'Ocean Deep',
+        tokens: { '--color-primary': '#0f172a' },
+      })
+    })
+
+    await waitFor(() => {
+      expect(themeRef.current.customThemes).toHaveLength(1)
+      expect(themeRef.current.customThemes[0]).toMatchObject({
+        id: created.id,
+        name: 'Ocean Deep',
+      })
+    })
+
+    const stored = JSON.parse(localStorage.getItem(CUSTOM_THEMES_STORAGE_KEY) ?? '[]')
+    expect(stored.some((theme) => theme?.name === 'Ocean Deep')).toBe(true)
+  })
+
+  it('ignores requests to activate unknown theme identifiers', async () => {
+    const themeRef = { current: null }
+
+    render(
+      <ThemeProvider>
+        <ThemeCapture onTheme={(theme) => {
+          themeRef.current = theme
+        }} />
+        <TestConsumer />
+      </ThemeProvider>,
+    )
+
+    await waitFor(() => expect(themeRef.current?.activeThemeId).toBe(DEFAULT_THEME_ID))
+
+    act(() => {
+      themeRef.current.setActiveThemeId('unknown-theme')
+      themeRef.current.setActiveThemeId('')
+    })
+
+    expect(themeRef.current.activeThemeId).toBe(DEFAULT_THEME_ID)
+  })
+
+  it('invokes onThemeChange once persisted selection hydration completes', async () => {
+    localStorage.setItem(SELECTED_THEME_STORAGE_KEY, 'forest')
+    const handleChange = vi.fn()
+
+    render(
+      <ThemeProvider onThemeChange={handleChange}>
+        <TestConsumer />
+      </ThemeProvider>,
+    )
+
+    await waitFor(() =>
+      expect(handleChange).toHaveBeenCalledWith({
+        id: 'forest',
+        theme: expect.objectContaining({ id: 'forest' }),
+      }),
+    )
   })
 })
 
