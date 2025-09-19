@@ -1,38 +1,7 @@
-# @guidogerb/components/point-of-sale – Tasks
+# @guidogerb/components-point-of-sale — Tasks
 
-## Payments & compliance
-
-- [ ] Implement support for on-session + off-session PaymentIntents, including mandate management for recurring billing.
-- [ ] Surface webhook reconciliation status so operators can re-sync invoices when Stripe events arrive out of order.
-- [ ] Add 3DS2 challenge handling with an inline modal experience and fallback redirect flow.
-- [ ] Integrate dispute monitoring and recovery actions inside the merchant dashboard view.
-
-## Catalog & merchandising
-
-- [ ] Expand catalog integration to support bundled products and volume pricing tiers pulled from GraphQL.
-- [ ] Add a quick-add SKU search bar that bypasses the catalog grid for power users.
-- [ ] Allow operators to edit product metadata (price overrides, notes) before adding to the cart.
-
-## Cart orchestration
-
-- [ ] Collaborate with `@guidogerb/components-shopping-cart` to support split tenders within the POS flow.
-- [ ] Persist draft carts to the backend by syncing shopping-cart storage events for multi-device continuity.
-- [ ] Surface tax-inclusive pricing by reconciling cart totals with jurisdiction-aware rates from Avalara.
-
-## Invoices & fulfillment
-
-- [ ] Generate PDF invoices using `jspdf` and attach them to transactional emails.
-- [ ] Sync invoice status with fulfillment systems (shipping, digital delivery) via event webhooks.
-- [ ] Provide scheduled invoice exports for finance tooling (NetSuite, QuickBooks).
-
-## Order history & analytics
-
-- [ ] Add cohort analytics: daily/weekly sales summaries with chart visualizations.
-- [ ] Ship advanced filters (status, payment method, fulfillment channel) and saved search presets.
-- [ ] Emit structured analytics events via `@guidogerb/components-analytics` for every checkout milestone.
-
-## Documentation & DX
-
-- [ ] Publish a Storybook surface showcasing the POS flow with mocked Stripe + API responses.
-- [ ] Document backend API contracts (GraphQL schemas, REST payloads) for PaymentIntent and invoice creation.
-- [ ] Provide code samples for integrating loyalty programs and membership discounts.
+| name | createdDate | lastUpdatedDate | completedDate | status | description |
+| --- | --- | --- | --- | --- | --- |
+| Document POS feature surface | 2025-09-19 | 2025-09-19 | 2025-09-19 | complete | Summarized catalog integration, Stripe requirements, and service helpers in the README. |
+| Wire invoice persistence API | 2025-09-19 | 2025-09-19 | - | in progress | Connect the checkout flow to backend endpoints that create invoices and refresh history views. |
+| Explore offline-friendly cart handoffs | 2025-09-19 | 2025-09-19 | - | todo | Investigate caching strategies so carts and invoices survive temporary network loss in retail environments. |

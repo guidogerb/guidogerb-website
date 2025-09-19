@@ -1,24 +1,52 @@
-# Stream4Cloud.com — Web App (Vite + React)
+# PickleCheeze.com — Vite tenant
 
-Quickstart
+Partner-facing microsite for PickleCheeze, featuring a marketing landing page and a protected
+portal with seasonal resources. The app uses shared packages for the header, footer, theme, and
+authenticated welcome card copy tailored to fermentation partners.
 
-- Copy env template: `.env.example` → `.env` and fill VITE\_\* values.
-- Dev: `pnpm --filter websites/stream4cloud.com dev`
-- Build: `pnpm --filter websites/stream4cloud.com build`
+## Local development
 
-Required env (VITE\_\*)
+```bash
+pnpm --filter websites/picklecheeze.com install
+pnpm --filter websites/picklecheeze.com dev
+```
 
-- VITE_ENABLE_SW=false|true (gate service worker)
-- VITE_COGNITO_CLIENT_ID, VITE_COGNITO_AUTHORITY or VITE_COGNITO_METADATA_URL
-- VITE_REDIRECT_URI, VITE_RESPONSE_TYPE=code, VITE_COGNITO_SCOPE, VITE_COGNITO_POST_LOGOUT_REDIRECT_URI
-- VITE_LOGIN_CALLBACK_PATH=/auth/callback
-- VITE_API_BASE_URL
+Copy `.env.example` to `.env` and provide the Cognito and API values listed below before running the
+site.
 
-PWA/offline
+### Required environment variables
 
-- Set VITE_ENABLE_SW=true to register /sw.js; offline.html is served as a fallback for navigations when offline.
+| Variable | Description |
+| --- | --- |
+| `VITE_COGNITO_CLIENT_ID` | App client ID for the PickleCheeze Cognito user pool. |
+| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Discovery endpoint for the hosted UI. |
+| `VITE_REDIRECT_URI` | Callback URL that Cognito should redirect to after login (`https://.../auth/callback`). |
+| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI` | Where Cognito should send users after logout. |
+| `VITE_RESPONSE_TYPE` | Usually `code` (PKCE). |
+| `VITE_COGNITO_SCOPE` | Space-separated scopes; defaults to `openid email phone profile`. |
+| `VITE_API_BASE_URL` | Backing API gateway for partner resources (currently unused but reserved). |
+| `VITE_ENABLE_SW` | `true`/`false` flag that controls service-worker registration. |
 
-Notes
+## Structure
 
-- Uses shared packages under @guidogerb/\* (workspace linked).
-- See repo PUBLISHING.md for deploy steps (S3 upload + CloudFront invalidation).
+```
+src/
+  App.jsx                # Landing sections + protected partner hub
+  headerSettings.js      # Shared header navigation definition
+  footerSettings.js      # Shared footer links and copy
+  website-components/
+    welcome-page/        # Authenticated welcome card personalised for partners
+```
+
+The header navigation scrolls to marketing sections using the in-app routing helper. Authenticated
+partners see quick links to PDF resources and contact emails sourced from the welcome component.
+
+## Build commands
+
+```bash
+pnpm --filter websites/picklecheeze.com build   # Production bundle
+pnpm --filter websites/picklecheeze.com preview # Preview the build locally
+```
+
+Refer to [`tasks.md`](./tasks.md) for upcoming work such as branded 404 routes and feature flagging
+partner resources.

@@ -57,7 +57,7 @@
     "ai:check:readme": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json README.md",
     "ai:check:spec": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json SPEC.md",
     "ai:check:publishing": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json PUBLISHING.md",
-    "ai:check:tasks": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json TASKS.md",
+    "ai:check:tasks": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json global-tasks.md",
     "format": "prettier -w .",
     "format:check": "prettier -c ."
   },

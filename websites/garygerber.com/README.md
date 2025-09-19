@@ -1,24 +1,50 @@
-# Stream4Cloud.com — Web App (Vite + React)
+# GaryGerber.com — Vite tenant
 
-Quickstart
+Artist microsite for Gary Gerber. Combines a long-form landing page for presenters with a protected
+rehearsal portal that links collaborators to stage plots, rehearsal checklists, and contact info.
 
-- Copy env template: `.env.example` → `.env` and fill VITE\_\* values.
-- Dev: `pnpm --filter websites/stream4cloud.com dev`
-- Build: `pnpm --filter websites/stream4cloud.com build`
+## Local development
 
-Required env (VITE\_\*)
+```bash
+pnpm --filter websites/garygerber.com install
+pnpm --filter websites/garygerber.com dev
+```
 
-- VITE_ENABLE_SW=false|true (gate service worker)
-- VITE_COGNITO_CLIENT_ID, VITE_COGNITO_AUTHORITY or VITE_COGNITO_METADATA_URL
-- VITE_REDIRECT_URI, VITE_RESPONSE_TYPE=code, VITE_COGNITO_SCOPE, VITE_COGNITO_POST_LOGOUT_REDIRECT_URI
-- VITE_LOGIN_CALLBACK_PATH=/auth/callback
-- VITE_API_BASE_URL
+Create a `.env` file from `.env.example` and populate the Cognito credentials listed below.
 
-PWA/offline
+### Required environment variables
 
-- Set VITE_ENABLE_SW=true to register /sw.js; offline.html is served as a fallback for navigations when offline.
+| Variable | Description |
+| --- | --- |
+| `VITE_COGNITO_CLIENT_ID` | Cognito app client for the rehearsal portal. |
+| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Hosted UI discovery endpoint. |
+| `VITE_REDIRECT_URI` | Callback URL (e.g., `https://garygerber.com/auth/callback`). |
+| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI` | Logout destination. |
+| `VITE_RESPONSE_TYPE` | Typically `code`. |
+| `VITE_COGNITO_SCOPE` | Requested scopes. |
+| `VITE_ENABLE_SW` | Enables/disables service-worker registration. |
 
-Notes
+## Structure
 
-- Uses shared packages under @guidogerb/\* (workspace linked).
-- See repo PUBLISHING.md for deploy steps (S3 upload + CloudFront invalidation).
+```
+src/
+  App.jsx                # Landing sections + rehearsal portal entry point
+  headerSettings.js
+  footerSettings.js
+  website-components/
+    welcome-page/        # Authenticated welcome copy for collaborators
+```
+
+The header navigation scrolls through marketing sections (programs, consulting, recordings, etc.).
+Once authenticated, collaborators see quick links to PDFs and rehearsal resources defined in the
+welcome component.
+
+## Build commands
+
+```bash
+pnpm --filter websites/garygerber.com build
+pnpm --filter websites/garygerber.com preview
+```
+
+Upcoming work—including rehearsal portal expansion and localized error routes—is tracked in
+[`tasks.md`](./tasks.md).

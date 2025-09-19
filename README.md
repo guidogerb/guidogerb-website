@@ -10,6 +10,11 @@ Reusable packages for all four sites.
 - `@guidogerb/api-client` — typed HTTP client
 - `@guidogerb/sw` — service worker / PWA helpers
 
+## Task tracking
+
+- [`global-tasks.md`](./global-tasks.md) captures repository-wide work.
+- Each package or website folder includes a `tasks.md` outlining local follow-ups.
+
 ## Dev
 
 ```bash
