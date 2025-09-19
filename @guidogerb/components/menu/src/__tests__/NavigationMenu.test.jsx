@@ -27,7 +27,7 @@ const buildItems = () => [
   },
 ]
 
-describe('NavigationMenu', () => {
+describe('App', () => {
   it('renders a navigation landmark with list semantics', () => {
     render(<NavigationMenu items={buildItems()} label="Tenant navigation" />)
 

@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
+    "@guidogerb/components/app",
     "@guidogerb/components/api-client",
     "@guidogerb/components/auth",
     "@guidogerb/components/menu",
     "@guidogerb/components/pages/*",
     "@guidogerb/components/router/*",
+    "@guidogerb/components/storage",
     "@guidogerb/components/sw",
     "@guidogerb/components/ui",
     "@guidogerb/css",
