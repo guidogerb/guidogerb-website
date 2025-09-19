@@ -1,5 +1,5 @@
 {
-  "name": "@guidogerb/components-point-of-sale",
+  "name": "@guidogerb/components-shopping-cart",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -24,9 +24,6 @@
     "react": ">=19"
   },
   "dependencies": {
-    "@guidogerb/components-catalog": "workspace:*",
-    "@guidogerb/components-shopping-cart": "workspace:*",
-    "@guidogerb/components-storage": "workspace:*",
     "@stripe/react-stripe-js": "^3.3.0",
     "@stripe/stripe-js": "^4.1.0"
   },

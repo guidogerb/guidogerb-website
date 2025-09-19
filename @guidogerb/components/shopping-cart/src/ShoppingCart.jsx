@@ -12,7 +12,7 @@ const formatMoney = (value, currency) => {
   }
 }
 
-export function Cart({
+export function ShoppingCart({
   onCheckout,
   allowPromoCodes = true,
   promoPlaceholder = 'Promo code',

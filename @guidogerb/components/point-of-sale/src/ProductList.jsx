@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Catalog } from '@guidogerb/components-catalog'
-import { useCart } from './context/CartContext.jsx'
+import { useCart } from '@guidogerb/components-shopping-cart'
 import { ProductCard } from './ProductCard.jsx'
 
 export function ProductList({

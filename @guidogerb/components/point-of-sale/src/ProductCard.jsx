@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useCart } from './context/CartContext.jsx'
+import { useCart } from '@guidogerb/components-shopping-cart'
 
 const formatCurrency = (amount, currency) => {
   try {

@@ -14,8 +14,8 @@ experiences:
   manage saved payment methods tied to Stripe Customers.
 - **Product catalog integration.** Reuses `@guidogerb/components-catalog` to browse products, apply taxonomy filters, and
   hydrate a tenant-specific cart.
-- **Cart + pricing engine.** Maintains cart state in a dedicated context, applies discounts, promo codes, and calculates
-  subtotal/tax/total in real time.
+- **Cart + pricing engine.** Leverages `@guidogerb/components-shopping-cart` for cart state, promotions, and real-time
+  subtotal/tax/total calculations.
 - **Invoices & history.** Generates invoices once payments succeed, renders printable summaries, and exposes an order
   ledger filtered by status.
 - **User accounts.** Links authenticated customers to Stripe Customer IDs and exposes editable profile metadata for POS
@@ -69,8 +69,9 @@ export function StorefrontPOS({ apiBaseUrl, initialUser }) {
 }
 ```
 
-`PointOfSale` bundles its own `UserProvider`, `CartProvider`, and Stripe `<Elements>` wrapper. Advanced consumers that need
-custom providers can disable either layer via the `withProviders` and `withElements` props.
+`PointOfSale` bundles its own `UserProvider`, `CartProvider` (implemented by
+`@guidogerb/components-shopping-cart`), and Stripe `<Elements>` wrapper. Advanced consumers that need custom providers can
+disable either layer via the `withProviders` and `withElements` props.
 
 The component will load products from the catalog, allow the operator to add them to the cart, collect payment with
 Stripe Elements, create invoices, and display a full audit trail.
@@ -82,13 +83,10 @@ Stripe Elements, create invoices, and display a full audit trail.
   ├── PointOfSale.jsx          // Top-level orchestrator
   ├── ProductList.jsx          // Catalog integration + product browsing UI
   ├── ProductCard.jsx          // Reusable card rendered within catalog results
-  ├── Cart.jsx                 // Cart details, quantity management, totals
-  ├── CheckoutForm.jsx         // Stripe Elements checkout workflow
   ├── InvoiceView.jsx          // Printable invoice summary
   ├── OrderHistory.jsx         // Past order ledger + filters
   ├── UserProfile.jsx          // Authenticated operator profile management
   ├── context/
-  │     ├── CartContext.jsx   // CartProvider + useCart hook
   │     └── UserContext.jsx   // UserProvider + useUser hook
   ├── services/
   │     ├── api.js            // Helpers for the POS GraphQL/REST gateway
@@ -99,7 +97,9 @@ Stripe Elements, create invoices, and display a full audit trail.
         └── HistoryPage.jsx   // Order history dashboard
 ```
 
-Each module can be consumed independently, enabling teams to reuse the contexts or service helpers inside bespoke UI.
+Cart primitives (state management, checkout surface, helpers) are sourced from
+`@guidogerb/components-shopping-cart`. Each remaining module can be consumed independently, enabling teams to reuse the
+contexts or service helpers inside bespoke UI.
 
 ## Props – `PointOfSale`
 
@@ -170,8 +170,9 @@ use native `fetch` against `apiBaseUrl`.
 
 ## Contexts
 
-- `CartProvider` exposes `useCart()` with `{ items, subtotal, tax, discount, total, addItem, updateQuantity, removeItem,
-  clearCart, applyPromoCode, setTaxRate, setDiscountRate }` and persists state when a storage controller is provided.
+- `CartProvider` (re-exported from `@guidogerb/components-shopping-cart`) exposes `useCart()` with `{ items, subtotal,
+  tax, discount, total, addItem, updateQuantity, removeItem, clearCart, applyPromoCode, setTaxRate, setDiscountRate,
+  setShipping }` and persists state when a storage controller is provided.
 - `UserProvider` exposes `useUser()` with `{ user, status, login, logout, updateProfile, setStripeCustomerId }`.
 
 ## Pages
@@ -194,6 +195,7 @@ pnpm --filter @guidogerb/components-point-of-sale test
 
 ## Related packages
 
+- [`@guidogerb/components-shopping-cart`](../shopping-cart/README.md) for cart state, totals, and checkout UI.
 - [`@guidogerb/components-catalog`](../catalog/README.md) for the product browsing surface.
 - [`@guidogerb/components-storage`](../storage/README.md) for persisted cart and preference storage.
 - [`@guidogerb/components-analytics`](../analytics/README.md) pairs nicely with POS events for merchant dashboards.

@@ -13,11 +13,11 @@
 - [ ] Add a quick-add SKU search bar that bypasses the catalog grid for power users.
 - [ ] Allow operators to edit product metadata (price overrides, notes) before adding to the cart.
 
-## Cart & pricing engine
+## Cart orchestration
 
-- [ ] Support split tenders where multiple payment methods contribute to a single invoice.
-- [ ] Persist draft carts to the backend so sessions can resume across devices and staff accounts.
-- [ ] Implement tax-inclusive pricing and jurisdiction-aware rate selection via Avalara.
+- [ ] Collaborate with `@guidogerb/components-shopping-cart` to support split tenders within the POS flow.
+- [ ] Persist draft carts to the backend by syncing shopping-cart storage events for multi-device continuity.
+- [ ] Surface tax-inclusive pricing by reconciling cart totals with jurisdiction-aware rates from Avalara.
 
 ## Invoices & fulfillment
 

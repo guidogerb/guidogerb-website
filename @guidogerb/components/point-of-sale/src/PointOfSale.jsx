@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
-import { CartProvider } from './context/CartContext.jsx'
-import { useCart } from './context/CartContext.jsx'
+import {
+  CartProvider,
+  CheckoutForm,
+  ShoppingCart,
+  useCart,
+} from '@guidogerb/components-shopping-cart'
 import { UserProvider } from './context/UserContext.jsx'
 import { useUser } from './context/UserContext.jsx'
 import { ProductList } from './ProductList.jsx'
-import { Cart } from './Cart.jsx'
-import { CheckoutForm } from './CheckoutForm.jsx'
 import { InvoiceView } from './InvoiceView.jsx'
 import { OrderHistory } from './OrderHistory.jsx'
 import { POSPage } from './pages/POSPage.jsx'
@@ -411,7 +413,7 @@ const PointOfSaleExperience = ({
     />
   )
 
-  const cartNode = <Cart />
+  const cartNode = <ShoppingCart />
 
   const checkoutMetadata = useMemo(
     () => ({
