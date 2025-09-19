@@ -5,7 +5,7 @@ import mkcert from 'vite-plugin-mkcert'
 export default ({ mode }) => {
   // Single source of truth for the base domain
   const ip = '127.0.0.5'
-  const host = 'llm.guidogerbpublishing.com'
+  const host = 'llc.guidogerbpublishing.com'
   const localHost = `local.${host}`
   const wildcardLocalHost = `*.local.${host}`
 

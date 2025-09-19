@@ -1,0 +1,49 @@
+﻿Id: EGG1850W4K2XV
+ARN: arn:aws:cloudfront::471112830678:distribution/EGG1850W4K2XV
+Status: Deployed
+DomainName: '-'
+Aliases: []
+Comment: ""
+IsIPV6Enabled: 
+WebACLId: ""
+PriceClass: 
+Origins:
+- Id: ggp-websites.s3.us-east-1.amazonaws.com-mfpng1b1oo6
+  DomainName: ggp-websites.s3.us-east-1.amazonaws.com
+  OriginAccessControlId: E3P51C4YP1C8R9
+  S3OriginConfig:
+    OriginAccessIdentity: ""
+    OriginReadTimeout: 30
+  CustomOriginConfig: 
+  OriginShield:
+    Enabled: false
+  OriginPath: ""
+  ConnectionAttempts: 3
+  ConnectionTimeout: 10
+  OriginHeaders:
+  - []
+Behaviors:
+- PathPattern: Default
+  TargetOriginId: ggp-websites.s3.us-east-1.amazonaws.com-mfpng1b1oo6
+  AllowedMethods:
+  - HEAD
+  - GET
+  CachedMethods: {}
+  ViewerProtocolPolicy: redirect-to-https
+  Compress: true
+  SmoothStreaming: 
+  RealtimeLogConfigArn: 
+  CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+  OriginRequestPolicyId: 
+  ResponseHeadersPolicyId: 
+  ForwardedValues: 
+  FunctionAssociations:
+  - - EventType: viewer-request
+      FunctionARN: arn:aws:cloudfront::471112830678:function/ggp-mt-host-to-prefix
+  LambdaFunctionAssociations:
+  - []
+  FieldLevelEncryptionId: ""
+  MinTTL: 
+  DefaultTTL: 
+  MaxTTL: 
+
