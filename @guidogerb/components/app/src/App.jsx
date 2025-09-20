@@ -1,11 +1,4 @@
-import {
-  createContext,
-  createElement,
-  isValidElement,
-  useContext,
-  useEffect,
-  useMemo,
-} from 'react'
+import { createContext, createElement, isValidElement, useContext, useEffect, useMemo } from 'react'
 import { createClient } from '@guidogerb/components-api'
 import { AuthProvider } from '@guidogerb/components-auth'
 import { Footer } from '@guidogerb/footer'
@@ -131,7 +124,7 @@ const normalizeRouteDefinition = (route, defaults) => {
 
   const mergedDefaults = defaults ?? {}
   normalized.isProtected =
-    isProtected !== undefined ? Boolean(isProtected) : mergedDefaults.isProtected ?? false
+    isProtected !== undefined ? Boolean(isProtected) : (mergedDefaults.isProtected ?? false)
   if (normalized.guard === undefined && mergedDefaults.guard !== undefined) {
     normalized.guard = mergedDefaults.guard
   }
@@ -185,15 +178,15 @@ const normalizeNavigationConfig = (navigation) => {
   if (!isObject(navigation)) {
     return {
       items: DEFAULT_NAVIGATION_ITEMS,
-      activePath:
-        typeof window !== 'undefined' && window.location ? window.location.pathname : '/',
+      activePath: typeof window !== 'undefined' && window.location ? window.location.pathname : '/',
       onNavigate: undefined,
     }
   }
 
-  const items = Array.isArray(navigation.items) && navigation.items.length > 0
-    ? navigation.items
-    : DEFAULT_NAVIGATION_ITEMS
+  const items =
+    Array.isArray(navigation.items) && navigation.items.length > 0
+      ? navigation.items
+      : DEFAULT_NAVIGATION_ITEMS
 
   const activePath =
     navigation.activePath ??
@@ -217,9 +210,10 @@ const normalizeFooterConfig = (footer, navigation) => {
   return {
     brand: footer.brand ?? DEFAULT_FOOTER_PROPS.brand,
     description: footer.description ?? DEFAULT_FOOTER_PROPS.description,
-    sections: Array.isArray(footer.sections) && footer.sections.length > 0
-      ? footer.sections
-      : DEFAULT_FOOTER_PROPS.sections,
+    sections:
+      Array.isArray(footer.sections) && footer.sections.length > 0
+        ? footer.sections
+        : DEFAULT_FOOTER_PROPS.sections,
     socialLinks: Array.isArray(footer.socialLinks)
       ? footer.socialLinks
       : DEFAULT_FOOTER_PROPS.socialLinks,
@@ -352,9 +346,7 @@ const normalizeAuthOptions = (authConfig) => {
   const merged = { ...providerProps }
 
   merged.loginCallbackPath =
-    merged.loginCallbackPath ??
-    config.loginCallbackPath ??
-    DEFAULT_LOGIN_CALLBACK_PATH
+    merged.loginCallbackPath ?? config.loginCallbackPath ?? DEFAULT_LOGIN_CALLBACK_PATH
 
   const defaultRedirect = `${origin}${merged.loginCallbackPath}`
 
@@ -366,7 +358,8 @@ const normalizeAuthOptions = (authConfig) => {
   }
   delete merged.clientId
 
-  merged.redirect_uri = merged.redirect_uri ?? merged.redirectUri ?? config.redirect_uri ?? config.redirectUri
+  merged.redirect_uri =
+    merged.redirect_uri ?? merged.redirectUri ?? config.redirect_uri ?? config.redirectUri
   if (!merged.redirect_uri) {
     merged.redirect_uri = defaultRedirect
   }

@@ -70,9 +70,7 @@ describe('AppBasic', () => {
 
     render(<AppBasic />)
 
-    expect(
-      await screen.findByRole('heading', { name: /dashboard overview/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /dashboard overview/i })).toBeInTheDocument()
     expect(screen.getByText(/replace this placeholder/i)).toBeInTheDocument()
   })
 
@@ -82,9 +80,7 @@ describe('AppBasic', () => {
     render(<AppBasic />)
 
     expect(await screen.findByRole('heading', { name: /page not found/i })).toBeInTheDocument()
-    expect(
-      screen.getByText(/we could not locate the requested page/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/we could not locate the requested page/i)).toBeInTheDocument()
   })
 
   it('normalises auth configuration and forwards logout URI to the guard', async () => {
