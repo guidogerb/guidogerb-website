@@ -80,12 +80,38 @@ states, error messaging, and redirect fallbacks.
 | Export            | Description                                                                                                                                                                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `AuthProvider`    | Configures `react-oidc-context` with Cognito-friendly defaults and renders `<LoginCallback />` when the current pathname matches `loginCallbackPath`.                                                                                       |
-| `Auth`            | Lightweight guard that triggers `signinRedirect()` when `autoSignIn` is enabled, surfaces loading/error states, and otherwise renders its children. Optional sign-out control renders when `logoutUri` is supplied or `showSignOut` is set. |
+| `Auth`            | Lightweight guard that triggers `signinRedirect()` when `autoSignIn` is enabled, surfaces loading/error states, and otherwise renders its children. Optional sign-out control renders when `logoutUri` is supplied or `showSignOut` is set. Use `loadingFallback` to render branded placeholders while authentication resolves. |
 | `LoginCallback`   | Finalizes the PKCE redirect, restores `returnTo` targets from storage, and replaces the history entry so callback URLs do not linger.                                                                                                       |
 | `useAuth`         | Re-exported hook from `react-oidc-context` for teams that need direct access to the underlying context.                                                                                                                                     |
 | `useTokenRenewal` | Hook that tracks token expiration, exposes silent renew status, and provides a `renew()` helper around `signinSilent()`.                                                                                                                    |
 | `SignOutControl`  | Full-width card that displays account metadata alongside the sign-out action, suitable for account menus and dashboards.                                                                                                                    |
 | `SignOutButton`   | Branded action that wraps `signoutRedirect`, handles redirect URIs, and conveys pending/error states to the UI with accessible feedback.                                                                                                    |
+
+
+### Custom loading placeholders
+
+Use the `loadingFallback` prop to show branded UI while the session hydrates. Pass a
+React node directly or provide a function that receives the raw `react-oidc-context`
+value so you can surface user metadata while the hosted UI completes:
+
+```tsx
+import { Auth } from '@guidogerb/components-auth'
+
+export function AccountGuard({ children }) {
+  return (
+    <Auth
+      loadingFallback={({ auth }) => (
+        <section aria-busy="true" className="account-loading">
+          <h2>Preparing your dashboard</h2>
+          <p>Signing in {auth?.user?.profile?.name ?? 'guest'}…</p>
+        </section>
+      )}
+    >
+      {children}
+    </Auth>
+  )
+}
+```
 
 ### Monitor silent token renewal
 

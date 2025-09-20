@@ -4,6 +4,18 @@ import SignOutControl from './SignOutControl.jsx'
 
 // Auth wrapper component: guards its children behind OIDC authentication
 // Usage: <Auth autoSignIn><Protected /></Auth>
+const renderFallback = (fallback, context) => {
+  if (fallback === null || fallback === undefined) {
+    return fallback
+  }
+
+  if (typeof fallback === 'function') {
+    return fallback(context)
+  }
+
+  return fallback
+}
+
 function Auth({
   children,
   autoSignIn = false,
@@ -11,6 +23,7 @@ function Auth({
   showSignOut,
   signOutButtonProps = {},
   signOutControlProps = {},
+  loadingFallback,
 }) {
   const auth = useOidcAuth()
   const redirectStartedRef = useRef(false)
@@ -24,7 +37,17 @@ function Auth({
   }, [autoSignIn, auth?.isAuthenticated, auth?.isLoading]) // removed "auth" object from deps
 
   if (auth?.isLoading) {
-    return <div>Loading...</div>
+    const renderedFallback = renderFallback(loadingFallback, { auth })
+
+    if (renderedFallback !== undefined) {
+      return renderedFallback
+    }
+
+    return (
+      <div role="status" aria-live="polite" className="gg-auth__loading">
+        Loading...
+      </div>
+    )
   }
 
   if (auth?.error) {

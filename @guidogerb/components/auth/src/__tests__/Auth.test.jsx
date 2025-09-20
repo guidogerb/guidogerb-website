@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { StrictMode } from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 const authState = vi.hoisted(() => ({ current: {} }))
@@ -14,12 +14,54 @@ describe('Auth', () => {
     authState.current = {}
   })
 
+  const renderStrict = (ui) => render(<StrictMode>{ui}</StrictMode>)
+
   it('renders a loading indicator while authentication status is pending', () => {
     authState.current = { isLoading: true }
 
     render(<Auth />)
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument()
+  })
+
+  it('renders custom loading fallback content when provided', () => {
+    authState.current = { isLoading: true }
+
+    render(
+      <Auth
+        loadingFallback={<section data-testid="loading-fallback">Loading profile…</section>}
+      />,
+    )
+
+    expect(screen.getByTestId('loading-fallback')).toHaveTextContent('Loading profile…')
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+  })
+
+  it('supports functional loading fallback builders', () => {
+    authState.current = {
+      isLoading: true,
+      user: { profile: { given_name: 'Guido' } },
+    }
+
+    render(
+      <Auth
+        loadingFallback={({ auth }) => (
+          <div role="status" data-testid="loading-fallback">
+            Preparing {auth?.user?.profile?.given_name}
+          </div>
+        )}
+      />,
+    )
+
+    expect(screen.getByTestId('loading-fallback')).toHaveTextContent('Preparing Guido')
+  })
+
+  it('renders loading state consistently under StrictMode double renders', () => {
+    authState.current = { isLoading: true }
+
+    renderStrict(<Auth />)
+
+    expect(screen.getAllByText(/loading/i)).toHaveLength(1)
   })
 
   it('surfaces authentication errors to help with configuration debugging', () => {
@@ -29,6 +71,14 @@ describe('Auth', () => {
 
     expect(screen.getByText(/network down/i)).toBeInTheDocument()
     expect(screen.getByText(/hint: ensure oidc is configured/i)).toBeInTheDocument()
+  })
+
+  it('surfaces errors when rendered within StrictMode', () => {
+    authState.current = { error: { message: 'strict failure' } }
+
+    renderStrict(<Auth />)
+
+    expect(screen.getByText(/strict failure/i)).toBeInTheDocument()
   })
 
   it('renders the protected children once the session is authenticated', () => {
@@ -41,6 +91,18 @@ describe('Auth', () => {
     )
 
     expect(screen.getByText('secret payload')).toBeInTheDocument()
+  })
+
+  it('renders protected children when StrictMode double invokes render', () => {
+    authState.current = { isAuthenticated: true }
+
+    renderStrict(
+      <Auth>
+        <span>strict secrets</span>
+      </Auth>,
+    )
+
+    expect(screen.getByText('strict secrets')).toBeInTheDocument()
   })
 
   it('renders a sign-out control when logoutUri is provided and triggers signoutRedirect', async () => {
@@ -131,6 +193,19 @@ describe('Auth', () => {
     await waitFor(() => expect(signinRedirect).toHaveBeenCalledTimes(1))
 
     rerender(<Auth autoSignIn />)
+
+    await waitFor(() => expect(signinRedirect).toHaveBeenCalledTimes(1))
+  })
+
+  it('triggers sign-in redirect once even when StrictMode double renders the tree', async () => {
+    const signinRedirect = vi.fn()
+    authState.current = {
+      signinRedirect,
+      isAuthenticated: false,
+      isLoading: false,
+    }
+
+    renderStrict(<Auth autoSignIn />)
 
     await waitFor(() => expect(signinRedirect).toHaveBeenCalledTimes(1))
   })
