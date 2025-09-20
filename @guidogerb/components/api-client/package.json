@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./index.js",
   "module": "./index.js",
+  "types": "./index.d.ts",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest"
@@ -17,6 +18,7 @@
   },
   "files": [
     "index.js",
+    "index.d.ts",
     "src"
   ],
   "dependencies": {},

@@ -15,11 +15,40 @@ Typed HTTP client for the Phase‑1 API (API Gateway HTTP API).
 import { createClient } from '@guidogerb/components/api-client'
 import { getAccessToken } from '@guidogerb/auth'
 
-export const api = createClient({
+export const http = createClient({
   baseUrl: import.meta.env.VITE_API_BASE_URL!,
   getAccessToken,
   userAgent: 'guidogerb-web/1.0',
 })
-// Example
-const health = await api.get('/health')
+
+const health = await http.get('/health')
 ```
+
+## Typed endpoint helpers
+
+The package also ships opinionated helpers that expose typed operations for
+the Phase‑1 REST endpoints. The helpers build on `createClient` and surface
+structured responses for catalog search, downloads, entitlements, checkout,
+and admin workflows. TypeScript declaration files are bundled so consumers
+receive rich type information without additional tooling.
+
+```ts
+import { createApi } from '@guidogerb/components/api-client'
+import { getAccessToken } from '@guidogerb/auth'
+
+export const api = createApi({
+  baseUrl: import.meta.env.VITE_API_BASE_URL!,
+  getAccessToken,
+  userAgent: 'guidogerb-web/1.0',
+})
+
+const health = await api.health.check()
+const search = await api.catalog.search({ query: 'ambient', limit: 20 })
+const cart = await api.cart.create({
+  items: [{ sku: 'album_123', quantity: 1 }],
+  promoCode: 'FALL25',
+})
+```
+
+When needed, the raw HTTP client used by the helpers is available via the
+`api.http` property.
