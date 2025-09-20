@@ -11,8 +11,8 @@ Parameters:
     Type: String
     Description: e.g., https://cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXX
   CognitoAudienceClientIds:
-    Type: String
-    Description: JSON array string of allowed audience client IDs (e.g., ["abc123"])
+    Type: CommaDelimitedList
+    Description: Comma-separated list of allowed audience client IDs (e.g., abc123,def456)
 
 Resources:
   HelloLogGroup:
@@ -106,4 +106,4 @@ Resources:
 
 Outputs:
   ApiEndpoint:
-    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}'

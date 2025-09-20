@@ -194,4 +194,47 @@ describe('LoginCallback', () => {
     await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/raw-destination'))
     expect(sessionStorage.getItem('auth:returnTo')).toBeNull()
   })
+
+  it('ignores hints that resolve to a different origin', async () => {
+    const location = setMockLocation('http://localhost/auth/callback?code=abc')
+
+    sessionStorage.setItem('auth:returnTo', 'https://evil.example.com/admin')
+
+    authState.current = {
+      isAuthenticated: true,
+      user: {},
+    }
+
+    render(<LoginCallback storageKey="auth:returnTo" />)
+
+    await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/'))
+  })
+
+  it('rejects unsafe protocols even when they look like URLs', async () => {
+    const location = setMockLocation('http://localhost/auth/callback?code=abc')
+
+    localStorage.setItem('auth:returnTo', 'javascript:alert(1)')
+
+    authState.current = {
+      isAuthenticated: true,
+      user: {},
+    }
+
+    render(<LoginCallback storageKey="auth:returnTo" />)
+
+    await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/'))
+  })
+
+  it('accepts absolute URLs that match the current origin', async () => {
+    const location = setMockLocation('http://localhost/auth/callback?code=abc')
+
+    authState.current = {
+      isAuthenticated: true,
+      user: {},
+    }
+
+    render(<LoginCallback redirectTo="http://localhost/dashboard?tab=live#anchor" />)
+
+    await waitFor(() => expect(location.replace).toHaveBeenCalledWith('/dashboard?tab=live#anchor'))
+  })
 })

@@ -7,6 +7,26 @@ Parameters:
   AdminPrincipalArn:
     Type: String
     Description: IAM ARN (user/role) granted data access
+  AllowFromPublic:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: 'false'
+    Description: Whether to expose the collection publicly. Set to 'false' for private VPC-only access.
+  SourceVpceIds:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^vpce-[A-Za-z0-9]+(,vpce-[A-Za-z0-9]+)*$'
+    Description: Comma-separated list of VPC endpoint IDs permitted when AllowFromPublic is 'false'.
+
+Rules:
+  RequireVpceIdsForPrivateAccess:
+    RuleCondition: !Equals [!Ref AllowFromPublic, 'false']
+    Assertions:
+      - Assert: !Not [!Equals [!Ref SourceVpceIds, '']]
+        AssertDescription: Provide SourceVpceIds when disabling public access.
+
+Conditions:
+  AllowPublicAccess: !Equals [!Ref AllowFromPublic, 'true']
 
 Resources:
   EncryptionPolicy:
@@ -27,8 +47,14 @@ Resources:
     Properties:
       Name: !Sub '${CollectionName}-net'
       Type: network
-      Policy: |
-        {"Rules":[{"ResourceType":"collection","Resource":["collection/*"]},{"ResourceType":"dashboard","Resource":["dashboard/*"]}],"AllowFromPublic":true}
+      Policy: !If
+        - AllowPublicAccess
+        - !Sub |
+            {"Rules":[{"ResourceType":"collection","Resource":["collection/${CollectionName}"]},{"ResourceType":"dashboard","Resource":["dashboard/${CollectionName}"]}],"AllowFromPublic":true}
+        - !Sub
+            - |
+              {"Rules":[{"ResourceType":"collection","Resource":["collection/${CollectionName}"]},{"ResourceType":"dashboard","Resource":["dashboard/${CollectionName}"]}],"SourceVPCEs":["${QuotedVpces}"],"AllowFromPublic":false}
+            - { QuotedVpces: !Join ['","', !Split [',', !Ref SourceVpceIds]] }
 
   DataAccessPolicy:
     Type: AWS::OpenSearchServerless::AccessPolicy
@@ -39,7 +65,7 @@ Resources:
         [
           {
             "Rules":[
-              {"ResourceType":"collection","Resource":["collection/${CollectionName}*"],"Permission":["aoss:CreateCollectionItems","aoss:DescribeCollectionItems","aoss:ReadDocument","aoss:WriteDocument"]},
+              {"ResourceType":"collection","Resource":["collection/${CollectionName}"],"Permission":["aoss:CreateCollectionItems","aoss:DescribeCollectionItems","aoss:ReadDocument","aoss:WriteDocument"]},
               {"ResourceType":"index","Resource":["index/${CollectionName}/*"],"Permission":["aoss:CreateIndex","aoss:DescribeIndex","aoss:ReadDocument","aoss:WriteDocument"]}
             ],
             "Principal":[ "${AdminPrincipalArn}" ]

@@ -70,6 +70,36 @@ const computeTarget = ({ redirectTo, user, storageValue }) => {
   return undefined
 }
 
+const sanitizeRedirectTarget = (value) => {
+  if (!value) return undefined
+  if (typeof window === 'undefined' || !window.location) return undefined
+
+  const trimmed = typeof value === 'string' ? value.trim() : value
+  if (!trimmed) return undefined
+
+  const ensureSameOrigin = (input) => {
+    try {
+      const resolved = new URL(input, window.location.origin)
+      if (resolved.origin !== window.location.origin) {
+        return undefined
+      }
+      if (!/^https?:$/i.test(resolved.protocol)) {
+        return undefined
+      }
+      return `${resolved.pathname}${resolved.search}${resolved.hash}`
+    } catch (error) {
+      return undefined
+    }
+  }
+
+  // Reject explicit protocols that aren't safe before attempting to resolve
+  if (/^[a-z][a-z0-9+\-.]*:/i.test(trimmed)) {
+    return ensureSameOrigin(trimmed)
+  }
+
+  return ensureSameOrigin(trimmed)
+}
+
 export default function LoginCallback({ redirectTo, storageKey = 'auth:returnTo' }) {
   const auth = useAuth()
   const callbackDoneRef = useRef(false)
@@ -98,7 +128,8 @@ export default function LoginCallback({ redirectTo, storageKey = 'auth:returnTo'
           const storageValue =
             sessionStorage.getItem(storageKey) || localStorage.getItem(storageKey)
 
-          const target = computeTarget({ redirectTo, user: auth?.user, storageValue }) || '/'
+          const target = computeTarget({ redirectTo, user: auth?.user, storageValue })
+          const sanitizedTarget = sanitizeRedirectTarget(target) || '/'
 
           // Cleanup any stored hint
           sessionStorage.removeItem(storageKey)
@@ -106,7 +137,7 @@ export default function LoginCallback({ redirectTo, storageKey = 'auth:returnTo'
 
           if (!canceled) {
             // Replace to avoid keeping the callback URL in history
-            window.location.replace(target)
+            window.location.replace(sanitizedTarget)
           }
         }
       } catch (e) {
