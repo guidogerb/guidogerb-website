@@ -28,9 +28,7 @@ describe('Auth', () => {
     authState.current = { isLoading: true }
 
     render(
-      <Auth
-        loadingFallback={<section data-testid="loading-fallback">Loading profile…</section>}
-      />,
+      <Auth loadingFallback={<section data-testid="loading-fallback">Loading profile…</section>} />,
     )
 
     expect(screen.getByTestId('loading-fallback')).toHaveTextContent('Loading profile…')
