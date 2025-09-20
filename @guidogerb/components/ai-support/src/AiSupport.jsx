@@ -209,6 +209,233 @@ function mergeHeaders(defaults, overrides) {
   return { ...defaults, ...(overrides || {}) }
 }
 
+function getContentType(response) {
+  if (!response?.headers || typeof response.headers.get !== 'function') {
+    return ''
+  }
+
+  return (
+    response.headers.get('Content-Type') ??
+    response.headers.get('content-type') ??
+    ''
+  )
+}
+
+function detectStreamMode(response) {
+  if (!response?.body || typeof response.body.getReader !== 'function') {
+    return null
+  }
+
+  const contentType = String(getContentType(response) || '').toLowerCase()
+
+  if (!contentType) {
+    return null
+  }
+
+  if (contentType.includes('text/event-stream')) {
+    return 'sse'
+  }
+
+  if (contentType.includes('ndjson') || contentType.includes('jsonl')) {
+    return 'ndjson'
+  }
+
+  if (contentType.includes('stream')) {
+    return 'sse'
+  }
+
+  return null
+}
+
+function extractStreamSegments(buffer, mode) {
+  if (mode === 'ndjson') {
+    const parts = buffer.split(/\r?\n/)
+    const remainder = parts.pop() ?? ''
+    const events = parts.map((part) => part.trim()).filter(Boolean)
+    return { events, remainder }
+  }
+
+  const rawEvents = buffer.split(/\n\n/)
+  const remainder = rawEvents.pop() ?? ''
+  const events = rawEvents
+    .map((event) => {
+      const dataLines = event
+        .split(/\n/)
+        .map((line) => line.replace(/^data:\s*/, ''))
+        .join('\n')
+        .trim()
+
+      return dataLines
+    })
+    .filter(Boolean)
+
+  return { events, remainder }
+}
+
+function parseStreamingEvent(event) {
+  const trimmed = event.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  if (trimmed === '[DONE]') {
+    return { done: true }
+  }
+
+  try {
+    const data = JSON.parse(trimmed)
+    const choice = Array.isArray(data?.choices) ? data.choices[0] : undefined
+    const deltaContent = typeof choice?.delta?.content === 'string' ? choice.delta.content : undefined
+    const messageContent = typeof choice?.message?.content === 'string' ? choice.message.content : undefined
+    const aggregatedContent =
+      typeof data?.content === 'string' ? data.content : undefined
+
+    return {
+      done: false,
+      data,
+      deltaContent,
+      messageContent,
+      aggregatedContent,
+    }
+  } catch (error) {
+    return {
+      done: false,
+      data: null,
+      deltaContent: trimmed,
+      messageContent: undefined,
+      aggregatedContent: undefined,
+    }
+  }
+}
+
+async function processStreamingResponse({
+  response,
+  mode,
+  historyLimit,
+  setMessages,
+  onResponse,
+  payload,
+  rag,
+  guardrailResult,
+}) {
+  if (!response?.body || typeof response.body.getReader !== 'function') {
+    return false
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let streamingContent = ''
+  let latestData = null
+  let sawContent = false
+
+  setMessages((current) =>
+    applyHistoryLimit(
+      [
+        ...current,
+        /** @type {const} */ ({ role: 'assistant', content: '', __streaming: true }),
+      ],
+      historyLimit,
+    ),
+  )
+
+  const updateStreamingMessage = (content, { markFinal = false } = {}) => {
+    streamingContent = content
+
+    setMessages((current) => {
+      if (!current.length) {
+        return current
+      }
+
+      const lastIndex = current.length - 1
+      const lastMessage = current[lastIndex]
+
+      if (lastMessage.role !== 'assistant' || (!lastMessage.__streaming && !markFinal)) {
+        return current
+      }
+
+      const nextMessages = current.slice()
+      const nextMessage = { role: 'assistant', content }
+      if (!markFinal) {
+        nextMessage.__streaming = true
+      }
+      nextMessages[lastIndex] = nextMessage
+      return nextMessages
+    })
+  }
+
+  const appendContent = (delta) => {
+    if (!delta) return
+    sawContent = true
+    updateStreamingMessage(streamingContent + delta)
+  }
+
+  const setFullContent = (content) => {
+    if (typeof content !== 'string') return
+    sawContent = true
+    updateStreamingMessage(content)
+  }
+
+  const handleEvent = (event) => {
+    const parsed = parseStreamingEvent(event)
+
+    if (!parsed) {
+      return
+    }
+
+    if (parsed.done) {
+      return
+    }
+
+    if (parsed.data) {
+      latestData = parsed.data
+    }
+
+    if (parsed.deltaContent) {
+      appendContent(parsed.deltaContent)
+    }
+
+    if (parsed.messageContent) {
+      setFullContent(parsed.messageContent)
+    }
+
+    if (!parsed.deltaContent && parsed.aggregatedContent) {
+      appendContent(parsed.aggregatedContent)
+    }
+  }
+
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const { events, remainder } = extractStreamSegments(buffer, mode)
+    buffer = remainder
+    events.forEach(handleEvent)
+  }
+
+  if (buffer.trim()) {
+    const { events } = extractStreamSegments(`${buffer}\n\n`, mode)
+    events.forEach(handleEvent)
+  }
+
+  updateStreamingMessage(streamingContent, { markFinal: true })
+
+  const assistantMessage = { role: 'assistant', content: streamingContent }
+  const responseData = latestData ?? (sawContent ? { choices: [{ message: assistantMessage }] } : null)
+
+  onResponse?.({
+    data: responseData,
+    request: payload,
+    assistantMessage,
+    rag,
+    guardrail: guardrailResult,
+  })
+
+  return true
+}
+
 export function AiSupport({
   endpoint,
   method = 'POST',
@@ -346,27 +573,46 @@ export function AiSupport({
         throw error
       }
 
-      const data = await response.json()
-      const assistantPayload = (data &&
-        data.choices &&
-        data.choices[0] &&
-        data.choices[0].message) ||
-        data?.message || { role: 'assistant', content: data?.content ?? '' }
+      const streamMode = detectStreamMode(response)
 
-      const assistantMessage = normalizeMessage(assistantPayload, 'assistant')
+      if (streamMode) {
+        const handled = await processStreamingResponse({
+          response,
+          mode: streamMode,
+          historyLimit,
+          setMessages,
+          onResponse,
+          payload,
+          rag,
+          guardrailResult,
+        })
 
-      setMessages((current) => {
-        const updated = [...current, assistantMessage]
-        return applyHistoryLimit(updated, historyLimit)
-      })
+        if (!handled) {
+          throw new Error('Failed to process streaming response for AI support')
+        }
+      } else {
+        const data = await response.json()
+        const assistantPayload = (data &&
+          data.choices &&
+          data.choices[0] &&
+          data.choices[0].message) ||
+          data?.message || { role: 'assistant', content: data?.content ?? '' }
 
-      onResponse?.({
-        data,
-        request: payload,
-        assistantMessage,
-        rag,
-        guardrail: guardrailResult,
-      })
+        const assistantMessage = normalizeMessage(assistantPayload, 'assistant')
+
+        setMessages((current) => {
+          const updated = [...current, assistantMessage]
+          return applyHistoryLimit(updated, historyLimit)
+        })
+
+        onResponse?.({
+          data,
+          request: payload,
+          assistantMessage,
+          rag,
+          guardrail: guardrailResult,
+        })
+      }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error))
       setErrorMessage(err.message)

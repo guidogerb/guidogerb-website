@@ -40,6 +40,40 @@ function MarketingApp() {
 `wrapElement` can be supplied to decorate every route element—for example to
 inject shared layouts or analytics boundaries—before the router renders it.
 
+### React Router data APIs
+
+Route definitions accept the full suite of React Router data API fields such as
+`loader`, `action`, `handle`, and `errorElement`. These entries are passed
+directly to the underlying router factory so `useLoaderData`, `defer`, and form
+actions work as expected.
+
+```jsx
+const routes = [
+  {
+    path: '/posts/:id',
+    loader: ({ params }) => fetchPost(params.id),
+    action: updatePost,
+    element: <PostDetail />, // PostDetail can call useLoaderData()
+  },
+]
+
+<PublicRouter router={createBrowserRouter} routes={routes} />
+```
+
+When the generated fallback experience is used, you can also supply data API
+options (like `loader`, `action`, `errorElement`, or `handle`) via
+`defaultFallback`:
+
+```jsx
+<PublicRouter
+  routes={[{ path: '/', element: <Home /> }]}
+  defaultFallback={{
+    loader: () => ({ supportUrl: '/support' }),
+    handle: { breadcrumb: 'Not Found' },
+  }}
+/>
+```
+
 ### Customising the generated fallback
 
 When the `fallback` prop is omitted, the router emits an accessible not-found

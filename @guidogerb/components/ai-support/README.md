@@ -7,6 +7,7 @@ Composable AI support widget that orchestrates OpenAI-compatible REST calls thro
 - **API Gateway bridge** — Posts chat-completion payloads using the OpenAI schema (`model`, `messages`, `temperature`, `top_p`, `user`) so the gateway can proxy to OpenAI or compatible providers without translation glue.
 - **Guardrail integration** — Accepts an async `guardrail` hook that can allow, block, or mutate user prompts before they leave the browser; rejected prompts surface detailed messaging in the UI.
 - **RAG embeddings** — Supports a pluggable `embeddingRetriever` hook that returns contextual snippets or message objects to prepend ahead of each API call, enabling Retrieval-Augmented Generation workflows.
+- **Streaming responses** — Detects `text/event-stream` and NDJSON payloads so the UI can surface assistant tokens as they arrive instead of waiting for the full JSON payload.
 - **User context aware** — Injects the provided `userContext` into the outbound payload (as the `user` field + serialized system prompt) so downstream services can personalize responses or apply policy rules.
 - **Configurable history limit** — Maintains a rolling chat history with a configurable `historyLimit`, trimming the oldest turns while preserving the earliest system instruction for grounding.
 - **Accessible chat shell** — Ships with a minimal, keyboard-friendly UI (messages list, textarea, submit button, live error banner) that consumers can re-style via `className` overrides.
@@ -108,6 +109,16 @@ The first system message serializes the `userContext`, followed by any RAG snipp
 - Guardrail rejections display a banner (`role="alert"`) with the provided `reason`.
 - Retriever errors, network failures, or non-2xx responses propagate to `onError` and present a generic failure message while keeping the user’s prompt in history for retry.
 - The submit button is disabled while a request is in flight to prevent duplicate submissions.
+
+### Streaming responses
+
+When the API Gateway returns `text/event-stream`, `application/x-ndjson`, or `application/jsonl` content types, `<AiSupport />`
+reads the body as a stream. A placeholder assistant message is added immediately and its content is updated as each chunk
+arrives, parsing OpenAI-style SSE deltas (`choices[].delta.content`) when available. Once the stream completes, the message is
+finalized and the aggregated payload is forwarded to `onResponse`.
+
+Environments that continue to return standard JSON payloads are unaffected; the component falls back to the original
+`response.json()` behaviour automatically.
 
 ### Testing
 

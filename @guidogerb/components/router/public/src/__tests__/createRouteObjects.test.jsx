@@ -78,6 +78,61 @@ describe('createRouteObjects', () => {
     })
   })
 
+  it('preserves loader and action definitions on route objects', () => {
+    const loader = vi.fn()
+    const action = vi.fn()
+    const handle = { breadcrumb: 'Data route' }
+    const routes = createRouteObjects([
+      {
+        path: '/data',
+        element: <div>Data</div>,
+        loader,
+        action,
+        handle,
+        shouldRevalidate: () => true,
+      },
+    ])
+
+    expect(routes[0]).toMatchObject({ loader, action, handle })
+    expect(routes[0].shouldRevalidate).toBeInstanceOf(Function)
+    expect(routes[0].shouldRevalidate()).toBe(true)
+  })
+
+  it('propagates data API options to the generated fallback route', () => {
+    const loader = vi.fn(() => ({ status: 'missing' }))
+    const action = vi.fn()
+    const fallbackRoutes = createRouteObjects(
+      [{ path: '/', element: <div>Home</div> }],
+      {
+        defaultFallback: {
+          loader,
+          action,
+          handle: { from: '404' },
+          errorElement: <div>Fallback error</div>,
+          shouldRevalidate: () => false,
+          hasErrorBoundary: true,
+          id: 'fallback',
+          caseSensitive: true,
+          path: '/*',
+        },
+      },
+    )
+
+    expect(fallbackRoutes).toHaveLength(2)
+    const fallback = fallbackRoutes[1]
+    expect(fallback).toMatchObject({
+      path: '/*',
+      loader,
+      action,
+      handle: { from: '404' },
+      hasErrorBoundary: true,
+      id: 'fallback',
+      caseSensitive: true,
+    })
+    expect(fallback.errorElement).toBeTruthy()
+    expect(fallback.shouldRevalidate?.()).toBe(false)
+  })
+
   it('invokes wrapElement for each route including fallback', () => {
     const wrapElement = vi.fn((element) => element)
     const routes = createRouteObjects(

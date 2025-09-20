@@ -1,7 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
-import { createMemoryRouter } from 'react-router-dom'
+import { createMemoryRouter, useLoaderData } from 'react-router-dom'
 import { PublicRouter } from '../PublicRouter.jsx'
+
+function LoaderEcho() {
+  const data = useLoaderData()
+  return <div>{typeof data === 'string' ? data : JSON.stringify(data)}</div>
+}
 
 describe('PublicRouter', () => {
   it('renders the active route using the provided router factory', () => {
@@ -110,5 +115,26 @@ describe('PublicRouter', () => {
     )
 
     expect(screen.getByTestId('wrapper')).toHaveTextContent('Home')
+  })
+
+  it('passes loader and action definitions to the router factory and resolves loader data', async () => {
+    const loader = vi.fn(() => 'Loaded from loader')
+    const action = vi.fn()
+    const factory = vi.fn((routes, options) => createMemoryRouter(routes, { ...options }))
+
+    render(
+      <PublicRouter
+        router={factory}
+        routerOptions={{ initialEntries: ['/data'] }}
+        routes={[{ path: '/data', element: <LoaderEcho />, loader, action }]}
+      />,
+    )
+
+    await screen.findByText('Loaded from loader')
+
+    expect(loader).toHaveBeenCalledTimes(1)
+    const [routesArg] = factory.mock.calls[0]
+    expect(routesArg[0].loader).toBe(loader)
+    expect(routesArg[0].action).toBe(action)
   })
 })

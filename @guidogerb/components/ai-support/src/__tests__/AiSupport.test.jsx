@@ -168,4 +168,53 @@ describe('AiSupport', () => {
       'First question?',
     )
   })
+
+  it('streams assistant responses when the gateway returns an event stream', async () => {
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      start(controller) {
+        const chunks = [
+          'data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n',
+          'data: {"choices":[{"delta":{"content":" world"}}]}\n\n',
+          'data: {"choices":[{"message":{"role":"assistant","content":"Hello world"}}]}\n\n',
+          'data: [DONE]\n\n',
+        ]
+
+        chunks.forEach((chunk) => controller.enqueue(encoder.encode(chunk)))
+        controller.close()
+      },
+    })
+
+    const onResponse = vi.fn()
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: {
+        get: () => 'text/event-stream',
+      },
+      body: stream,
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<AiSupport endpoint="/api/ai/support" onResponse={onResponse} />)
+
+    fireEvent.change(screen.getByLabelText('Message'), {
+      target: { value: 'Stream something cool' },
+    })
+
+    fireEvent.submit(screen.getByTestId('ai-support-form'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Hello world')).toBeInTheDocument()
+    })
+
+    expect(onResponse).toHaveBeenCalledTimes(1)
+    const responseArgs = onResponse.mock.calls[0][0]
+    expect(responseArgs.assistantMessage).toMatchObject({
+      role: 'assistant',
+      content: 'Hello world',
+    })
+    expect(responseArgs.data?.choices?.[0]?.message?.content).toBe('Hello world')
+  })
 })

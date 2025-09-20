@@ -102,8 +102,11 @@ const buildGeneratedFallbackDefinition = (config) => {
 
   const containerClass = [DEFAULT_FALLBACK_CLASS, options.className].filter(Boolean).join(' ')
 
-  return {
-    path: '*',
+  const fallbackRoute = {
+    path:
+      typeof options.path === 'string' && options.path.trim().length > 0
+        ? options.path.trim()
+        : '*',
     element: (
       <DefaultFallback
         title={title}
@@ -116,6 +119,26 @@ const buildGeneratedFallbackDefinition = (config) => {
     ),
     isFallback: true,
   }
+
+  const dataApiFields = [
+    'loader',
+    'action',
+    'lazy',
+    'errorElement',
+    'handle',
+    'shouldRevalidate',
+    'hasErrorBoundary',
+    'id',
+    'caseSensitive',
+  ]
+
+  for (const field of dataApiFields) {
+    if (Object.prototype.hasOwnProperty.call(options, field)) {
+      fallbackRoute[field] = options[field]
+    }
+  }
+
+  return fallbackRoute
 }
 
 function toRouteObject(route, wrapElement) {
