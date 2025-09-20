@@ -70,6 +70,41 @@ describe('Footer', () => {
     expect(link).toHaveAttribute('rel', 'noreferrer noopener')
   })
 
+  it('applies default icons to known social links', () => {
+    renderFooter({
+      socialLinks: [
+        { label: 'LinkedIn', href: 'https://linkedin.com/company/guidogerb', external: true },
+        { label: 'Studio Blog', href: 'https://example.com/blog' },
+      ],
+    })
+
+    const linkedin = screen.getByRole('link', { name: 'LinkedIn' })
+    const linkedinIcon = linkedin.querySelector('svg')
+    expect(linkedinIcon).not.toBeNull()
+    expect(linkedinIcon).toHaveAttribute('aria-hidden', 'true')
+
+    const blogLink = screen.getByRole('link', { name: 'Studio Blog' })
+    expect(blogLink.querySelector('svg')).toBeNull()
+  })
+
+  it('adds legal callout icons and respects explicit overrides', () => {
+    renderFooter({
+      legalLinks: [
+        { label: 'Privacy', href: '/privacy' },
+        { label: 'Terms', href: '/terms', icon: <span data-testid="terms-icon">*</span> },
+      ],
+    })
+
+    const privacy = screen.getByRole('link', { name: 'Privacy' })
+    const privacyIcon = privacy.querySelector('svg')
+    expect(privacyIcon).not.toBeNull()
+    expect(privacyIcon).toHaveAttribute('aria-hidden', 'true')
+
+    const terms = screen.getByRole('link', { name: 'Terms' })
+    expect(terms.querySelector('svg')).toBeNull()
+    expect(screen.getByTestId('terms-icon')).toBeInTheDocument()
+  })
+
   it('invokes onNavigate when provided', () => {
     const handleNavigate = vi.fn()
     renderFooter({

@@ -89,3 +89,28 @@ Run the package tests with:
 ```bash
 pnpm --filter @guidogerb/footer test
 ```
+
+## Icon defaults
+
+The footer automatically assigns accessible SVG icons for common social networks and legal callouts when an explicit `icon`
+value is not provided. Detection is based on each link's `label` and `href`, covering platforms like Instagram, TikTok,
+LinkedIn, YouTube, Substack, Spotify, Bandcamp, Facebook, and X, along with legal targets such as Privacy, Terms, Cookies,
+Accessibility, and Copyright.
+
+You can also import the curated icon set directly:
+
+```ts
+import {
+  DEFAULT_SOCIAL_ICONS,
+  DEFAULT_LEGAL_ICONS,
+  SOCIAL_ICON_COMPONENTS,
+  LEGAL_ICON_COMPONENTS,
+  getDefaultSocialIcon,
+  getDefaultLegalIcon,
+} from '@guidogerb/footer'
+
+const instagramIcon = DEFAULT_SOCIAL_ICONS.instagram
+const privacyIconNode = getDefaultLegalIcon({ label: 'Privacy', href: '/privacy' })
+```
+
+Each exported icon component accepts standard SVG props if you need to customise size or colour.

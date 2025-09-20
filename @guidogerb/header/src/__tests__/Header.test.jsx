@@ -5,12 +5,20 @@ import { Header } from '../Header.jsx'
 import { HeaderContextProvider } from '../HeaderContextProvider.jsx'
 import { createHeaderSettings, resetHeaderSettings } from '../settings.js'
 
-function renderHeader(overrides, props = {}) {
+function renderHeader(overrides, props = {}, options = {}) {
   const settings = createHeaderSettings(overrides ?? {})
+  const { includeMain = false, mainId = 'main-content', mainLabel = 'Main content' } = options
 
   return render(
     <HeaderContextProvider defaultSettings={settings}>
-      <Header {...props} />
+      <>
+        <Header {...props} />
+        {includeMain ? (
+          <main id={mainId} role="main" tabIndex={-1}>
+            {mainLabel}
+          </main>
+        ) : null}
+      </>
     </HeaderContextProvider>,
   )
 }
@@ -180,5 +188,88 @@ describe('Header', () => {
     )
 
     expect(screen.getByRole('link', { name: 'Stories' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('surfaces skip links ahead of other navigation content for keyboard users', async () => {
+    const initialHash = window.location.hash
+    const user = userEvent.setup()
+
+    renderHeader(
+      {
+        brand: { title: 'Guidogerb', tagline: 'Skip nav brand', href: '/' },
+        utilityLinks: [
+          { label: 'Skip to main content', href: '#main-region' },
+          { label: 'Contact', href: '/contact' },
+        ],
+        primaryLinks: [{ label: 'Programs', href: '/programs' }],
+      },
+      undefined,
+      { includeMain: true, mainId: 'main-region', mainLabel: 'Main region content' },
+    )
+
+    const brand = screen.getByRole('link', { name: 'Skip nav brand' })
+    const skipLink = screen.getByRole('link', { name: 'Skip to main content' })
+    expect(skipLink).toHaveAttribute('href', '#main-region')
+
+    await user.tab()
+    expect(document.activeElement).toBe(brand)
+
+    await user.tab()
+    expect(document.activeElement).toBe(skipLink)
+
+    await user.keyboard('{Enter}')
+    expect(window.location.hash).toBe('#main-region')
+
+    window.location.hash = initialHash
+  })
+
+  it('marks nested navigation items as current when the active path matches a child', () => {
+    renderHeader(
+      {
+        primaryLinks: [
+          {
+            label: 'Programs',
+            href: '/programs',
+            children: [
+              { label: '2025 Season', href: '/programs/2025' },
+              { label: 'Workshops', href: '/programs/workshops' },
+            ],
+          },
+        ],
+      },
+      { activePath: '/programs/2025' },
+    )
+
+    expect(screen.getByRole('link', { name: '2025 Season' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: 'Programs' })).not.toHaveAttribute('aria-current')
+  })
+
+  it('supports activating navigation links via keyboard input', async () => {
+    const onNavigate = vi.fn()
+    const user = userEvent.setup()
+
+    renderHeader(
+      {
+        brand: { title: 'Guidogerb', tagline: 'Keyboard brand', href: '/' },
+        primaryLinks: [
+          { label: 'Programs', href: '/programs' },
+          { label: 'Events', href: '/events' },
+        ],
+      },
+      { onNavigate },
+    )
+
+    await user.tab() // brand
+    await user.tab() // first navigation link
+
+    const programsLink = screen.getByRole('link', { name: 'Programs' })
+    expect(document.activeElement).toBe(programsLink)
+
+    await user.keyboard('{Enter}')
+
+    expect(onNavigate).toHaveBeenCalledTimes(1)
+    const payload = onNavigate.mock.calls[0][0]
+    expect(payload.item).toMatchObject({ label: 'Programs', href: '/programs' })
+    expect(payload.event?.type).toBe('click')
   })
 })

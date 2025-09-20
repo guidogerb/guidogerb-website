@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 
+import { applyDefaultIcons } from './iconLibrary.jsx'
+
 const BASE_CLASS = 'gg-footer'
 
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0
@@ -103,7 +105,11 @@ const renderLink = (link, index, onNavigate, section) => {
     <li key={key} className={`${BASE_CLASS}__link-item`}>
       <a {...linkProps}>
         <span className={`${BASE_CLASS}__link-label`}>
-          {link.icon ? <span className={`${BASE_CLASS}__link-icon`}>{link.icon}</span> : null}
+          {link.icon ? (
+            <span className={`${BASE_CLASS}__link-icon`} aria-hidden="true">
+              {link.icon}
+            </span>
+          ) : null}
           <span>{link.label}</span>
           {isNonEmptyString(link?.badge) ? (
             <span className={`${BASE_CLASS}__link-badge`} data-tone={link?.badgeTone ?? 'info'}>
@@ -145,14 +151,21 @@ const renderLegal = (items, onNavigate) => {
 
   return (
     <ul className={`${BASE_CLASS}__legal-list`} role="list">
-      {normalizeLinks(items).map((link, index) => (
+      {items.map((link, index) => (
         <li key={getLinkKey(link, index)} className={`${BASE_CLASS}__legal-item`}>
           <a
             {...buildLinkProps(link, onNavigate, {
               type: 'legal',
             })}
           >
-            {link.label}
+            <span className={`${BASE_CLASS}__link-label`}>
+              {link.icon ? (
+                <span className={`${BASE_CLASS}__link-icon`} aria-hidden="true">
+                  {link.icon}
+                </span>
+              ) : null}
+              <span>{link.label}</span>
+            </span>
           </a>
         </li>
       ))}
@@ -173,7 +186,14 @@ export function Footer({
   ...rest
 } = {}) {
   const normalizedSections = useMemo(() => normalizeSections(sections), [sections])
-  const normalizedSocial = useMemo(() => normalizeLinks(socialLinks), [socialLinks])
+  const normalizedSocial = useMemo(
+    () => applyDefaultIcons(normalizeLinks(socialLinks), 'social'),
+    [socialLinks],
+  )
+  const normalizedLegal = useMemo(
+    () => applyDefaultIcons(normalizeLinks(legalLinks), 'legal'),
+    [legalLinks],
+  )
   const hasBrand =
     isNonEmptyString(brand?.name) || isNonEmptyString(description) || normalizedSocial.length > 0
 
@@ -211,7 +231,9 @@ export function Footer({
                       aria-label={link.description ?? link.label}
                     >
                       {link.icon ? (
-                        <span className={`${BASE_CLASS}__social-icon`}>{link.icon}</span>
+                        <span className={`${BASE_CLASS}__social-icon`} aria-hidden="true">
+                          {link.icon}
+                        </span>
                       ) : (
                         <span className={`${BASE_CLASS}__social-text`}>{link.label}</span>
                       )}
@@ -233,7 +255,7 @@ export function Footer({
       {children ? <div className={`${BASE_CLASS}__extra`}>{children}</div> : null}
 
       <div className={`${BASE_CLASS}__meta`}>
-        {renderLegal(legalLinks, onNavigate)}
+        {renderLegal(normalizedLegal, onNavigate)}
         {isNonEmptyString(copyright) ? (
           <p className={`${BASE_CLASS}__copyright`}>
             <small>{copyright}</small>
