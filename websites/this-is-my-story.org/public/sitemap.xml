@@ -5,14 +5,14 @@
 
   <url>
     <loc>https://this-is-my-story.org</loc>
-    <lastmod>2025-09-20T17:32:49.199Z</lastmod>
+    <lastmod>2025-09-20T18:37:42.612Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
     <loc>https://this-is-my-story.org/auth/callback</loc>
-    <lastmod>2025-09-20T17:32:49.199Z</lastmod>
+    <lastmod>2025-09-20T18:37:42.612Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -180,8 +180,7 @@ export function Header({
   const hasUtilityLinks = Array.isArray(utilityLinks) && utilityLinks.length > 0
   const hasActions = Array.isArray(actions) && actions.length > 0
   const hasAnnouncements = Array.isArray(announcements) && announcements.length > 0
-  const hasMobileNavigation =
-    hasPrimaryLinks || hasSecondaryLinks || hasUtilityLinks || hasActions
+  const hasMobileNavigation = hasPrimaryLinks || hasSecondaryLinks || hasUtilityLinks || hasActions
 
   const mobileMenuId = useId()
   const mobileMenuRef = useRef(null)

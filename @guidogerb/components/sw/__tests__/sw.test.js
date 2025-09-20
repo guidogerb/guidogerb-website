@@ -153,7 +153,10 @@ describe('service worker helpers', () => {
   it('invokes the offline callback when the first worker installs', async () => {
     const installingWorker = createMockWorker('installing')
     const registration = createMockRegistration({ installing: installingWorker })
-    const serviceWorker = createMockServiceWorker({ registerResult: registration, controller: null })
+    const serviceWorker = createMockServiceWorker({
+      registerResult: registration,
+      controller: null,
+    })
 
     Object.defineProperty(window.navigator, 'serviceWorker', {
       configurable: true,

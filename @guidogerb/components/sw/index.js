@@ -9,7 +9,11 @@ const createDeferred = () => {
 }
 
 const isServiceWorkerSupported = () => {
-  return typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'serviceWorker' in navigator
+  return (
+    typeof window !== 'undefined' &&
+    typeof navigator !== 'undefined' &&
+    'serviceWorker' in navigator
+  )
 }
 
 const noopPromise = () => new Promise(() => {})
