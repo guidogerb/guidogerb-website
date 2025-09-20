@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { vi } from 'vitest'
+import { afterAll, beforeAll, vi } from 'vitest'
 import { createMemoryRouter, useLoaderData } from 'react-router-dom'
 import { PublicRouter } from '../PublicRouter.jsx'
 
@@ -7,6 +7,54 @@ function LoaderEcho() {
   const data = useLoaderData()
   return <div>{typeof data === 'string' ? data : JSON.stringify(data)}</div>
 }
+
+const originalRequest = globalThis.Request
+
+beforeAll(() => {
+  if (typeof originalRequest !== 'function') {
+    return
+  }
+
+  if (typeof AbortController === 'function') {
+    try {
+      const controller = new AbortController()
+      // Attempt to construct a native Request; if it works we can keep it as-is.
+      new originalRequest('http://localhost/', { signal: controller.signal })
+      return
+    } catch (error) {
+      // Native Request is incompatible with the AbortSignal generated above.
+    }
+  }
+
+  class RequestShim {
+    constructor(resource, init = {}) {
+      this.url = typeof resource === 'string' ? resource : resource?.url ?? ''
+      this.method = init.method ?? 'GET'
+      this.signal = init.signal ?? null
+      if (init.headers) {
+        this.headers = init.headers
+      } else if (typeof Headers === 'function') {
+        this.headers = new Headers()
+      } else {
+        this.headers = new Map()
+      }
+    }
+
+    clone() {
+      return new RequestShim(this.url, {
+        method: this.method,
+        signal: this.signal,
+        headers: this.headers,
+      })
+    }
+  }
+
+  globalThis.Request = RequestShim
+})
+
+afterAll(() => {
+  globalThis.Request = originalRequest
+})
 
 describe('PublicRouter', () => {
   it('renders the active route using the provided router factory', () => {
