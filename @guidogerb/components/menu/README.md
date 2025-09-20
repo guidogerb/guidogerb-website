@@ -46,3 +46,54 @@ export function PrimaryNav() {
 
 The component emits structural class names (e.g., `gg-navigation-menu__item`)
 so consuming apps can style the menu without overriding behavior.
+
+## Theming with CSS custom properties
+
+Pair the menu with `@guidogerb/css/tokens.css` to gain access to custom
+properties that describe interactive states. Every menu instance exposes the
+following tokens:
+
+- `--gg-navigation-menu-link-hover-background`
+- `--gg-navigation-menu-link-hover-color`
+- `--gg-navigation-menu-link-focus-background`
+- `--gg-navigation-menu-link-focus-color`
+- `--gg-navigation-menu-link-focus-ring`
+- `--gg-navigation-menu-link-active-background`
+- `--gg-navigation-menu-link-active-color`
+- `--gg-navigation-menu-link-active-ring`
+
+Use the tokens from your stylesheet to align hover/focus/current states across
+tenants:
+
+```css
+.gg-navigation-menu__link {
+  display: flex;
+  gap: var(--gg-navigation-menu-link-gap);
+  padding-block: var(--gg-navigation-menu-link-padding-block);
+  padding-inline: var(--gg-navigation-menu-link-padding-inline);
+  border-radius: var(--gg-navigation-menu-item-radius);
+  color: var(--gg-navigation-menu-link-color);
+  background: var(--gg-navigation-menu-link-background);
+  transition: background 150ms ease;
+}
+
+.gg-navigation-menu__link:hover {
+  color: var(--gg-navigation-menu-link-hover-color);
+  background: var(--gg-navigation-menu-link-hover-background);
+}
+
+.gg-navigation-menu__link:focus-visible {
+  color: var(--gg-navigation-menu-link-focus-color);
+  background: var(--gg-navigation-menu-link-focus-background);
+  box-shadow: var(--gg-navigation-menu-link-focus-ring);
+}
+
+.gg-navigation-menu__item--active .gg-navigation-menu__link {
+  color: var(--gg-navigation-menu-link-active-color);
+  background: var(--gg-navigation-menu-link-active-background);
+  box-shadow: var(--gg-navigation-menu-link-active-ring);
+}
+```
+
+Override the custom properties on `.gg-navigation-menu` (or a parent element)
+to brand the navigation component per tenant.

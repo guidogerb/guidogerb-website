@@ -120,6 +120,51 @@ Send initial events by passing the `initialEvents` prop:
 
 ## Testing & maintenance
 
+## Ecommerce event presets
+
+The package exports convenience builders for common GA4 ecommerce flows. Each
+helper returns the event name and normalized parameters so you can forward them
+directly to `trackEvent`:
+
+```js
+import { useAnalytics, buildAddToCartEvent } from '@guidogerb/components/analytics'
+
+function AddToCartButton({ product }) {
+  const analytics = useAnalytics()
+
+  const handleClick = () => {
+    const event = buildAddToCartEvent({
+      currency: 'USD',
+      item: {
+        id: product.sku,
+        name: product.title,
+        price: product.price,
+        quantity: 1,
+        brand: product.brand,
+        categories: product.categories,
+      },
+    })
+
+    analytics.trackEvent(event.name, event.params)
+  }
+
+  return <button onClick={handleClick}>Add to cart</button>
+}
+```
+
+Available helpers:
+
+- `buildAddToCartEvent(options)` — Normalizes a single item or collection into
+  an `add_to_cart` payload and derives the `value` when omitted.
+- `buildPurchaseEvent(options)` — Produces a `purchase` event, merging totals,
+  tax, shipping, and checkout metadata.
+- `buildRefundEvent(options)` — Generates a `refund` event, deriving totals from
+  refunded line items and supporting `partial` refunds.
+
+All helpers accept either a single `item` or an `items` array, uppercase the
+currency code, and guard against invalid numbers so analytics calls remain
+resilient.
+
 - Run the package tests with `pnpm vitest run @guidogerb/components/analytics/src/__tests__/Analytics.test.jsx`.
 - Review [`tasks.md`](./tasks.md) for upcoming enhancements and operational follow-ups.
 
