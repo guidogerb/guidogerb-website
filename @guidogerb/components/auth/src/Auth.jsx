@@ -4,13 +4,7 @@ import SignOutButton from './SignOutButton.jsx'
 
 // Auth wrapper component: guards its children behind OIDC authentication
 // Usage: <Auth autoSignIn><Protected /></Auth>
-function Auth({
-  children,
-  autoSignIn = false,
-  logoutUri,
-  showSignOut,
-  signOutButtonProps = {},
-}) {
+function Auth({ children, autoSignIn = false, logoutUri, showSignOut, signOutButtonProps = {} }) {
   const auth = useOidcAuth()
   const redirectStartedRef = useRef(false)
 
@@ -41,9 +35,7 @@ function Auth({
     const mergedSignOutProps = {
       ...signOutButtonProps,
       redirectUri:
-        signOutButtonProps?.redirectUri === undefined
-          ? logoutUri
-          : signOutButtonProps.redirectUri,
+        signOutButtonProps?.redirectUri === undefined ? logoutUri : signOutButtonProps.redirectUri,
       containerStyle: signOutButtonProps?.containerStyle
         ? { ...defaultContainerStyle, ...signOutButtonProps.containerStyle }
         : defaultContainerStyle,

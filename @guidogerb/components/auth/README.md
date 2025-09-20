@@ -72,14 +72,13 @@ export function AccountMenu() {
 
 ## Components
 
-| Export          | Description |
-| --------------- | ----------- |
-| `AuthProvider`  | Configures `react-oidc-context` with Cognito-friendly defaults and renders `<LoginCallback />` when the current pathname matches `loginCallbackPath`. |
+| Export          | Description                                                                                                                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AuthProvider`  | Configures `react-oidc-context` with Cognito-friendly defaults and renders `<LoginCallback />` when the current pathname matches `loginCallbackPath`.                                                                                       |
 | `Auth`          | Lightweight guard that triggers `signinRedirect()` when `autoSignIn` is enabled, surfaces loading/error states, and otherwise renders its children. Optional sign-out control renders when `logoutUri` is supplied or `showSignOut` is set. |
-| `LoginCallback` | Finalizes the PKCE redirect, restores `returnTo` targets from storage, and replaces the history entry so callback URLs do not linger. |
-| `useAuth`       | Re-exported hook from `react-oidc-context` for teams that need direct access to the underlying context. |
-| `SignOutButton` | Branded action that wraps `signoutRedirect`, handles redirect URIs, and conveys pending/error states to the UI with accessible feedback. |
-
+| `LoginCallback` | Finalizes the PKCE redirect, restores `returnTo` targets from storage, and replaces the history entry so callback URLs do not linger.                                                                                                       |
+| `useAuth`       | Re-exported hook from `react-oidc-context` for teams that need direct access to the underlying context.                                                                                                                                     |
+| `SignOutButton` | Branded action that wraps `signoutRedirect`, handles redirect URIs, and conveys pending/error states to the UI with accessible feedback.                                                                                                    |
 
 ## Error handling & logging
 

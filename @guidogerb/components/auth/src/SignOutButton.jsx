@@ -69,9 +69,12 @@ export default function SignOutButton({
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState(null)
 
-  useEffect(() => () => {
-    mountedRef.current = false
-  }, [])
+  useEffect(
+    () => () => {
+      mountedRef.current = false
+    },
+    [],
+  )
 
   const {
     style: buttonStyleProp,
@@ -190,7 +193,7 @@ export default function SignOutButton({
     }
   }
 
-  const buttonLabel = isPending ? pendingText : children ?? 'Sign out'
+  const buttonLabel = isPending ? pendingText : (children ?? 'Sign out')
   const statusMessage = computeStatusMessage(status, { pendingText, successText, errorText }, error)
   const buttonDisabled = disabledProp || isPending
 
