@@ -1,11 +1,6 @@
 export type SearchParamsPrimitive = string | number | boolean
-export type SearchParamsValue =
-  | SearchParamsPrimitive
-  | Array<SearchParamsPrimitive>
-export type SearchParamsInput =
-  | string
-  | URLSearchParams
-  | Record<string, SearchParamsValue>
+export type SearchParamsValue = SearchParamsPrimitive | Array<SearchParamsPrimitive>
+export type SearchParamsInput = string | URLSearchParams | Record<string, SearchParamsValue>
 
 export interface RetryOptions {
   attempts?: number
@@ -43,7 +38,11 @@ export interface HttpResponse<T = unknown> {
 }
 
 export interface HttpClient {
-  request<T = unknown>(method: string, path: string, options?: RequestOptions): Promise<HttpResponse<T>>
+  request<T = unknown>(
+    method: string,
+    path: string,
+    options?: RequestOptions,
+  ): Promise<HttpResponse<T>>
   get<T = unknown>(path: string, options?: RequestOptions): Promise<T>
   post<T = unknown>(path: string, options?: RequestOptions): Promise<T>
   put<T = unknown>(path: string, options?: RequestOptions): Promise<T>
@@ -470,8 +469,16 @@ export interface HealthApi {
 
 export interface CatalogApi {
   search(params?: CatalogSearchParams, options?: RequestOptions): Promise<CatalogSearchResponse>
-  getItem(id: string, params?: CatalogItemRequest, options?: RequestOptions): Promise<CatalogItemResponse>
-  getArtist(slug: string, params?: CatalogArtistRequest, options?: RequestOptions): Promise<ArtistProfile>
+  getItem(
+    id: string,
+    params?: CatalogItemRequest,
+    options?: RequestOptions,
+  ): Promise<CatalogItemResponse>
+  getArtist(
+    slug: string,
+    params?: CatalogArtistRequest,
+    options?: RequestOptions,
+  ): Promise<ArtistProfile>
 }
 
 export interface DownloadsApi {
@@ -479,7 +486,10 @@ export interface DownloadsApi {
 }
 
 export interface AccountApi {
-  getEntitlements(params?: EntitlementListParams, options?: RequestOptions): Promise<EntitlementsResponse>
+  getEntitlements(
+    params?: EntitlementListParams,
+    options?: RequestOptions,
+  ): Promise<EntitlementsResponse>
   getInvoices(params?: InvoiceListParams, options?: RequestOptions): Promise<InvoicesResponse>
 }
 
@@ -488,7 +498,10 @@ export interface CartApi {
 }
 
 export interface CheckoutApi {
-  createSession(input: CheckoutSessionRequest, options?: RequestOptions): Promise<CheckoutSessionResponse>
+  createSession(
+    input: CheckoutSessionRequest,
+    options?: RequestOptions,
+  ): Promise<CheckoutSessionResponse>
 }
 
 export interface AdminCatalogApi {
@@ -500,7 +513,11 @@ export interface AdminDomainsApi {
 }
 
 export interface AdminUsersApi {
-  updateRoles(userId: string, input: UpdateUserRolesRequest, options?: RequestOptions): Promise<UserRolesResponse>
+  updateRoles(
+    userId: string,
+    input: UpdateUserRolesRequest,
+    options?: RequestOptions,
+  ): Promise<UserRolesResponse>
 }
 
 export interface AdminStoresApi {

@@ -63,9 +63,7 @@ describe('createApi', () => {
   })
 
   it('encodes catalog identifiers and rejects missing values', async () => {
-    const fetch = vi
-      .fn()
-      .mockImplementation(() => Promise.resolve(jsonResponse({ id: 'prod-1' })))
+    const fetch = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ id: 'prod-1' })))
     const api = createApi({ baseUrl: 'https://api.example.com', fetch })
 
     await api.catalog.getItem('prod/123', {
@@ -94,7 +92,9 @@ describe('createApi', () => {
   })
 
   it('creates download links and validates payloads', async () => {
-    const fetch = vi.fn().mockResolvedValue(jsonResponse({ url: 'https://downloads.example.com/file' }))
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(jsonResponse({ url: 'https://downloads.example.com/file' }))
     const api = createApi({ baseUrl: 'https://api.example.com', fetch })
 
     const payload = { assetIds: ['asset-1'], tenantId: 'tenant-1' }
@@ -143,9 +143,15 @@ describe('createApi', () => {
     const fetch = vi
       .fn()
       .mockResolvedValueOnce(
-        jsonResponse({ id: 'cart-1', items: [], totals: { subtotal: 0, discount: 0, tax: 0, shipping: 0, total: 0, currency: 'USD' } }),
+        jsonResponse({
+          id: 'cart-1',
+          items: [],
+          totals: { subtotal: 0, discount: 0, tax: 0, shipping: 0, total: 0, currency: 'USD' },
+        }),
       )
-      .mockResolvedValueOnce(jsonResponse({ sessionId: 'sess_1', expiresAt: '2024-01-01T00:00:00Z' }))
+      .mockResolvedValueOnce(
+        jsonResponse({ sessionId: 'sess_1', expiresAt: '2024-01-01T00:00:00Z' }),
+      )
 
     const api = createApi({ baseUrl: 'https://api.example.com', fetch })
 
@@ -162,9 +168,9 @@ describe('createApi', () => {
     expect(init.method).toBe('POST')
 
     expect(() => api.cart.create({})).toThrow('cart.create requires an items array')
-    expect(() => api.checkout.createSession({ successUrl: 'https://example.com', cancelUrl: '' })).toThrow(
-      'checkout.createSession requires successUrl and cancelUrl',
-    )
+    expect(() =>
+      api.checkout.createSession({ successUrl: 'https://example.com', cancelUrl: '' }),
+    ).toThrow('checkout.createSession requires successUrl and cancelUrl')
   })
 
   it('supports admin workflows with validation and correctly scoped paths', async () => {
@@ -174,7 +180,11 @@ describe('createApi', () => {
     await api.admin.catalog.import({ source: 's3://bucket/catalog.json' })
     await api.admin.domains.create({ domain: 'shop.example.com', tenantId: 'tenant-1' })
     await api.admin.users.updateRoles('user-1', { tenantId: 'tenant-1', roles: ['admin'] })
-    await api.admin.stores.create({ name: 'Main Store', tenantId: 'tenant-1', defaultCurrency: 'USD' })
+    await api.admin.stores.create({
+      name: 'Main Store',
+      tenantId: 'tenant-1',
+      defaultCurrency: 'USD',
+    })
     await api.admin.stores.createProduct('store-1', {
       title: 'Album',
       price: { amount: 1999, currency: 'USD' },
