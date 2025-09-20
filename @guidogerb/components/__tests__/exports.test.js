@@ -52,10 +52,7 @@ describe('@guidogerb/components barrel exports', () => {
 
     const missingExports = packagePaths.filter((relativePath) => {
       const searchTerm = `./${relativePath}/index`
-      return (
-        !barrelContent.includes(`'${searchTerm}`) &&
-        !barrelContent.includes(`"${searchTerm}`)
-      )
+      return !barrelContent.includes(`'${searchTerm}`) && !barrelContent.includes(`"${searchTerm}`)
     })
 
     expect(missingExports).toEqual([])
