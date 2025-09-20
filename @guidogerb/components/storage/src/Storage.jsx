@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { createStorageController } from './createStorageController.js'
 
@@ -81,7 +74,9 @@ const buildContextValue = ({ namespace, defaultArea, fallbackArea, controllers }
 
   const getValue = (key, fallbackValue, area = defaultArea) => {
     const controller = getController(area)
-    return typeof controller?.get === 'function' ? controller.get(key, fallbackValue) : fallbackValue
+    return typeof controller?.get === 'function'
+      ? controller.get(key, fallbackValue)
+      : fallbackValue
   }
 
   const setValue = (key, value, area = defaultArea) => {
@@ -303,10 +298,7 @@ export const useStoredValue = (key, { area, defaultValue } = {}) => {
   const updateValue = useCallback(
     (nextValue) => {
       if (!controller || typeof controller.set !== 'function') return undefined
-      const resolved =
-        typeof nextValue === 'function'
-          ? nextValue(readValue())
-          : nextValue
+      const resolved = typeof nextValue === 'function' ? nextValue(readValue()) : nextValue
       return controller.set(key, resolved)
     },
     [controller, key, readValue],

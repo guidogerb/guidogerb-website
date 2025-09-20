@@ -33,7 +33,7 @@ function ThemeToggle() {
 
 export function App() {
   return (
-    <StorageProvider namespace="guidogerb.app" areas={["local", "session"]}>
+    <StorageProvider namespace="guidogerb.app" areas={['local', 'session']}>
       <ThemeToggle />
     </StorageProvider>
   )
@@ -50,12 +50,12 @@ export function App() {
 
 ## Planned surface
 
-| Area               | Goals                                                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| Area               | Goals                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Storage controller | ✅ Available via `createStorageController`. Returns scoped accessors (`get`, `set`, `remove`, `list`) and gracefully falls back when `window` is unavailable. |
-| Cookie utilities   | ⏳ Lightweight encoder/decoder helpers plus batched update support for multi-cookie workflows.          |
-| Cache governance   | ⏳ Shared channel (e.g., BroadcastChannel, event emitter, or observable store) that exposes caching preferences for the service worker to consume. |
-| Diagnostics        | ⏳ Optional logging hooks so apps can trace cache/storage mutations during development.                  |
+| Cookie utilities   | ⏳ Lightweight encoder/decoder helpers plus batched update support for multi-cookie workflows.                                                                |
+| Cache governance   | ⏳ Shared channel (e.g., BroadcastChannel, event emitter, or observable store) that exposes caching preferences for the service worker to consume.            |
+| Diagnostics        | ⏳ Optional logging hooks so apps can trace cache/storage mutations during development.                                                                       |
 
 ## Integration with `@guidogerb/components/sw`
 
