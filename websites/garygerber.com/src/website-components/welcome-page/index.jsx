@@ -1,4 +1,5 @@
 import { useAuth } from '@guidogerb/components-auth'
+import rehearsalResources from '../../rehearsalResources.js'
 
 export default function Welcome({ children }) {
   const auth = useAuth()
@@ -14,6 +15,7 @@ export default function Welcome({ children }) {
   const name =
     auth?.user?.profile?.['cognito:username'] ?? auth?.user?.profile?.name ?? 'userNotAvailable'
   const email = auth?.user?.profile?.email
+  const { stagePlotHref, rehearsalChecklistHref, productionEmailHref } = rehearsalResources
 
   return (
     <div className="welcome-card">
@@ -25,13 +27,13 @@ export default function Welcome({ children }) {
       </p>
       <ul className="welcome-links">
         <li>
-          <a href="/files/stage-plot.pdf">Download latest stage plot</a>
+          <a href={stagePlotHref}>Download latest stage plot</a>
         </li>
         <li>
-          <a href="/files/rehearsal-checklist.pdf">Rehearsal checklist</a>
+          <a href={rehearsalChecklistHref}>Rehearsal checklist</a>
         </li>
         <li>
-          <a href="mailto:hello@garygerber.com?subject=Collaboration%20Notes">
+          <a href={productionEmailHref}>
             Email production team
           </a>
         </li>
