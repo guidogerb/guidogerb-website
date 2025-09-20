@@ -37,7 +37,9 @@ describe('Gary Gerber marketing sections', () => {
 
   it('renders consulting services content', () => {
     render(<ConsultingSection />)
-    expect(screen.getByRole('heading', { level: 2, name: 'Residencies & masterclasses' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Residencies & masterclasses' }),
+    ).toBeInTheDocument()
   })
 
   it('renders recordings and studio resources highlights', () => {
@@ -64,7 +66,9 @@ describe('Gary Gerber marketing sections', () => {
       </RehearsalRoomSection>,
     )
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Client rehearsal room' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Client rehearsal room' }),
+    ).toBeInTheDocument()
     expect(mockProtected).toHaveBeenCalledTimes(1)
     expect(mockProtected).toHaveBeenCalledWith(
       expect.objectContaining({

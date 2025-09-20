@@ -14,8 +14,8 @@ export default function RecordingsEducationSection() {
           <li>
             <h3>"Stories in Transit"</h3>
             <p>
-              A live album captured during the 2024 Rail Lines residency, blending improvisation with
-              commuter soundscapes.
+              A live album captured during the 2024 Rail Lines residency, blending improvisation
+              with commuter soundscapes.
             </p>
           </li>
           <li>

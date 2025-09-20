@@ -8,7 +8,11 @@ export default function NewsletterSignupSection() {
           from Gary’s collaborations with composers, dancers, and filmmakers.
         </p>
       </div>
-      <form className="newsletter-form" aria-label="Newsletter sign up" onSubmit={(event) => event.preventDefault()}>
+      <form
+        className="newsletter-form"
+        aria-label="Newsletter sign up"
+        onSubmit={(event) => event.preventDefault()}
+      >
         <label htmlFor="newsletter-email" className="visually-hidden">
           Email address
         </label>
