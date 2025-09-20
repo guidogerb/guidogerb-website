@@ -22,7 +22,14 @@ export function App({ children }) {
       client_id={import.meta.env.VITE_COGNITO_CLIENT_ID}
       loginCallbackPath="/auth/callback"
     >
-      <Auth autoSignIn logoutUri={import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI}>
+      <Auth
+        autoSignIn
+        logoutUri={import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI}
+        signOutButtonProps={{
+          pendingText: 'Signing out…',
+          successText: 'Signed out — see you soon!',
+        }}
+      >
         <ProtectedArea />
       </Auth>
     </AuthProvider>
@@ -41,14 +48,38 @@ controls where the hosted UI redirects after authentication; the `LoginCallback`
 consume the redirect response, restore any stored `returnTo` hint, and send the user back to their
 previous location.
 
+### Standalone sign-out control
+
+When you need to place the sign-out action outside of the `Auth` wrapper, use the
+`SignOutButton` directly. The button disables itself while the redirect is in
+flight, surfaces errors, and gracefully falls back to `removeUser()` when
+`signoutRedirect` is unavailable.
+
+```tsx
+import { SignOutButton } from '@guidogerb/components-auth'
+
+export function AccountMenu() {
+  return (
+    <SignOutButton
+      redirectUri={import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI}
+      variant="secondary"
+    >
+      Sign out of Stream4Cloud
+    </SignOutButton>
+  )
+}
+```
+
 ## Components
 
-| Export          | Description                                                                                                                                           |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Export          | Description |
+| --------------- | ----------- |
 | `AuthProvider`  | Configures `react-oidc-context` with Cognito-friendly defaults and renders `<LoginCallback />` when the current pathname matches `loginCallbackPath`. |
-| `Auth`          | Lightweight guard that triggers `signinRedirect()` when `autoSignIn` is enabled, surfaces loading/error states, and otherwise renders its children.   |
-| `LoginCallback` | Finalizes the PKCE redirect, restores `returnTo` targets from storage, and replaces the history entry so callback URLs do not linger.                 |
-| `useAuth`       | Re-exported hook from `react-oidc-context` for teams that need direct access to the underlying context.                                               |
+| `Auth`          | Lightweight guard that triggers `signinRedirect()` when `autoSignIn` is enabled, surfaces loading/error states, and otherwise renders its children. Optional sign-out control renders when `logoutUri` is supplied or `showSignOut` is set. |
+| `LoginCallback` | Finalizes the PKCE redirect, restores `returnTo` targets from storage, and replaces the history entry so callback URLs do not linger. |
+| `useAuth`       | Re-exported hook from `react-oidc-context` for teams that need direct access to the underlying context. |
+| `SignOutButton` | Branded action that wraps `signoutRedirect`, handles redirect URIs, and conveys pending/error states to the UI with accessible feedback. |
+
 
 ## Error handling & logging
 

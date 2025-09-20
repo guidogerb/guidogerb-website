@@ -1,9 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { useAuth as useOidcAuth } from 'react-oidc-context'
+import SignOutButton from './SignOutButton.jsx'
 
 // Auth wrapper component: guards its children behind OIDC authentication
 // Usage: <Auth autoSignIn><Protected /></Auth>
-function Auth({ children, autoSignIn = false, logoutUri }) {
+function Auth({
+  children,
+  autoSignIn = false,
+  logoutUri,
+  showSignOut,
+  signOutButtonProps = {},
+}) {
   const auth = useOidcAuth()
   const redirectStartedRef = useRef(false)
 
@@ -14,16 +21,6 @@ function Auth({ children, autoSignIn = false, logoutUri }) {
       auth?.signinRedirect()
     }
   }, [autoSignIn, auth?.isAuthenticated, auth?.isLoading]) // removed "auth" object from deps
-
-  const signOutRedirect = () => {
-    const url = logoutUri
-    if (url) {
-      window.location.href = url
-    } else {
-      // fallback: just remove user if logout URL isn't configured
-      auth?.removeUser()
-    }
-  }
 
   if (auth?.isLoading) {
     return <div>Loading...</div>
@@ -39,12 +36,23 @@ function Auth({ children, autoSignIn = false, logoutUri }) {
   }
 
   if (auth?.isAuthenticated) {
+    const shouldShowSignOut = showSignOut ?? Boolean(logoutUri)
+    const defaultContainerStyle = { marginTop: '1.5rem' }
+    const mergedSignOutProps = {
+      ...signOutButtonProps,
+      redirectUri:
+        signOutButtonProps?.redirectUri === undefined
+          ? logoutUri
+          : signOutButtonProps.redirectUri,
+      containerStyle: signOutButtonProps?.containerStyle
+        ? { ...defaultContainerStyle, ...signOutButtonProps.containerStyle }
+        : defaultContainerStyle,
+    }
+
     return (
       <div>
         {children ?? null}
-        {/*        <div style={{ marginTop: 12 }}>
-          <button onClick={signOutRedirect}>Sign out</button>
-        </div>*/}
+        {shouldShowSignOut ? <SignOutButton {...mergedSignOutProps} /> : null}
       </div>
     )
   }

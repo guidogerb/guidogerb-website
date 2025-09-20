@@ -43,6 +43,56 @@ describe('Auth', () => {
     expect(screen.getByText('secret payload')).toBeInTheDocument()
   })
 
+  it('renders a sign-out control when logoutUri is provided and triggers signoutRedirect', async () => {
+    const signoutRedirect = vi.fn(() => Promise.resolve())
+    authState.current = {
+      isAuthenticated: true,
+      signoutRedirect,
+    }
+
+    render(<Auth logoutUri="https://auth.example.com/logout" />)
+
+    const button = screen.getByRole('button', { name: /sign out/i })
+    fireEvent.click(button)
+
+    expect(button).toHaveTextContent(/signing out/i)
+
+    await waitFor(() =>
+      expect(signoutRedirect).toHaveBeenCalledWith({
+        post_logout_redirect_uri: 'https://auth.example.com/logout',
+      }),
+    )
+  })
+
+  it('merges signOutButtonProps and forwards redirect overrides', async () => {
+    const signoutRedirect = vi.fn(() => Promise.resolve())
+    authState.current = {
+      isAuthenticated: true,
+      signoutRedirect,
+    }
+
+    render(
+      <Auth
+        logoutUri="https://auth.example.com/logout-default"
+        signOutButtonProps={{
+          redirectUri: 'https://auth.example.com/custom',
+          pendingText: 'Signing out now…',
+        }}
+      />,
+    )
+
+    const button = screen.getByRole('button', { name: /sign out/i })
+    fireEvent.click(button)
+
+    expect(button).toHaveTextContent(/signing out now/i)
+
+    await waitFor(() =>
+      expect(signoutRedirect).toHaveBeenCalledWith({
+        post_logout_redirect_uri: 'https://auth.example.com/custom',
+      }),
+    )
+  })
+
   it('lets the user trigger a sign-in redirect when autoSignIn is disabled', () => {
     const signinRedirect = vi.fn()
     authState.current = {
