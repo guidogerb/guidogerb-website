@@ -33,6 +33,49 @@ describe('PublicRouter', () => {
     expect(screen.getByText('404')).toBeInTheDocument()
   })
 
+  it('renders a default not-found experience when fallback is omitted', () => {
+    render(
+      <PublicRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/missing'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+      />,
+    )
+
+    expect(screen.getByRole('heading', { name: /page not found/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /go back home/i })).toHaveAttribute('href', '/')
+  })
+
+  it('allows customizing the generated fallback copy', () => {
+    render(
+      <PublicRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/missing'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+        defaultFallback={{
+          title: 'Nicht gefunden',
+          description: 'Bitte prüfen Sie die Adresse oder wählen Sie eine Option.',
+          homeHref: '/start',
+          homeLabel: 'Zur Startseite',
+          supportHref: 'mailto:hallo@example.com',
+          supportLabel: 'Support kontaktieren',
+          lang: 'de',
+        }}
+      />,
+    )
+
+    const heading = screen.getByRole('heading', { name: /nicht gefunden/i })
+    const container = heading.closest('section')
+    expect(container).not.toBeNull()
+    expect(container).toHaveAttribute('lang', 'de')
+    expect(screen.getByText(/bitte prüfen sie/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /zur startseite/i })).toHaveAttribute('href', '/start')
+    expect(screen.getByRole('link', { name: /support kontaktieren/i })).toHaveAttribute(
+      'href',
+      'mailto:hallo@example.com',
+    )
+  })
+
   it('passes basename and router options to the router factory', () => {
     const factory = vi.fn((routes, options) => createMemoryRouter(routes, { ...options }))
 

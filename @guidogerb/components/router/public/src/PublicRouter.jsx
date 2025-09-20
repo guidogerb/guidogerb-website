@@ -5,14 +5,15 @@ import { createRouteObjects } from './createRouteObjects.jsx'
 export function PublicRouter({
   routes = [],
   fallback,
+  defaultFallback,
   basename,
   router = createBrowserRouter,
   routerOptions,
   wrapElement,
 }) {
   const routeObjects = useMemo(
-    () => createRouteObjects(routes, { fallback, wrapElement }),
-    [routes, fallback, wrapElement],
+    () => createRouteObjects(routes, { fallback, wrapElement, defaultFallback }),
+    [routes, fallback, wrapElement, defaultFallback],
   )
 
   const routerInstance = useMemo(() => {

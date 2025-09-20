@@ -52,28 +52,43 @@ Because the component injects the GA tag, **do not** add the GA snippet to your 
 
 ## Tracking SPA navigations
 
-Single-page apps need to emit a page view when the router changes routes. Combine the hook with your router of choice:
+Single-page apps need to emit a page view when the router changes routes. Drop the
+provided `AnalyticsRouterBridge` component inside your React Router tree and it will
+dispatch a `page_view` whenever navigation occurs:
 
 ```jsx
-import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
-import { useAnalytics } from '@guidogerb/components/analytics'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Analytics, AnalyticsRouterBridge } from '@guidogerb/components/analytics'
 
-function AnalyticsRouterBridge() {
-  const location = useLocation()
-  const analytics = useAnalytics()
+<Analytics measurementId={measurementId} sendPageView={false}>
+  <BrowserRouter>
+    <AnalyticsRouterBridge trackInitialPageView />
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/pricing" element={<Pricing />} />
+    </Routes>
+  </BrowserRouter>
+</Analytics>
+```
 
-  useEffect(() => {
-    analytics.pageView(location.pathname, {
-      page_title: document.title,
-    })
-  }, [analytics, location.pathname])
+`trackInitialPageView` ensures the first render is recorded when you disable GA’s
+automatic page view via `sendPageView={false}`. The bridge merges sensible defaults
+such as `page_location` and `page_title`, and you can customise what gets sent with
+the lower-level hook:
+
+```jsx
+import { useAnalyticsPageViews } from '@guidogerb/components/analytics'
+
+function CustomAnalyticsBridge() {
+  useAnalyticsPageViews({
+    getParams: ({ location }) => ({
+      page_title: `Tenant portal — ${location.pathname}`,
+    }),
+  })
 
   return null
 }
 ```
-
-Place `<AnalyticsRouterBridge />` anywhere inside the `<Analytics>` provider.
 
 ## Component API
 
