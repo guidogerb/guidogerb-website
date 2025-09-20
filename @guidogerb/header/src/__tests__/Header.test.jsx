@@ -240,7 +240,10 @@ describe('Header', () => {
       { activePath: '/programs/2025' },
     )
 
-    expect(screen.getByRole('link', { name: '2025 Season' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: '2025 Season' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
     expect(screen.getByRole('link', { name: 'Programs' })).not.toHaveAttribute('aria-current')
   })
 
