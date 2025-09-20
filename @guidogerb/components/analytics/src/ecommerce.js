@@ -1,6 +1,7 @@
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0
 
-const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+const isPlainObject = (value) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
 
 const pickString = (...candidates) => {
   for (const candidate of candidates) {
@@ -31,7 +32,8 @@ const toPositiveInteger = (value) => {
   return rounded > 0 ? rounded : undefined
 }
 
-const normalizeCurrency = (value) => (isNonEmptyString(value) ? value.trim().toUpperCase() : undefined)
+const normalizeCurrency = (value) =>
+  isNonEmptyString(value) ? value.trim().toUpperCase() : undefined
 
 const uniquePush = (collection, value) => {
   if (!isNonEmptyString(value)) return
@@ -121,12 +123,22 @@ const normalizeEcommerceItem = (item, defaults = {}) => {
     normalized[key] = category
   })
 
-  const listId = pickString(item.item_list_id, item.listId, defaults.item_list_id, defaults.itemListId)
+  const listId = pickString(
+    item.item_list_id,
+    item.listId,
+    defaults.item_list_id,
+    defaults.itemListId,
+  )
   if (listId) {
     normalized.item_list_id = listId
   }
 
-  const listName = pickString(item.item_list_name, item.listName, defaults.item_list_name, defaults.itemListName)
+  const listName = pickString(
+    item.item_list_name,
+    item.listName,
+    defaults.item_list_name,
+    defaults.itemListName,
+  )
   if (listName) {
     normalized.item_list_name = listName
   }

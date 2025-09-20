@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  buildAddToCartEvent,
-  buildPurchaseEvent,
-  buildRefundEvent,
-} from '../ecommerce.js'
+import { buildAddToCartEvent, buildPurchaseEvent, buildRefundEvent } from '../ecommerce.js'
 
 describe('ecommerce event presets', () => {
   it('builds add_to_cart payloads with derived totals and metadata', () => {
@@ -95,7 +91,13 @@ describe('ecommerce event presets', () => {
       partial: true,
       items: [
         { item_id: 'sku-lessons', item_name: 'Lesson Credits', price: 25, quantity: 1 },
-        { item_id: 'sku-workshop', item_name: 'Workshop Pass', price: 40, quantity: 1, discount: 10 },
+        {
+          item_id: 'sku-workshop',
+          item_name: 'Workshop Pass',
+          price: 40,
+          quantity: 1,
+          discount: 10,
+        },
       ],
     })
 
