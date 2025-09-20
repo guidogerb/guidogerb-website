@@ -28,10 +28,70 @@ const sanitizeSearchParams = (params) => {
   }, {})
 }
 
+const appendToMap = (map, key, value) => {
+  if (value === undefined || value === null) return
+  const existing = map.get(key)
+  const stringValue = String(value)
+  if (existing) {
+    existing.push(stringValue)
+  } else {
+    map.set(key, [stringValue])
+  }
+}
+
+const normalizeSearchParams = (value) => {
+  if (!value) return undefined
+  const map = new Map()
+
+  if (value instanceof URLSearchParams) {
+    value.forEach((val, key) => appendToMap(map, key, val))
+  } else if (typeof value === 'string') {
+    const params = new URLSearchParams(value.startsWith('?') ? value.slice(1) : value)
+    params.forEach((val, key) => appendToMap(map, key, val))
+  } else if (typeof value === 'object') {
+    Object.entries(value).forEach(([key, raw]) => {
+      if (raw === undefined || raw === null) return
+      const values = Array.isArray(raw) ? raw : [raw]
+      values.forEach((item) => appendToMap(map, key, item))
+    })
+  }
+
+  return map.size > 0 ? map : undefined
+}
+
+const mergeSearchParams = (existing, additions) => {
+  const existingMap = normalizeSearchParams(existing)
+  const additionMap = normalizeSearchParams(additions)
+
+  if (!existingMap) return additionMap
+  if (!additionMap) return existingMap
+
+  additionMap.forEach((values, key) => {
+    existingMap.set(key, [...values])
+  })
+  return existingMap
+}
+
+const mapToSearchParamsInit = (map) => {
+  if (!map || map.size === 0) return undefined
+  const result = {}
+  map.forEach((values, key) => {
+    if (!values || values.length === 0) return
+    result[key] = values.length === 1 ? values[0] : [...values]
+  })
+  return result
+}
+
 const applySearchParams = (options, searchParams) => {
   if (!searchParams) return options ?? {}
-  if (!options) return { searchParams }
-  return { ...options, searchParams }
+  const mergedMap = mergeSearchParams(options?.searchParams ?? options?.query, searchParams)
+  if (!mergedMap) return options ?? {}
+  const nextOptions = options ? { ...options } : {}
+  if ('query' in nextOptions) {
+    delete nextOptions.query
+  }
+  nextOptions.searchParams = mapToSearchParamsInit(mergedMap)
+  return nextOptions
 }
 
 export const createApi = ({ client, ...options } = {}) => {
