@@ -23,7 +23,19 @@
   "peerDependencies": {
     "react": ">=19"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@guidogerb/components-api": "workspace:*",
+    "@guidogerb/components-auth": "workspace:*",
+    "@guidogerb/components-menu": "workspace:*",
+    "@guidogerb/components-pages-protected": "workspace:*",
+    "@guidogerb/components-pages-public": "workspace:*",
+    "@guidogerb/components-router-protected": "workspace:*",
+    "@guidogerb/components-storage": "workspace:*",
+    "@guidogerb/components-sw": "workspace:*",
+    "@guidogerb/components-ui": "workspace:*",
+    "@guidogerb/footer": "workspace:*",
+    "@guidogerb/header": "workspace:*"
+  },
   "devDependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
