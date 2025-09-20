@@ -83,7 +83,10 @@ describe('Gary Gerber welcome component', () => {
   })
 
   it('uses configured rehearsal resource links when environment overrides are provided', async () => {
-    vi.stubEnv('VITE_REHEARSAL_RESOURCES_STAGE_PLOT_URL', 'https://cdn.example.com/plots/latest.pdf')
+    vi.stubEnv(
+      'VITE_REHEARSAL_RESOURCES_STAGE_PLOT_URL',
+      'https://cdn.example.com/plots/latest.pdf',
+    )
     vi.stubEnv('VITE_REHEARSAL_RESOURCES_CHECKLIST_URL', '/assets/custom-checklist.pdf')
     vi.stubEnv('VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL', 'production@example.com')
     vi.stubEnv('VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL_SUBJECT', 'Updated rehearsal notes')

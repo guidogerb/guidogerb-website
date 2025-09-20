@@ -33,9 +33,7 @@ export default function Welcome({ children }) {
           <a href={rehearsalChecklistHref}>Rehearsal checklist</a>
         </li>
         <li>
-          <a href={productionEmailHref}>
-            Email production team
-          </a>
+          <a href={productionEmailHref}>Email production team</a>
         </li>
       </ul>
       {children}

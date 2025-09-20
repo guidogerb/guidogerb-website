@@ -11,5 +11,5 @@ links to stage plots, checklists, and production contacts.
   - `VITE_REHEARSAL_RESOURCES_CHECKLIST_URL`
   - `VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL`
   - `VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL_SUBJECT`
-  When overrides are absent the component falls back to tenant defaults so deployments keep
-  working without extra configuration.
+    When overrides are absent the component falls back to tenant defaults so deployments keep
+    working without extra configuration.
