@@ -50,11 +50,11 @@ Resources:
       Policy: !If
         - AllowPublicAccess
         - !Sub |
-            {"Rules":[{"ResourceType":"collection","Resource":["collection/${CollectionName}"]},{"ResourceType":"dashboard","Resource":["dashboard/${CollectionName}"]}],"AllowFromPublic":true}
+          {"Rules":[{"ResourceType":"collection","Resource":["collection/${CollectionName}"]},{"ResourceType":"dashboard","Resource":["dashboard/${CollectionName}"]}],"AllowFromPublic":true}
         - !Sub
-            - |
-              {"Rules":[{"ResourceType":"collection","Resource":["collection/${CollectionName}"]},{"ResourceType":"dashboard","Resource":["dashboard/${CollectionName}"]}],"SourceVPCEs":["${QuotedVpces}"],"AllowFromPublic":false}
-            - { QuotedVpces: !Join ['","', !Split [',', !Ref SourceVpceIds]] }
+          - |
+            {"Rules":[{"ResourceType":"collection","Resource":["collection/${CollectionName}"]},{"ResourceType":"dashboard","Resource":["dashboard/${CollectionName}"]}],"SourceVPCEs":["${QuotedVpces}"],"AllowFromPublic":false}
+          - { QuotedVpces: !Join ['","', !Split [',', !Ref SourceVpceIds]] }
 
   DataAccessPolicy:
     Type: AWS::OpenSearchServerless::AccessPolicy
