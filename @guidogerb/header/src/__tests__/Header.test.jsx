@@ -209,10 +209,14 @@ describe('Header', () => {
 
     const brand = screen.getByRole('link', { name: 'Skip nav brand' })
     const skipLink = screen.getByRole('link', { name: 'Skip to main content' })
+    const menuToggle = screen.getByRole('button', { name: /open navigation menu/i })
     expect(skipLink).toHaveAttribute('href', '#main-region')
 
     await user.tab()
     expect(document.activeElement).toBe(brand)
+
+    await user.tab()
+    expect(document.activeElement).toBe(menuToggle)
 
     await user.tab()
     expect(document.activeElement).toBe(skipLink)
@@ -263,6 +267,7 @@ describe('Header', () => {
     )
 
     await user.tab() // brand
+    await user.tab() // mobile menu toggle
     await user.tab() // first navigation link
 
     const programsLink = screen.getByRole('link', { name: 'Programs' })
@@ -274,5 +279,70 @@ describe('Header', () => {
     const payload = onNavigate.mock.calls[0][0]
     expect(payload.item).toMatchObject({ label: 'Programs', href: '/programs' })
     expect(payload.event?.type).toBe('click')
+  })
+
+  it('opens the mobile navigation and traps focus until dismissed', async () => {
+    const user = userEvent.setup()
+
+    renderHeader({
+      primaryLinks: [{ label: 'Stories', href: '/stories' }],
+      secondaryLinks: [{ label: 'Docs', href: '/docs' }],
+      actions: [{ label: 'Contact', href: '/contact' }],
+    })
+
+    const toggle = screen.getByRole('button', { name: /open navigation menu/i })
+    await user.click(toggle)
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+
+    const dialog = screen.getByRole('dialog', { name: /mobile navigation/i })
+    expect(dialog).toBeInTheDocument()
+
+    const closeButton = within(dialog).getByRole('button', { name: /close menu/i })
+    expect(closeButton).toHaveFocus()
+
+    await user.tab()
+    expect(within(dialog).getByRole('link', { name: 'Stories' })).toHaveFocus()
+
+    await user.tab()
+    expect(within(dialog).getByRole('link', { name: 'Docs' })).toHaveFocus()
+
+    await user.tab()
+    expect(within(dialog).getByRole('link', { name: 'Contact' })).toHaveFocus()
+
+    await user.tab()
+    expect(closeButton).toHaveFocus()
+
+    await user.tab({ shift: true })
+    expect(within(dialog).getByRole('link', { name: 'Contact' })).toHaveFocus()
+
+    await user.keyboard('{Escape}')
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveFocus()
+    expect(screen.queryByRole('dialog', { name: /mobile navigation/i })).toBeNull()
+  })
+
+  it('closes the mobile navigation after selecting a route', async () => {
+    const onNavigate = vi.fn()
+    const user = userEvent.setup()
+
+    renderHeader(
+      {
+        primaryLinks: [{ label: 'Stories', href: '/stories' }],
+      },
+      { onNavigate },
+    )
+
+    const toggle = screen.getByRole('button', { name: /open navigation menu/i })
+    await user.click(toggle)
+
+    const dialog = await screen.findByRole('dialog', { name: /mobile navigation/i })
+    const storiesLink = within(dialog).getByRole('link', { name: 'Stories' })
+    await user.click(storiesLink)
+
+    expect(onNavigate).toHaveBeenCalledTimes(1)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveFocus()
   })
 })

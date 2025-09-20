@@ -1,9 +1,43 @@
 import { NavigationMenu } from '@guidogerb/components-menu'
-import { useMemo } from 'react'
+import {
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { DEFAULT_HEADER_SETTINGS } from './settings.js'
 import { useHeaderContext } from './useHeaderContext.js'
 
 const BASE_CLASS = 'gg-header'
+const FOCUSABLE_SELECTOR =
+  'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled])'
+
+const defer = (fn) => {
+  if (typeof fn !== 'function') return
+  if (typeof queueMicrotask === 'function') {
+    queueMicrotask(fn)
+    return
+  }
+
+  Promise.resolve()
+    .then(fn)
+    .catch(() => {
+      /* noop */
+    })
+}
+
+const getFocusableElements = (container) => {
+  if (!container) return []
+  return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).filter((element) => {
+    if (element.hasAttribute('disabled')) return false
+    if (element.getAttribute('aria-hidden') === 'true') return false
+    return typeof element.focus === 'function'
+  })
+}
 
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0
 
@@ -81,6 +115,10 @@ const defaultRenderBrand = ({ brand }) => {
  *   secondaryNavigationLabel?: string
  *   utilityNavigationLabel?: string
  *   announcementsLabel?: string
+ *   mobileNavigationLabel?: string
+ *   mobileMenuButtonLabel?: string
+ *   mobileMenuAriaLabel?: string
+ *   mobileMenuCloseLabel?: string
  *   renderAction?: (params: {
  *     action: import('./settings.js').HeaderAction
  *     index: number
@@ -111,6 +149,10 @@ export function Header({
   secondaryNavigationLabel = 'Secondary navigation',
   utilityNavigationLabel = 'Utility navigation',
   announcementsLabel = 'Announcements',
+  mobileNavigationLabel = 'Mobile navigation',
+  mobileMenuButtonLabel = 'Menu',
+  mobileMenuAriaLabel = 'Open navigation menu',
+  mobileMenuCloseLabel = 'Close menu',
   renderAction = defaultRenderAction,
   renderAnnouncement = defaultRenderAnnouncement,
   renderBrand = defaultRenderBrand,
@@ -138,6 +180,136 @@ export function Header({
   const hasUtilityLinks = Array.isArray(utilityLinks) && utilityLinks.length > 0
   const hasActions = Array.isArray(actions) && actions.length > 0
   const hasAnnouncements = Array.isArray(announcements) && announcements.length > 0
+  const hasMobileNavigation =
+    hasPrimaryLinks || hasSecondaryLinks || hasUtilityLinks || hasActions
+
+  const mobileMenuId = useId()
+  const mobileMenuRef = useRef(null)
+  const mobileToggleRef = useRef(null)
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const isMobileNavOpenRef = useRef(isMobileNavOpen)
+
+  useEffect(() => {
+    isMobileNavOpenRef.current = isMobileNavOpen
+  }, [isMobileNavOpen])
+
+  const focusToggleButton = useCallback(() => {
+    const toggle = mobileToggleRef.current
+    if (toggle && typeof toggle.focus === 'function') {
+      toggle.focus({ preventScroll: true })
+    }
+  }, [])
+
+  const closeMobileNav = useCallback(() => {
+    setIsMobileNavOpen((prev) => {
+      if (!prev) return prev
+      defer(focusToggleButton)
+      return false
+    })
+  }, [focusToggleButton])
+
+  const handleMobileToggle = useCallback(() => {
+    setIsMobileNavOpen((prev) => {
+      const next = !prev
+      if (!next) {
+        defer(focusToggleButton)
+      }
+      return next
+    })
+  }, [focusToggleButton])
+
+  const focusTrapHandler = useCallback(
+    (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        closeMobileNav()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const container = mobileMenuRef.current
+      if (!container) return
+
+      const focusable = getFocusableElements(container)
+      if (focusable.length === 0) {
+        event.preventDefault()
+        if (typeof container.focus === 'function') {
+          container.focus({ preventScroll: true })
+        }
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = typeof document !== 'undefined' ? document.activeElement : null
+
+      if (event.shiftKey) {
+        if (!container.contains(active) || active === first) {
+          event.preventDefault()
+          last.focus({ preventScroll: true })
+        }
+        return
+      }
+
+      if (!container.contains(active) || active === last) {
+        event.preventDefault()
+        first.focus({ preventScroll: true })
+      }
+    },
+    [closeMobileNav],
+  )
+
+  useEffect(() => {
+    if (!isMobileNavOpen) return undefined
+    const container = mobileMenuRef.current
+    if (!container) return undefined
+
+    container.addEventListener('keydown', focusTrapHandler)
+
+    let restoreOverflow
+    if (typeof document !== 'undefined') {
+      const previousOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      restoreOverflow = () => {
+        document.body.style.overflow = previousOverflow
+      }
+    }
+
+    defer(() => {
+      const focusable = getFocusableElements(container)
+      const target = focusable[0] ?? container
+      if (typeof target?.focus === 'function') {
+        target.focus({ preventScroll: true })
+      }
+    })
+
+    return () => {
+      container.removeEventListener('keydown', focusTrapHandler)
+      if (typeof restoreOverflow === 'function') {
+        try {
+          restoreOverflow()
+        } catch (error) {
+          /* noop */
+        }
+      }
+    }
+  }, [focusTrapHandler, isMobileNavOpen])
+
+  const handleNavigate = useCallback(
+    (payload) => {
+      if (typeof onNavigate === 'function') {
+        onNavigate(payload)
+      }
+      if (isMobileNavOpenRef.current) {
+        closeMobileNav()
+      }
+    },
+    [closeMobileNav, onNavigate],
+  )
+
+  const shouldHandleNavigation = isMobileNavOpen || typeof onNavigate === 'function'
+  const navigationHandler = shouldHandleNavigation ? handleNavigate : undefined
 
   const headerClassName = useMemo(
     () =>
@@ -168,6 +340,53 @@ export function Header({
     ],
   )
 
+  const renderActionsList = useCallback(
+    (actionList, { className: actionsClassName, itemClassName, onAction } = {}) => {
+      if (!Array.isArray(actionList) || actionList.length === 0) return null
+
+      const listClassName = actionsClassName ?? `${BASE_CLASS}__actions`
+      const listItemClassName = itemClassName ?? `${BASE_CLASS}__actions-item`
+
+      return (
+        <ul className={listClassName} role="list">
+          {actionList.map((action, index) => {
+            const key = getActionKey(action, index)
+            const rendered = renderAction({ action, index })
+            if (!rendered) return null
+
+            if (onAction && isValidElement(rendered)) {
+              const originalOnClick = rendered.props?.onClick
+              return (
+                <li key={key} className={listItemClassName}>
+                  {cloneElement(rendered, {
+                    onClick: (event) => {
+                      if (typeof originalOnClick === 'function') {
+                        originalOnClick(event)
+                      }
+                      if (!event?.defaultPrevented) {
+                        onAction(action, event)
+                      }
+                    },
+                  })}
+                </li>
+              )
+            }
+
+            return (
+              <li key={key} className={listItemClassName}>
+                {rendered}
+              </li>
+            )
+          })}
+        </ul>
+      )
+    },
+    [renderAction],
+  )
+
+  const mobileToggleAriaLabel = isMobileNavOpen ? mobileMenuCloseLabel : mobileMenuAriaLabel
+  const mobileMenuButtonText = isMobileNavOpen ? mobileMenuCloseLabel : mobileMenuButtonLabel
+
   return (
     <header
       className={headerClassName}
@@ -197,6 +416,22 @@ export function Header({
       <div className={`${BASE_CLASS}__bar`}>
         <div className={`${BASE_CLASS}__brand`}>{renderBrand({ brand: brand ?? {} })}</div>
 
+        {hasMobileNavigation ? (
+          <div className={`${BASE_CLASS}__mobile-toggle-container`}>
+            <button
+              type="button"
+              className={`${BASE_CLASS}__mobile-toggle`}
+              aria-expanded={isMobileNavOpen}
+              aria-controls={mobileMenuId}
+              aria-label={mobileToggleAriaLabel}
+              onClick={handleMobileToggle}
+              ref={mobileToggleRef}
+            >
+              {mobileMenuButtonText}
+            </button>
+          </div>
+        ) : null}
+
         {hasUtilityLinks ? (
           <NavigationMenu
             className={`${BASE_CLASS}__utility-nav`}
@@ -204,7 +439,7 @@ export function Header({
             orientation="horizontal"
             label={utilityNavigationLabel}
             activePath={activePath}
-            onNavigate={onNavigate}
+            onNavigate={navigationHandler}
             listProps={{ className: `${BASE_CLASS}__utility-nav-list` }}
           />
         ) : null}
@@ -219,20 +454,7 @@ export function Header({
           {showAuthControls && typeof renderAuthControls === 'function'
             ? renderAuthControls({ settings })
             : null}
-          {hasActions ? (
-            <ul className={`${BASE_CLASS}__actions`} role="list">
-              {actions.map((action, index) => {
-                const key = getActionKey(action, index)
-                const rendered = renderAction({ action, index })
-                if (!rendered) return null
-                return (
-                  <li key={key} className={`${BASE_CLASS}__actions-item`}>
-                    {rendered}
-                  </li>
-                )
-              })}
-            </ul>
-          ) : null}
+          {hasActions ? renderActionsList(actions) : null}
         </div>
       </div>
 
@@ -243,7 +465,7 @@ export function Header({
           orientation="horizontal"
           label={primaryNavigationLabel}
           activePath={activePath}
-          onNavigate={onNavigate}
+          onNavigate={navigationHandler}
         />
       ) : null}
 
@@ -254,8 +476,85 @@ export function Header({
           orientation="vertical"
           label={secondaryNavigationLabel}
           activePath={activePath}
-          onNavigate={onNavigate}
+          onNavigate={navigationHandler}
         />
+      ) : null}
+
+      {hasMobileNavigation ? (
+        <>
+          <div
+            className={`${BASE_CLASS}__mobile-backdrop`}
+            data-open={isMobileNavOpen ? 'true' : 'false'}
+            hidden={!isMobileNavOpen}
+            onClick={closeMobileNav}
+          />
+          <div
+            id={mobileMenuId}
+            ref={mobileMenuRef}
+            className={`${BASE_CLASS}__mobile-panel`}
+            role="dialog"
+            aria-modal="true"
+            aria-label={mobileNavigationLabel}
+            hidden={!isMobileNavOpen}
+            tabIndex={-1}
+          >
+            <div className={`${BASE_CLASS}__mobile-header`}>
+              <span className={`${BASE_CLASS}__mobile-title`}>{mobileNavigationLabel}</span>
+              <button
+                type="button"
+                className={`${BASE_CLASS}__mobile-close`}
+                onClick={closeMobileNav}
+                aria-label={mobileMenuCloseLabel}
+              >
+                {mobileMenuCloseLabel}
+              </button>
+            </div>
+            <div className={`${BASE_CLASS}__mobile-content`}>
+              {hasPrimaryLinks ? (
+                <NavigationMenu
+                  className={`${BASE_CLASS}__mobile-primary-nav`}
+                  items={primaryLinks}
+                  orientation="vertical"
+                  label={primaryNavigationLabel}
+                  activePath={activePath}
+                  onNavigate={handleNavigate}
+                />
+              ) : null}
+
+              {hasSecondaryLinks ? (
+                <NavigationMenu
+                  className={`${BASE_CLASS}__mobile-secondary-nav`}
+                  items={secondaryLinks}
+                  orientation="vertical"
+                  label={secondaryNavigationLabel}
+                  activePath={activePath}
+                  onNavigate={handleNavigate}
+                />
+              ) : null}
+
+              {hasUtilityLinks ? (
+                <NavigationMenu
+                  className={`${BASE_CLASS}__mobile-utility-nav`}
+                  items={utilityLinks}
+                  orientation="vertical"
+                  label={utilityNavigationLabel}
+                  activePath={activePath}
+                  onNavigate={handleNavigate}
+                />
+              ) : null}
+
+              {hasActions
+                ? renderActionsList(actions, {
+                    className: `${BASE_CLASS}__mobile-actions`,
+                    itemClassName: `${BASE_CLASS}__mobile-actions-item`,
+                    onAction: () => {
+                      closeMobileNav()
+                    },
+                  })
+                : null}
+            </div>
+          </div>
+        </>
       ) : null}
     </header>
   )

@@ -1,6 +1,7 @@
 import { registerSW, unregisterSW } from '../index.js'
 
 const originalDescriptor = Object.getOwnPropertyDescriptor(window.navigator, 'serviceWorker')
+const originalReadyStateDescriptor = Object.getOwnPropertyDescriptor(document, 'readyState')
 
 function restoreServiceWorker() {
   if (originalDescriptor) {
@@ -10,43 +11,207 @@ function restoreServiceWorker() {
   }
 }
 
+function restoreDocumentReadyState() {
+  if (originalReadyStateDescriptor) {
+    Object.defineProperty(document, 'readyState', originalReadyStateDescriptor)
+  }
+}
+
+const setDocumentReadyState = (state) => {
+  Object.defineProperty(document, 'readyState', {
+    configurable: true,
+    get: () => state,
+  })
+}
+
+const createMockWorker = (initialState = 'installing') => {
+  const listeners = new Map()
+  return {
+    state: initialState,
+    addEventListener: vi.fn((event, handler) => {
+      listeners.set(event, handler)
+    }),
+    dispatchStateChange(nextState) {
+      this.state = nextState
+      const handler = listeners.get('statechange')
+      if (handler) handler()
+    },
+  }
+}
+
+const createMockRegistration = ({ waiting = null, installing = null } = {}) => {
+  const listeners = new Map()
+  return {
+    installing,
+    waiting,
+    scope: '/',
+    update: vi.fn(() => Promise.resolve()),
+    addEventListener: vi.fn((event, handler) => {
+      listeners.set(event, handler)
+    }),
+    dispatchUpdateFound() {
+      const handler = listeners.get('updatefound')
+      if (handler) handler()
+    },
+  }
+}
+
+const createMockServiceWorker = ({ registerResult, controller = {} } = {}) => {
+  const listeners = new Map()
+  let controllerRef = controller
+  return {
+    register: vi.fn(() => Promise.resolve(registerResult)),
+    getRegistrations: vi.fn(() => Promise.resolve([])),
+    addEventListener: vi.fn((event, handler) => {
+      listeners.set(handler, event)
+    }),
+    removeEventListener: vi.fn((event, handler) => {
+      listeners.delete(handler)
+    }),
+    dispatchControllerChange() {
+      for (const [handler, event] of listeners.entries()) {
+        if (event === 'controllerchange') {
+          handler()
+        }
+      }
+    },
+    get controller() {
+      return controllerRef
+    },
+    set controller(value) {
+      controllerRef = value
+    },
+  }
+}
+
 describe('service worker helpers', () => {
   afterEach(() => {
     restoreServiceWorker()
+    restoreDocumentReadyState()
     vi.restoreAllMocks()
   })
 
-  it('skips registration when the browser does not support service workers', () => {
+  it('skips registration when the browser does not support service workers', async () => {
     delete window.navigator.serviceWorker
     const addEventListenerSpy = vi.spyOn(window, 'addEventListener')
 
-    expect(() => registerSW()).not.toThrow()
+    const result = registerSW()
 
-    if (!('serviceWorker' in window.navigator)) {
-      expect(addEventListenerSpy).not.toHaveBeenCalled()
-    }
+    expect(addEventListenerSpy).not.toHaveBeenCalled()
+    await expect(result.ready).resolves.toBeNull()
+    await expect(result.checkForUpdates()).resolves.toBe(false)
   })
 
   it('registers the service worker once the window load event fires', async () => {
-    const register = vi.fn(() => Promise.resolve())
-    const handlers = {}
+    const registration = createMockRegistration()
+    const serviceWorker = createMockServiceWorker({ registerResult: registration })
 
     Object.defineProperty(window.navigator, 'serviceWorker', {
       configurable: true,
-      value: { register },
+      value: serviceWorker,
     })
 
-    vi.spyOn(window, 'addEventListener').mockImplementation((event, handler) => {
-      handlers[event] = handler
+    const addListenerSpy = vi.spyOn(window, 'addEventListener')
+    const removeListenerSpy = vi.spyOn(window, 'removeEventListener')
+
+    setDocumentReadyState('loading')
+
+    const sw = registerSW({ url: '/custom-sw.js' })
+
+    const loadHandler = addListenerSpy.mock.calls.find(([event]) => event === 'load')?.[1]
+    expect(loadHandler).toBeInstanceOf(Function)
+
+    loadHandler()
+
+    await expect(sw.ready).resolves.toBe(registration)
+    expect(serviceWorker.register).toHaveBeenCalledWith('/custom-sw.js')
+    expect(removeListenerSpy).toHaveBeenCalledWith('load', loadHandler)
+  })
+
+  it('resolves updateReady when an updated worker is waiting', async () => {
+    const waitingWorker = createMockWorker('installed')
+    const registration = createMockRegistration({ waiting: waitingWorker })
+    const serviceWorker = createMockServiceWorker({ registerResult: registration, controller: {} })
+
+    Object.defineProperty(window.navigator, 'serviceWorker', {
+      configurable: true,
+      value: serviceWorker,
     })
 
-    registerSW({ url: '/custom-sw.js' })
+    const onUpdateReady = vi.fn()
 
-    expect(handlers.load).toBeInstanceOf(Function)
+    const sw = registerSW({ immediate: true, onUpdateReady })
 
-    await handlers.load()
+    await expect(sw.ready).resolves.toBe(registration)
 
-    expect(register).toHaveBeenCalledWith('/custom-sw.js')
+    const updateDetail = await sw.updateReady
+    expect(updateDetail.registration).toBe(registration)
+    expect(updateDetail.waiting).toBe(waitingWorker)
+    expect(onUpdateReady).toHaveBeenCalledWith({ registration, waiting: waitingWorker })
+  })
+
+  it('invokes the offline callback when the first worker installs', async () => {
+    const installingWorker = createMockWorker('installing')
+    const registration = createMockRegistration({ installing: installingWorker })
+    const serviceWorker = createMockServiceWorker({ registerResult: registration, controller: null })
+
+    Object.defineProperty(window.navigator, 'serviceWorker', {
+      configurable: true,
+      value: serviceWorker,
+    })
+
+    const onOfflineReady = vi.fn()
+    const onUpdateReady = vi.fn()
+
+    const sw = registerSW({ immediate: true, onOfflineReady, onUpdateReady })
+
+    installingWorker.dispatchStateChange('installed')
+
+    await Promise.resolve()
+    expect(onOfflineReady).toHaveBeenCalledWith({ registration })
+    expect(onUpdateReady).not.toHaveBeenCalled()
+
+    const sentinel = Symbol('pending')
+    await expect(Promise.race([sw.updateReady, Promise.resolve(sentinel)])).resolves.toBe(sentinel)
+  })
+
+  it('triggers updatefound callbacks and exposes checkForUpdates', async () => {
+    const registration = createMockRegistration()
+    const serviceWorker = createMockServiceWorker({ registerResult: registration, controller: {} })
+
+    Object.defineProperty(window.navigator, 'serviceWorker', {
+      configurable: true,
+      value: serviceWorker,
+    })
+
+    const onUpdateFound = vi.fn()
+
+    const sw = registerSW({ immediate: true, onUpdateFound })
+
+    await sw.ready
+    registration.dispatchUpdateFound()
+
+    expect(onUpdateFound).toHaveBeenCalledWith(registration)
+    await expect(sw.checkForUpdates()).resolves.toBe(true)
+    expect(registration.update).toHaveBeenCalledTimes(1)
+  })
+
+  it('forwards controllerchange events when a handler is supplied', async () => {
+    const registration = createMockRegistration()
+    const serviceWorker = createMockServiceWorker({ registerResult: registration, controller: {} })
+
+    Object.defineProperty(window.navigator, 'serviceWorker', {
+      configurable: true,
+      value: serviceWorker,
+    })
+
+    const onControllerChange = vi.fn()
+
+    registerSW({ immediate: true, onControllerChange })
+
+    serviceWorker.dispatchControllerChange()
+
+    expect(onControllerChange).toHaveBeenCalledWith(serviceWorker.controller)
   })
 
   it('unregisters all existing registrations when available', async () => {
