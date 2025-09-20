@@ -214,11 +214,7 @@ function getContentType(response) {
     return ''
   }
 
-  return (
-    response.headers.get('Content-Type') ??
-    response.headers.get('content-type') ??
-    ''
-  )
+  return response.headers.get('Content-Type') ?? response.headers.get('content-type') ?? ''
 }
 
 function detectStreamMode(response) {
@@ -286,10 +282,11 @@ function parseStreamingEvent(event) {
   try {
     const data = JSON.parse(trimmed)
     const choice = Array.isArray(data?.choices) ? data.choices[0] : undefined
-    const deltaContent = typeof choice?.delta?.content === 'string' ? choice.delta.content : undefined
-    const messageContent = typeof choice?.message?.content === 'string' ? choice.message.content : undefined
-    const aggregatedContent =
-      typeof data?.content === 'string' ? data.content : undefined
+    const deltaContent =
+      typeof choice?.delta?.content === 'string' ? choice.delta.content : undefined
+    const messageContent =
+      typeof choice?.message?.content === 'string' ? choice.message.content : undefined
+    const aggregatedContent = typeof data?.content === 'string' ? data.content : undefined
 
     return {
       done: false,
@@ -332,10 +329,7 @@ async function processStreamingResponse({
 
   setMessages((current) =>
     applyHistoryLimit(
-      [
-        ...current,
-        /** @type {const} */ ({ role: 'assistant', content: '', __streaming: true }),
-      ],
+      [...current, /** @type {const} */ ({ role: 'assistant', content: '', __streaming: true })],
       historyLimit,
     ),
   )
@@ -423,7 +417,8 @@ async function processStreamingResponse({
   updateStreamingMessage(streamingContent, { markFinal: true })
 
   const assistantMessage = { role: 'assistant', content: streamingContent }
-  const responseData = latestData ?? (sawContent ? { choices: [{ message: assistantMessage }] } : null)
+  const responseData =
+    latestData ?? (sawContent ? { choices: [{ message: assistantMessage }] } : null)
 
   onResponse?.({
     data: responseData,

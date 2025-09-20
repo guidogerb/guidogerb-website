@@ -28,7 +28,7 @@ beforeAll(() => {
 
   class RequestShim {
     constructor(resource, init = {}) {
-      this.url = typeof resource === 'string' ? resource : resource?.url ?? ''
+      this.url = typeof resource === 'string' ? resource : (resource?.url ?? '')
       this.method = init.method ?? 'GET'
       this.signal = init.signal ?? null
       if (init.headers) {

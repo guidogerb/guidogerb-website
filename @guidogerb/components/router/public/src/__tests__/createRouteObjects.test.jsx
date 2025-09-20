@@ -101,22 +101,19 @@ describe('createRouteObjects', () => {
   it('propagates data API options to the generated fallback route', () => {
     const loader = vi.fn(() => ({ status: 'missing' }))
     const action = vi.fn()
-    const fallbackRoutes = createRouteObjects(
-      [{ path: '/', element: <div>Home</div> }],
-      {
-        defaultFallback: {
-          loader,
-          action,
-          handle: { from: '404' },
-          errorElement: <div>Fallback error</div>,
-          shouldRevalidate: () => false,
-          hasErrorBoundary: true,
-          id: 'fallback',
-          caseSensitive: true,
-          path: '/*',
-        },
+    const fallbackRoutes = createRouteObjects([{ path: '/', element: <div>Home</div> }], {
+      defaultFallback: {
+        loader,
+        action,
+        handle: { from: '404' },
+        errorElement: <div>Fallback error</div>,
+        shouldRevalidate: () => false,
+        hasErrorBoundary: true,
+        id: 'fallback',
+        caseSensitive: true,
+        path: '/*',
       },
-    )
+    })
 
     expect(fallbackRoutes).toHaveLength(2)
     const fallback = fallbackRoutes[1]
