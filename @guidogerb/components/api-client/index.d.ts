@@ -5,6 +5,13 @@ export type SearchParamsInput = string | URLSearchParams | Record<string, Search
 export interface RetryOptions {
   attempts?: number
   delayMs?: number
+  factor?: number
+  maxDelayMs?: number | null
+  jitterMs?: number
+  timeoutMs?: number
+  timeout?: number
+  idempotent?: boolean
+  methods?: Array<string>
 }
 
 export interface RequestOptions {
@@ -158,6 +165,34 @@ export interface CatalogSearchResponse {
   metadata?: Record<string, unknown>
 }
 
+export interface CatalogAutocompleteParams {
+  query?: string
+  q?: string
+  limit?: number
+  tenantId?: string
+  tenant?: string
+  locale?: string
+}
+
+export interface CatalogAutocompleteSuggestion {
+  id: string
+  type: string
+  title: string
+  subtitle?: string
+  imageUrl?: string | null
+  description?: string | null
+  tags?: string[]
+  metadata?: Record<string, unknown>
+}
+
+export interface CatalogAutocompleteResponse {
+  suggestions: CatalogAutocompleteSuggestion[]
+  query?: {
+    q?: string
+  }
+  metadata?: Record<string, unknown>
+}
+
 export interface CatalogItemRequest {
   tenantId?: string
   tenant?: string
@@ -175,6 +210,23 @@ export interface CatalogArtistRequest {
   tenantId?: string
   tenant?: string
   locale?: string
+}
+
+export interface CatalogCollectionRequest {
+  tenantId?: string
+  tenant?: string
+  locale?: string
+  includeItems?: boolean
+}
+
+export interface CatalogCollectionResponse {
+  id: string
+  slug?: string
+  title: string
+  description?: string
+  heroImageUrl?: string | null
+  items?: CatalogItem[]
+  metadata?: Record<string, unknown>
 }
 
 export interface ArtistSocialLinks {
@@ -215,6 +267,18 @@ export interface DownloadLinkResponse {
   size?: number
   integrity?: string
   [key: string]: unknown
+}
+
+export interface DownloadLinkStatusResponse {
+  token: string
+  status: 'pending' | 'ready' | 'expired' | 'revoked' | string
+  url?: string
+  expiresAt?: string
+  contentType?: string
+  fileName?: string
+  size?: number
+  checksum?: string
+  metadata?: Record<string, unknown>
 }
 
 export interface EntitlementUsage {
@@ -284,6 +348,19 @@ export interface InvoicesResponse {
   hasNextPage?: boolean
 }
 
+export interface UserProfile {
+  id: string
+  email: string
+  name?: string
+  firstName?: string
+  lastName?: string
+  avatarUrl?: string | null
+  locale?: string
+  roles?: string[]
+  tenantId?: string
+  metadata?: Record<string, unknown>
+}
+
 export interface CartItemInput {
   sku: string
   quantity?: number
@@ -325,6 +402,12 @@ export interface CartResponse {
   metadata?: Record<string, unknown>
 }
 
+export type CartRetrieveResponse = CartResponse & {
+  status?: string
+  createdAt?: string
+  expiresAt?: string | null
+}
+
 export type CheckoutMode = 'payment' | 'subscription' | string
 
 export interface CheckoutSessionRequest {
@@ -347,6 +430,15 @@ export interface CheckoutSessionResponse {
   expiresAt: string
   publishableKey?: string
   metadata?: Record<string, unknown>
+}
+
+export interface CheckoutSessionDetailsResponse extends CheckoutSessionResponse {
+  status?: string
+  customerEmail?: string
+  customerId?: string
+  amountTotal?: number
+  currency?: string
+  paymentStatus?: string
 }
 
 export interface CatalogImportRequest {
@@ -468,6 +560,10 @@ export interface HealthApi {
 }
 
 export interface CatalogApi {
+  autocomplete(
+    params?: CatalogAutocompleteParams,
+    options?: RequestOptions,
+  ): Promise<CatalogAutocompleteResponse>
   search(params?: CatalogSearchParams, options?: RequestOptions): Promise<CatalogSearchResponse>
   getItem(
     id: string,
@@ -479,13 +575,20 @@ export interface CatalogApi {
     params?: CatalogArtistRequest,
     options?: RequestOptions,
   ): Promise<ArtistProfile>
+  getCollection(
+    id: string,
+    params?: CatalogCollectionRequest,
+    options?: RequestOptions,
+  ): Promise<CatalogCollectionResponse>
 }
 
 export interface DownloadsApi {
   createLink(input: DownloadLinkRequest, options?: RequestOptions): Promise<DownloadLinkResponse>
+  getLinkStatus(token: string, options?: RequestOptions): Promise<DownloadLinkStatusResponse>
 }
 
 export interface AccountApi {
+  getProfile(options?: RequestOptions): Promise<UserProfile>
   getEntitlements(
     params?: EntitlementListParams,
     options?: RequestOptions,
@@ -495,6 +598,7 @@ export interface AccountApi {
 
 export interface CartApi {
   create(input: CartCreateRequest, options?: RequestOptions): Promise<CartResponse>
+  retrieve(cartId: string, options?: RequestOptions): Promise<CartRetrieveResponse>
 }
 
 export interface CheckoutApi {
@@ -502,6 +606,10 @@ export interface CheckoutApi {
     input: CheckoutSessionRequest,
     options?: RequestOptions,
   ): Promise<CheckoutSessionResponse>
+  getSession(
+    sessionId: string,
+    options?: RequestOptions,
+  ): Promise<CheckoutSessionDetailsResponse>
 }
 
 export interface AdminCatalogApi {

@@ -1,10 +1,17 @@
 import { useEffect, useRef } from 'react'
 import { useAuth as useOidcAuth } from 'react-oidc-context'
-import SignOutButton from './SignOutButton.jsx'
+import SignOutControl from './SignOutControl.jsx'
 
 // Auth wrapper component: guards its children behind OIDC authentication
 // Usage: <Auth autoSignIn><Protected /></Auth>
-function Auth({ children, autoSignIn = false, logoutUri, showSignOut, signOutButtonProps = {} }) {
+function Auth({
+  children,
+  autoSignIn = false,
+  logoutUri,
+  showSignOut,
+  signOutButtonProps = {},
+  signOutControlProps = {},
+}) {
   const auth = useOidcAuth()
   const redirectStartedRef = useRef(false)
 
@@ -41,10 +48,29 @@ function Auth({ children, autoSignIn = false, logoutUri, showSignOut, signOutBut
         : defaultContainerStyle,
     }
 
+    const { buttonProps: controlButtonProps, user: providedUser, ...restControlProps } =
+      signOutControlProps ?? {}
+
+    const finalButtonProps = controlButtonProps
+      ? {
+          ...mergedSignOutProps,
+          ...controlButtonProps,
+          containerStyle: controlButtonProps.containerStyle
+            ? { ...mergedSignOutProps.containerStyle, ...controlButtonProps.containerStyle }
+            : mergedSignOutProps.containerStyle,
+        }
+      : mergedSignOutProps
+
     return (
       <div>
         {children ?? null}
-        {shouldShowSignOut ? <SignOutButton {...mergedSignOutProps} /> : null}
+        {shouldShowSignOut ? (
+          <SignOutControl
+            {...restControlProps}
+            user={providedUser ?? auth?.user ?? null}
+            buttonProps={finalButtonProps}
+          />
+        ) : null}
       </div>
     )
   }

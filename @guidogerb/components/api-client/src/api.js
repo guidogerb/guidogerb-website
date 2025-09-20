@@ -102,6 +102,22 @@ export const createApi = ({ client, ...options } = {}) => {
   }
 
   const catalog = {
+    autocomplete: (params = {}, requestOptions) => {
+      const query = params.query ?? params.q
+      if (!query || String(query).trim().length === 0) {
+        throw new Error('catalog.autocomplete requires a query')
+      }
+      const searchParams = sanitizeSearchParams({
+        q: query,
+        limit: params.limit,
+        tenant: params.tenantId ?? params.tenant,
+        locale: params.locale,
+      })
+      return http.get(
+        '/public/catalog/autocomplete',
+        applySearchParams(requestOptions, searchParams),
+      )
+    },
     search: (params = {}, requestOptions) => {
       const searchParams = sanitizeSearchParams({
         q: params.query ?? params.q,
@@ -142,6 +158,20 @@ export const createApi = ({ client, ...options } = {}) => {
         applySearchParams(requestOptions, searchParams),
       )
     },
+    getCollection: (id, params = {}, requestOptions) => {
+      if (!id) {
+        throw new Error('catalog.getCollection requires an id')
+      }
+      const searchParams = sanitizeSearchParams({
+        tenant: params.tenantId ?? params.tenant,
+        locale: params.locale,
+        includeItems: params.includeItems,
+      })
+      return http.get(
+        `/public/catalog/collections/${encodeSegment(id)}`,
+        applySearchParams(requestOptions, searchParams),
+      )
+    },
   }
 
   const downloads = {
@@ -151,9 +181,16 @@ export const createApi = ({ client, ...options } = {}) => {
       }
       return http.post('/downloads/link', { ...(requestOptions ?? {}), json: payload })
     },
+    getLinkStatus: (token, requestOptions) => {
+      if (!token) {
+        throw new Error('downloads.getLinkStatus requires a token')
+      }
+      return http.get(`/downloads/${encodeSegment(token)}`, requestOptions)
+    },
   }
 
   const me = {
+    getProfile: (requestOptions) => http.get('/me', requestOptions),
     getEntitlements: (params = {}, requestOptions) => {
       const searchParams = sanitizeSearchParams({
         tenant: params.tenantId ?? params.tenant,
@@ -181,6 +218,12 @@ export const createApi = ({ client, ...options } = {}) => {
       }
       return http.post('/cart', { ...(requestOptions ?? {}), json: payload })
     },
+    retrieve: (cartId, requestOptions) => {
+      if (!cartId) {
+        throw new Error('cart.retrieve requires a cartId')
+      }
+      return http.get(`/cart/${encodeSegment(cartId)}`, requestOptions)
+    },
   }
 
   const checkout = {
@@ -189,6 +232,12 @@ export const createApi = ({ client, ...options } = {}) => {
         throw new Error('checkout.createSession requires successUrl and cancelUrl')
       }
       return http.post('/checkout/create-session', { ...(requestOptions ?? {}), json: payload })
+    },
+    getSession: (sessionId, requestOptions) => {
+      if (!sessionId) {
+        throw new Error('checkout.getSession requires a sessionId')
+      }
+      return http.get(`/checkout/sessions/${encodeSegment(sessionId)}`, requestOptions)
     },
   }
 

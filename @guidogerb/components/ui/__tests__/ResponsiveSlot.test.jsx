@@ -4,6 +4,8 @@ import { renderToString } from 'react-dom/server'
 import {
   ResponsiveSlot,
   ResponsiveSlotProvider,
+  useResponsiveSlotInstance,
+  useResponsiveSlotMeta,
   useResponsiveSlotSize,
 } from '../src/ResponsiveSlot/ResponsiveSlot.jsx'
 
@@ -102,6 +104,11 @@ describe('ResponsiveSlot', () => {
     expect(markup).toContain('--slot-block-size:26rem')
     expect(markup).toContain('inline-size:var(--slot-inline-size)')
     expect(markup).toContain('role="presentation"')
+    expect(markup).toContain('data-slot-key="catalog.card"')
+    expect(markup).toContain('data-slot-label="Catalog Card"')
+    expect(markup).toContain('data-slot-default-variant="default"')
+    expect(markup).toContain('data-slot-variant-label="Default"')
+    expect(markup).toContain('data-slot-tags="commerce,grid"')
   })
 
   it('updates CSS variables when the active breakpoint changes', async () => {
@@ -123,6 +130,8 @@ describe('ResponsiveSlot', () => {
       await waitFor(() => {
         expect(slot.style.getPropertyValue('--slot-inline-size')).toBe('min(100%, 20rem)')
         expect(slot.style.getPropertyValue('--slot-block-size')).toBe('24rem')
+        expect(slot.dataset.slotDefaultVariant).toBe('default')
+        expect(slot.dataset.slotVariantLabel).toBe('Default')
       })
 
       act(() => {
@@ -151,6 +160,8 @@ describe('ResponsiveSlot', () => {
     expect(slot.getAttribute('role')).toBe('presentation')
     expect(slot.style.display).toBe('contents')
     expect(slot.style.getPropertyValue('--slot-inline-size')).toBe('')
+    expect(slot.dataset.slotKey).toBe('catalog.card')
+    expect(slot.dataset.slotVariant).toBe('default')
   })
 
   it('exposes responsive size data through the hook with registry overrides', () => {
@@ -162,6 +173,7 @@ describe('ResponsiveSlot', () => {
           data-inline={size.inline}
           data-block={size.block}
           data-max-inline={size.maxInline}
+          data-breakpoint={size.breakpoint}
         />
       )
     }
@@ -171,9 +183,11 @@ describe('ResponsiveSlot', () => {
         defaultBreakpoint="xl"
         registry={{
           'custom.card': {
-            md: { inline: '18rem', block: '20rem' },
-            xl: { inline: '26rem', block: 28, maxInline: '30rem' },
-            xxl: { inline: 'ignored' },
+            sizes: {
+              md: { inline: '18rem', block: '20rem' },
+              xl: { inline: '26rem', block: 28, maxInline: '30rem' },
+              xxl: { inline: 'ignored' },
+            },
           },
         }}
       >
@@ -185,6 +199,7 @@ describe('ResponsiveSlot', () => {
     expect(probe.dataset.inline).toBe('40px')
     expect(probe.dataset.block).toBe('28px')
     expect(probe.dataset.maxInline).toBe('30rem')
+    expect(probe.dataset.breakpoint).toBe('xl')
   })
 
   it('inherits parent slot sizing when inherit is enabled', () => {
@@ -206,6 +221,140 @@ describe('ResponsiveSlot', () => {
     expect(child.style.getPropertyValue('--slot-block-size')).toBe(
       parent.style.getPropertyValue('--slot-block-size'),
     )
+    expect(child.dataset.slotLabel).toBe(parent.dataset.slotLabel)
+    expect(child.dataset.slotDefaultVariant).toBe(parent.dataset.slotDefaultVariant)
+    expect(child.dataset.slotVariantLabel).toBe(parent.dataset.slotVariantLabel)
+  })
+
+  it('resolves token-based sizes and responds to theme change events', async () => {
+    const originalMatchMedia = window.matchMedia
+    const mockMatchMedia = createMatchMedia(1100)
+    window.matchMedia = mockMatchMedia
+
+    try {
+      render(
+        <ResponsiveSlotProvider
+          tokens={{ 'space-xl': '50px' }}
+          registry={{
+            'token.slot': {
+              sizes: {
+                lg: { inline: 'token:space-xl', block: 'token:space-xl' },
+              },
+            },
+          }}
+        >
+          <ResponsiveSlot slot="token.slot" data-testid="token-slot">
+            <div />
+          </ResponsiveSlot>
+        </ResponsiveSlotProvider>,
+      )
+
+      const slot = await screen.findByTestId('token-slot')
+
+      await waitFor(() => {
+        expect(slot.style.getPropertyValue('--slot-inline-size')).toBe('50px')
+        expect(slot.style.getPropertyValue('--slot-block-size')).toBe('50px')
+      })
+
+      act(() => {
+        window.dispatchEvent(
+          new CustomEvent('theme:change', { detail: { 'space-xl': '64px' } }),
+        )
+      })
+
+      await waitFor(() => {
+        expect(slot.style.getPropertyValue('--slot-inline-size')).toBe('64px')
+        expect(slot.style.getPropertyValue('--slot-block-size')).toBe('64px')
+      })
+    } finally {
+      window.matchMedia = originalMatchMedia
+    }
+  })
+
+  it('merges metadata from registry extends and exposes dataset attributes', () => {
+    function MetaProbe() {
+      const meta = useResponsiveSlotMeta('feature.card')
+      return (
+        <div
+          data-testid="meta"
+          data-label={meta.label}
+          data-default-variant={meta.defaultVariant}
+          data-variant-count={Object.keys(meta.variants || {}).length}
+        />
+      )
+    }
+
+    render(
+      <ResponsiveSlotProvider
+        registry={{
+          'feature.card': {
+            extends: 'catalog.card',
+            sizes: {
+              md: { inline: '22rem', block: '28rem' },
+            },
+            meta: {
+              label: 'Feature Card',
+              description: 'Spotlight on featured items.',
+              tags: ['feature'],
+              variants: {
+                highlight: { label: 'Highlight' },
+              },
+              defaultVariant: 'highlight',
+            },
+          },
+        }}
+      >
+        <div>
+          <ResponsiveSlot slot="feature.card" variant="highlight" data-testid="slot">
+            <div />
+          </ResponsiveSlot>
+          <MetaProbe />
+        </div>
+      </ResponsiveSlotProvider>,
+    )
+
+    const slot = screen.getByTestId('slot')
+    expect(slot.dataset.slotLabel).toBe('Feature Card')
+    expect(slot.dataset.slotDescription).toBe('Spotlight on featured items.')
+    expect(slot.dataset.slotVariant).toBe('highlight')
+    expect(slot.dataset.slotVariantLabel).toBe('Highlight')
+    expect(slot.dataset.slotDefaultVariant).toBe('highlight')
+    expect(slot.dataset.slotTags).toBe('commerce,grid,feature')
+    expect(slot.dataset.designComponent).toBe('Catalog / Card')
+
+    const meta = screen.getByTestId('meta')
+    expect(meta.dataset.label).toBe('Feature Card')
+    expect(meta.dataset.defaultVariant).toBe('highlight')
+    expect(meta.dataset.variantCount).toBe('3')
+  })
+
+  it('provides slot instance context with meta and variant', () => {
+    function InstanceProbe() {
+      const instance = useResponsiveSlotInstance()
+      return (
+        <div
+          data-testid="instance"
+          data-slot={instance?.slot || 'none'}
+          data-variant={instance?.variant || 'none'}
+          data-label={instance?.meta?.label || 'none'}
+          data-breakpoint-count={Object.keys(instance?.byBreakpoint || {}).length}
+        />
+      )
+    }
+
+    render(
+      <ResponsiveSlotProvider>
+        <ResponsiveSlot slot="catalog.card" variant="compact">
+          <InstanceProbe />
+        </ResponsiveSlot>
+      </ResponsiveSlotProvider>,
+    )
+
+    const probe = screen.getByTestId('instance')
+    expect(probe.dataset.slot).toBe('catalog.card')
+    expect(probe.dataset.variant).toBe('compact')
+    expect(probe.dataset.label).toBe('Catalog Card')
+    expect(Number(probe.dataset.breakpointCount)).toBeGreaterThan(0)
   })
 
   it('warns when a slot is missing from the registry in development', () => {

@@ -48,10 +48,14 @@ describe('Auth', () => {
     authState.current = {
       isAuthenticated: true,
       signoutRedirect,
+      user: {
+        profile: { name: 'Guido Gerb', email: 'guido@example.com' },
+      },
     }
 
     render(<Auth logoutUri="https://auth.example.com/logout" />)
 
+    expect(screen.getByRole('heading', { name: /ready to head out/i })).toBeInTheDocument()
     const button = screen.getByRole('button', { name: /sign out/i })
     fireEvent.click(button)
 
@@ -69,6 +73,9 @@ describe('Auth', () => {
     authState.current = {
       isAuthenticated: true,
       signoutRedirect,
+      user: {
+        profile: { preferred_username: 'guidogerb' },
+      },
     }
 
     render(
@@ -77,11 +84,12 @@ describe('Auth', () => {
         signOutButtonProps={{
           redirectUri: 'https://auth.example.com/custom',
           pendingText: 'Signing out now…',
+          children: 'Log out',
         }}
       />,
     )
 
-    const button = screen.getByRole('button', { name: /sign out/i })
+    const button = screen.getByRole('button', { name: /log out/i })
     fireEvent.click(button)
 
     expect(button).toHaveTextContent(/signing out now/i)

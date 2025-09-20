@@ -84,6 +84,79 @@ describe('createClient', () => {
     expect(fetch).toHaveBeenCalledTimes(1)
   })
 
+  it('retries idempotent POST requests and reuses the request body', async () => {
+    const fetch = vi.fn()
+    fetch.mockRejectedValueOnce(new TypeError('temporary failure'))
+    fetch.mockResolvedValueOnce(jsonResponse({ ok: true }))
+    const logger = { debug: vi.fn(), warn: vi.fn() }
+
+    const client = createClient({
+      baseUrl: 'https://api.example.com',
+      fetch,
+      logger,
+      retry: { attempts: 2, delayMs: 0 },
+    })
+
+    const payload = { foo: 'bar' }
+    const data = await client.post('/things', {
+      json: payload,
+      retry: { idempotent: true },
+    })
+
+    expect(data).toEqual({ ok: true })
+    expect(fetch).toHaveBeenCalledTimes(2)
+    const firstCall = fetch.mock.calls[0]
+    const secondCall = fetch.mock.calls[1]
+    expect(firstCall[0]).toBe('https://api.example.com/things')
+    expect(secondCall[0]).toBe('https://api.example.com/things')
+    expect(firstCall[1].body).toBe(secondCall[1].body)
+    expect(firstCall[1].body).toBe(JSON.stringify(payload))
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[api-client] retrying request after error',
+      expect.objectContaining({ method: 'POST', url: 'https://api.example.com/things' }),
+    )
+  })
+
+  it('merges custom retry method lists from client and request options', async () => {
+    const fetch = vi.fn()
+    fetch.mockRejectedValueOnce(new TypeError('offline'))
+    fetch.mockResolvedValueOnce(jsonResponse({ ok: true }))
+
+    const client = createClient({
+      baseUrl: 'https://api.example.com',
+      fetch,
+      retry: { attempts: 2, delayMs: 0, methods: ['delete'] },
+    })
+
+    const data = await client.delete('/items/1', { retry: { methods: ['options'] } })
+    expect(data).toEqual({ ok: true })
+    expect(fetch).toHaveBeenCalledTimes(2)
+    expect(fetch.mock.calls[0][1].method).toBe('DELETE')
+    expect(fetch.mock.calls[1][1].method).toBe('DELETE')
+  })
+
+  it('aborts requests when timeoutMs elapses', async () => {
+    const fetch = vi.fn((_, init = {}) =>
+      new Promise((_, reject) => {
+        init.signal?.addEventListener(
+          'abort',
+          () => {
+            reject(init.signal.reason)
+          },
+          { once: true },
+        )
+      }),
+    )
+
+    const client = createClient({ baseUrl: 'https://api.example.com', fetch })
+
+    await expect(client.get('/slow', { retry: { attempts: 1, timeoutMs: 5 } })).rejects.toMatchObject({
+      name: 'ApiError',
+      cause: expect.objectContaining({ message: 'Request timed out' }),
+    })
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
   it('surfaces response metadata via request helper', async () => {
     const fetch = vi.fn().mockResolvedValue(jsonResponse({ status: 'ok' }, { status: 201 }))
 

@@ -1,6 +1,6 @@
-const RETRYABLE_METHODS = new Set(['GET', 'HEAD'])
+const DEFAULT_RETRYABLE_METHODS = new Set(['GET', 'HEAD'])
 const RETRYABLE_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504])
-const DEFAULT_RETRY = Object.freeze({ attempts: 3, delayMs: 250 })
+const DEFAULT_RETRY = Object.freeze({ attempts: 3, delayMs: 250, factor: 2 })
 
 const delay = (ms) =>
   ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve()
@@ -74,11 +74,53 @@ const buildUrl = (baseUrl, path = '', searchParams) => {
   return url.toString()
 }
 
-const computeRetry = (method, retry) => {
-  const attempts = Math.max(1, retry?.attempts ?? DEFAULT_RETRY.attempts)
-  const delayMs = Math.max(0, retry?.delayMs ?? DEFAULT_RETRY.delayMs)
-  const enabled = RETRYABLE_METHODS.has(method.toUpperCase()) && attempts > 1
-  return { enabled, attempts, delayMs }
+const computeRetry = (method, retryOverride, defaultRetry) => {
+  const baseConfig = defaultRetry ? { ...defaultRetry } : {}
+  const overrideConfig = retryOverride ? { ...retryOverride } : null
+  const merged = {
+    ...DEFAULT_RETRY,
+    ...baseConfig,
+    ...(overrideConfig ?? {}),
+  }
+
+  const attempts = Math.max(1, merged.attempts ?? DEFAULT_RETRY.attempts)
+  const delayMs = Math.max(0, merged.delayMs ?? DEFAULT_RETRY.delayMs)
+  const factor = merged.factor && merged.factor > 1 ? merged.factor : DEFAULT_RETRY.factor
+  const maxDelayMs = merged.maxDelayMs != null ? Math.max(0, merged.maxDelayMs) : null
+  const jitterMs = merged.jitterMs != null ? Math.max(0, merged.jitterMs) : 0
+  const timeoutMs = merged.timeoutMs ?? merged.timeout ?? null
+
+  const allowed = new Set(DEFAULT_RETRYABLE_METHODS)
+  if (merged.idempotent) {
+    allowed.add('POST')
+    allowed.add('PUT')
+    allowed.add('PATCH')
+  }
+
+  const collectMethods = (source) => {
+    if (!source || !Array.isArray(source.methods)) return
+    for (const entry of source.methods) {
+      if (!entry) continue
+      allowed.add(String(entry).toUpperCase())
+    }
+  }
+
+  collectMethods(baseConfig)
+  collectMethods(overrideConfig)
+
+  const methodUpper = method.toUpperCase()
+  const enabled = attempts > 1 && allowed.has(methodUpper)
+
+  return {
+    enabled,
+    attempts,
+    delayMs,
+    factor,
+    maxDelayMs,
+    jitterMs,
+    timeoutMs,
+    allowedMethods: allowed,
+  }
 }
 
 const parseBody = async (response) => {
@@ -106,14 +148,12 @@ const parseBody = async (response) => {
   return response.text()
 }
 
-const shouldRetryResponse = (method, response) => {
-  if (!RETRYABLE_METHODS.has(method.toUpperCase())) return false
+const shouldRetryResponse = (response) => {
   if (!response) return false
   return RETRYABLE_STATUS_CODES.has(response.status)
 }
 
-const shouldRetryError = (method, error) => {
-  if (!RETRYABLE_METHODS.has(method.toUpperCase())) return false
+const shouldRetryError = (error) => {
   if (!error) return false
   return error.name !== 'AbortError'
 }
@@ -153,9 +193,17 @@ export const createClient = ({
   const logWarn = typeof logger?.warn === 'function' ? logger.warn.bind(logger) : logDebug
 
   const send = async (method, path, options = {}) => {
-    const retryConfig = options.retry ?? defaultRetry
     const methodUpper = method.toUpperCase()
-    const { enabled, attempts, delayMs } = computeRetry(methodUpper, retryConfig)
+    const retryConfig = options.retry ?? null
+    const {
+      enabled,
+      attempts,
+      delayMs,
+      factor,
+      maxDelayMs,
+      jitterMs,
+      timeoutMs,
+    } = computeRetry(methodUpper, retryConfig, defaultRetry)
     const url = buildUrl(base, path, options.searchParams ?? options.query)
 
     const requestHeaders = new Headers(baseHeaders)
@@ -165,6 +213,7 @@ export const createClient = ({
     }
 
     let body
+    let requestBody
     if (options.json !== undefined) {
       body = JSON.stringify(options.json)
       if (!requestHeaders.has('content-type')) {
@@ -191,17 +240,65 @@ export const createClient = ({
       signal: options.signal,
     }
 
-    if (body !== undefined && !RETRYABLE_METHODS.has(methodUpper)) {
-      requestInit.body = body
-    } else if (body !== undefined && RETRYABLE_METHODS.has(methodUpper)) {
+    if (body !== undefined && DEFAULT_RETRYABLE_METHODS.has(methodUpper) && !retryConfig?.idempotent) {
       logWarn('[api-client] Ignoring body on idempotent request', {
         method: methodUpper,
         url,
       })
+    } else if (body !== undefined) {
+      requestInit.body = body
+      requestBody = body
     }
 
     let attempt = 0
     let lastError
+
+    const calculateDelay = (currentAttempt) => {
+      const exponent = Math.max(0, currentAttempt - 1)
+      const baseDelay = delayMs * factor ** exponent
+      const jitter = jitterMs > 0 ? Math.random() * jitterMs : 0
+      const total = baseDelay + jitter
+      return maxDelayMs != null ? Math.min(maxDelayMs, total) : total
+    }
+
+    const createSignal = () => {
+      if (!timeoutMs && !options.signal) {
+        return { signal: options.signal, cleanup: () => {} }
+      }
+
+      const controller = new AbortController()
+      let timeoutId
+
+      const handleAbort = (event) => {
+        controller.abort(event?.target?.reason ?? options.signal?.reason)
+      }
+
+      if (options.signal) {
+        if (options.signal.aborted) {
+          controller.abort(options.signal.reason)
+        } else {
+          options.signal.addEventListener('abort', handleAbort, { once: true })
+        }
+      }
+
+      if (timeoutMs && timeoutMs > 0) {
+        timeoutId = setTimeout(() => {
+          controller.abort(new Error('Request timed out'))
+        }, timeoutMs)
+      }
+
+      return {
+        signal: controller.signal,
+        cleanup: () => {
+          if (timeoutId) clearTimeout(timeoutId)
+          if (options.signal) {
+            options.signal.removeEventListener('abort', handleAbort)
+          }
+        },
+      }
+    }
+
+    const bodySnapshot = requestBody
 
     while (attempt < attempts) {
       attempt += 1
@@ -211,6 +308,18 @@ export const createClient = ({
         url,
         headers: sanitizeHeaders(requestHeaders),
       })
+
+      const { signal, cleanup } = createSignal()
+      if (signal) {
+        requestInit.signal = signal
+      } else {
+        delete requestInit.signal
+      }
+      if (bodySnapshot !== undefined) {
+        requestInit.body = bodySnapshot
+      } else if ('body' in requestInit) {
+        delete requestInit.body
+      }
 
       try {
         const response = await fetch(url, requestInit)
@@ -222,14 +331,15 @@ export const createClient = ({
         })
 
         if (!response.ok) {
-          if (enabled && shouldRetryResponse(method, response) && attempt < attempts) {
+          if (enabled && shouldRetryResponse(response) && attempt < attempts) {
             logWarn('[api-client] retrying request after response', {
               attempt,
               method: methodUpper,
               url,
               status: response.status,
             })
-            await delay(delayMs * 2 ** (attempt - 1))
+            cleanup()
+            await delay(calculateDelay(attempt))
             continue
           }
 
@@ -244,18 +354,20 @@ export const createClient = ({
         }
 
         const data = await parseBody(response)
+        cleanup()
         return { data, response }
       } catch (error) {
+        cleanup()
         if (error instanceof ApiError) throw error
         lastError = error
-        if (enabled && shouldRetryError(method, error) && attempt < attempts) {
+        if (enabled && shouldRetryError(error) && attempt < attempts) {
           logWarn('[api-client] retrying request after error', {
             attempt,
             method: methodUpper,
             url,
             error: error?.message,
           })
-          await delay(delayMs * 2 ** (attempt - 1))
+          await delay(calculateDelay(attempt))
           continue
         }
 

@@ -6,7 +6,7 @@ Typed HTTP client for the Phase‑1 API (API Gateway HTTP API).
 
 - Fetch wrapper + JSON coercion
 - **Auth token injection** via `@guidogerb/auth`
-- Dev logging (redacted), GET retries with backoff
+- Dev logging (redacted), configurable retries with backoff + timeouts
 - Narrow types for `/health`; stubs for future endpoints
 
 ## Usage
@@ -52,3 +52,32 @@ const cart = await api.cart.create({
 
 When needed, the raw HTTP client used by the helpers is available via the
 `api.http` property.
+
+### Retry & timeout configuration
+
+`createClient` exposes exponential backoff controls that apply globally or can
+be overridden per-request:
+
+```ts
+const client = createClient({
+  baseUrl: 'https://api.guidogerb.dev',
+  retry: {
+    attempts: 4,
+    delayMs: 200,
+    factor: 1.8,
+    jitterMs: 100,
+    maxDelayMs: 5_000,
+    timeoutMs: 10_000,
+    idempotent: true, // allow POST/PUT/PATCH retries
+    methods: ['delete'], // extend retryable verbs
+  },
+})
+
+await client.post('/carts', {
+  json: { sku: 'album_123', quantity: 1 },
+  retry: { idempotent: true, timeoutMs: 5_000 },
+})
+```
+
+Timeouts leverage `AbortController` and propagate abort reasons so tests can
+assert on the underlying error via `ApiError#cause`.

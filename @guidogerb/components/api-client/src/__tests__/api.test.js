@@ -125,6 +125,57 @@ describe('createApi', () => {
     expect(() => api.catalog.getArtist('', {})).toThrow('catalog.getArtist requires a slug')
   })
 
+  it('supports catalog autocomplete and collection retrieval with typed params', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          suggestions: [
+            { id: 'track-1', type: 'track', title: 'Track 1' },
+            { id: 'artist-2', type: 'artist', title: 'Artist' },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 'collection-42', title: 'Featured Collection', items: [] }),
+      )
+
+    const api = createApi({ baseUrl: 'https://api.example.com', fetch })
+
+    await api.catalog.autocomplete(
+      { query: 'lofi', limit: 5, tenantId: 'tenant-1', locale: 'en-US' },
+      { searchParams: { audience: 'djs' } },
+    )
+
+    let [url, init] = fetch.mock.calls[0]
+    expect(init.method).toBe('GET')
+    let parsed = new URL(url)
+    expect(parsed.pathname).toBe('/public/catalog/autocomplete')
+    expect(parsed.searchParams.get('q')).toBe('lofi')
+    expect(parsed.searchParams.get('limit')).toBe('5')
+    expect(parsed.searchParams.get('tenant')).toBe('tenant-1')
+    expect(parsed.searchParams.get('locale')).toBe('en-US')
+    expect(parsed.searchParams.get('audience')).toBe('djs')
+
+    await api.catalog.getCollection(
+      'collection/featured',
+      { tenant: 'tenant-2', includeItems: true },
+      { query: { locale: 'fr-FR', sort: 'manual' } },
+    )
+
+    ;[url, init] = fetch.mock.calls[1]
+    expect(init.method).toBe('GET')
+    parsed = new URL(url)
+    expect(parsed.pathname).toBe('/public/catalog/collections/collection%2Ffeatured')
+    expect(parsed.searchParams.get('tenant')).toBe('tenant-2')
+    expect(parsed.searchParams.get('includeItems')).toBe('true')
+    expect(parsed.searchParams.get('locale')).toBe('fr-FR')
+    expect(parsed.searchParams.get('sort')).toBe('manual')
+
+    expect(() => api.catalog.autocomplete({})).toThrow('catalog.autocomplete requires a query')
+    expect(() => api.catalog.getCollection('', {})).toThrow('catalog.getCollection requires an id')
+  })
+
   it('creates download links and validates payloads', async () => {
     const fetch = vi
       .fn()
@@ -205,6 +256,69 @@ describe('createApi', () => {
     expect(() =>
       api.checkout.createSession({ successUrl: 'https://example.com', cancelUrl: '' }),
     ).toThrow('checkout.createSession requires successUrl and cancelUrl')
+  })
+
+  it('retrieves download status, account profile, cart, and checkout sessions', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          token: 'token/123',
+          status: 'ready',
+          url: 'https://downloads.example.com/token/123',
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ id: 'user-1', email: 'user@example.com' }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: 'cart-1',
+          items: [],
+          totals: { subtotal: 0, discount: 0, tax: 0, shipping: 0, total: 0, currency: 'USD' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          sessionId: 'sess_1',
+          status: 'complete',
+          url: 'https://checkout.example.com/sess_1',
+        }),
+      )
+
+    const api = createApi({ baseUrl: 'https://api.example.com', fetch })
+
+    const download = await api.downloads.getLinkStatus('token/123', { searchParams: { audit: '1' } })
+    let [url, init] = fetch.mock.calls[0]
+    expect(init.method).toBe('GET')
+    let parsed = new URL(url)
+    expect(parsed.pathname).toBe('/downloads/token%2F123')
+    expect(parsed.searchParams.get('audit')).toBe('1')
+    expect(download.token).toBe('token/123')
+
+    const profile = await api.me.getProfile()
+    ;[url, init] = fetch.mock.calls[1]
+    expect(init.method).toBe('GET')
+    parsed = new URL(url)
+    expect(parsed.pathname).toBe('/me')
+    expect(profile.email).toBe('user@example.com')
+
+    const cart = await api.cart.retrieve('cart/456')
+    ;[url, init] = fetch.mock.calls[2]
+    expect(init.method).toBe('GET')
+    parsed = new URL(url)
+    expect(parsed.pathname).toBe('/cart/cart%2F456')
+    expect(cart.id).toBe('cart-1')
+
+    const session = await api.checkout.getSession('sess/789', { query: '?expand=payment_intent' })
+    ;[url, init] = fetch.mock.calls[3]
+    expect(init.method).toBe('GET')
+    parsed = new URL(url)
+    expect(parsed.pathname).toBe('/checkout/sessions/sess%2F789')
+    expect(parsed.searchParams.get('expand')).toBe('payment_intent')
+    expect(session.sessionId).toBe('sess_1')
+
+    expect(() => api.downloads.getLinkStatus('')).toThrow('downloads.getLinkStatus requires a token')
+    expect(() => api.cart.retrieve('')).toThrow('cart.retrieve requires a cartId')
+    expect(() => api.checkout.getSession('')).toThrow('checkout.getSession requires a sessionId')
   })
 
   it('supports admin workflows with validation and correctly scoped paths', async () => {
