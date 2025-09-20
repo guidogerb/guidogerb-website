@@ -41,30 +41,26 @@ describe('createRouteObjects', () => {
   })
 
   it('supports disabling the generated fallback route', () => {
-    const routes = createRouteObjects(
-      [{ path: '/', element: <div>Home</div> }],
-      { defaultFallback: false },
-    )
+    const routes = createRouteObjects([{ path: '/', element: <div>Home</div> }], {
+      defaultFallback: false,
+    })
 
     expect(routes).toHaveLength(1)
   })
 
   it('allows customizing the generated fallback copy and locale', () => {
-    const routes = createRouteObjects(
-      [{ path: '/', element: <div>Home</div> }],
-      {
-        defaultFallback: {
-          title: 'Nicht gefunden',
-          description: 'Bitte prüfen Sie die Adresse oder wählen Sie eine Option unten.',
-          homeHref: '/start',
-          homeLabel: 'Zur Startseite',
-          supportHref: 'mailto:hallo@example.com',
-          supportLabel: 'Support kontaktieren',
-          lang: 'de',
-          className: 'custom-fallback',
-        },
+    const routes = createRouteObjects([{ path: '/', element: <div>Home</div> }], {
+      defaultFallback: {
+        title: 'Nicht gefunden',
+        description: 'Bitte prüfen Sie die Adresse oder wählen Sie eine Option unten.',
+        homeHref: '/start',
+        homeLabel: 'Zur Startseite',
+        supportHref: 'mailto:hallo@example.com',
+        supportLabel: 'Support kontaktieren',
+        lang: 'de',
+        className: 'custom-fallback',
       },
-    )
+    })
 
     expect(routes).toHaveLength(2)
     const fallback = routes[1]
@@ -72,7 +68,10 @@ describe('createRouteObjects', () => {
     expect(fallback.element.props.className).toContain('custom-fallback')
     expect(fallback.element.props.title).toBe('Nicht gefunden')
     expect(fallback.element.props.description).toMatch(/bitte prüfen sie/i)
-    expect(fallback.element.props.primaryAction).toMatchObject({ href: '/start', label: 'Zur Startseite' })
+    expect(fallback.element.props.primaryAction).toMatchObject({
+      href: '/start',
+      label: 'Zur Startseite',
+    })
     expect(fallback.element.props.secondaryAction).toMatchObject({
       href: 'mailto:hallo@example.com',
       label: 'Support kontaktieren',

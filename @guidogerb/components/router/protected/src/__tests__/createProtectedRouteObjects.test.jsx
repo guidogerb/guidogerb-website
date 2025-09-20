@@ -102,25 +102,21 @@ describe('createProtectedRouteObjects', () => {
   })
 
   it('allows disabling the generated fallback route', () => {
-    const routes = createProtectedRouteObjects(
-      [{ path: '/', element: <div>Home</div> }],
-      { defaultFallback: false },
-    )
+    const routes = createProtectedRouteObjects([{ path: '/', element: <div>Home</div> }], {
+      defaultFallback: false,
+    })
 
     expect(routes).toHaveLength(1)
   })
 
   it('supports customizing the generated fallback copy', () => {
-    const routes = createProtectedRouteObjects(
-      [{ path: '/', element: <div>Home</div> }],
-      {
-        defaultFallback: {
-          title: 'Hola',
-          homeLabel: 'Inicio',
-          homeHref: '/inicio',
-        },
+    const routes = createProtectedRouteObjects([{ path: '/', element: <div>Home</div> }], {
+      defaultFallback: {
+        title: 'Hola',
+        homeLabel: 'Inicio',
+        homeHref: '/inicio',
       },
-    )
+    })
 
     expect(routes).toHaveLength(2)
     const fallback = routes[1]

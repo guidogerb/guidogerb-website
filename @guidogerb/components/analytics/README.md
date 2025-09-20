@@ -59,8 +59,7 @@ dispatch a `page_view` whenever navigation occurs:
 ```jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Analytics, AnalyticsRouterBridge } from '@guidogerb/components/analytics'
-
-<Analytics measurementId={measurementId} sendPageView={false}>
+;<Analytics measurementId={measurementId} sendPageView={false}>
   <BrowserRouter>
     <AnalyticsRouterBridge trackInitialPageView />
     <Routes>

@@ -113,7 +113,10 @@ describe('ProtectedRouter', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: 'Hola' })).toBeInTheDocument()
     expect(screen.getByText('No encontramos la página solicitada.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveAttribute('href', '/inicio')
+    expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveAttribute(
+      'href',
+      '/inicio',
+    )
     expect(screen.queryByTestId('default-guard')).not.toBeInTheDocument()
   })
 })

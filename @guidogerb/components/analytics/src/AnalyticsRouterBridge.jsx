@@ -4,12 +4,17 @@ import { useAnalytics } from './Analytics.jsx'
 
 const defaultShouldTrack = () => true
 
-const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+const isPlainObject = (value) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
 
 const buildDefaultParams = () => {
   const params = {}
 
-  if (typeof document !== 'undefined' && typeof document.title === 'string' && document.title.length > 0) {
+  if (
+    typeof document !== 'undefined' &&
+    typeof document.title === 'string' &&
+    document.title.length > 0
+  ) {
     params.page_title = document.title
   }
 
@@ -101,7 +106,10 @@ export function useAnalyticsPageViews(options = {}) {
       extraParams = paramsBuilder
     }
 
-    const params = normalizeParams({ ...defaults, ...(isPlainObject(extraParams) ? extraParams : {}) })
+    const params = normalizeParams({
+      ...defaults,
+      ...(isPlainObject(extraParams) ? extraParams : {}),
+    })
 
     analytics.pageView(path, params)
 

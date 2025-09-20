@@ -1,11 +1,13 @@
 import { isValidElement } from 'react'
 import { Navigate } from 'react-router-dom'
 
-const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+const isPlainObject = (value) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
 
 const DEFAULT_FALLBACK_COPY = Object.freeze({
   title: 'Page not found',
-  description: 'We could not find the requested page. Check the address or use the links below to continue browsing.',
+  description:
+    'We could not find the requested page. Check the address or use the links below to continue browsing.',
   primaryAction: Object.freeze({ label: 'Go back home', href: '/' }),
 })
 
@@ -93,11 +95,12 @@ const buildGeneratedFallbackDefinition = (config) => {
       ? options.description.trim()
       : DEFAULT_FALLBACK_COPY.description
 
-  const lang = typeof options.lang === 'string' && options.lang.trim().length > 0 ? options.lang.trim() : undefined
+  const lang =
+    typeof options.lang === 'string' && options.lang.trim().length > 0
+      ? options.lang.trim()
+      : undefined
 
-  const containerClass = [DEFAULT_FALLBACK_CLASS, options.className]
-    .filter(Boolean)
-    .join(' ')
+  const containerClass = [DEFAULT_FALLBACK_CLASS, options.className].filter(Boolean).join(' ')
 
   return {
     path: '*',
@@ -221,9 +224,7 @@ function DefaultFallback({ title, description, primaryAction, secondaryAction, l
         <p className="gg-public-router__fallback-description">{description}</p>
         <nav aria-label="Suggested destinations" className="gg-public-router__fallback-actions">
           <a {...primary.props}>{primary.label}</a>
-          {secondary ? (
-            <a {...secondary.props}>{secondary.label}</a>
-          ) : null}
+          {secondary ? <a {...secondary.props}>{secondary.label}</a> : null}
         </nav>
       </div>
     </section>

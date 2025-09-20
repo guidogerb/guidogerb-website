@@ -40,7 +40,10 @@ describe('AnalyticsRouterBridge', () => {
 
     await waitFor(() => {
       const entry = window.dataLayer?.find(
-        (event) => event[0] === 'event' && event[1] === 'page_view' && event[2]?.page_path === '/about?ref=spec',
+        (event) =>
+          event[0] === 'event' &&
+          event[1] === 'page_view' &&
+          event[2]?.page_path === '/about?ref=spec',
       )
       expect(entry).toBeDefined()
     })
@@ -59,7 +62,8 @@ describe('AnalyticsRouterBridge', () => {
 
     await waitFor(() => {
       const entry = window.dataLayer?.find(
-        (event) => event[0] === 'event' && event[1] === 'page_view' && event[2]?.page_path === '/welcome',
+        (event) =>
+          event[0] === 'event' && event[1] === 'page_view' && event[2]?.page_path === '/welcome',
       )
       expect(entry).toBeDefined()
       expect(entry?.[2]).toMatchObject({ page_title: 'Landing page' })
