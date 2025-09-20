@@ -62,6 +62,41 @@ describe('createApi', () => {
     expect(parsed.searchParams.get('tenant')).toBe('tenant-123')
   })
 
+  it('merges typed filters with request-level search params without mutating inputs', async () => {
+    const fetch = vi.fn()
+    fetch.mockImplementationOnce(() =>
+      Promise.resolve(jsonResponse({ items: [], pageInfo: { total: 0, hasNextPage: false } })),
+    )
+    fetch.mockImplementationOnce(() =>
+      Promise.resolve(jsonResponse({ items: [], pageInfo: { total: 0, hasNextPage: false } })),
+    )
+
+    const api = createApi({ baseUrl: 'https://api.example.com', fetch })
+
+    const providedParams = new URLSearchParams('foo=bar&limit=5')
+    await api.catalog.search(
+      { query: 'ambient', limit: 10 },
+      { searchParams: providedParams, headers: { 'x-debug': '1' } },
+    )
+
+    let [url] = fetch.mock.calls[0]
+    let parsed = new URL(url)
+    expect(parsed.searchParams.getAll('limit')).toEqual(['10'])
+    expect(parsed.searchParams.get('foo')).toBe('bar')
+    expect(providedParams.getAll('limit')).toEqual(['5'])
+
+    await api.catalog.search(
+      { tags: ['vinyl'], sort: 'featured' },
+      { query: '?tenant=tenant-1&sort=outdated' },
+    )
+
+    ;[url] = fetch.mock.calls[1]
+    parsed = new URL(url)
+    expect(parsed.searchParams.getAll('tags')).toEqual(['vinyl'])
+    expect(parsed.searchParams.get('sort')).toBe('featured')
+    expect(parsed.searchParams.get('tenant')).toBe('tenant-1')
+  })
+
   it('encodes catalog identifiers and rejects missing values', async () => {
     const fetch = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ id: 'prod-1' })))
     const api = createApi({ baseUrl: 'https://api.example.com', fetch })
