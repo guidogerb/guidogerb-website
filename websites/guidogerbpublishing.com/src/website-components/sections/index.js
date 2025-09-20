@@ -1,0 +1,6 @@
+export { HeroSection } from './HeroSection.jsx'
+export { PlatformSection } from './PlatformSection.jsx'
+export { DistributionSection } from './DistributionSection.jsx'
+export { ResourcesSection } from './ResourcesSection.jsx'
+export { NewsletterSection } from './NewsletterSection.jsx'
+export { PartnerPortalSection } from './PartnerPortalSection.jsx'
