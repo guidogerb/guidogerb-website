@@ -66,6 +66,18 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
 
+  '@guidogerb/components/app':
+    devDependencies:
+      react:
+        specifier: ^19.1.1
+        version: 19.1.1
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.1.1(react@19.1.1)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
+
   '@guidogerb/components/auth':
     dependencies:
       oidc-client-ts:

@@ -70,7 +70,9 @@ describe('marketing sections', () => {
 
     expect(screen.getByRole('heading', { level: 2, name: 'Author onboarding' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Marketing toolkit' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 2, name: 'Compliance resources' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Compliance resources' }),
+    ).toBeInTheDocument()
   })
 
   it('renders newsletter subscription form', () => {
@@ -83,7 +85,9 @@ describe('marketing sections', () => {
   it('renders the partner portal section with the protected wrapper', () => {
     render(<PartnerPortalSection logoutUri="/logout" />)
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Partner operations portal' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Partner operations portal' }),
+    ).toBeInTheDocument()
     expect(mockProtected).toHaveBeenCalledWith(expect.objectContaining({ logoutUri: '/logout' }))
     expect(screen.getByTestId('welcome-component')).toBeInTheDocument()
   })
