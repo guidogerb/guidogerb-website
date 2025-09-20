@@ -209,4 +209,3 @@ describe('useTokenRenewal', () => {
     expect(status.dataset.lastRenewal).toBe('')
   })
 })
-

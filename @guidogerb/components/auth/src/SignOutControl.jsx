@@ -6,10 +6,7 @@ const mergeStyles = (...styles) => Object.assign({}, ...styles.filter(Boolean))
 
 const computeInitials = (value, fallback = 'GG') => {
   if (!value) return fallback
-  const parts = String(value)
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
+  const parts = String(value).trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return fallback
   const letters = parts
     .slice(0, 2)
@@ -21,7 +18,11 @@ const computeInitials = (value, fallback = 'GG') => {
 const resolveProfile = (user) => {
   const profile = user?.profile ?? {}
   const displayName =
-    profile.name ?? profile.preferred_username ?? profile.given_name ?? profile.email ?? 'Signed in user'
+    profile.name ??
+    profile.preferred_username ??
+    profile.given_name ??
+    profile.email ??
+    'Signed in user'
   const secondary = profile.email ?? profile.preferred_username ?? ''
   const avatarUrl = profile.picture ?? profile.avatar_url ?? null
   return { displayName, secondary, avatarUrl }
@@ -77,16 +78,14 @@ export default function SignOutControl({
 
   const infoStackStyle = useMemo(
     () =>
-      mergeStyles(
-        {
-          display: 'flex',
-          flexDirection: layout === 'vertical' ? 'column' : 'row',
-          alignItems: layout === 'vertical' ? 'center' : 'flex-start',
-          gap: layout === 'vertical' ? '1.25rem' : '1.5rem',
-          flex: 1,
-          textAlign: layout === 'vertical' ? 'center' : 'left',
-        },
-      ),
+      mergeStyles({
+        display: 'flex',
+        flexDirection: layout === 'vertical' ? 'column' : 'row',
+        alignItems: layout === 'vertical' ? 'center' : 'flex-start',
+        gap: layout === 'vertical' ? '1.25rem' : '1.5rem',
+        flex: 1,
+        textAlign: layout === 'vertical' ? 'center' : 'left',
+      }),
     [layout],
   )
 

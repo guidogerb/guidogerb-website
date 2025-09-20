@@ -48,8 +48,11 @@ function Auth({
         : defaultContainerStyle,
     }
 
-    const { buttonProps: controlButtonProps, user: providedUser, ...restControlProps } =
-      signOutControlProps ?? {}
+    const {
+      buttonProps: controlButtonProps,
+      user: providedUser,
+      ...restControlProps
+    } = signOutControlProps ?? {}
 
     const finalButtonProps = controlButtonProps
       ? {

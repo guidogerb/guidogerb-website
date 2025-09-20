@@ -437,10 +437,7 @@ export function ResponsiveSlotProvider({
     return (name) => snapshot?.[name]
   }, [resolveToken, tokenSnapshot])
 
-  const mergedRegistry = useMemo(
-    () => mergeSlotRegistry(baseResponsiveSlots, registry),
-    [registry],
-  )
+  const mergedRegistry = useMemo(() => mergeSlotRegistry(baseResponsiveSlots, registry), [registry])
 
   const activeBreakpoint = useActiveBreakpoint(fallbackBreakpoint)
 
@@ -527,13 +524,17 @@ export function ResponsiveSlot({
   const definition = registry?.[slot]
   const definitionMeta = definition?.meta
   const inheritedMeta = inherit && parentContext?.meta ? parentContext.meta : undefined
-  const meta = useMemo(() => mergeMeta(inheritedMeta, definitionMeta), [inheritedMeta, definitionMeta])
+  const meta = useMemo(
+    () => mergeMeta(inheritedMeta, definitionMeta),
+    [inheritedMeta, definitionMeta],
+  )
   const defaultVariant = meta.defaultVariant || 'default'
   const variantName = variant ?? defaultVariant
 
-  const baseSizes = inherit && parentContext?.byBreakpoint
-    ? parentContext.byBreakpoint
-    : definition?.sizes ?? (definition && !definition.sizes ? definition : undefined)
+  const baseSizes =
+    inherit && parentContext?.byBreakpoint
+      ? parentContext.byBreakpoint
+      : (definition?.sizes ?? (definition && !definition.sizes ? definition : undefined))
 
   const mergedSizes = useMemo(() => {
     if (isContentOnly) return null
@@ -580,7 +581,8 @@ export function ResponsiveSlot({
   datasetProps['data-slot-default-variant'] = defaultVariant
   if (meta?.label) datasetProps['data-slot-label'] = meta.label
   if (meta?.description) datasetProps['data-slot-description'] = meta.description
-  if (meta?.design?.figmaComponent) datasetProps['data-design-component'] = meta.design.figmaComponent
+  if (meta?.design?.figmaComponent)
+    datasetProps['data-design-component'] = meta.design.figmaComponent
   if (meta?.design?.figmaNodeId) datasetProps['data-design-node'] = meta.design.figmaNodeId
   if (meta?.design?.figmaUrl) datasetProps['data-design-url'] = meta.design.figmaUrl
   if (meta?.tags) {

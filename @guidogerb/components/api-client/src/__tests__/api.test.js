@@ -162,7 +162,6 @@ describe('createApi', () => {
       { tenant: 'tenant-2', includeItems: true },
       { query: { locale: 'fr-FR', sort: 'manual' } },
     )
-
     ;[url, init] = fetch.mock.calls[1]
     expect(init.method).toBe('GET')
     parsed = new URL(url)
@@ -286,7 +285,9 @@ describe('createApi', () => {
 
     const api = createApi({ baseUrl: 'https://api.example.com', fetch })
 
-    const download = await api.downloads.getLinkStatus('token/123', { searchParams: { audit: '1' } })
+    const download = await api.downloads.getLinkStatus('token/123', {
+      searchParams: { audit: '1' },
+    })
     let [url, init] = fetch.mock.calls[0]
     expect(init.method).toBe('GET')
     let parsed = new URL(url)
@@ -316,7 +317,9 @@ describe('createApi', () => {
     expect(parsed.searchParams.get('expand')).toBe('payment_intent')
     expect(session.sessionId).toBe('sess_1')
 
-    expect(() => api.downloads.getLinkStatus('')).toThrow('downloads.getLinkStatus requires a token')
+    expect(() => api.downloads.getLinkStatus('')).toThrow(
+      'downloads.getLinkStatus requires a token',
+    )
     expect(() => api.cart.retrieve('')).toThrow('cart.retrieve requires a cartId')
     expect(() => api.checkout.getSession('')).toThrow('checkout.getSession requires a sessionId')
   })

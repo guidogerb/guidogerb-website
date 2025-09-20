@@ -195,15 +195,11 @@ export const createClient = ({
   const send = async (method, path, options = {}) => {
     const methodUpper = method.toUpperCase()
     const retryConfig = options.retry ?? null
-    const {
-      enabled,
-      attempts,
-      delayMs,
-      factor,
-      maxDelayMs,
-      jitterMs,
-      timeoutMs,
-    } = computeRetry(methodUpper, retryConfig, defaultRetry)
+    const { enabled, attempts, delayMs, factor, maxDelayMs, jitterMs, timeoutMs } = computeRetry(
+      methodUpper,
+      retryConfig,
+      defaultRetry,
+    )
     const url = buildUrl(base, path, options.searchParams ?? options.query)
 
     const requestHeaders = new Headers(baseHeaders)
@@ -240,7 +236,11 @@ export const createClient = ({
       signal: options.signal,
     }
 
-    if (body !== undefined && DEFAULT_RETRYABLE_METHODS.has(methodUpper) && !retryConfig?.idempotent) {
+    if (
+      body !== undefined &&
+      DEFAULT_RETRYABLE_METHODS.has(methodUpper) &&
+      !retryConfig?.idempotent
+    ) {
       logWarn('[api-client] Ignoring body on idempotent request', {
         method: methodUpper,
         url,

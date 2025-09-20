@@ -606,10 +606,7 @@ export interface CheckoutApi {
     input: CheckoutSessionRequest,
     options?: RequestOptions,
   ): Promise<CheckoutSessionResponse>
-  getSession(
-    sessionId: string,
-    options?: RequestOptions,
-  ): Promise<CheckoutSessionDetailsResponse>
+  getSession(sessionId: string, options?: RequestOptions): Promise<CheckoutSessionDetailsResponse>
 }
 
 export interface AdminCatalogApi {

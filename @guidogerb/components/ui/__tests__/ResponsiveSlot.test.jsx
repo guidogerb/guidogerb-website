@@ -257,9 +257,7 @@ describe('ResponsiveSlot', () => {
       })
 
       act(() => {
-        window.dispatchEvent(
-          new CustomEvent('theme:change', { detail: { 'space-xl': '64px' } }),
-        )
+        window.dispatchEvent(new CustomEvent('theme:change', { detail: { 'space-xl': '64px' } }))
       })
 
       await waitFor(() => {

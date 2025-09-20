@@ -136,21 +136,24 @@ describe('createClient', () => {
   })
 
   it('aborts requests when timeoutMs elapses', async () => {
-    const fetch = vi.fn((_, init = {}) =>
-      new Promise((_, reject) => {
-        init.signal?.addEventListener(
-          'abort',
-          () => {
-            reject(init.signal.reason)
-          },
-          { once: true },
-        )
-      }),
+    const fetch = vi.fn(
+      (_, init = {}) =>
+        new Promise((_, reject) => {
+          init.signal?.addEventListener(
+            'abort',
+            () => {
+              reject(init.signal.reason)
+            },
+            { once: true },
+          )
+        }),
     )
 
     const client = createClient({ baseUrl: 'https://api.example.com', fetch })
 
-    await expect(client.get('/slow', { retry: { attempts: 1, timeoutMs: 5 } })).rejects.toMatchObject({
+    await expect(
+      client.get('/slow', { retry: { attempts: 1, timeoutMs: 5 } }),
+    ).rejects.toMatchObject({
       name: 'ApiError',
       cause: expect.objectContaining({ message: 'Request timed out' }),
     })
