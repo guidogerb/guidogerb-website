@@ -1,4 +1,5 @@
 import { useAuth } from '@guidogerb/components-auth'
+import partnerResources from '../../partnerResources.js'
 
 export default function Welcome({ children }) {
   const auth = useAuth()
@@ -14,6 +15,7 @@ export default function Welcome({ children }) {
   const name =
     auth?.user?.profile?.['cognito:username'] ?? auth?.user?.profile?.name ?? 'userNotAvailable'
   const email = auth?.user?.profile?.email
+  const { releaseCalendarHref, royaltyTemplateHref, operationsEmailHref } = partnerResources
 
   return (
     <div className="welcome-card">
@@ -25,13 +27,13 @@ export default function Welcome({ children }) {
       </p>
       <ul className="welcome-links">
         <li>
-          <a href="/files/release-calendar.xlsx">Download release calendar</a>
+          <a href={releaseCalendarHref}>Download release calendar</a>
         </li>
         <li>
-          <a href="/files/royalty-report-sample.pdf">Review latest royalty template</a>
+          <a href={royaltyTemplateHref}>Review latest royalty template</a>
         </li>
         <li>
-          <a href="mailto:partners@guidogerbpublishing.com?subject=Catalog%20update%20request">
+          <a href={operationsEmailHref}>
             Email publishing operations
           </a>
         </li>
