@@ -95,4 +95,25 @@ describe('ProtectedRouter', () => {
 
     expect(screen.getByTestId('default-guard')).toHaveTextContent('Missing')
   })
+
+  it('respects defaultFallback overrides when generating a catch-all route', () => {
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/missing'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+        defaultFallback={{
+          title: 'Hola',
+          description: 'No encontramos la página solicitada.',
+          homeHref: '/inicio',
+          homeLabel: 'Volver al inicio',
+        }}
+      />,
+    )
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Hola' })).toBeInTheDocument()
+    expect(screen.getByText('No encontramos la página solicitada.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveAttribute('href', '/inicio')
+    expect(screen.queryByTestId('default-guard')).not.toBeInTheDocument()
+  })
 })

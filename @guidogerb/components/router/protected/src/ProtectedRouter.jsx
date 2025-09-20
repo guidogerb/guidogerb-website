@@ -5,6 +5,7 @@ import { PublicRouter } from '@guidogerb/components-router-public'
 export function ProtectedRouter({
   routes = [],
   fallback,
+  defaultFallback,
   guard = Protected,
   guardProps,
   protectFallback = false,
@@ -32,5 +33,13 @@ export function ProtectedRouter({
     [guard, guardProps, protectFallback, wrapElement],
   )
 
-  return <PublicRouter {...rest} routes={routes} fallback={fallback} wrapElement={guardWrapper} />
+  return (
+    <PublicRouter
+      {...rest}
+      routes={routes}
+      fallback={fallback}
+      defaultFallback={defaultFallback}
+      wrapElement={guardWrapper}
+    />
+  )
 }

@@ -36,4 +36,6 @@ function PortalApp() {
 ```
 
 Set `protectFallback` to guard the catch-all route, or pass a custom `guard`
-component/`guardProps` to integrate alternative authentication flows.
+component/`guardProps` to integrate alternative authentication flows. When you
+omit `fallback`, the helpers generate a default catch-all page – customise or
+disable it via the shared `defaultFallback` option.

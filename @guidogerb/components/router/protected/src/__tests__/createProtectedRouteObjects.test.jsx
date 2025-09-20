@@ -85,11 +85,46 @@ describe('createProtectedRouteObjects', () => {
 
     render(routes[0].element)
 
-    expect(wrapElement).toHaveBeenCalledTimes(1)
-    const [elementArg, meta] = wrapElement.mock.calls[0]
-    expect(meta).toMatchObject({ path: '/', isFallback: false })
+    expect(routes).toHaveLength(2)
+    expect(wrapElement).toHaveBeenCalledTimes(2)
+
+    const routeCall = wrapElement.mock.calls.find(([, meta]) => meta.path === '/')
+    const fallbackCall = wrapElement.mock.calls.find(([, meta]) => meta.isFallback)
+
+    expect(routeCall).toBeDefined()
+    expect(fallbackCall).toBeDefined()
+    expect(routeCall?.[1]).toMatchObject({ path: '/', isFallback: false })
+    expect(fallbackCall?.[1]).toMatchObject({ path: '*', isFallback: true })
+    const [elementArg] = routeCall
     expect(screen.getByTestId('guard')).toBeInTheDocument()
     expect(screen.getByTestId('wrapped')).toHaveAttribute('data-path', '/')
     expect(screen.getByTestId('wrapped')).toHaveTextContent('Home')
+  })
+
+  it('allows disabling the generated fallback route', () => {
+    const routes = createProtectedRouteObjects(
+      [{ path: '/', element: <div>Home</div> }],
+      { defaultFallback: false },
+    )
+
+    expect(routes).toHaveLength(1)
+  })
+
+  it('supports customizing the generated fallback copy', () => {
+    const routes = createProtectedRouteObjects(
+      [{ path: '/', element: <div>Home</div> }],
+      {
+        defaultFallback: {
+          title: 'Hola',
+          homeLabel: 'Inicio',
+          homeHref: '/inicio',
+        },
+      },
+    )
+
+    expect(routes).toHaveLength(2)
+    const fallback = routes[1]
+    expect(fallback.element.props.title).toBe('Hola')
+    expect(fallback.element.props.primaryAction).toMatchObject({ href: '/inicio', label: 'Inicio' })
   })
 })
