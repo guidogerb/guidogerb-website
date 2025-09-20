@@ -89,7 +89,6 @@ describe('createApi', () => {
       { tags: ['vinyl'], sort: 'featured' },
       { query: '?tenant=tenant-1&sort=outdated' },
     )
-
     ;[url] = fetch.mock.calls[1]
     parsed = new URL(url)
     expect(parsed.searchParams.getAll('tags')).toEqual(['vinyl'])
