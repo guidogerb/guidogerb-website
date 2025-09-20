@@ -33,9 +33,7 @@ export default function Welcome({ children }) {
           <a href={royaltyTemplateHref}>Review latest royalty template</a>
         </li>
         <li>
-          <a href={operationsEmailHref}>
-            Email publishing operations
-          </a>
+          <a href={operationsEmailHref}>Email publishing operations</a>
         </li>
       </ul>
       {children}

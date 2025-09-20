@@ -68,22 +68,25 @@ describe('Guidogerb Publishing welcome component', () => {
     expect(screen.getByText('Signed in as partner@example.com')).toBeInTheDocument()
     expect(screen.getByTestId('nested')).toBeInTheDocument()
 
-    expect(
-      screen.getByRole('link', { name: /Download release calendar/i }),
-    ).toHaveAttribute('href', '/files/release-calendar.xlsx')
-    expect(
-      screen.getByRole('link', { name: /Review latest royalty template/i }),
-    ).toHaveAttribute('href', '/files/royalty-report-sample.pdf')
-    expect(
-      screen.getByRole('link', { name: /Email publishing operations/i }),
-    ).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Download release calendar/i })).toHaveAttribute(
+      'href',
+      '/files/release-calendar.xlsx',
+    )
+    expect(screen.getByRole('link', { name: /Review latest royalty template/i })).toHaveAttribute(
+      'href',
+      '/files/royalty-report-sample.pdf',
+    )
+    expect(screen.getByRole('link', { name: /Email publishing operations/i })).toHaveAttribute(
       'href',
       'mailto:partners@guidogerbpublishing.com?subject=Catalog%20update%20request',
     )
   })
 
   it('uses configured resource URLs and mailto address when provided', async () => {
-    vi.stubEnv('VITE_PARTNER_RESOURCES_RELEASE_CALENDAR_URL', 'https://cdn.example.com/calendar.xlsx')
+    vi.stubEnv(
+      'VITE_PARTNER_RESOURCES_RELEASE_CALENDAR_URL',
+      'https://cdn.example.com/calendar.xlsx',
+    )
     vi.stubEnv('VITE_PARTNER_RESOURCES_ROYALTY_TEMPLATE_URL', '/assets/royalty.pdf')
     vi.stubEnv('VITE_PARTNER_RESOURCES_OPERATIONS_EMAIL', 'ops@example.com')
     vi.stubEnv('VITE_PARTNER_RESOURCES_OPERATIONS_EMAIL_SUBJECT', 'Metadata sync request')
@@ -103,14 +106,17 @@ describe('Guidogerb Publishing welcome component', () => {
       screen.getByRole('heading', { level: 3, name: 'Welcome back, catalog-admin!' }),
     ).toBeInTheDocument()
 
-    expect(
-      screen.getByRole('link', { name: /Download release calendar/i }),
-    ).toHaveAttribute('href', 'https://cdn.example.com/calendar.xlsx')
-    expect(
-      screen.getByRole('link', { name: /Review latest royalty template/i }),
-    ).toHaveAttribute('href', '/assets/royalty.pdf')
-    expect(
-      screen.getByRole('link', { name: /Email publishing operations/i }),
-    ).toHaveAttribute('href', 'mailto:ops@example.com?subject=Metadata%20sync%20request')
+    expect(screen.getByRole('link', { name: /Download release calendar/i })).toHaveAttribute(
+      'href',
+      'https://cdn.example.com/calendar.xlsx',
+    )
+    expect(screen.getByRole('link', { name: /Review latest royalty template/i })).toHaveAttribute(
+      'href',
+      '/assets/royalty.pdf',
+    )
+    expect(screen.getByRole('link', { name: /Email publishing operations/i })).toHaveAttribute(
+      'href',
+      'mailto:ops@example.com?subject=Metadata%20sync%20request',
+    )
   })
 })
