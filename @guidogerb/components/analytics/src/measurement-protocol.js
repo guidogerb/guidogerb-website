@@ -171,7 +171,10 @@ export function createMeasurementProtocolClient(options = {}) {
       body.timestamp_micros = Math.round(timestampMicros)
     }
 
-    const mergedUserProps = mergeUserProperties(defaultUserProps, normalizeUserProperties(userProperties))
+    const mergedUserProps = mergeUserProperties(
+      defaultUserProps,
+      normalizeUserProperties(userProperties),
+    )
     if (mergedUserProps) {
       body.user_properties = mergedUserProps
     }

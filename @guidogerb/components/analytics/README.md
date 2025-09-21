@@ -94,16 +94,16 @@ function CustomAnalyticsBridge() {
 
 ### `<Analytics />`
 
-| Prop             | Type                                       | Default      | Description                                                                                                                   |
-| ---------------- | ------------------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `measurementId`  | `string`                                   | **Required** | The GA4 measurement ID (`G-XXXXXXX`). When omitted, the component becomes a no-op.                                            |
-| `debugMode`      | `boolean`                                  | `false`      | Enables GA debug output via the Network panel.                                                                                |
-| `sendPageView`   | `boolean`                                  | `true`       | When `false`, prevents GA from sending the automatic initial `page_view`. Useful when you plan to manage page views manually. |
-| `defaultConsent` | `object`                                   | `undefined`  | Consent defaults passed to `gtag('consent', 'default', ...)` before configuration.                                            |
-| `config`         | `object`                                   | `{}`         | Additional GA configuration merged into `gtag('config', measurementId, config)`.                                              |
-| `initialEvents`  | `Array<{ name: string, params?: object }>` | `[]`         | Events dispatched immediately after GA is configured (e.g., to record the first page view manually).                          |
+| Prop             | Type                                       | Default      | Description                                                                                                                                          |
+| ---------------- | ------------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `measurementId`  | `string`                                   | **Required** | The GA4 measurement ID (`G-XXXXXXX`). When omitted, the component becomes a no-op.                                                                   |
+| `debugMode`      | `boolean`                                  | `false`      | Enables GA debug output via the Network panel.                                                                                                       |
+| `sendPageView`   | `boolean`                                  | `true`       | When `false`, prevents GA from sending the automatic initial `page_view`. Useful when you plan to manage page views manually.                        |
+| `defaultConsent` | `object`                                   | `undefined`  | Consent defaults passed to `gtag('consent', 'default', ...)` before configuration.                                                                   |
+| `config`         | `object`                                   | `{}`         | Additional GA configuration merged into `gtag('config', measurementId, config)`.                                                                     |
+| `initialEvents`  | `Array<{ name: string, params?: object }>` | `[]`         | Events dispatched immediately after GA is configured (e.g., to record the first page view manually).                                                 |
 | `onConsentEvent` | `(event, history) => void`                 | `undefined`  | Callback invoked whenever consent defaults are applied or updated via `consent()`. Receives the event payload and a snapshot of the consent history. |
-| `children`       | `ReactNode`                                | `null`       | The subtree that should have access to analytics helpers.                                                                     |
+| `children`       | `ReactNode`                                | `null`       | The subtree that should have access to analytics helpers.                                                                                            |
 
 ### `useAnalytics()`
 

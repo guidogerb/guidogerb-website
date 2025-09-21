@@ -150,7 +150,8 @@ const normalizeRetentionOptions = (retention, context) => {
 const sanitizeMessagesForStorage = (messages) =>
   messages.map((message) => ({
     role: typeof message?.role === 'string' ? message.role : 'assistant',
-    content: typeof message?.content === 'string' ? message.content : String(message?.content ?? ''),
+    content:
+      typeof message?.content === 'string' ? message.content : String(message?.content ?? ''),
   }))
 
 const extractStoredMessages = (value) => {
@@ -166,7 +167,11 @@ const extractStoredMessages = (value) => {
 }
 
 const getStoredUpdatedAt = (value) => {
-  if (isPlainObject(value) && typeof value.updatedAt === 'number' && Number.isFinite(value.updatedAt)) {
+  if (
+    isPlainObject(value) &&
+    typeof value.updatedAt === 'number' &&
+    Number.isFinite(value.updatedAt)
+  ) {
     return value.updatedAt
   }
 
@@ -609,12 +614,7 @@ export function AiSupport({
     if (!persistedTranscript.expired) return undefined
     resolvedStorage.remove(conversationStorageKey)
     return undefined
-  }, [
-    conversationStorageKey,
-    persistConversation,
-    resolvedStorage,
-    persistedTranscript.expired,
-  ])
+  }, [conversationStorageKey, persistConversation, resolvedStorage, persistedTranscript.expired])
 
   const normalizedInitialMessages = useMemo(
     () => normalizeMessages(initialMessages, { defaultRole: 'system' }),

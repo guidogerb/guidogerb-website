@@ -41,50 +41,50 @@ import { AiSupport } from '@guidogerb/components/ai-support'
 
 ### Props
 
-| Prop                 | Type                                                                                | Default            | Description                                                                                       |
-| -------------------- | ----------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------- |
- | `endpoint`           | `string`                                                                            | —
-   | Required API Gateway endpoint that accepts OpenAI chat-completion payloads.                       |
-| `model`              | `string`                                                                            | `gpt-4o-mini`
-  | Chat-completion model identifier sent to the gateway.                                             |
-| `method`             | `string`                                                                            | `POST`
-  | HTTP verb for the request (POST is recommended).                                                  |
-| `headers`            | `Record<string, string>`                                                            | `{}`
-  | Additional headers merged with `Content-Type: application/json`.                                  |
-| `temperature`        | `number`                                                                            | `0.2`
-  | Temperature parameter forwarded to the chat endpoint.                                             |
-| `topP`               | `number`                                                                            | `1`
-  | Top-p nucleus sampling value forwarded to the chat endpoint.                                      |
-| `userContext`        | `Record<string, unknown> \| string`                                                 | `undefined`
-  | Supplemental context serialized into a system message and (if possible) the `user` field.         |
-| `historyLimit`       | `number`                                                                            | `10`
-  | Maximum number of conversation turns retained in local state (earliest system message is pinned). |
-| `initialMessages`    | `Array<{ role: string; content: string } \| string>`                                | `[]`
-  | Seed conversation (commonly a system primer); counted against the history limit.                  |
-| `storage`            | `ReturnType<typeof createStorageController>`                                       | `undefined`
-  | Optional storage controller used to persist transcripts. Defaults to the bundled controller when omitted. |
-| `storageNamespace`   | `string`                                                                            | `'guidogerb.ai-support'`
-  | Namespace passed to the default transcript storage controller.                                    |
-| `storageKey`         | `string`                                                                            | `'transcript'`
-  | Base key used for transcript persistence (the resolved `tenantId` is appended automatically).     |
-| `tenantId`           | `string`                                                                            | `'default'`
-  | Identifier that scopes persisted transcripts per tenant/environment.                              |
-| `persistConversation`| `boolean`                                                                          | `true`
-  | Disable persistence when set to `false`, keeping conversation history in memory only.             |
-| `transcriptRetention`| `number \| RetentionOptions \| (context) => RetentionOptions`                     | `undefined`
-  | Optional retention rules (max age/max messages) applied before saving transcripts.                 |
-| `guardrail`          | `({ input, messages, userContext }) => Promise<GuardrailResult> \| GuardrailResult` | `undefined`
-  | Hook invoked before dispatch; can allow, transform, or block the prompt.                          |
-| `embeddingRetriever` | `({ input, messages, userContext }) => Promise<RagResult> \| RagResult`             | `undefined`
-  | Hook that returns contextual documents/messages injected as system prompts for RAG.               |
-| `fetcher`            | `(url, init) => Promise<Response>`                                                  | `globalThis.fetch`
-  | Override fetch implementation (useful for SSR/testing).                                           |
-| `className`          | `string`                                                                            | `''`
-  | Optional class name applied to the root element for theming.                                      |
-| `onResponse`         | `({ data, request, assistantMessage, rag, guardrail }) => void`                     | `undefined`
-  | Called when the gateway responds successfully.                                                    |
-| `onError`            | `(error) => void`                                                                   | `undefined`
-  | Invoked whenever a guardrail, retriever, or network error occurs.                                 |
+| Prop                                                                                                      | Type                                                                                | Default                  | Description |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------ | ----------- |
+| `endpoint`                                                                                                | `string`                                                                            | —                        |
+| Required API Gateway endpoint that accepts OpenAI chat-completion payloads.                               |
+| `model`                                                                                                   | `string`                                                                            | `gpt-4o-mini`            |
+| Chat-completion model identifier sent to the gateway.                                                     |
+| `method`                                                                                                  | `string`                                                                            | `POST`                   |
+| HTTP verb for the request (POST is recommended).                                                          |
+| `headers`                                                                                                 | `Record<string, string>`                                                            | `{}`                     |
+| Additional headers merged with `Content-Type: application/json`.                                          |
+| `temperature`                                                                                             | `number`                                                                            | `0.2`                    |
+| Temperature parameter forwarded to the chat endpoint.                                                     |
+| `topP`                                                                                                    | `number`                                                                            | `1`                      |
+| Top-p nucleus sampling value forwarded to the chat endpoint.                                              |
+| `userContext`                                                                                             | `Record<string, unknown> \| string`                                                 | `undefined`              |
+| Supplemental context serialized into a system message and (if possible) the `user` field.                 |
+| `historyLimit`                                                                                            | `number`                                                                            | `10`                     |
+| Maximum number of conversation turns retained in local state (earliest system message is pinned).         |
+| `initialMessages`                                                                                         | `Array<{ role: string; content: string } \| string>`                                | `[]`                     |
+| Seed conversation (commonly a system primer); counted against the history limit.                          |
+| `storage`                                                                                                 | `ReturnType<typeof createStorageController>`                                        | `undefined`              |
+| Optional storage controller used to persist transcripts. Defaults to the bundled controller when omitted. |
+| `storageNamespace`                                                                                        | `string`                                                                            | `'guidogerb.ai-support'` |
+| Namespace passed to the default transcript storage controller.                                            |
+| `storageKey`                                                                                              | `string`                                                                            | `'transcript'`           |
+| Base key used for transcript persistence (the resolved `tenantId` is appended automatically).             |
+| `tenantId`                                                                                                | `string`                                                                            | `'default'`              |
+| Identifier that scopes persisted transcripts per tenant/environment.                                      |
+| `persistConversation`                                                                                     | `boolean`                                                                           | `true`                   |
+| Disable persistence when set to `false`, keeping conversation history in memory only.                     |
+| `transcriptRetention`                                                                                     | `number \| RetentionOptions \| (context) => RetentionOptions`                       | `undefined`              |
+| Optional retention rules (max age/max messages) applied before saving transcripts.                        |
+| `guardrail`                                                                                               | `({ input, messages, userContext }) => Promise<GuardrailResult> \| GuardrailResult` | `undefined`              |
+| Hook invoked before dispatch; can allow, transform, or block the prompt.                                  |
+| `embeddingRetriever`                                                                                      | `({ input, messages, userContext }) => Promise<RagResult> \| RagResult`             | `undefined`              |
+| Hook that returns contextual documents/messages injected as system prompts for RAG.                       |
+| `fetcher`                                                                                                 | `(url, init) => Promise<Response>`                                                  | `globalThis.fetch`       |
+| Override fetch implementation (useful for SSR/testing).                                                   |
+| `className`                                                                                               | `string`                                                                            | `''`                     |
+| Optional class name applied to the root element for theming.                                              |
+| `onResponse`                                                                                              | `({ data, request, assistantMessage, rag, guardrail }) => void`                     | `undefined`              |
+| Called when the gateway responds successfully.                                                            |
+| `onError`                                                                                                 | `(error) => void`                                                                   | `undefined`              |
+| Invoked whenever a guardrail, retriever, or network error occurs.                                         |
 
 `RetentionOptions` supports `maxAgeMs` (milliseconds) and `maxMessages`. When a function is provided it receives `{ tenantId }` and should return a `RetentionOptions` object or `undefined`.
 

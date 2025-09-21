@@ -32,7 +32,9 @@ describe('createMeasurementProtocolClient', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const [url, options] = fetchMock.mock.calls[0]
-    expect(url).toBe(`${MEASUREMENT_PROTOCOL_ENDPOINT}?measurement_id=G-TEST123&api_secret=secret-key`)
+    expect(url).toBe(
+      `${MEASUREMENT_PROTOCOL_ENDPOINT}?measurement_id=G-TEST123&api_secret=secret-key`,
+    )
     expect(options).toMatchObject({ method: 'POST' })
     expect(options.headers['content-type']).toBe('application/json')
 
@@ -101,7 +103,9 @@ describe('createMeasurementProtocolClient', () => {
     })
 
     const [url] = fetchMock.mock.calls[0]
-    expect(url).toBe(`${MEASUREMENT_PROTOCOL_DEBUG_ENDPOINT}?measurement_id=G-DEBUG&api_secret=secret-key`)
+    expect(url).toBe(
+      `${MEASUREMENT_PROTOCOL_DEBUG_ENDPOINT}?measurement_id=G-DEBUG&api_secret=secret-key`,
+    )
   })
 
   it('throws when required identifiers or events are missing', async () => {

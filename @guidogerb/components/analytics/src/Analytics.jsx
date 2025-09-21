@@ -111,10 +111,7 @@ const Analytics = ({
     return history.length > 0 ? history[history.length - 1] : null
   }, [])
 
-  const getConsentHistory = useCallback(
-    () => consentHistoryRef.current.slice(),
-    [],
-  )
+  const getConsentHistory = useCallback(() => consentHistoryRef.current.slice(), [])
 
   const subscribeToConsent = useCallback((listener) => {
     if (typeof listener !== 'function') {
@@ -141,8 +138,8 @@ const Analytics = ({
       isNonEmptyString(mode) && mode !== 'default'
         ? mode
         : eventType === 'update'
-        ? 'update'
-        : 'default'
+          ? 'update'
+          : 'default'
     const normalizedSettings = isPlainObject(settings) ? { ...settings } : {}
 
     const event = {

@@ -261,9 +261,7 @@ describe('AiSupport', () => {
 
     vi.stubGlobal('fetch', fetchMock)
 
-    render(
-      <AiSupport endpoint="/api/ai/support" storage={storage} tenantId="tenant-42" />,
-    )
+    render(<AiSupport endpoint="/api/ai/support" storage={storage} tenantId="tenant-42" />)
 
     fireEvent.change(screen.getByLabelText('Message'), {
       target: { value: 'Hello there' },
