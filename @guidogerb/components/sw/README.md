@@ -41,6 +41,28 @@ await unregisterSW()
     `onUpdateReady`, `onControllerChange`, `onRegisterError`) surface registration
     milestones.
 - `unregisterSW()` removes every active registration for the current origin.
+- `createCachePreferenceSubscriber(options)` returns a read-only channel that listens to
+  cache preference broadcasts from `@guidogerb/components-storage`. Subscribers receive
+  merged preference objects and can optionally request an initial snapshot.
 
-Future revisions will subscribe to cache preferences published by
-`@guidogerb/components-storage` so tenants can toggle offline buckets at runtime.
+## Cache preferences
+
+```ts
+import {
+  createCachePreferenceSubscriber,
+  DEFAULT_CACHE_PREFERENCES,
+} from '@guidogerb/components-sw'
+
+const cachePreferences = createCachePreferenceSubscriber()
+
+const unsubscribe = cachePreferences.subscribe(({ origin, preferences }) => {
+  console.log('Cache settings updated by', origin, preferences)
+})
+
+// Access the latest merged view without waiting for an event
+const snapshot = cachePreferences.getPreferences() ?? DEFAULT_CACHE_PREFERENCES
+
+// Later, when the listener is no longer needed
+unsubscribe()
+cachePreferences.destroy()
+```

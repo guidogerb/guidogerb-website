@@ -14,6 +14,10 @@
       "import": "./index.js",
       "require": "./index.js"
     },
+    "./cache-preferences": {
+      "import": "./src/cachePreferencesChannel.js",
+      "require": "./src/cachePreferencesChannel.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

@@ -15,6 +15,8 @@ It also owns the configuration switches that let applications enable, disable, o
 - `useStoredValue` — stateful helper that keeps component state in sync with a key in the selected storage area and exposes
   setters/removers similar to `useState`.
 - `createStorageController` — factory for constructing standalone controllers when direct access is needed outside React.
+- `createCachePreferenceChannel` / `DEFAULT_CACHE_PREFERENCES` — observable cache governance helpers that persist toggles,
+  broadcast updates via `BroadcastChannel`, and keep service worker subscribers in sync.
 
 ## Usage
 
@@ -54,15 +56,37 @@ export function App() {
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Storage controller | ✅ Available via `createStorageController`. Returns scoped accessors (`get`, `set`, `remove`, `list`) and gracefully falls back when `window` is unavailable. |
 | Cookie utilities   | ⏳ Lightweight encoder/decoder helpers plus batched update support for multi-cookie workflows.                                                                |
-| Cache governance   | ⏳ Shared channel (e.g., BroadcastChannel, event emitter, or observable store) that exposes caching preferences for the service worker to consume.            |
+| Cache governance   | ✅ Cache preference channel that persists toggles and multicasts them to service worker helpers via `BroadcastChannel`. |
 | Diagnostics        | ⏳ Optional logging hooks so apps can trace cache/storage mutations during development.                                                                       |
 
 ## Integration with `@guidogerb/components/sw`
 
-The storage controller will publish cache policy updates (such as disabled asset caching, API cache TTL overrides, or prefetch
-manifests) through the shared channel above. The service worker helpers will subscribe to those updates to adjust their caching
-behaviour without requiring a redeploy. This keeps runtime toggles (for privacy modes, tenant-specific caching, etc.) in one
-place while ensuring the worker always follows the latest settings.
+The storage package now exposes `createCachePreferenceChannel`, a lightweight store that persists cache policy updates under a
+single key and multicasts them through `BroadcastChannel`. Consumers can call `updatePreferences` with partial objects (for
+example `{ assets: { enabled: false } }`) and every subscriber—including `@guidogerb/components-sw`—receives a structured event
+with the merged preferences. The service worker helpers use the same channel name so toggles propagate immediately without a
+redeploy.
+
+```js
+import {
+  createCachePreferenceChannel,
+  DEFAULT_CACHE_PREFERENCES,
+} from '@guidogerb/components-storage/cache-preferences'
+
+const cacheChannel = createCachePreferenceChannel({
+  storageController,
+  defaultPreferences: DEFAULT_CACHE_PREFERENCES,
+})
+
+cacheChannel.updatePreferences({
+  assets: { enabled: false },
+  api: { maxAgeSeconds: 120 },
+})
+
+cacheChannel.subscribe(({ origin, preferences }) => {
+  console.info('Cache preferences changed by', origin, preferences)
+})
+```
 
 ## Testing roadmap
 

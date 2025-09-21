@@ -1,4 +1,10 @@
-import { registerSW, unregisterSW } from '../index.js'
+import {
+  DEFAULT_CACHE_PREFERENCES,
+  createCachePreferenceSubscriber,
+  registerSW,
+  unregisterSW,
+} from '../index.js'
+import { createCachePreferenceChannel } from '@guidogerb/components-storage/cache-preferences'
 
 const originalDescriptor = Object.getOwnPropertyDescriptor(window.navigator, 'serviceWorker')
 const originalReadyStateDescriptor = Object.getOwnPropertyDescriptor(document, 'readyState')
@@ -81,6 +87,40 @@ const createMockServiceWorker = ({ registerResult, controller = {} } = {}) => {
     set controller(value) {
       controllerRef = value
     },
+  }
+}
+
+const createBroadcastFactory = () => {
+  const peers = new Set()
+
+  return () => {
+    const listeners = new Set()
+    const channel = {
+      listeners,
+      closed: false,
+      addEventListener(event, handler) {
+        if (event !== 'message' || typeof handler !== 'function') return
+        listeners.add(handler)
+      },
+      removeEventListener(event, handler) {
+        if (event !== 'message' || typeof handler !== 'function') return
+        listeners.delete(handler)
+      },
+      postMessage(message) {
+        for (const peer of peers) {
+          if (peer.closed) continue
+          peer.listeners.forEach((listener) => listener({ data: message }))
+        }
+      },
+      close() {
+        channel.closed = true
+        peers.delete(channel)
+        listeners.clear()
+      },
+    }
+
+    peers.add(channel)
+    return channel
   }
 }
 
@@ -241,5 +281,63 @@ describe('service worker helpers', () => {
     delete window.navigator.serviceWorker
 
     expect(unregisterSW()).toBeUndefined()
+  })
+})
+
+describe('cache preference subscriber', () => {
+  it('receives broadcast updates and mirrors the latest preferences', () => {
+    const broadcastFactory = createBroadcastFactory()
+
+    const publisher = createCachePreferenceChannel({
+      broadcastChannelFactory: broadcastFactory,
+      persist: false,
+    })
+
+    const subscriber = createCachePreferenceSubscriber({
+      broadcastChannelFactory: broadcastFactory,
+      logger: { warn: vi.fn(), error: vi.fn() },
+    })
+
+    const handler = vi.fn()
+    subscriber.subscribe(handler)
+
+    publisher.updatePreferences({
+      assets: { enabled: false },
+      api: { maxAgeSeconds: 90 },
+    })
+
+    expect(subscriber.getPreferences().assets.enabled).toBe(false)
+    expect(subscriber.getPreferences().api.maxAgeSeconds).toBe(90)
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: 'broadcast',
+        preferences: expect.objectContaining({
+          assets: expect.objectContaining({ enabled: false }),
+        }),
+      }),
+    )
+
+    publisher.destroy()
+    subscriber.destroy()
+  })
+
+  it('can emit an initial snapshot when requested', () => {
+    const subscriber = createCachePreferenceSubscriber({
+      broadcastChannelFactory: createBroadcastFactory(),
+      logger: { warn: vi.fn(), error: vi.fn() },
+    })
+
+    const handler = vi.fn()
+    subscriber.subscribe(handler, { emitInitial: true })
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: 'initial',
+        preferences: DEFAULT_CACHE_PREFERENCES,
+      }),
+    )
+
+    subscriber.destroy()
   })
 })

@@ -1,3 +1,12 @@
+import { createCachePreferenceChannel } from '@guidogerb/components-storage/cache-preferences'
+
+export {
+  CACHE_PREFERENCE_CHANNEL_NAME,
+  CACHE_PREFERENCE_MESSAGE_TYPE,
+  CACHE_PREFERENCE_VERSION,
+  DEFAULT_CACHE_PREFERENCES,
+} from '@guidogerb/components-storage/cache-preferences'
+
 const createDeferred = () => {
   let resolve
   let reject
@@ -164,4 +173,33 @@ export function unregisterSW() {
     .getRegistrations()
     .then((registrations) => registrations.forEach((registration) => registration.unregister()))
     .catch(() => void 0)
+}
+
+export function createCachePreferenceSubscriber(options = {}) {
+  const {
+    broadcastChannelFactory,
+    channelName,
+    defaultPreferences,
+    initialPreferences,
+    logger = console,
+    sourceId,
+  } = options ?? {}
+
+  const channel = createCachePreferenceChannel({
+    broadcastChannelFactory,
+    channelName,
+    defaultPreferences,
+    initialPreferences,
+    logger,
+    persist: false,
+    sourceId,
+  })
+
+  return Object.freeze({
+    channelName: channel.channelName,
+    version: channel.version,
+    getPreferences: channel.getPreferences,
+    subscribe: channel.subscribe,
+    destroy: channel.destroy,
+  })
 }
