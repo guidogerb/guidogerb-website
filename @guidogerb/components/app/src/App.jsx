@@ -233,15 +233,14 @@ const normalizePublicPages = (publicPages, { navigation } = {}) => {
   const config = isObject(publicPages) ? publicPages : {}
 
   const navigationConfig = isObject(navigation) ? navigation : {}
-  const navigationItems = Array.isArray(navigationConfig.items)
-    ? navigationConfig.items
-    : undefined
+  const navigationItems = Array.isArray(navigationConfig.items) ? navigationConfig.items : undefined
 
   const landingProps = {
     navigation,
     navigationItems: navigationItems?.length ? navigationItems : DEFAULT_NAVIGATION_ITEMS,
     navigationActivePath:
-      typeof navigationConfig.activePath === 'string' && navigationConfig.activePath.trim().length > 0
+      typeof navigationConfig.activePath === 'string' &&
+      navigationConfig.activePath.trim().length > 0
         ? navigationConfig.activePath
         : '/',
     navigationOnNavigate:
@@ -639,7 +638,8 @@ function DefaultMarketingLanding({
   const resolvedActivePath =
     typeof navigationActivePath === 'string' && navigationActivePath.trim().length > 0
       ? navigationActivePath
-      : typeof navigationConfig.activePath === 'string' && navigationConfig.activePath.trim().length > 0
+      : typeof navigationConfig.activePath === 'string' &&
+          navigationConfig.activePath.trim().length > 0
         ? navigationConfig.activePath
         : '/'
 

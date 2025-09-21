@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
 import {
-      CartProvider,
-    CheckoutForm,
-    ShoppingCart,
-    useCart,
+  CartProvider,
+  CheckoutForm,
+  ShoppingCart,
+  useCart,
 } from '@guidogerb/components-shopping-cart'
 import { UserProvider } from './context/UserContext.jsx'
 import { useUser } from './context/UserContext.jsx'

@@ -26,8 +26,8 @@ that truly differ per tenant:
 | `@guidogerb/components-ui`               | Wrap the app in the design system provider and expose shared layout primitives so tokens, typography, and chrome match the Guidogerb brand. | `themeOverrides` plus slot props for header/footer overrides.                   |
 | `@guidogerb/components-router-public`    | Provide the canonical public router instance so marketing URLs resolve consistently.                                                        | `publicRoutes` prop to register tenant-specific routes.                         |
 | `@guidogerb/components-router-protected` | Supply the protected router configured with authentication guards.                                                                          | `protectedRoutes`, optional breadcrumb metadata.                                |
-| `@guidogerb/components-sw`               | Register the standard service worker (`/sw.js`) so offline caching is immediately available.                                                | `serviceWorker` prop forwards custom registration options.                |
-| `@guidogerb/components-storage`          | Create a storage namespace (`guidogerb.app`) used by auth and feature flags.                                                                | `storage` props configure alternate namespaces and persistence.                                    |
+| `@guidogerb/components-sw`               | Register the standard service worker (`/sw.js`) so offline caching is immediately available.                                                | `serviceWorker` prop forwards custom registration options.                      |
+| `@guidogerb/components-storage`          | Create a storage namespace (`guidogerb.app`) used by auth and feature flags.                                                                | `storage` props configure alternate namespaces and persistence.                 |
 
 `<AppBasic />` now composes the provider stack, shared marketing landing, protected router, and
 chrome so tenant projects can render both public and authenticated routes without manual wiring.

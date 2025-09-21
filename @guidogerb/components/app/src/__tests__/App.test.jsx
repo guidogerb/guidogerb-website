@@ -244,7 +244,14 @@ describe('AppBasic', () => {
 
   it('forwards custom service worker options when provided', async () => {
     render(
-      <AppBasic serviceWorker={{ url: '/tenant/sw.js', immediate: true, scope: '/tenant', onOfflineReady: vi.fn() }} />,
+      <AppBasic
+        serviceWorker={{
+          url: '/tenant/sw.js',
+          immediate: true,
+          scope: '/tenant',
+          onOfflineReady: vi.fn(),
+        }}
+      />,
     )
 
     await waitFor(() => {
@@ -267,7 +274,10 @@ describe('AppBasic', () => {
     const previewNav = await screen.findByRole('navigation', { name: /app navigation/i })
     const dashboardLink = within(previewNav).getByRole('link', { name: /dashboard/i })
 
-    expect(within(previewNav).getByRole('link', { name: /welcome/i })).toHaveAttribute('aria-current', 'page')
+    expect(within(previewNav).getByRole('link', { name: /welcome/i })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
 
     await user.click(dashboardLink)
 
@@ -325,13 +335,9 @@ describe('AppBasic', () => {
       ]),
     )
 
-    expect(routerProps.fallback).toEqual(
-      expect.objectContaining({ path: '*', isFallback: true }),
-    )
+    expect(routerProps.fallback).toEqual(expect.objectContaining({ path: '*', isFallback: true }))
     const expectedLogout = `${window.location.origin}/auth/logout`
-    expect(routerProps.guardProps).toEqual(
-      expect.objectContaining({ logoutUri: expectedLogout }),
-    )
+    expect(routerProps.guardProps).toEqual(expect.objectContaining({ logoutUri: expectedLogout }))
     expect(routerProps.protectFallback).toBe(true)
     expect(routerProps.basename).toBe('/app-shell')
     expect(routerProps.routerOptions).toEqual({ future: { v7_normalizeFormMethod: true } })
@@ -345,7 +351,9 @@ describe('AppBasic', () => {
     ]
 
     render(
-      <AppBasic navigation={{ items: navItems, activePath: '/account', onNavigate: handleNavigate }} />,
+      <AppBasic
+        navigation={{ items: navItems, activePath: '/account', onNavigate: handleNavigate }}
+      />,
     )
 
     const providerProps = mocks.headerProvider.mock.calls.at(-1)?.[0] ?? {}
@@ -371,9 +379,7 @@ describe('AppBasic', () => {
     cleanup()
     mocks.storage.mockClear()
 
-    render(
-      <AppBasic storage={{ namespace: 'tenant.app', mode: 'session', persist: false }} />,
-    )
+    render(<AppBasic storage={{ namespace: 'tenant.app', mode: 'session', persist: false }} />)
 
     const storageProps = mocks.storage.mock.calls.at(-1)?.[0] ?? {}
     expect(storageProps.namespace).toBe('tenant.app')
