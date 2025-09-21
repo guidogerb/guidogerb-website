@@ -339,7 +339,7 @@ describe('PointOfSale', () => {
         },
       ]),
       createPaymentIntent: vi.fn().mockResolvedValue({ id: 'pi_789', clientSecret: 'cs_test_789' }),
-      createInvoice: vi.fn().mockRejectedValue(new Error('offline')), 
+      createInvoice: vi.fn().mockRejectedValue(new Error('offline')),
       listInvoices: vi.fn().mockResolvedValue([]),
       listOrders: vi.fn().mockResolvedValue([]),
       recordOrder: vi.fn(),

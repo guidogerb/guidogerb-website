@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
 import {
-  CartProvider,
-  CheckoutForm,
-  ShoppingCart,
-  useCart,
+      CartProvider,
+    CheckoutForm,
+    ShoppingCart,
+    useCart,
 } from '@guidogerb/components-shopping-cart'
 import { UserProvider } from './context/UserContext.jsx'
 import { useUser } from './context/UserContext.jsx'
@@ -107,7 +107,8 @@ const normalizeHandoffEntries = (entries, limit = 5) => {
     normalized.push({
       ...entry,
       id,
-      status: entry.status === HANDOFF_STATUS_PENDING ? HANDOFF_STATUS_PENDING : HANDOFF_STATUS_SYNCED,
+      status:
+        entry.status === HANDOFF_STATUS_PENDING ? HANDOFF_STATUS_PENDING : HANDOFF_STATUS_SYNCED,
       createdAt: entry.createdAt ?? Date.now(),
     })
     if (normalized.length >= limit) break
@@ -241,7 +242,7 @@ const PointOfSaleExperience = ({
     (updater) => {
       if (!handoffStorage?.set || maxStoredHandoffs <= 0) return
       setHandoffs((prev) => {
-        const nextEntries = typeof updater === 'function' ? updater(prev) : updater ?? []
+                const nextEntries = typeof updater === 'function' ? updater(prev) : updater ?? []
         const normalized = normalizeHandoffEntries(nextEntries, maxStoredHandoffs)
         if (handoffEntriesEqual(prev, normalized)) return prev
         handoffStorage.set(handoffStorageKey, normalized)
@@ -464,8 +465,7 @@ const PointOfSaleExperience = ({
             user,
             metadata: metadataPayload,
           })
-          resolvedInvoice =
-            invoiceResponse?.invoice ?? invoiceResponse ?? fallbackInvoice
+          resolvedInvoice = invoiceResponse?.invoice ?? invoiceResponse ?? fallbackInvoice
           persistenceStatus = HANDOFF_STATUS_SYNCED
         } catch (error) {
           persistenceError = error
@@ -483,14 +483,10 @@ const PointOfSaleExperience = ({
         buildOrderFromInvoice(fallbackInvoice, { totals: snapshot.totals, user })
 
       setActiveInvoice(resolvedInvoice)
-      setInvoices((prev) =>
-        mergeByKey(prev, [resolvedInvoice], (item) => item?.id ?? item?.number),
-      )
+      setInvoices((prev) => mergeByKey(prev, [resolvedInvoice], (item) => item?.id ?? item?.number))
 
       if (orderRecord) {
-        setOrders((prev) =>
-          mergeByKey(prev, [orderRecord], (item) => item?.id ?? item?.number),
-        )
+        setOrders((prev) => mergeByKey(prev, [orderRecord], (item) => item?.id ?? item?.number))
       }
 
       if (persistenceStatus === HANDOFF_STATUS_SYNCED && posApi?.recordOrder) {
@@ -523,9 +519,7 @@ const PointOfSaleExperience = ({
             cart: snapshot,
             paymentIntent: paymentIntentResult,
             paymentIntentId: paymentIntentResult?.id ?? null,
-            user: user
-              ? { id: user.id, name: user.name, email: user.email }
-              : null,
+            user: user ? { id: user.id, name: user.name, email: user.email } : null,
             metadata: metadataPayload,
           }
           return [nextEntry, ...filtered]
@@ -634,7 +628,6 @@ const PointOfSaleExperience = ({
           setIsLoadingInvoices(false)
           setView('invoice')
         })
-
     },
     [invoices, posApi],
   )
@@ -662,8 +655,7 @@ const PointOfSaleExperience = ({
       for (const entry of pending) {
         if (cancelled) return
         const paymentIntentPayload =
-          entry.paymentIntent ??
-          (entry.paymentIntentId ? { id: entry.paymentIntentId } : null)
+          entry.paymentIntent ?? (entry.paymentIntentId ? { id: entry.paymentIntentId } : null)
         const userSnapshot = entry.user ?? user
         try {
           const invoiceResponse = await posApi.createInvoice({
@@ -718,9 +710,7 @@ const PointOfSaleExperience = ({
           }
 
           if (orderRecord) {
-            setOrders((prev) =>
-              mergeByKey(prev, [orderRecord], (item) => item?.id ?? item?.number),
-            )
+            setOrders((prev) => mergeByKey(prev, [orderRecord], (item) => item?.id ?? item?.number))
           }
         } catch (error) {
           if (cancelled) return
