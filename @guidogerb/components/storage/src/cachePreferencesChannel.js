@@ -1,6 +1,7 @@
 import { createStorageController } from './createStorageController.js'
 
-const isPlainObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value)
+const isPlainObject = (value) =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const cloneValue = (value) => {
   if (Array.isArray(value)) {
@@ -110,11 +111,7 @@ export const DEFAULT_CACHE_PREFERENCES = deepFreeze({
   },
 })
 
-const resolveBroadcastChannel = ({
-  channelName,
-  broadcastChannelFactory,
-  logger,
-}) => {
+const resolveBroadcastChannel = ({ channelName, broadcastChannelFactory, logger }) => {
   if (typeof broadcastChannelFactory === 'function') {
     try {
       return broadcastChannelFactory(channelName)
@@ -165,9 +162,7 @@ export const createCachePreferenceChannel = (options = {}) => {
     sourceId = `cache-pref-${Math.random().toString(16).slice(2)}`,
   } = options ?? {}
 
-  const controller = persist
-    ? storageController ?? createController()
-    : null
+  const controller = persist ? (storageController ?? createController()) : null
 
   const readInitial = () => {
     if (initialPreferences) {
@@ -197,13 +192,16 @@ export const createCachePreferenceChannel = (options = {}) => {
     safeNotify(listeners, logger, event)
   }
 
-  const commit = (value, {
-    origin = 'local',
-    persist: shouldPersist = persist,
-    broadcast: shouldBroadcast = true,
-    timestamp,
-    emitter,
-  } = {}) => {
+  const commit = (
+    value,
+    {
+      origin = 'local',
+      persist: shouldPersist = persist,
+      broadcast: shouldBroadcast = true,
+      timestamp,
+      emitter,
+    } = {},
+  ) => {
     const normalized = normalizePreferences(value, defaultPreferences)
     if (deepEqual(normalized, current)) {
       return current

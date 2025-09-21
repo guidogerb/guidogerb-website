@@ -56,7 +56,7 @@ export function App() {
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Storage controller | ✅ Available via `createStorageController`. Returns scoped accessors (`get`, `set`, `remove`, `list`) and gracefully falls back when `window` is unavailable. |
 | Cookie utilities   | ⏳ Lightweight encoder/decoder helpers plus batched update support for multi-cookie workflows.                                                                |
-| Cache governance   | ✅ Cache preference channel that persists toggles and multicasts them to service worker helpers via `BroadcastChannel`. |
+| Cache governance   | ✅ Cache preference channel that persists toggles and multicasts them to service worker helpers via `BroadcastChannel`.                                       |
 | Diagnostics        | ⏳ Optional logging hooks so apps can trace cache/storage mutations during development.                                                                       |
 
 ## Integration with `@guidogerb/components/sw`
