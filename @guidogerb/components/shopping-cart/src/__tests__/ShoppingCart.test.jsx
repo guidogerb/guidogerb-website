@@ -163,7 +163,9 @@ describe('ShoppingCart package', () => {
     expect(bundleHeadings.map((heading) => heading.textContent)).toEqual(
       expect.arrayContaining(['Vinyl Record', 'Poster']),
     )
-    const posterRow = bundleHeadings.find((heading) => heading.textContent === 'Poster')?.closest('li')
+    const posterRow = bundleHeadings
+      .find((heading) => heading.textContent === 'Poster')
+      ?.closest('li')
     const vinylRow = bundleHeadings
       .find((heading) => heading.textContent === 'Vinyl Record')
       ?.closest('li')
@@ -207,7 +209,7 @@ describe('ShoppingCart package', () => {
         metadata={{ orderId: 'order-1' }}
         onPaymentSuccess={onPaymentSuccess}
         onPaymentError={onPaymentError}
-      />, 
+      />,
     )
 
     expect(screen.getByTestId('payment-element')).toBeInTheDocument()
@@ -350,7 +352,10 @@ describe('ShoppingCart package', () => {
     })
 
     expect(analyticsMock.trackEvent).toHaveBeenCalledTimes(2)
-    const cartClears = analyticsMock.trackEvent.mock.calls.map(([name, params]) => ({ name, params }))
+    const cartClears = analyticsMock.trackEvent.mock.calls.map(([name, params]) => ({
+      name,
+      params,
+    }))
     expect(cartClears.every((event) => event.name === 'remove_from_cart')).toBe(true)
     expect(cartClears.flatMap((event) => event.params.items)).toEqual(
       expect.arrayContaining([

@@ -77,9 +77,7 @@ export function ShoppingCart({
                           <div>
                             <h4>{bundleItem.name}</h4>
                             {bundleItem.description && <p>{bundleItem.description}</p>}
-                            <p className="gg-pos__cart-bundle-item-quantity">
-                              Qty {totalQuantity}
-                            </p>
+                            <p className="gg-pos__cart-bundle-item-quantity">Qty {totalQuantity}</p>
                           </div>
                           <div className="gg-pos__cart-bundle-item-price">
                             {formatMoney(bundleItem.price.amount, bundleItem.price.currency)}

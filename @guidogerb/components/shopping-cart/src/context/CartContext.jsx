@@ -54,7 +54,11 @@ const normalizeBundleComponent = (component, { parentId, bundleId, currency, ind
 
   const perBundleQuantity = ensureNumber(component.quantity, 1)
   const normalizedId =
-    component.id ?? component.sku ?? component.productId ?? component.product_id ?? buildBundleComponentId(bundleId, component, index)
+    component.id ??
+    component.sku ??
+    component.productId ??
+    component.product_id ??
+    buildBundleComponentId(bundleId, component, index)
   const lineId = buildBundleComponentId(bundleId, component, index)
 
   const price = normalizePrice(component.price ?? component, currency)
@@ -106,7 +110,9 @@ const mergeBundleItems = (existing = [], incoming = []) => {
       quantity: current.quantity,
       includeInTotals: item.includeInTotals ?? current.includeInTotals,
       categories:
-        Array.isArray(item.categories) && item.categories.length > 0 ? item.categories : current.categories,
+        Array.isArray(item.categories) && item.categories.length > 0
+          ? item.categories
+          : current.categories,
       image: item.image ?? current.image,
       inventoryId: item.inventoryId ?? current.inventoryId,
       trackInventory: item.trackInventory ?? current.trackInventory,
@@ -126,12 +132,7 @@ const normalizeItem = (item) => {
   const basePrice = normalizePrice(item.price ?? item, item.price?.currency ?? item.currency)
 
   const bundleId =
-    item.bundleId ??
-    item.bundle_id ??
-    item.bundle?.id ??
-    item.bundleKey ??
-    item.bundle_key ??
-    null
+    item.bundleId ?? item.bundle_id ?? item.bundle?.id ?? item.bundleKey ?? item.bundle_key ?? null
 
   const resolvedBundleId = bundleId ?? normalizedId ?? generateBundleId()
 
@@ -159,7 +160,7 @@ const normalizeItem = (item) => {
     image: item.image ?? item.media?.[0]?.url ?? null,
     bundleItems,
     isBundle: bundleItems.length > 0,
-    bundleId: bundleItems.length > 0 ? resolvedBundleId : bundleId ?? null,
+    bundleId: bundleItems.length > 0 ? resolvedBundleId : (bundleId ?? null),
     includeInTotals: item.includeInTotals ?? true,
     trackInventory: item.trackInventory ?? item.lockInventory ?? true,
     inventoryId:
@@ -244,7 +245,12 @@ const buildAnalyticsItemsFromCartItem = (item, quantity) => {
     if (totalQuantity <= 0) return
 
     const idCandidate =
-      source.sku ?? source.id ?? source.productId ?? source.product_id ?? source.lineId ?? source.name
+      source.sku ??
+      source.id ??
+      source.productId ??
+      source.product_id ??
+      source.lineId ??
+      source.name
     const nameCandidate = source.name ?? source.title ?? source.label ?? idCandidate
 
     const resolvedId = coerceAnalyticsString(idCandidate)
@@ -383,7 +389,10 @@ const cartReducer = (state, action) => {
       if (existingIndex >= 0) {
         items = state.items.map((entry, index) => {
           if (index !== existingIndex) return entry
-          const mergedBundleItems = mergeBundleItems(entry.bundleItems ?? [], item.bundleItems ?? [])
+          const mergedBundleItems = mergeBundleItems(
+            entry.bundleItems ?? [],
+            item.bundleItems ?? [],
+          )
           return {
             ...entry,
             metadata: { ...entry.metadata, ...item.metadata },
