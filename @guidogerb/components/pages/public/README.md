@@ -14,6 +14,9 @@ sections for marketing and error scenarios.
   links.
 - `renderAction(s)` – Helper utilities used by the shells to normalize CTA data
   into buttons/links.
+- `StorytellingIllustration`, `ConnectionsIllustration`,
+  `AnalyticsIllustration` – Accessible SVG artwork that follows Guidogerb
+  branding and ships with sensible alt text defaults.
 
 ## Usage
 
@@ -21,6 +24,7 @@ sections for marketing and error scenarios.
 import { MarketingShell } from '@guidogerb/components-pages-public'
 import { Header } from '@guidogerb/header'
 import { Footer } from '@guidogerb/footer'
+import { StorytellingIllustration } from '@guidogerb/components-pages-public'
 
 function LandingPage() {
   return (
@@ -34,7 +38,7 @@ function LandingPage() {
         { label: 'Schedule a call', href: '/contact' },
         { label: 'Download programs', href: '/press-kit.pdf', download: true },
       ]}
-      media={<img alt="Gary at the piano" src="/piano.jpg" />}
+      media={<StorytellingIllustration />}
       aside={<p>Residency dates available for spring and summer engagements.</p>}
     >
       <section>
@@ -45,3 +49,31 @@ function LandingPage() {
   )
 }
 ```
+
+### Illustrations
+
+The packaged illustrations are lightweight React components that render inline
+SVG. They expose `title`, `description`, and `palette` props so tenants can
+control the accessible name and align colours with custom themes:
+
+```jsx
+import {
+  ConnectionsIllustration,
+  AnalyticsIllustration,
+} from '@guidogerb/components-pages-public'
+
+function Preview() {
+  return (
+    <div className="marketing-preview">
+      <ConnectionsIllustration
+        title="Editorial collaboration"
+        palette={{ nodePrimary: '#9333ea', hub: '#f59e0b' }}
+      />
+      <AnalyticsIllustration description="Weekly performance metrics" />
+    </div>
+  )
+}
+```
+
+Each component defaults to descriptive copy that functions as alt text, and the
+`palette` prop can override any of the documented colour tokens.
