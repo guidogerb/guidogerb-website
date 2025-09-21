@@ -46,6 +46,7 @@ describe('AnalyticsRouterBridge', () => {
           event[2]?.page_path === '/about?ref=spec',
       )
       expect(entry).toBeDefined()
+      expect(entry?.[2]?.page_referrer).toBe('/')
     })
   })
 
@@ -94,8 +95,63 @@ describe('AnalyticsRouterBridge', () => {
         expect.objectContaining({
           path: '/products/123',
           params: expect.objectContaining({ page_title: 'Viewing /products/123' }),
+          previousPath: '/',
         }),
       )
+    })
+  })
+
+  it('allows customizing or disabling referrer tracking', async () => {
+    const customReferrer = vi.fn(({ previousPath }) => `custom:${previousPath ?? 'none'}`)
+
+    render(
+      <Analytics measurementId="G-ROUTER-REF" sendPageView={false}>
+        <MemoryRouter initialEntries={['/landing']}>
+          <AnalyticsRouterBridge getReferrer={customReferrer} />
+          <Routes>
+            <Route path="/landing" element={<NavigateOnMount to="/docs" />} />
+            <Route path="/docs" element={<NavigateOnMount to="/docs/api" />} />
+            <Route path="/docs/api" element={<div>Docs</div>} />
+          </Routes>
+        </MemoryRouter>
+      </Analytics>,
+    )
+
+    await waitFor(() => {
+      const entries = window.dataLayer?.filter(
+        (event) => event[0] === 'event' && event[1] === 'page_view',
+      )
+      expect(entries?.length).toBeGreaterThanOrEqual(2)
+    })
+
+    const lastEntry = window.dataLayer
+      ?.filter((event) => event[0] === 'event' && event[1] === 'page_view')
+      .pop()
+
+    expect(lastEntry?.[2]?.page_referrer).toBe('custom:/docs')
+    expect(customReferrer).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/docs/api', previousPath: '/docs' }),
+    )
+
+    window.dataLayer = []
+
+    render(
+      <Analytics measurementId="G-ROUTER-REF-OFF" sendPageView={false}>
+        <MemoryRouter initialEntries={['/landing']}>
+          <AnalyticsRouterBridge includeReferrer={false} />
+          <Routes>
+            <Route path="/landing" element={<NavigateOnMount to="/settings" />} />
+            <Route path="/settings" element={<div>Settings</div>} />
+          </Routes>
+        </MemoryRouter>
+      </Analytics>,
+    )
+
+    await waitFor(() => {
+      const entry = window.dataLayer?.find(
+        (event) => event[0] === 'event' && event[1] === 'page_view',
+      )
+      expect(entry?.[2]?.page_referrer).toBeUndefined()
     })
   })
 })
