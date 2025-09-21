@@ -68,6 +68,48 @@ describe('ProtectedRouter', () => {
     expect(screen.getByTestId('custom-guard')).toHaveAttribute('data-tone', 'warm')
   })
 
+  it('supports per-route guard configuration objects', () => {
+    const ConfigurableGuard = ({ children, tone, badge }) => (
+      <div data-testid="config-guard" data-tone={tone} data-badge={badge}>
+        {children}
+      </div>
+    )
+
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/secure'] }}
+        routes={[
+          {
+            path: '/secure',
+            element: <div>Secure</div>,
+            guard: { component: ConfigurableGuard, props: { tone: 'config', badge: 'config' } },
+            guardProps: { tone: 'route' },
+          },
+        ]}
+        guardProps={{ tone: 'global', badge: 'global' }}
+      />,
+    )
+
+    expect(screen.queryByTestId('default-guard')).not.toBeInTheDocument()
+    const guard = screen.getByTestId('config-guard')
+    expect(guard).toHaveAttribute('data-tone', 'route')
+    expect(guard).toHaveAttribute('data-badge', 'config')
+  })
+
+  it('allows disabling guards from route configuration objects', () => {
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/public'] }}
+        routes={[{ path: '/public', element: <div>Public</div>, guard: { disabled: true } }]}
+      />,
+    )
+
+    expect(screen.getByText('Public')).toBeInTheDocument()
+    expect(screen.queryByTestId('default-guard')).not.toBeInTheDocument()
+  })
+
   it('supports additional wrapping via the wrapElement prop', () => {
     render(
       <ProtectedRouter
@@ -94,6 +136,52 @@ describe('ProtectedRouter', () => {
     )
 
     expect(screen.getByTestId('default-guard')).toHaveTextContent('Missing')
+  })
+
+  it('renders fallback content for guests when fallback remains public', () => {
+    const StatefulGuard = ({ children, isAuthenticated }) => (
+      <div data-testid="stateful-guard" data-state={isAuthenticated ? 'authenticated' : 'guest'}>
+        {children}
+      </div>
+    )
+
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/missing'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+        guard={StatefulGuard}
+        guardProps={{ isAuthenticated: false }}
+        fallback={<div role="status">Missing</div>}
+      />,
+    )
+
+    expect(screen.getByRole('status')).toHaveTextContent('Missing')
+    expect(screen.queryByTestId('stateful-guard')).not.toBeInTheDocument()
+  })
+
+  it('wraps fallback routes with guard state when protection is enabled', () => {
+    const StatefulGuard = ({ children, isAuthenticated }) => (
+      <div data-testid="stateful-guard" data-state={isAuthenticated ? 'authenticated' : 'guest'}>
+        {children}
+      </div>
+    )
+
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/missing'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+        guard={StatefulGuard}
+        guardProps={{ isAuthenticated: true }}
+        fallback={<div role="status">Missing</div>}
+        protectFallback
+      />,
+    )
+
+    const guard = screen.getByTestId('stateful-guard')
+    expect(guard).toHaveAttribute('data-state', 'authenticated')
+    expect(guard).toHaveTextContent('Missing')
   })
 
   it('respects defaultFallback overrides when generating a catch-all route', () => {

@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import Protected from '@guidogerb/components-pages-protected'
 import { PublicRouter } from '@guidogerb/components-router-public'
+import { applyGuard } from './applyGuard.jsx'
 
 export function ProtectedRouter({
   routes = [],
@@ -13,23 +14,13 @@ export function ProtectedRouter({
   ...rest
 }) {
   const guardWrapper = useCallback(
-    (element, route = {}) => {
-      let output = element
-
-      if (
-        route.guard === false ||
-        route.isProtected === false ||
-        (route.isFallback && !protectFallback)
-      ) {
-        output = element
-      } else {
-        const GuardComponent = route.guard || guard
-        const mergedProps = { ...(guardProps ?? {}), ...(route.guardProps ?? {}) }
-        output = <GuardComponent {...mergedProps}>{element}</GuardComponent>
-      }
-
-      return wrapElement ? wrapElement(output, route) : output
-    },
+    (element, route = {}) =>
+      applyGuard(element, route, {
+        guard,
+        guardProps,
+        protectFallback,
+        afterGuard: wrapElement,
+      }),
     [guard, guardProps, protectFallback, wrapElement],
   )
 
