@@ -267,6 +267,9 @@ importers:
 
   '@guidogerb/components/shopping-cart':
     dependencies:
+      '@guidogerb/components-analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@stripe/react-stripe-js':
         specifier: ^3.3.0
         version: 3.10.0(@stripe/stripe-js@4.10.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)

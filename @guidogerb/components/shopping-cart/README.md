@@ -101,9 +101,54 @@ The component consumes state from `useCart()` and therefore must be rendered wit
 - `storage` / `storageKey` – optional persistence layer compatible with
   `@guidogerb/components-storage` controllers.
 - `initialCart` – seed data for items, promo codes, and shipping.
+- `bundleItems` – optional array of component products attached to a parent cart item. Each entry
+  accepts `{ id, name, quantity, price, includeInTotals }` and is rendered beneath the parent row
+  with derived quantities (per-bundle quantity multiplied by the parent quantity).
+- `metadata.analytics` – optional map of GA4-friendly fields merged into emitted ecommerce events.
+  Primitive values (string, number, boolean) are forwarded as-is while other values are coerced to
+  strings when possible.
+
+### Bundled products
+
+Catalog entries can ship multiple inventory records together while presenting a single purchasable
+item. Provide `bundleItems` when calling `addItem()` or seeding `initialCart` to expose this
+structure:
+
+```ts
+cart.addItem({
+  id: 'starter-pack',
+  name: 'Starter Pack',
+  price: { amount: 6000, currency: 'USD' },
+  quantity: 1,
+  bundleItems: [
+    { id: 'vinyl', name: 'Vinyl Record', quantity: 1, price: { amount: 4000, currency: 'USD' } },
+    {
+      id: 'poster',
+      name: 'Poster',
+      quantity: 2,
+      price: { amount: 2000, currency: 'USD' },
+      includeInTotals: false,
+    },
+  ],
+})
+```
+
+The cart UI renders the parent bundle row plus each component line item. Component totals default to
+`price.amount * quantity` per bundle and multiply by the parent quantity at render time. When a
+component sets `includeInTotals: false` the row is labelled “Included in bundle” and excluded from
+subtotal calculations so discounts remain applied to the parent entry.
 
 `useCart()` exposes `{ items, totals, addItem, updateQuantity, removeItem, clearCart,
 applyPromoCode, setTaxRate, setDiscountRate, setShipping }`.
+
+### Analytics events
+
+`CartProvider` automatically emits ecommerce analytics events whenever a line item is added,
+updated, removed, or when the cart is cleared. The payload is normalised so parent bundles and
+their component items appear as discrete GA4 entries with currency amounts in major units. Include
+additional measurement metadata by supplying a `metadata.analytics` object on items or bundle
+components – values such as `item_list_id`, `item_category`, or custom dimensions are forwarded in
+the resulting event payloads.
 
 ## `CheckoutForm`
 

@@ -24,6 +24,7 @@
     "react": ">=19"
   },
   "dependencies": {
+    "@guidogerb/components-analytics": "workspace:*",
     "@stripe/react-stripe-js": "^3.3.0",
     "@stripe/stripe-js": "^4.1.0"
   },
