@@ -1,8 +1,10 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { createStorageController } from '@guidogerb/components-storage'
+import * as storageModule from '@guidogerb/components-storage'
 import { Catalog } from '../Catalog.jsx'
+
+const { createStorageController } = storageModule
 
 const buildProduct = (overrides = {}) => ({
   id: `prod-${Math.random().toString(16).slice(2)}`,
@@ -195,5 +197,54 @@ describe('Catalog', () => {
     await user.click(cta)
 
     expect(handleSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'stream-1' }))
+  })
+
+  it('scopes storage keys by tenant and environment when storageScope is provided', async () => {
+    const client = {
+      post: vi.fn().mockResolvedValue(buildGraphQLPayload({ items: [] })),
+    }
+    const storage = createStorageController({ namespace: 'test.catalog' })
+
+    render(
+      <Catalog
+        client={client}
+        storage={storage}
+        storageKey="prefs"
+        storageScope={{ tenantId: 'tenant-42', environment: 'staging' }}
+        initialView="list"
+        initialFilters={{ types: ['SUBSCRIPTION'] }}
+      />,
+    )
+
+    await waitFor(() => expect(client.post).toHaveBeenCalledTimes(1))
+
+    await waitFor(() => {
+      expect(storage.get('prefs::tenant:tenant-42::env:staging')).toMatchObject({
+        viewMode: 'list',
+        types: ['SUBSCRIPTION'],
+      })
+    })
+  })
+
+  it('creates a scoped storage namespace when a storageScope is provided without a controller', async () => {
+    const client = {
+      post: vi.fn().mockResolvedValue(buildGraphQLPayload({ items: [] })),
+    }
+    const spy = vi.spyOn(storageModule, 'createStorageController')
+
+    render(
+      <Catalog
+        client={client}
+        storageScope={{ tenantId: 'tenant-7', environment: 'production' }}
+      />,
+    )
+
+    await waitFor(() => expect(client.post).toHaveBeenCalledTimes(1))
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ namespace: 'guidogerb.catalog::tenant:tenant-7::env:production' }),
+    )
+
+    spy.mockRestore()
   })
 })

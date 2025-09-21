@@ -26,5 +26,10 @@ export function ProtectedRoute() {
 3. Trigger the hosted UI redirect automatically when `autoSignIn` is enabled (default behaviour).
 4. Render children only after the user is authenticated.
 
-Pass a `logoutUri` to redirect users back to the hosted UI logout endpoint. Future iterations will
-accept custom loading/unauthenticated render props so tenants can provide branded experiences.
+Pass a `logoutUri` to redirect users back to the hosted UI logout endpoint.
+
+### Custom unauthenticated fallback
+
+Provide the `fallback` prop to show a branded experience while the authentication state resolves.
+The prop accepts either a React node or a function that receives the current auth context and
+returns a node. When omitted, the component renders the default “Protected Loading…” status region.

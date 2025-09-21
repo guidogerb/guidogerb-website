@@ -86,6 +86,30 @@ const FULFILLMENT_FILTERS = [
   { value: 'HYBRID', label: 'Hybrid bundle' },
 ]
 
+const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0
+
+const buildScopeSuffix = (scope) => {
+  if (!scope || typeof scope !== 'object') return ''
+
+  const segments = []
+
+  if (isNonEmptyString(scope.tenantId)) {
+    segments.push(`tenant:${scope.tenantId}`)
+  }
+
+  if (isNonEmptyString(scope.environment)) {
+    segments.push(`env:${scope.environment}`)
+  }
+
+  return segments.join('::')
+}
+
+const buildScopedIdentifier = (base, scope) => {
+  const normalizedBase = isNonEmptyString(base) ? base : 'catalog'
+  const suffix = buildScopeSuffix(scope)
+  return suffix ? `${normalizedBase}::${suffix}` : normalizedBase
+}
+
 const initialState = {
   status: 'idle',
   items: [],
@@ -350,6 +374,7 @@ export function Catalog({
   storage,
   storageNamespace = 'guidogerb.catalog',
   storageKey = 'catalog.preferences',
+  storageScope,
   initialView = 'grid',
   initialFilters = {},
   initialSort = DEFAULT_SORT_KEY,
@@ -366,14 +391,24 @@ export function Catalog({
     return createClient({ baseUrl: apiBaseUrl })
   }, [apiBaseUrl, client])
 
+  const scopedNamespace = useMemo(
+    () => buildScopedIdentifier(storageNamespace, storageScope),
+    [storageNamespace, storageScope],
+  )
+
+  const scopedStorageKey = useMemo(
+    () => buildScopedIdentifier(storageKey, storageScope),
+    [storageKey, storageScope],
+  )
+
   const resolvedStorage = useMemo(() => {
     if (storage) return storage
-    return createStorageController({ namespace: storageNamespace })
-  }, [storage, storageNamespace])
+    return createStorageController({ namespace: scopedNamespace })
+  }, [scopedNamespace, storage])
 
   const storedPreferences = useMemo(
-    () => readPreferences(resolvedStorage, storageKey) ?? {},
-    [resolvedStorage, storageKey],
+    () => readPreferences(resolvedStorage, scopedStorageKey) ?? {},
+    [resolvedStorage, scopedStorageKey],
   )
 
   const [viewMode, setViewMode] = useState(() => storedPreferences.viewMode ?? initialView)
@@ -391,18 +426,18 @@ export function Catalog({
   const [state, dispatch] = useReducer(catalogReducer, initialState)
 
   useEffect(() => {
-    persistPreferences(resolvedStorage, storageKey, {
+    persistPreferences(resolvedStorage, scopedStorageKey, {
       viewMode,
       sortKey,
       search,
       ...filters,
     })
-  }, [filters, resolvedStorage, search, sortKey, storageKey, viewMode])
+  }, [filters, resolvedStorage, scopedStorageKey, search, sortKey, viewMode])
 
   useEffect(() => {
     if (!resolvedStorage) return undefined
     const unsubscribe = resolvedStorage.subscribe?.((event) => {
-      if (!event || event.key !== storageKey) return
+      if (!event || event.key !== scopedStorageKey) return
       if (event.type === 'set') {
         const next = event.value ?? {}
         if (next.viewMode && next.viewMode !== viewMode) setViewMode(next.viewMode)
@@ -433,9 +468,9 @@ export function Catalog({
     initialSort,
     initialView,
     resolvedStorage,
+    scopedStorageKey,
     search,
     sortKey,
-    storageKey,
     viewMode,
   ])
 

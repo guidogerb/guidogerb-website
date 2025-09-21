@@ -117,9 +117,14 @@ when the `errors` array is populated or `data.catalog` is missing.
 | `client`            | `{ post(path, options) => Promise<any> }`                                                                     | —                                   | Preconfigured API client instance. Overrides `apiBaseUrl`.                      |
 | `graphQLEndpoint`   | `string`                                                                                                      | `"/graphql"`                        | Path invoked on the client when issuing catalog queries.                        |
 | `query`             | `string`                                                                                                      | `DEFAULT_CATALOG_QUERY`             | GraphQL document string used for catalog requests.                              |
-| `storage`           | `StorageController`                                                                                           | memory-scoped store                 | Storage controller powering persisted preferences.                              |
-| `storageNamespace`  | `string`                                                                                                      | `'guidogerb.catalog'`               | Namespace passed to `createStorageController` when `storage` is omitted.        |
-| `storageKey`        | `string`                                                                                                      | `'catalog.preferences'`             | Storage key used to persist layout + filter state.                              |
+| `storage`           | `StorageController`
+           | memory-scoped store                 | Storage controller powering persisted preferences.                              |
+| `storageNamespace`  | `string`
+           | `'guidogerb.catalog'`               | Namespace passed to `createStorageController` when `storage` is omitted.        |
+| `storageKey`        | `string`
+           | `'catalog.preferences'`             | Storage key used to persist layout + filter state.                              |
+| `storageScope`      | `{ tenantId?: string; environment?: string }`
+           | `undefined`                        | Appends tenant/environment segments to the namespace and key for isolation.     |
 | `initialView`       | `'grid' &#124; 'list'`                                                                                        | `'grid'`                            | Initial layout mode. Persisted overrides take precedence.                       |
 | `initialFilters`    | `Partial<{ types: string[]; fulfillment: string[]; availability: string[]; tags: string[]; search: string }>` | `{}`                                | Seeds the filter state and search term.                                         |
 | `initialSort`       | `keyof Catalog.SORT_OPTIONS`                                                                                  | `'featured'`                        | Default sort key applied before user interaction.                               |
