@@ -2,6 +2,7 @@
   "name": "guidogerb-website",
   "version": "1.0.0",
   "private": true,
+  "license": "Apache-2.0",
   "workspaces": [
     "@guidogerb/components/ai-support",
     "@guidogerb/components/analytics",
