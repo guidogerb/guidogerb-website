@@ -10,9 +10,7 @@ describe('public page illustrations', () => {
   it('exposes default accessible copy for the storytelling scene', () => {
     render(<StorytellingIllustration />)
 
-    expect(
-      screen.getByRole('img', { name: /performer under stage lights/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /performer under stage lights/i })).toBeInTheDocument()
   })
 
   it('allows overriding copy and palette on the connections illustration', () => {
@@ -24,9 +22,7 @@ describe('public page illustrations', () => {
       />,
     )
 
-    expect(
-      screen.getByRole('img', { name: 'Team collaboration blueprint' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Team collaboration blueprint' })).toBeInTheDocument()
 
     const description = container.querySelector('desc')
     expect(description?.textContent).toContain('network of colleagues')

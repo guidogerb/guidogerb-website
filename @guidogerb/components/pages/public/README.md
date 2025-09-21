@@ -57,10 +57,7 @@ SVG. They expose `title`, `description`, and `palette` props so tenants can
 control the accessible name and align colours with custom themes:
 
 ```jsx
-import {
-  ConnectionsIllustration,
-  AnalyticsIllustration,
-} from '@guidogerb/components-pages-public'
+import { ConnectionsIllustration, AnalyticsIllustration } from '@guidogerb/components-pages-public'
 
 function Preview() {
   return (

@@ -75,7 +75,15 @@ export const StorytellingIllustration = forwardRef(function StorytellingIllustra
     >
       {({ background, shadow, primary, accent, highlight, audience, outline }) => (
         <>
-          <rect data-part="canvas" x="12" y="12" width="296" height="216" rx="28" fill={background} />
+          <rect
+            data-part="canvas"
+            x="12"
+            y="12"
+            width="296"
+            height="216"
+            rx="28"
+            fill={background}
+          />
           <ellipse data-part="stage-shadow" cx="160" cy="196" rx="96" ry="20" fill={shadow} />
           <path
             data-part="stage"
@@ -163,7 +171,15 @@ export const ConnectionsIllustration = forwardRef(function ConnectionsIllustrati
     >
       {({ background, network, nodePrimary, nodeAccent, nodeHighlight, outline, signal, hub }) => (
         <>
-          <rect data-part="canvas" x="8" y="20" width="304" height="200" rx="32" fill={background} />
+          <rect
+            data-part="canvas"
+            x="8"
+            y="20"
+            width="304"
+            height="200"
+            rx="32"
+            fill={background}
+          />
           <path
             data-part="signal-ring"
             d="M160 58 C 210 58 250 100 250 148 C 250 162 247 176 241.2 188.8"
@@ -221,7 +237,15 @@ export const ConnectionsIllustration = forwardRef(function ConnectionsIllustrati
             strokeLinecap="round"
             data-part="link-quaternary"
           />
-          <circle data-part="hub" cx="160" cy="124" r="20" fill={hub} stroke={outline} strokeWidth="4" />
+          <circle
+            data-part="hub"
+            cx="160"
+            cy="124"
+            r="20"
+            fill={hub}
+            stroke={outline}
+            strokeWidth="4"
+          />
           <circle
             data-part="node-primary"
             cx="108"
@@ -270,8 +294,22 @@ export const ConnectionsIllustration = forwardRef(function ConnectionsIllustrati
             opacity="0.9"
           />
           <circle data-part="background-node" cx="128" cy="66" r="10" fill={signal} opacity="0.7" />
-          <circle data-part="background-node-secondary" cx="240" cy="72" r="8" fill={signal} opacity="0.5" />
-          <circle data-part="background-node-tertiary" cx="188" cy="192" r="9" fill={signal} opacity="0.4" />
+          <circle
+            data-part="background-node-secondary"
+            cx="240"
+            cy="72"
+            r="8"
+            fill={signal}
+            opacity="0.5"
+          />
+          <circle
+            data-part="background-node-tertiary"
+            cx="188"
+            cy="192"
+            r="9"
+            fill={signal}
+            opacity="0.4"
+          />
         </>
       )}
     </BaseIllustration>
@@ -300,7 +338,8 @@ export const AnalyticsIllustration = forwardRef(function AnalyticsIllustration(
 ) {
   const finalTitle = title ?? 'Analytics dashboard preview'
   const finalDescription =
-    description ?? 'Charts and graphs show performance metrics available in the Guidogerb dashboard.'
+    description ??
+    'Charts and graphs show performance metrics available in the Guidogerb dashboard.'
 
   return (
     <BaseIllustration
@@ -326,10 +365,44 @@ export const AnalyticsIllustration = forwardRef(function AnalyticsIllustration(
         spark,
       }) => (
         <>
-          <rect data-part="canvas" x="14" y="16" width="292" height="208" rx="24" fill={background} />
-          <rect data-part="chart-area" x="40" y="60" width="168" height="128" rx="18" fill={chartBackground} />
-          <line data-part="axis-x" x1="56" y1="172" x2="192" y2="172" stroke={axis} strokeWidth="4" strokeLinecap="round" />
-          <line data-part="axis-y" x1="56" y1="88" x2="56" y2="172" stroke={axis} strokeWidth="4" strokeLinecap="round" />
+          <rect
+            data-part="canvas"
+            x="14"
+            y="16"
+            width="292"
+            height="208"
+            rx="24"
+            fill={background}
+          />
+          <rect
+            data-part="chart-area"
+            x="40"
+            y="60"
+            width="168"
+            height="128"
+            rx="18"
+            fill={chartBackground}
+          />
+          <line
+            data-part="axis-x"
+            x1="56"
+            y1="172"
+            x2="192"
+            y2="172"
+            stroke={axis}
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+          <line
+            data-part="axis-y"
+            x1="56"
+            y1="88"
+            x2="56"
+            y2="172"
+            stroke={axis}
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
           <rect data-part="bar" x="72" y="140" width="24" height="32" rx="6" fill={bar} />
           <rect data-part="bar" x="112" y="120" width="24" height="52" rx="6" fill={barAccent} />
           <rect data-part="bar" x="152" y="104" width="24" height="68" rx="6" fill={barHighlight} />
@@ -345,11 +418,29 @@ export const AnalyticsIllustration = forwardRef(function AnalyticsIllustration(
           <g data-part="pie" transform="translate(234 128)">
             <circle data-part="pie-ring" r="44" fill={chartBackground} />
             <path data-part="pie-primary" d="M0 -36A36 36 0 0 1 32 18L0 0Z" fill={piePrimary} />
-            <path data-part="pie-secondary" d="M32 18A36 36 0 0 1 -18 34L0 0Z" fill={pieSecondary} />
+            <path
+              data-part="pie-secondary"
+              d="M32 18A36 36 0 0 1 -18 34L0 0Z"
+              fill={pieSecondary}
+            />
             <path data-part="pie-tertiary" d="M-18 34A36 36 0 0 1 0 -36L0 0Z" fill={pieTertiary} />
-            <circle data-part="pie-center" r="14" fill={background} stroke={outline} strokeWidth="4" />
+            <circle
+              data-part="pie-center"
+              r="14"
+              fill={background}
+              stroke={outline}
+              strokeWidth="4"
+            />
           </g>
-          <rect data-part="legend-card" x="214" y="60" width="80" height="40" rx="10" fill={chartBackground} />
+          <rect
+            data-part="legend-card"
+            x="214"
+            y="60"
+            width="80"
+            height="40"
+            rx="10"
+            fill={chartBackground}
+          />
           <circle data-part="legend-dot-primary" cx="230" cy="80" r="6" fill={piePrimary} />
           <circle data-part="legend-dot-secondary" cx="230" cy="96" r="6" fill={pieSecondary} />
           <circle data-part="legend-dot-tertiary" cx="230" cy="112" r="6" fill={pieTertiary} />
