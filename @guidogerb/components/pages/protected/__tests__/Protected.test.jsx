@@ -30,9 +30,7 @@ vi.mock('@guidogerb/components-auth', () => ({
         {auth?.isAuthenticated && logoutUri ? (
           <button
             type="button"
-            onClick={() =>
-              auth?.signoutRedirect?.({ post_logout_redirect_uri: logoutUri })
-            }
+            onClick={() => auth?.signoutRedirect?.({ post_logout_redirect_uri: logoutUri })}
           >
             Sign out
           </button>
