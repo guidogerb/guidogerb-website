@@ -1,0 +1,203 @@
+[
+  {
+    "name": "@eslint/js",
+    "license": "MIT",
+    "feature": "Provides the baseline ESLint rule set that powers repository-wide linting.",
+    "packages": [
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "@testing-library/jest-dom",
+    "license": "MIT",
+    "feature": "Adds DOM-specific matchers so assertions can verify accessibility-friendly output.",
+    "packages": [
+      "package.json"
+    ]
+  },
+  {
+    "name": "@testing-library/react",
+    "license": "MIT",
+    "feature": "Supplies lightweight utilities to render React components and query the virtual DOM in tests.",
+    "packages": [
+      "@guidogerb/components/point-of-sale/package.json",
+      "@guidogerb/components/shopping-cart/package.json",
+      "package.json"
+    ]
+  },
+  {
+    "name": "@testing-library/user-event",
+    "license": "MIT",
+    "feature": "Simulates high-level user interactions (clicks, typing, tabbing) during component tests.",
+    "packages": [
+      "@guidogerb/components/point-of-sale/package.json",
+      "@guidogerb/components/shopping-cart/package.json",
+      "package.json"
+    ]
+  },
+  {
+    "name": "@types/react",
+    "license": "MIT",
+    "feature": "Delivers TypeScript type definitions for React when authoring website code.",
+    "packages": [
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "@types/react-dom",
+    "license": "MIT",
+    "feature": "Provides TypeScript definitions for the React DOM renderer APIs.",
+    "packages": [
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "@vitejs/plugin-react",
+    "license": "MIT",
+    "feature": "Enables automatic JSX transform and fast refresh integration inside the Vite bundler.",
+    "packages": [
+      "package.json",
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "eslint",
+    "license": "MIT",
+    "feature": "Runs the ESLint engine to enforce code-quality and consistency rules.",
+    "packages": [
+      "package.json",
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "eslint-plugin-react-hooks",
+    "license": "MIT",
+    "feature": "Supplies ESLint rules that validate correct usage of React Hooks.",
+    "packages": [
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "eslint-plugin-react-refresh",
+    "license": "MIT",
+    "feature": "Guards React components against patterns that break Fast Refresh during development.",
+    "packages": [
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "globals",
+    "license": "MIT",
+    "feature": "Shares predefined global variables so ESLint understands the browser and Node environments.",
+    "packages": [
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "jsdom",
+    "license": "MIT",
+    "feature": "Creates a browser-like DOM implementation required for rendering components in Node-based tests.",
+    "packages": [
+      "package.json"
+    ]
+  },
+  {
+    "name": "prettier",
+    "license": "MIT",
+    "feature": "Formats source files to a consistent style across the project.",
+    "packages": [
+      "package.json"
+    ]
+  },
+  {
+    "name": "rimraf",
+    "license": "ISC",
+    "feature": "Offers cross-platform removal of build artifacts during cleanup tasks.",
+    "packages": [
+      "package.json"
+    ]
+  },
+  {
+    "name": "vite-plugin-mkcert",
+    "license": "MIT",
+    "feature": "Generates local HTTPS certificates so Vite previews run with trusted origins.",
+    "packages": [
+      "websites/garygerber.com/package.json",
+      "websites/ggp.llc/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json",
+      "websites/stream4cloud.com/package.json",
+      "websites/this-is-my-story.org/package.json"
+    ]
+  },
+  {
+    "name": "vitest",
+    "license": "MIT",
+    "feature": "Executes the unit and integration test suites with a Jest-compatible API.",
+    "packages": [
+      "@guidogerb/components/ai-support/package.json",
+      "@guidogerb/components/analytics/package.json",
+      "@guidogerb/components/api-client/package.json",
+      "@guidogerb/components/app/package.json",
+      "@guidogerb/components/auth/package.json",
+      "@guidogerb/components/catalog/package.json",
+      "@guidogerb/components/menu/package.json",
+      "@guidogerb/components/pages/protected/package.json",
+      "@guidogerb/components/pages/public/package.json",
+      "@guidogerb/components/point-of-sale/package.json",
+      "@guidogerb/components/router/protected/package.json",
+      "@guidogerb/components/router/public/package.json",
+      "@guidogerb/components/shopping-cart/package.json",
+      "@guidogerb/components/storage/package.json",
+      "@guidogerb/components/sw/package.json",
+      "@guidogerb/components/ui/package.json",
+      "@guidogerb/css/package.json",
+      "@guidogerb/footer/package.json",
+      "@guidogerb/header/package.json",
+      "package.json",
+      "websites/garygerber.com/package.json",
+      "websites/guidogerbpublishing.com/package.json",
+      "websites/picklecheeze.com/package.json"
+    ]
+  }
+]
