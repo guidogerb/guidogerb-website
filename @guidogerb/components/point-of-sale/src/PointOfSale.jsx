@@ -242,7 +242,7 @@ const PointOfSaleExperience = ({
     (updater) => {
       if (!handoffStorage?.set || maxStoredHandoffs <= 0) return
       setHandoffs((prev) => {
-                const nextEntries = typeof updater === 'function' ? updater(prev) : updater ?? []
+        const nextEntries = typeof updater === 'function' ? updater(prev) : (updater ?? [])
         const normalized = normalizeHandoffEntries(nextEntries, maxStoredHandoffs)
         if (handoffEntriesEqual(prev, normalized)) return prev
         handoffStorage.set(handoffStorageKey, normalized)

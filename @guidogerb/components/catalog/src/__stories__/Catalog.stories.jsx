@@ -125,7 +125,9 @@ const filterProducts = (products, variables = {}) => {
   }
 
   if (requestedFulfillment.length) {
-    filtered = filtered.filter((product) => requestedFulfillment.includes(product.availability.fulfillment))
+    filtered = filtered.filter((product) =>
+      requestedFulfillment.includes(product.availability.fulfillment),
+    )
   }
 
   if (searchTerm) {

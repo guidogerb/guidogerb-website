@@ -84,8 +84,7 @@ function CustomAnalyticsBridge() {
     getParams: ({ location }) => ({
       page_title: `Tenant portal — ${location.pathname}`,
     }),
-    getReferrer: ({ previousPath }) =>
-      previousPath ? `tenant-portal:${previousPath}` : undefined,
+    getReferrer: ({ previousPath }) => (previousPath ? `tenant-portal:${previousPath}` : undefined),
   })
 
   return null
