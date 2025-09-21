@@ -229,8 +229,24 @@ const normalizeFooterConfig = (footer, navigation) => {
   }
 }
 
-const normalizePublicPages = (publicPages, { navigationItems }) => {
+const normalizePublicPages = (publicPages, { navigation } = {}) => {
   const config = isObject(publicPages) ? publicPages : {}
+
+  const navigationConfig = isObject(navigation) ? navigation : {}
+  const navigationItems = Array.isArray(navigationConfig.items)
+    ? navigationConfig.items
+    : undefined
+
+  const landingProps = {
+    navigation,
+    navigationItems: navigationItems?.length ? navigationItems : DEFAULT_NAVIGATION_ITEMS,
+    navigationActivePath:
+      typeof navigationConfig.activePath === 'string' && navigationConfig.activePath.trim().length > 0
+        ? navigationConfig.activePath
+        : '/',
+    navigationOnNavigate:
+      typeof navigationConfig.onNavigate === 'function' ? navigationConfig.onNavigate : undefined,
+  }
 
   const landingValue = config.landing ?? DefaultMarketingLanding
   const landingRoute = isObject(landingValue)
@@ -238,6 +254,12 @@ const normalizePublicPages = (publicPages, { navigationItems }) => {
         {
           path: landingValue.path ?? '/',
           ...landingValue,
+          componentProps: isObject(landingValue.componentProps)
+            ? { ...landingProps, ...landingValue.componentProps }
+            : landingProps,
+          elementProps: isObject(landingValue.elementProps)
+            ? { ...landingProps, ...landingValue.elementProps }
+            : landingProps,
           isProtected: false,
           guard: false,
         },
@@ -245,13 +267,20 @@ const normalizePublicPages = (publicPages, { navigationItems }) => {
       )
     : {
         path: '/',
-        element: renderSlot(landingValue, { navigationItems }),
+        element: renderSlot(landingValue, landingProps),
         isProtected: false,
         guard: false,
       }
 
   if (!landingRoute?.element) {
-    landingRoute.element = <DefaultMarketingLanding navigationItems={navigationItems} />
+    landingRoute.element = (
+      <DefaultMarketingLanding
+        navigation={landingProps.navigation}
+        navigationItems={landingProps.navigationItems}
+        navigationActivePath={landingProps.navigationActivePath}
+        navigationOnNavigate={landingProps.navigationOnNavigate}
+      />
+    )
   }
 
   if (!landingRoute.path) {
@@ -497,8 +526,8 @@ export const AppBasic = ({
   }, [header?.props, navigationConfig.activePath, navigationConfig.onNavigate])
 
   const publicConfig = useMemo(
-    () => normalizePublicPages(publicPages, { navigationItems: navigationConfig.items }),
-    [publicPages, navigationConfig.items],
+    () => normalizePublicPages(publicPages, { navigation: navigationConfig }),
+    [publicPages, navigationConfig],
   )
 
   const protectedConfig = useMemo(() => normalizeProtectedPages(protectedPages), [protectedPages])
@@ -522,14 +551,20 @@ export const AppBasic = ({
   const storageConfig = isObject(storage) ? storage : {}
   const { namespace = DEFAULT_STORAGE_NAMESPACE, ...storageRest } = storageConfig
 
-  const swConfig = isObject(serviceWorker) ? serviceWorker : {}
-  const swEnabled = swConfig.enabled !== false
-  const swUrl = swConfig.url ?? '/sw.js'
+  const { swEnabled, swUrl, swOptions } = useMemo(() => {
+    const config = isObject(serviceWorker) ? serviceWorker : {}
+    const { enabled, url, ...rest } = config
+    return {
+      swEnabled: enabled !== false,
+      swUrl: typeof url === 'string' && url.length > 0 ? url : '/sw.js',
+      swOptions: rest,
+    }
+  }, [serviceWorker])
 
   useEffect(() => {
     if (!swEnabled) return
-    registerSW({ url: swUrl })
-  }, [swEnabled, swUrl])
+    registerSW({ url: swUrl, ...swOptions })
+  }, [swEnabled, swUrl, swOptions])
 
   const themeOptions = useMemo(() => normalizeThemeOptions(theme), [theme])
 
@@ -587,7 +622,36 @@ export const App = AppBasic
 
 export default App
 
-function DefaultMarketingLanding({ navigationItems = DEFAULT_NAVIGATION_ITEMS }) {
+function DefaultMarketingLanding({
+  navigation,
+  navigationItems = DEFAULT_NAVIGATION_ITEMS,
+  navigationActivePath,
+  navigationOnNavigate,
+}) {
+  const navigationConfig = isObject(navigation) ? navigation : {}
+  const resolvedNavigationItems =
+    Array.isArray(navigationItems) && navigationItems.length > 0
+      ? navigationItems
+      : Array.isArray(navigationConfig.items) && navigationConfig.items.length > 0
+        ? navigationConfig.items
+        : DEFAULT_NAVIGATION_ITEMS
+
+  const resolvedActivePath =
+    typeof navigationActivePath === 'string' && navigationActivePath.trim().length > 0
+      ? navigationActivePath
+      : typeof navigationConfig.activePath === 'string' && navigationConfig.activePath.trim().length > 0
+        ? navigationConfig.activePath
+        : '/'
+
+  const resolvedOnNavigate =
+    typeof navigationOnNavigate === 'function'
+      ? navigationOnNavigate
+      : typeof navigationConfig.onNavigate === 'function'
+        ? navigationConfig.onNavigate
+        : undefined
+
+  const hasNavigation = Array.isArray(resolvedNavigationItems) && resolvedNavigationItems.length > 0
+
   return (
     <MarketingShell
       eyebrow="Introducing AppBasic"
@@ -602,10 +666,16 @@ function DefaultMarketingLanding({ navigationItems = DEFAULT_NAVIGATION_ITEMS })
         },
       ]}
       aside={
-        navigationItems && navigationItems.length > 0 ? (
+        hasNavigation ? (
           <div className="gg-app-basic__nav-preview">
             <h2 className="gg-app-basic__nav-preview-title">Primary navigation</h2>
-            <NavigationMenu items={navigationItems} orientation="vertical" label="App navigation" />
+            <NavigationMenu
+              items={resolvedNavigationItems}
+              orientation="vertical"
+              label="App navigation"
+              activePath={resolvedActivePath}
+              onNavigate={resolvedOnNavigate}
+            />
           </div>
         ) : null
       }

@@ -26,12 +26,13 @@ that truly differ per tenant:
 | `@guidogerb/components-ui`               | Wrap the app in the design system provider and expose shared layout primitives so tokens, typography, and chrome match the Guidogerb brand. | `themeOverrides` plus slot props for header/footer overrides.                   |
 | `@guidogerb/components-router-public`    | Provide the canonical public router instance so marketing URLs resolve consistently.                                                        | `publicRoutes` prop to register tenant-specific routes.                         |
 | `@guidogerb/components-router-protected` | Supply the protected router configured with authentication guards.                                                                          | `protectedRoutes`, optional breadcrumb metadata.                                |
-| `@guidogerb/components-sw`               | Register the standard service worker (`/sw.js`) so offline caching is immediately available.                                                | `serviceWorkerUrl` when a tenant self-hosts an alternate worker.                |
-| `@guidogerb/components-storage`          | Create a storage namespace (`guidogerb.app`) used by auth and feature flags.                                                                | `storagePrefix` for white-label deployments.                                    |
+| `@guidogerb/components-sw`               | Register the standard service worker (`/sw.js`) so offline caching is immediately available.                                                | `serviceWorker` prop forwards custom registration options.                |
+| `@guidogerb/components-storage`          | Create a storage namespace (`guidogerb.app`) used by auth and feature flags.                                                                | `storage` props configure alternate namespaces and persistence.                                    |
 
-Until the providers above are fully wired, `<AppBasic />` renders a placeholder wrapper. The unit
-suite already includes a "renders without crashing" smoke test so we can replace the internals with
-confidence once the wiring lands.
+`<AppBasic />` now composes the provider stack, shared marketing landing, protected router, and
+chrome so tenant projects can render both public and authenticated routes without manual wiring.
+Override navigation, header, footer, authentication, API client, storage, service worker, theming,
+and page collections through the component props.
 
 ## Testing
 
@@ -41,7 +42,5 @@ Run the Vitest suite directly from this package while the workspace manifest is 
 pnpm --dir @guidogerb/components/app test
 ```
 
-## Status
-
-Work-in-progress. The [tasks plan](./tasks.md) tracks detailed milestones for delivering the
-composition described above and for adding additional variants beyond `<AppBasic />`.
+The test suite mocks dependent providers to assert routing, authentication, service worker, and
+storage wiring. Refer to the [tasks plan](./tasks.md) for upcoming variant work.
