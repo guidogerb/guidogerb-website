@@ -105,6 +105,17 @@ export function createPOSApi({ baseUrl, client } = {}) {
     })
   }
 
+  const getInvoice = async ({ id }) => {
+    if (!id) {
+      throw new Error('getInvoice requires an id')
+    }
+
+    const response = await resolvedClient.get(`/pos/invoices/${encodeURIComponent(id)}`)
+
+    if (response?.invoice) return response.invoice
+    return response
+  }
+
   const listInvoices = async ({ userId, status } = {}) => {
     const response = await resolvedClient.get(`/pos/invoices${toQuery({ userId, status })}`)
     return Array.isArray(response?.invoices) ? response.invoices : response
@@ -135,6 +146,7 @@ export function createPOSApi({ baseUrl, client } = {}) {
     createPaymentIntent,
     createInvoice,
     listInvoices,
+    getInvoice,
     listOrders,
     recordOrder,
     updateCustomer,

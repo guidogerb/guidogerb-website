@@ -199,6 +199,9 @@ importers:
 
   '@guidogerb/components/point-of-sale':
     dependencies:
+      '@guidogerb/components-analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@guidogerb/components-catalog':
         specifier: workspace:*
         version: link:../catalog
