@@ -33,7 +33,9 @@ describe('SlotEditorOverlay', () => {
         status="idle"
         error={null}
         lastUpdatedAt="2025-09-19T00:00:00.000Z"
-        overflowEvents={[{ id: 'md', breakpoint: 'md', inlineBudget: '10rem', blockBudget: '12rem' }]}
+        overflowEvents={[
+          { id: 'md', breakpoint: 'md', inlineBudget: '10rem', blockBudget: '12rem' },
+        ]}
         isActive
         onActivate={() => {}}
       />,

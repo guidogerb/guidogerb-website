@@ -66,10 +66,7 @@ export function SlotEditorOverlay({
     setJsonError(null)
   }, [propsJSON])
 
-  const breakpointOptions = useMemo(
-    () => breakpoints.map(({ key }) => key),
-    [breakpoints],
-  )
+  const breakpointOptions = useMemo(() => breakpoints.map(({ key }) => key), [breakpoints])
 
   const resolvedVariantOptions = useMemo(() => {
     const entries = Object.entries(variantOptions)
@@ -114,8 +111,7 @@ export function SlotEditorOverlay({
   const currentSizes = sizes[selectedBreakpoint] || {}
   const overridesForBreakpoint = draftSizes[selectedBreakpoint] || {}
 
-  const publishDisabled =
-    status === 'saving' || !isDirty || Boolean(jsonError) || !isActive
+  const publishDisabled = status === 'saving' || !isDirty || Boolean(jsonError) || !isActive
   const discardDisabled = status === 'saving'
 
   const overlayStyle = {
@@ -130,7 +126,9 @@ export function SlotEditorOverlay({
     padding: '0.75rem',
     boxShadow: '0 10px 25px rgba(15, 23, 42, 0.35)',
     fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    border: isActive ? '1px solid rgba(148, 163, 184, 0.65)' : '1px solid rgba(148, 163, 184, 0.35)',
+    border: isActive
+      ? '1px solid rgba(148, 163, 184, 0.65)'
+      : '1px solid rgba(148, 163, 184, 0.35)',
     opacity: isActive ? 1 : 0.75,
     pointerEvents: 'auto',
   }
@@ -205,7 +203,8 @@ export function SlotEditorOverlay({
                   borderRadius: '999px',
                   border: '1px solid rgba(148, 163, 184, 0.5)',
                   padding: '0.25rem 0.75rem',
-                  background: key === selectedBreakpoint ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
+                  background:
+                    key === selectedBreakpoint ? 'rgba(59, 130, 246, 0.2)' : 'transparent',
                   color: 'inherit',
                   cursor: 'pointer',
                 }}
@@ -311,7 +310,14 @@ export function SlotEditorOverlay({
         </div>
 
         {overflowEvents.length > 0 ? (
-          <div style={{ fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <div
+            style={{
+              fontSize: '0.75rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.35rem',
+            }}
+          >
             <div style={{ fontWeight: 600 }}>Overflow events</div>
             <ul style={{ margin: 0, paddingLeft: '1rem', display: 'grid', gap: '0.25rem' }}>
               {overflowEvents.map((event) => (

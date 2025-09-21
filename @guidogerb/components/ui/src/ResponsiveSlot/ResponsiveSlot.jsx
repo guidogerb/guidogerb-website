@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { SlotEditorOverlay } from './editing/SlotEditorOverlay.jsx'
 import { useSlotEditing } from './editing/useSlotEditing.js'
@@ -529,8 +521,12 @@ export function ResponsiveSlot({
   children,
   ...rest
 }) {
-  const { registry, activeBreakpoint, breakpoints, resolveToken: tokenResolver } =
-    useResponsiveSlotContext()
+  const {
+    registry,
+    activeBreakpoint,
+    breakpoints,
+    resolveToken: tokenResolver,
+  } = useResponsiveSlotContext()
   const parentContext = useContext(SlotInstanceContext)
   const slotRef = useRef(null)
 
@@ -539,13 +535,16 @@ export function ResponsiveSlot({
   const definition = registry?.[slot]
   const definitionMeta = definition?.meta
   const inheritedMeta = inherit && parentContext?.meta ? parentContext.meta : undefined
-  const meta = useMemo(() => mergeMeta(inheritedMeta, definitionMeta), [inheritedMeta, definitionMeta])
+  const meta = useMemo(
+    () => mergeMeta(inheritedMeta, definitionMeta),
+    [inheritedMeta, definitionMeta],
+  )
   const defaultVariant = meta.defaultVariant || 'default'
 
   const baseSizes =
     inherit && parentContext?.byBreakpoint
       ? parentContext.byBreakpoint
-      : definition?.sizes ?? (definition && !definition.sizes ? definition : undefined)
+      : (definition?.sizes ?? (definition && !definition.sizes ? definition : undefined))
 
   const propOverrides = useMemo(() => {
     if (!sizes || sizes === 'content') return undefined
@@ -686,10 +685,8 @@ export function ResponsiveSlot({
       overflowWarningCache.add(warningKey)
 
       const detail = {
-        inlineBudget:
-          element.style.getPropertyValue('--slot-inline-size') || resolvedSize.inline,
-        blockBudget:
-          element.style.getPropertyValue('--slot-block-size') || resolvedSize.block,
+        inlineBudget: element.style.getPropertyValue('--slot-inline-size') || resolvedSize.inline,
+        blockBudget: element.style.getPropertyValue('--slot-block-size') || resolvedSize.block,
         breakpoint: activeBreakpoint,
         timestamp: Date.now(),
       }

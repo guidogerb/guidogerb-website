@@ -275,9 +275,7 @@ export function useSlotEditing({
 
   const isActive = isEditable && activeEditableId === editableId
   const shouldShowOverlay = Boolean(
-    isEditable &&
-      isEditing &&
-      (activeEditableId == null || activeEditableId === editableId),
+    isEditable && isEditing && (activeEditableId == null || activeEditableId === editableId),
   )
 
   const setActive = useCallback(() => {
@@ -340,14 +338,7 @@ export function useSlotEditing({
       setError(err)
       throw err
     }
-  }, [
-    isEditable,
-    draft,
-    graphqlEndpoint,
-    fetcher,
-    graphqlHeaders,
-    editableId,
-  ])
+  }, [isEditable, draft, graphqlEndpoint, fetcher, graphqlHeaders, editableId])
 
   const discardDraft = useCallback(() => {
     if (!isEditable || !baseState) return
