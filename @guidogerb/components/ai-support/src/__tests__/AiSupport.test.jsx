@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { createStorageController } from '@guidogerb/components-storage'
 
 import { AiSupport } from '../AiSupport.jsx'
 
@@ -216,5 +217,95 @@ describe('AiSupport', () => {
       content: 'Hello world',
     })
     expect(responseArgs.data?.choices?.[0]?.message?.content).toBe('Hello world')
+  })
+
+  it('hydrates persisted transcripts from storage per tenant', () => {
+    const storage = createStorageController({ namespace: 'test.ai-support', area: 'memory' })
+    storage.set('transcript::tenant-a', {
+      updatedAt: Date.now(),
+      messages: [
+        { role: 'system', content: 'Persisted system context' },
+        { role: 'assistant', content: 'Stored greeting' },
+      ],
+    })
+    storage.set('transcript::tenant-b', {
+      updatedAt: Date.now(),
+      messages: [{ role: 'assistant', content: 'Other tenant transcript' }],
+    })
+
+    render(
+      <AiSupport
+        endpoint="/api/ai/support"
+        storage={storage}
+        tenantId="tenant-a"
+        initialMessages={[{ role: 'system', content: 'Fresh system prompt' }]}
+      />,
+    )
+
+    expect(screen.getByText('Stored greeting')).toBeInTheDocument()
+    expect(screen.queryByText('Other tenant transcript')).not.toBeInTheDocument()
+  })
+
+  it('persists conversation updates to storage for the active tenant', async () => {
+    const storage = createStorageController({ namespace: 'test.ai-support', area: 'memory' })
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: { role: 'assistant', content: 'Happy to help!' },
+          },
+        ],
+      }),
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <AiSupport endpoint="/api/ai/support" storage={storage} tenantId="tenant-42" />,
+    )
+
+    fireEvent.change(screen.getByLabelText('Message'), {
+      target: { value: 'Hello there' },
+    })
+
+    fireEvent.submit(screen.getByTestId('ai-support-form'))
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+
+    await waitFor(() => {
+      const record = storage.get('transcript::tenant-42')
+      expect(record?.messages).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ role: 'assistant', content: 'Happy to help!' }),
+          expect.objectContaining({ role: 'user', content: 'Hello there' }),
+        ]),
+      )
+    })
+  })
+
+  it('expires stored transcripts when retention rules mark them stale', async () => {
+    const storage = createStorageController({ namespace: 'test.ai-support', area: 'memory' })
+    storage.set('transcript::tenant-expire', {
+      updatedAt: Date.now() - 60_000,
+      messages: [{ role: 'assistant', content: 'Old transcript' }],
+    })
+
+    render(
+      <AiSupport
+        endpoint="/api/ai/support"
+        storage={storage}
+        tenantId="tenant-expire"
+        transcriptRetention={{ maxAgeMs: 10 }}
+        initialMessages={[{ role: 'system', content: 'Fresh start' }]}
+      />,
+    )
+
+    await waitFor(() => {
+      expect(storage.get('transcript::tenant-expire')).toBeUndefined()
+    })
+
+    expect(screen.queryByText('Old transcript')).not.toBeInTheDocument()
+    expect(screen.getByText('Fresh start')).toBeInTheDocument()
   })
 })

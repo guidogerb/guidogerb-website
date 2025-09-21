@@ -11,6 +11,11 @@ export {
   buildRefundEvent,
   ecommerce,
 } from './ecommerce.js'
+export {
+  createMeasurementProtocolClient,
+  MEASUREMENT_PROTOCOL_ENDPOINT,
+  MEASUREMENT_PROTOCOL_DEBUG_ENDPOINT,
+} from './measurement-protocol.js'
 
 const AnalyticsRouterBridge = AnalyticsRouterBridgeNamed ?? AnalyticsRouterBridgeDefault
 

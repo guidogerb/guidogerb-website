@@ -8,6 +8,7 @@ A lightweight React integration for Google Analytics 4 (GA4). The `<Analytics>` 
 - **Centralized helpers:** Use the `useAnalytics()` hook anywhere in your component tree to send events, fire page views, update consent, or set user properties.
 - **Configurable by props:** Toggle debug mode, send initial events, and merge in any GA config overrides without leaving JSX.
 - **Consent-aware:** Provide default consent values and update them later based on user preferences or CMP responses.
+- **Measurement Protocol fallback:** Mirror events from server workers or Node runtimes when a browser GA tag is unavailable.
 
 ## Get a Google Analytics account & measurement ID
 
@@ -101,6 +102,7 @@ function CustomAnalyticsBridge() {
 | `defaultConsent` | `object`                                   | `undefined`  | Consent defaults passed to `gtag('consent', 'default', ...)` before configuration.                                            |
 | `config`         | `object`                                   | `{}`         | Additional GA configuration merged into `gtag('config', measurementId, config)`.                                              |
 | `initialEvents`  | `Array<{ name: string, params?: object }>` | `[]`         | Events dispatched immediately after GA is configured (e.g., to record the first page view manually).                          |
+| `onConsentEvent` | `(event, history) => void`                 | `undefined`  | Callback invoked whenever consent defaults are applied or updated via `consent()`. Receives the event payload and a snapshot of the consent history. |
 | `children`       | `ReactNode`                                | `null`       | The subtree that should have access to analytics helpers.                                                                     |
 
 ### `useAnalytics()`
@@ -112,7 +114,12 @@ Returns helper methods bound to the current analytics instance:
 - `setUserProperties(properties)` — Apply GA user properties.
 - `setUserId(userId | null)` — Associate (or clear) a user ID.
 - `consent(mode, settings)` — Update consent (`mode` defaults to `'default'` when omitted).
+- `getConsentHistory()` — Returns a copy of all consent events recorded so far.
+- `getLastConsentEvent()` — Convenience helper returning the most recent consent event or `null`.
+- `subscribeToConsent(listener)` — Register a listener for consent changes. Returns an unsubscribe function.
 - `gtag(...args)` — Direct access to the underlying `gtag` helper for advanced scenarios.
+
+Consent events are timestamped and deduplicated, so re-rendering `<Analytics>` with the same `defaultConsent` does not emit duplicate `default` events. Listeners added via `subscribeToConsent` receive both the latest event and the full history snapshot.
 
 All helpers safely no-op when the measurement ID is missing or the code executes outside the browser (SSR).
 
@@ -131,6 +138,37 @@ Send initial events by passing the `initialEvents` prop:
   ]}
 />
 ```
+
+## Measurement Protocol fallback
+
+Some environments—such as server-rendered routes or service workers—cannot rely on the GA browser tag. Use
+`createMeasurementProtocolClient` to mirror critical events with the GA4 Measurement Protocol. Configure the helper with your
+measurement ID and API secret, then send events whenever the browser client is unavailable.
+
+```js
+import { createMeasurementProtocolClient } from '@guidogerb/components/analytics'
+
+const mp = createMeasurementProtocolClient({
+  measurementId: process.env.GA_MEASUREMENT_ID,
+  apiSecret: process.env.GA_API_SECRET,
+  clientId: 'offline-client-123',
+  userProperties: { deployment: 'edge-worker' },
+})
+
+await mp.sendEvent({
+  name: 'purchase',
+  params: {
+    currency: 'USD',
+    value: 120,
+  },
+})
+```
+
+Provide `clientId` or `userId` per request (or configure defaults when creating the client). You can also:
+
+- Set `debug: true` to use the GA debug endpoint for validation.
+- Merge additional payload details—such as `userProperties`, `nonPersonalizedAds`, or `timestampMicros`—on each call.
+- Batch multiple events with `sendEvents({ events: [...] })`.
 
 ## Testing & maintenance
 

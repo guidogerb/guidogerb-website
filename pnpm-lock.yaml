@@ -37,6 +37,10 @@ importers:
         version: 3.2.4(jsdom@27.0.0(postcss@8.5.6))
 
   '@guidogerb/components/ai-support':
+    dependencies:
+      '@guidogerb/components-storage':
+        specifier: workspace:*
+        version: link:../storage
     devDependencies:
       react:
         specifier: ^19.1.1

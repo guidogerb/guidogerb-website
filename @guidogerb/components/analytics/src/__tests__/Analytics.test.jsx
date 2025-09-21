@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { render, waitFor } from '@testing-library/react'
+import { vi } from 'vitest'
 
 import Analytics, { useAnalytics } from '../Analytics.jsx'
 
@@ -111,6 +112,103 @@ describe('Analytics', () => {
     )
   })
 
+  it('tracks consent events and exposes history helpers', async () => {
+    const consentCallback = vi.fn()
+    const consentListener = vi.fn()
+    let historySnapshot = []
+    let lastEvent = null
+
+    function Tracker() {
+      const analytics = useAnalytics()
+
+      useEffect(() => {
+        const unsubscribe = analytics.subscribeToConsent(consentListener)
+        const timer = setTimeout(() => {
+          analytics.consent('update', { ad_storage: 'denied' })
+          historySnapshot = analytics.getConsentHistory()
+          lastEvent = analytics.getLastConsentEvent()
+        }, 0)
+        return () => {
+          clearTimeout(timer)
+          unsubscribe()
+        }
+      }, [analytics])
+
+      return null
+    }
+
+    render(
+      <Analytics
+        measurementId="G-CONSENT-TRACKING"
+        defaultConsent={{ ad_storage: 'granted' }}
+        onConsentEvent={consentCallback}
+      >
+        <Tracker />
+      </Analytics>,
+    )
+
+    await waitFor(() => {
+      expect(consentCallback).toHaveBeenCalledTimes(2)
+    })
+
+    const events = consentCallback.mock.calls.map(([event]) => event)
+    expect(events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'default',
+          mode: 'default',
+          settings: { ad_storage: 'granted' },
+        }),
+        expect.objectContaining({
+          type: 'update',
+          mode: 'update',
+          settings: { ad_storage: 'denied' },
+        }),
+      ]),
+    )
+
+    await waitFor(() => {
+      expect(historySnapshot).toHaveLength(2)
+    })
+
+    expect(consentListener).toHaveBeenCalledTimes(2)
+    expect(historySnapshot.some((event) => event.type === 'default')).toBe(true)
+    expect(lastEvent).toMatchObject({ type: 'update', mode: 'update' })
+  })
+
+  it('avoids duplicating default consent events across re-renders', async () => {
+    const initialCallback = vi.fn()
+    const rerenderCallback = vi.fn()
+
+    const { rerender } = render(
+      <Analytics
+        measurementId="G-CONSENT-ONCE"
+        defaultConsent={{ analytics_storage: 'granted' }}
+        onConsentEvent={initialCallback}
+      />,
+    )
+
+    await waitFor(() => {
+      expect(initialCallback).toHaveBeenCalledTimes(1)
+    })
+
+    rerender(
+      <Analytics
+        measurementId="G-CONSENT-ONCE"
+        defaultConsent={{ analytics_storage: 'granted' }}
+        onConsentEvent={rerenderCallback}
+      >
+        <ConsentUpdater />
+      </Analytics>,
+    )
+
+    await waitFor(() => {
+      expect(initialCallback).toHaveBeenCalledTimes(1)
+      expect(rerenderCallback).toHaveBeenCalledTimes(1)
+      expect(rerenderCallback.mock.calls[0][0]).toMatchObject({ type: 'update' })
+    })
+  })
+
   it('gracefully no-ops when the measurement id is missing', () => {
     render(<Analytics measurementId={null} />)
 
@@ -127,3 +225,13 @@ describe('Analytics', () => {
     expect(scripts).toHaveLength(1)
   })
 })
+
+function ConsentUpdater() {
+  const analytics = useAnalytics()
+
+  useEffect(() => {
+    analytics.consent('update', { analytics_storage: 'denied' })
+  }, [analytics])
+
+  return null
+}
