@@ -67,6 +67,10 @@ example `{ assets: { enabled: false } }`) and every subscriber—including `@gui
 with the merged preferences. The service worker helpers use the same channel name so toggles propagate immediately without a
 redeploy.
 
+Channels can also service sync requests from peers that cannot access the persisted storage (e.g., the service worker). Call
+`requestSync()` from a read-only channel—`createCachePreferenceSubscriber` does this automatically—and the provider will
+re-broadcast the latest merged preferences so every runtime converges on the same configuration.
+
 ```js
 import {
   createCachePreferenceChannel,

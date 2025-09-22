@@ -5,6 +5,7 @@ import {
   unregisterSW,
 } from '../index.js'
 import { createCachePreferenceChannel } from '@guidogerb/components-storage/cache-preferences'
+import { createStorageController } from '@guidogerb/components-storage'
 
 const originalDescriptor = Object.getOwnPropertyDescriptor(window.navigator, 'serviceWorker')
 const originalReadyStateDescriptor = Object.getOwnPropertyDescriptor(document, 'readyState')
@@ -339,5 +340,46 @@ describe('cache preference subscriber', () => {
     )
 
     subscriber.destroy()
+  })
+
+  it('requests stored cache preferences when initialized', async () => {
+    const controller = createStorageController({ namespace: 'sync', area: 'memory' })
+    controller.set('cache.preferences', {
+      assets: { enabled: false },
+      api: { maxAgeSeconds: 180 },
+    })
+
+    const broadcastFactory = createBroadcastFactory()
+    const provider = createCachePreferenceChannel({
+      storageController: controller,
+      broadcastChannelFactory: broadcastFactory,
+      logger: { warn: vi.fn(), error: vi.fn() },
+    })
+
+    const subscriber = createCachePreferenceSubscriber({
+      broadcastChannelFactory: broadcastFactory,
+      logger: { warn: vi.fn(), error: vi.fn() },
+    })
+
+    await Promise.resolve()
+
+    expect(subscriber.getPreferences().assets.enabled).toBe(false)
+    expect(subscriber.getPreferences().api.maxAgeSeconds).toBe(180)
+
+    const handler = vi.fn()
+    subscriber.subscribe(handler, { emitInitial: true })
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: 'initial',
+        preferences: expect.objectContaining({
+          assets: expect.objectContaining({ enabled: false }),
+          api: expect.objectContaining({ maxAgeSeconds: 180 }),
+        }),
+      }),
+    )
+
+    subscriber.destroy()
+    provider.destroy()
   })
 })
