@@ -3,6 +3,7 @@ import { createCachePreferenceChannel } from '@guidogerb/components-storage/cach
 export {
   CACHE_PREFERENCE_CHANNEL_NAME,
   CACHE_PREFERENCE_MESSAGE_TYPE,
+  CACHE_PREFERENCE_SYNC_REQUEST_TYPE,
   CACHE_PREFERENCE_VERSION,
   DEFAULT_CACHE_PREFERENCES,
 } from '@guidogerb/components-storage/cache-preferences'
@@ -195,11 +196,16 @@ export function createCachePreferenceSubscriber(options = {}) {
     sourceId,
   })
 
+  if (typeof channel.requestSync === 'function') {
+    channel.requestSync()
+  }
+
   return Object.freeze({
     channelName: channel.channelName,
     version: channel.version,
     getPreferences: channel.getPreferences,
     subscribe: channel.subscribe,
+    requestSync: channel.requestSync,
     destroy: channel.destroy,
   })
 }

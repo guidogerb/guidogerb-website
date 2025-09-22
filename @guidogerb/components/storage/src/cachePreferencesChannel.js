@@ -90,6 +90,7 @@ const normalizePreferences = (value, defaults) => {
 
 export const CACHE_PREFERENCE_CHANNEL_NAME = '@guidogerb/cache-preferences'
 export const CACHE_PREFERENCE_MESSAGE_TYPE = '@guidogerb/cache-preferences/update'
+export const CACHE_PREFERENCE_SYNC_REQUEST_TYPE = '@guidogerb/cache-preferences/request-sync'
 export const CACHE_PREFERENCE_STORAGE_KEY = 'cache.preferences'
 export const CACHE_PREFERENCE_VERSION = 1
 
@@ -159,6 +160,7 @@ export const createCachePreferenceChannel = (options = {}) => {
     logger = console,
     defaultPreferences = DEFAULT_CACHE_PREFERENCES,
     initialPreferences,
+    provideSync = persist || initialPreferences !== undefined,
     sourceId = `cache-pref-${Math.random().toString(16).slice(2)}`,
   } = options ?? {}
 
@@ -186,6 +188,7 @@ export const createCachePreferenceChannel = (options = {}) => {
 
   const listeners = new Set()
   const broadcast = resolveBroadcastChannel({ channelName, broadcastChannelFactory, logger })
+  const canProvideSnapshots = Boolean(provideSync)
 
   const notify = (event) => {
     if (isDestroyed) return
@@ -224,6 +227,7 @@ export const createCachePreferenceChannel = (options = {}) => {
     }
 
     const eventTimestamp = typeof timestamp === 'number' ? timestamp : Date.now()
+    const eventEmitter = emitter ?? sourceId
     const event = Object.freeze({
       type: CACHE_PREFERENCE_MESSAGE_TYPE,
       preferences: frozen,
@@ -231,22 +235,18 @@ export const createCachePreferenceChannel = (options = {}) => {
       timestamp: eventTimestamp,
       version: CACHE_PREFERENCE_VERSION,
       source: sourceId,
-      emitter: emitter ?? sourceId,
+      emitter: eventEmitter,
     })
 
     notify(event)
 
-    if (shouldBroadcast && broadcast && typeof broadcast.postMessage === 'function') {
-      try {
-        broadcast.postMessage({
-          ...event,
-          preferences: cloneValue(frozen),
-        })
-      } catch (error) {
-        if (logger?.warn) {
-          logger.warn('[storage] Failed to broadcast cache preferences', error)
-        }
-      }
+    if (shouldBroadcast) {
+      broadcastPreferences({
+        origin,
+        emitter: eventEmitter,
+        timestamp: eventTimestamp,
+        preferences: frozen,
+      })
     }
 
     return frozen
@@ -283,18 +283,79 @@ export const createCachePreferenceChannel = (options = {}) => {
 
   const getPreferences = () => current
 
+  const postBroadcast = (payload, warnMessage) => {
+    if (!broadcast || typeof broadcast.postMessage !== 'function') return false
+
+    try {
+      broadcast.postMessage(payload)
+      return true
+    } catch (error) {
+      if (logger?.warn) {
+        logger.warn(warnMessage ?? '[storage] Failed to broadcast cache preferences', error)
+      }
+      return false
+    }
+  }
+
+  const broadcastPreferences = ({
+    origin = 'local',
+    emitter,
+    timestamp,
+    preferences = current,
+  } = {}) => {
+    return postBroadcast(
+      {
+        type: CACHE_PREFERENCE_MESSAGE_TYPE,
+        preferences: cloneValue(preferences),
+        origin,
+        timestamp: typeof timestamp === 'number' ? timestamp : Date.now(),
+        version: CACHE_PREFERENCE_VERSION,
+        source: sourceId,
+        emitter: emitter ?? sourceId,
+      },
+      '[storage] Failed to broadcast cache preferences',
+    )
+  }
+
+  const requestSync = ({ emitter } = {}) => {
+    return postBroadcast(
+      {
+        type: CACHE_PREFERENCE_SYNC_REQUEST_TYPE,
+        timestamp: Date.now(),
+        version: CACHE_PREFERENCE_VERSION,
+        source: sourceId,
+        emitter: emitter ?? sourceId,
+      },
+      '[storage] Failed to request cache preference sync',
+    )
+  }
+
   const handleMessage = (event) => {
     const message = event?.data
-    if (!message || message.type !== CACHE_PREFERENCE_MESSAGE_TYPE) return
-    if (message.source === sourceId) return
+    if (!message || typeof message !== 'object') return
 
-    commit(message.preferences, {
-      origin: 'broadcast',
-      persist,
-      broadcast: false,
-      timestamp: message.timestamp,
-      emitter: message.emitter ?? message.source,
-    })
+    if (message.type === CACHE_PREFERENCE_MESSAGE_TYPE) {
+      if (message.source === sourceId) return
+
+      commit(message.preferences, {
+        origin: 'broadcast',
+        persist,
+        broadcast: false,
+        timestamp: message.timestamp,
+        emitter: message.emitter ?? message.source,
+      })
+      return
+    }
+
+    if (message.type === CACHE_PREFERENCE_SYNC_REQUEST_TYPE) {
+      if (!canProvideSnapshots) return
+      if (message.source === sourceId) return
+
+      broadcastPreferences({
+        origin: 'sync',
+        emitter: message.emitter ?? message.source,
+      })
+    }
   }
 
   if (broadcast && typeof broadcast.addEventListener === 'function') {
@@ -403,6 +464,8 @@ export const createCachePreferenceChannel = (options = {}) => {
     updatePreferences,
     resetPreferences,
     subscribe,
+    requestSync,
+    broadcastPreferences,
     destroy,
   })
 }

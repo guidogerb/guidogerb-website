@@ -62,6 +62,9 @@ const unsubscribe = cachePreferences.subscribe(({ origin, preferences }) => {
 // Access the latest merged view without waiting for an event
 const snapshot = cachePreferences.getPreferences() ?? DEFAULT_CACHE_PREFERENCES
 
+// Request an explicit resync (the subscriber automatically asks once on init)
+cachePreferences.requestSync()
+
 // Later, when the listener is no longer needed
 unsubscribe()
 cachePreferences.destroy()
