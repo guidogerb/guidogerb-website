@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
+import { JsonEditor } from './JsonEditor.jsx'
 
 const DIMENSIONS = [
   { key: 'inline', label: 'Inline' },
@@ -8,18 +10,6 @@ const DIMENSIONS = [
   { key: 'minInline', label: 'Min inline' },
   { key: 'minBlock', label: 'Min block' },
 ]
-
-function formatPropsJSON(value) {
-  if (value == null) return '{\n}'
-  try {
-    if (typeof value === 'string') {
-      return value
-    }
-    return JSON.stringify(value, null, 2)
-  } catch (error) {
-    return '{\n}'
-  }
-}
 
 export function SlotEditorOverlay({
   slotKey,
@@ -50,7 +40,6 @@ export function SlotEditorOverlay({
     if (activeBreakpoint) return activeBreakpoint
     return breakpoints[0]?.key ?? 'md'
   })
-  const [jsonInput, setJsonInput] = useState(() => formatPropsJSON(propsJSON))
   const [jsonError, setJsonError] = useState(null)
 
   useEffect(() => {
@@ -60,11 +49,6 @@ export function SlotEditorOverlay({
       )
     }
   }, [activeBreakpoint])
-
-  useEffect(() => {
-    setJsonInput(formatPropsJSON(propsJSON))
-    setJsonError(null)
-  }, [propsJSON])
 
   const breakpointOptions = useMemo(() => breakpoints.map(({ key }) => key), [breakpoints])
 
@@ -76,24 +60,14 @@ export function SlotEditorOverlay({
     return entries
   }, [variantOptions])
 
-  const handlePropsChange = (event) => {
-    const value = event.target.value
-    setJsonInput(value)
-    if (!onPropsChange) return
-    if (!value.trim()) {
-      setJsonError(null)
-      onPropsChange(undefined)
-      return
-    }
-
-    try {
-      const parsed = JSON.parse(value)
-      onPropsChange(parsed)
-      setJsonError(null)
-    } catch (parseError) {
-      setJsonError(parseError.message)
-    }
-  }
+  const handlePropsChange = useCallback(
+    (nextValue) => {
+      if (typeof onPropsChange === 'function') {
+        onPropsChange(nextValue)
+      }
+    },
+    [onPropsChange],
+  )
 
   const handleSizeInputChange = (breakpoint, dimension) => (event) => {
     const value = event.target.value
@@ -251,13 +225,14 @@ export function SlotEditorOverlay({
           </button>
         </div>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Props JSON</span>
-          <textarea
-            value={jsonInput}
-            onChange={handlePropsChange}
-            rows={6}
-            style={{
+        <JsonEditor
+          label="Props JSON"
+          value={propsJSON}
+          onChange={handlePropsChange}
+          onErrorChange={setJsonError}
+          rows={6}
+          textareaProps={{
+            style: {
               width: '100%',
               borderRadius: '0.5rem',
               border: '1px solid rgba(148, 163, 184, 0.4)',
@@ -266,12 +241,9 @@ export function SlotEditorOverlay({
               padding: '0.5rem',
               fontFamily: 'monospace',
               fontSize: '0.75rem',
-            }}
-          />
-          {jsonError ? (
-            <div style={{ color: '#f87171', fontSize: '0.75rem' }}>JSON error: {jsonError}</div>
-          ) : null}
-        </label>
+            },
+          }}
+        />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
           <button
