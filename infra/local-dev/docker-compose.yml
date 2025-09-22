@@ -1,0 +1,77 @@
+version: "3.9"
+
+services:
+  cloudfront:
+    image: nginx:1.27-alpine
+    container_name: guidogerb-cloudfront
+    ports:
+      - "8080:80"
+    volumes:
+      - ./cloudfront/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - s3-static
+      - api-gateway
+    networks:
+      - guidogerb
+
+  s3-static:
+    image: nginx:1.27-alpine
+    container_name: guidogerb-s3
+    volumes:
+      - ./s3/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./data/s3:/var/www/sites:ro
+    networks:
+      - guidogerb
+
+  cognito-mock:
+    build:
+      context: ./services
+      dockerfile: cognito-mock/Dockerfile
+    container_name: guidogerb-cognito
+    environment:
+      COGNITO_ISSUER: http://cognito-mock:8000
+      COGNITO_DEFAULT_AUDIENCES: guidogerb-api,guidogerb-app
+      COGNITO_APP_CLIENT_ID: local-dev-client
+    ports:
+      - "8100:8000"
+    networks:
+      - guidogerb
+
+  lambda-service:
+    build:
+      context: ./services
+      dockerfile: lambda/Dockerfile
+    container_name: guidogerb-lambda
+    networks:
+      - guidogerb
+
+  fargate-service:
+    build:
+      context: ./services
+      dockerfile: fargate/Dockerfile
+    container_name: guidogerb-fargate
+    networks:
+      - guidogerb
+
+  api-gateway:
+    build:
+      context: ./services
+      dockerfile: api-gateway/Dockerfile
+    container_name: guidogerb-api-gateway
+    environment:
+      COGNITO_JWKS_URL: http://cognito-mock:8000/.well-known/jwks.json
+      COGNITO_ISSUER: http://cognito-mock:8000
+      LAMBDA_URL: http://lambda-service:9000
+      FARGATE_URL: http://fargate-service:9001
+      LAMBDA_AUDIENCE: guidogerb-api
+      FARGATE_AUDIENCE: guidogerb-app
+    depends_on:
+      - cognito-mock
+      - lambda-service
+      - fargate-service
+    networks:
+      - guidogerb
+
+networks:
+  guidogerb:
+    driver: bridge
