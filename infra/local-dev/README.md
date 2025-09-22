@@ -8,14 +8,14 @@ container workloads using the same hostnames as production.
 
 ## Topology
 
-| Component | Local service | Purpose |
-| --------- | ------------- | ------- |
-| CloudFront | `guidogerb-cloudfront` (Nginx) | Acts as the edge distribution. Routes hostnames to the S3 origin or to the API Gateway container and forwards the `Host` header so per-tenant logic can run downstream. |
-| S3 origin  | `guidogerb-s3` (Nginx) | Serves SPA builds from `infra/local-dev/data/s3/tenants/<host>` with an `_placeholder` fallback when no build has been synced. |
-| Cognito    | `guidogerb-cognito` (FastAPI) | Issues RS256-signed JWT access tokens and exposes a JWKS endpoint. Mimics a Cognito user pool for local sign-in flows. |
-| API Gateway | `guidogerb-api-gateway` (FastAPI) | Validates Cognito JWTs and forwards requests based on the host name: `api.local.<tenant>` → Lambda, `app.local.<tenant>` → Fargate. |
-| Lambda     | `guidogerb-lambda` (FastAPI) | Sample Python handler that echoes requests and includes tenant metadata injected by the API gateway. |
-| ECS Fargate | `guidogerb-fargate` (FastAPI) | Simulated container service with a sample `/orders` API. |
+| Component   | Local service                     | Purpose                                                                                                                                                                 |
+| ----------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CloudFront  | `guidogerb-cloudfront` (Nginx)    | Acts as the edge distribution. Routes hostnames to the S3 origin or to the API Gateway container and forwards the `Host` header so per-tenant logic can run downstream. |
+| S3 origin   | `guidogerb-s3` (Nginx)            | Serves SPA builds from `infra/local-dev/data/s3/tenants/<host>` with an `_placeholder` fallback when no build has been synced.                                          |
+| Cognito     | `guidogerb-cognito` (FastAPI)     | Issues RS256-signed JWT access tokens and exposes a JWKS endpoint. Mimics a Cognito user pool for local sign-in flows.                                                  |
+| API Gateway | `guidogerb-api-gateway` (FastAPI) | Validates Cognito JWTs and forwards requests based on the host name: `api.local.<tenant>` → Lambda, `app.local.<tenant>` → Fargate.                                     |
+| Lambda      | `guidogerb-lambda` (FastAPI)      | Sample Python handler that echoes requests and includes tenant metadata injected by the API gateway.                                                                    |
+| ECS Fargate | `guidogerb-fargate` (FastAPI)     | Simulated container service with a sample `/orders` API.                                                                                                                |
 
 All services share the `guidogerb` Docker network to emulate VPC-internal DNS
 (`*.service.local`).
