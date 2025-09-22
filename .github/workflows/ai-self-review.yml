@@ -27,7 +27,7 @@ jobs:
       - run: pnpm i --ignore-scripts
       - name: Validate docs
         run: |
-          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json SPEC.md
-          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json README.md
-          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json PUBLISHING.md
-          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json TASKS.md
+          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json docs/SPEC.md
+          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json docs/README.md
+          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json docs/PUBLISHING.md
+          node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json docs/TASKS.md
