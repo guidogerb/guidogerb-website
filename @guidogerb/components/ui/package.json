@@ -20,6 +20,7 @@
     "src/JsonViewer/JsonViewer.jsx",
     "src/ResponsiveSlot/ResponsiveSlot.jsx",
     "src/ResponsiveSlot/editing/EditModeContext.jsx",
+    "src/ResponsiveSlot/editing/JsonEditor.jsx",
     "src/ResponsiveSlot/editing/SlotEditorOverlay.jsx",
     "src/ResponsiveSlot/editing/useSlotEditing.js",
     "src/ResponsiveSlot/editing/localDraftStorage.js"
