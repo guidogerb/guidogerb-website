@@ -44,6 +44,7 @@ export function useAnalyticsPageViews(options = {}) {
     getParams: paramsBuilder,
     shouldTrack = defaultShouldTrack,
     onTrack,
+    eventName = 'page_view',
   } = options
 
   const analytics = useAnalytics()
@@ -120,18 +121,30 @@ export function useAnalyticsPageViews(options = {}) {
       extraParams = paramsBuilder
     }
 
-    const params = normalizeParams({
+    const baseParams = normalizeParams({
       ...defaults,
       ...(isPlainObject(extraParams) ? extraParams : {}),
     })
 
-    analytics.pageView(path, params)
+    const params =
+      typeof baseParams.page_path === 'string' && baseParams.page_path.length > 0
+        ? baseParams
+        : { ...baseParams, page_path: path }
+
+    const isCustomEvent = typeof eventName === 'string' && eventName !== 'page_view'
+
+    if (isCustomEvent && typeof analytics.trackEvent === 'function') {
+      analytics.trackEvent(eventName, params)
+    } else if (typeof analytics.pageView === 'function') {
+      analytics.pageView(path, params)
+    }
 
     if (typeof onTrack === 'function') {
       onTrack({ ...context, params })
     }
   }, [
     analytics,
+    eventName,
     getPath,
     getReferrer,
     hash,

@@ -32,6 +32,222 @@ vi.mock('@stripe/stripe-js', () => ({
   loadStripe: vi.fn(),
 }))
 
+vi.mock('@guidogerb/components-shopping-cart', () => {
+  const React = require('react')
+  const CartContext = React.createContext()
+
+  const ensureNumber = (value, fallback = 0) => {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : fallback
+  }
+
+  const formatCurrency = (value, currency) => {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency,
+      }).format(value / 100)
+    } catch (error) {
+      return `$${(value / 100).toFixed(2)}`
+    }
+  }
+
+  const transformProduct = (product = {}) => ({
+    id: product.id ?? product.sku ?? product.lineId ?? `product-${Date.now()}`,
+    lineId: product.lineId ?? product.id ?? product.sku ?? `line-${Date.now()}`,
+    name: product.title ?? product.name ?? 'Product',
+    description: product.description ?? '',
+    price: product.price ?? { amount: 0, currency: 'USD' },
+    quantity: ensureNumber(product.quantity, 1),
+    metadata: product.metadata ?? {},
+  })
+
+  const CartProvider = ({
+    children,
+    initialCart,
+    storage,
+    storageKey = 'cart',
+    currency = 'USD',
+  }) => {
+    const initialItems = React.useMemo(
+      () => (Array.isArray(initialCart?.items) ? initialCart.items : []),
+      [initialCart?.items],
+    )
+    const initialCurrency = React.useMemo(
+      () => initialCart?.currency ?? initialCart?.totals?.currency ?? currency,
+      [currency, initialCart?.currency, initialCart?.totals?.currency],
+    )
+
+    const [items, setItems] = React.useState(initialItems)
+    const [cartCurrency, setCartCurrency] = React.useState(initialCurrency)
+
+    const persistState = React.useCallback(
+      (nextItems) => {
+        if (!storage?.set) return
+        const subtotal = nextItems.reduce(
+          (sum, item) => sum + ensureNumber(item.price?.amount) * ensureNumber(item.quantity, 1),
+          0,
+        )
+        const payloadCurrency =
+          nextItems.find((item) => item?.price?.currency)?.price?.currency ??
+          cartCurrency ??
+          currency ??
+          'USD'
+        const payload = {
+          items: nextItems,
+          currency: payloadCurrency,
+          totals: {
+            subtotal,
+            discount: 0,
+            tax: 0,
+            total: subtotal,
+            currency: payloadCurrency,
+          },
+          promoCode: initialCart?.promoCode ?? null,
+          customTaxRate: initialCart?.customTaxRate ?? null,
+          customDiscountRate: initialCart?.customDiscountRate ?? null,
+          shipping: initialCart?.shipping ?? 0,
+          updatedAt: new Date().toISOString(),
+        }
+        storage.set(storageKey, payload)
+      },
+      [cartCurrency, currency, initialCart, storage, storageKey],
+    )
+
+    React.useEffect(() => {
+      persistState(items)
+    }, [items, persistState])
+
+    const addItem = React.useCallback((product) => {
+      const transformed = transformProduct(product)
+      setCartCurrency(transformed.price?.currency ?? cartCurrency ?? currency ?? 'USD')
+      setItems((prev) => {
+        const existing = prev.find((item) => item.id === transformed.id)
+        if (existing) {
+          const updated = prev.map((item) =>
+            item.id === transformed.id
+              ? {
+                  ...item,
+                  quantity: ensureNumber(item.quantity, 1) + ensureNumber(transformed.quantity, 1),
+                }
+              : item,
+          )
+          persistState(updated)
+          return updated
+        }
+        const nextItems = [...prev, transformed]
+        persistState(nextItems)
+        return nextItems
+      })
+    }, [cartCurrency, currency, persistState])
+
+    const clearCart = React.useCallback(() => {
+      setItems((prev) => {
+        if (prev.length === 0) {
+          persistState(prev)
+          return prev
+        }
+        const emptied = []
+        persistState(emptied)
+        return emptied
+      })
+    }, [persistState])
+
+    const totals = React.useMemo(() => {
+      const subtotal = items.reduce(
+        (sum, item) => sum + ensureNumber(item.price?.amount) * ensureNumber(item.quantity, 1),
+        0,
+      )
+      return {
+        subtotal,
+        discount: 0,
+        tax: 0,
+        total: subtotal,
+        currency: cartCurrency ?? currency ?? 'USD',
+      }
+    }, [cartCurrency, currency, items])
+
+    const value = React.useMemo(
+      () => ({ items, totals, addItem, clearCart }),
+      [addItem, clearCart, items, totals],
+    )
+
+    return React.createElement(CartContext.Provider, { value }, children)
+  }
+
+  const useCart = () => React.useContext(CartContext)
+
+  const ShoppingCart = () => {
+    const { items, totals } = useCart()
+    if (items.length === 0) {
+      return React.createElement('p', null, 'Your cart is empty.')
+    }
+    return React.createElement(
+      'div',
+      null,
+      React.createElement(
+        'ul',
+        { 'data-testid': 'cart-items' },
+        items.map((item) =>
+          React.createElement(
+            'li',
+            { key: item.id },
+            `${item.name} × ${ensureNumber(item.quantity, 1)}`,
+          ),
+        ),
+      ),
+      React.createElement(
+        'span',
+        null,
+        `Total ${formatCurrency(totals.total, totals.currency)}`,
+      ),
+    )
+  }
+
+  const CheckoutForm = ({
+    confirmPayment,
+    onPaymentSuccess,
+    onPaymentError,
+    clientSecret,
+    amount,
+    currency,
+    metadata,
+  }) => {
+    const handleConfirm = async () => {
+      try {
+        const result = await confirmPayment({ clientSecret, amount, currency, metadata })
+        onPaymentSuccess(result.paymentIntent, {})
+      } catch (error) {
+        onPaymentError?.(error)
+      }
+    }
+
+    return React.createElement(
+      'button',
+      { type: 'button', onClick: handleConfirm },
+      'Confirm Payment',
+    )
+  }
+
+  return {
+    __esModule: true,
+    CartProvider,
+    ShoppingCart,
+    CheckoutForm,
+    useCart,
+  }
+})
+
+vi.mock(
+  '@guidogerb/components-analytics',
+  () => ({
+    __esModule: true,
+    buildAddToCartEvent: vi.fn(() => ({ name: 'add_to_cart', params: {} })),
+    useAnalytics: () => ({ trackEvent: vi.fn() }),
+  }),
+  { virtual: true },
+)
+
 import { Elements } from '@stripe/react-stripe-js'
 import { PointOfSale } from '../PointOfSale.jsx'
 
@@ -139,6 +355,7 @@ describe('PointOfSale', () => {
           initialUser={initialUser}
           onOrderComplete={onOrderComplete}
           onInvoiceCreate={onInvoiceCreate}
+          serviceWorker={{ enabled: false }}
         />
       </Elements>,
     )
