@@ -4,6 +4,61 @@ A shared React component package that houses the forthcoming **GuidoGerb UI Cont
 
 > **Status:** The package currently exposes the legacy `ResponsiveSlot` implementation and a `JsonViewer` helper. The new API surface (`ResponsiveSlotProvider`, `GuidoGerbUI_Container`, and `useResponsiveSlotSize`) is being designed to meet the new specification. Track the implementation work in [`tasks.md`](./tasks.md).
 
+## Exports overview
+
+- Marketing site sections
+  - `HeroSection`, `PlatformSection`, `DistributionSection`, `ResourcesSection`, `NewsletterSection`, `PartnerPortalSection`
+- Artist site sections
+  - `ProgramsHeroSection`, `ConsultingSection`, `RecordingsEducationSection`, `AboutPressSection`, `NewsletterSignupSection`, `RehearsalRoomSection`, `Welcome`
+- Utilities/primitives
+  - `ResponsiveSlot`, `EditModeProvider`, `useEditMode`, `JsonViewer`
+
+## Welcome – authentication-agnostic by design
+
+`Welcome` intentionally does not import an authentication library. Consumers provide a hook function to retrieve auth state.
+
+Props:
+
+- `useAuthHook: () => { isAuthenticated?: boolean; error?: any; user?: { profile?: Record<string, any> } }`
+  - Typically pass `useAuth` from `@guidogerb/components-auth`.
+- `rehearsalResources?: { stagePlotHref?: string; rehearsalChecklistHref?: string; productionEmailHref?: string }`
+- `children?: ReactNode`
+
+Example:
+
+```jsx
+import { Welcome } from '@guidogerb/components-ui'
+import { useAuth } from '@guidogerb/components-auth'
+
+function RehearsalCard() {
+  const rehearsalResources = {
+    stagePlotHref: '/files/stage-plot.pdf',
+    rehearsalChecklistHref: '/files/rehearsal-checklist.pdf',
+    productionEmailHref: 'mailto:hello@example.com?subject=Notes',
+  }
+  return <Welcome useAuthHook={useAuth} rehearsalResources={rehearsalResources} />
+}
+```
+
+## PartnerPortalSection – pluggable Welcome
+
+`PartnerPortalSection` renders a protected shell and, by default, the `Welcome` component. It accepts the same inputs so sites can control auth and resource links.
+
+Props:
+
+- `logoutUri: string` – forwarded to the protected wrapper.
+- `useAuthHook?: Function` – passed to `Welcome`.
+- `rehearsalResources?: object` – passed to `Welcome`.
+- `WelcomeComponent?: ComponentType` – override the inner welcome component in tests or custom sites.
+
+Example (website usage):
+
+```jsx
+import { PartnerPortalSection } from '@guidogerb/components-ui'
+import { useAuth } from '@guidogerb/components-auth'
+;<PartnerPortalSection logoutUri={import.meta.env.VITE_LOGOUT_URI} useAuthHook={useAuth} />
+```
+
 ## Why this package exists
 
 - Provide a single source of truth for layout slot sizing across GuidoGerb properties.

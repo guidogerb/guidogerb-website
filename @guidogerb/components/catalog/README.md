@@ -109,6 +109,7 @@ The component expects a classic GraphQL response envelope (`{ data, errors }`) a
 when the `errors` array is populated or `data.catalog` is missing.
 
 ## Props
+
 | Prop                    | Type                                                                                                          | Default                             | Description                                                                     |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
 | `apiBaseUrl`            | `string`                                                                                                      | —                                   | Base URL forwarded to `createClient` when an explicit `client` is not provided. |

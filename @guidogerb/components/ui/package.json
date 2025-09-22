@@ -1,7 +1,7 @@
 {
   "name": "@guidogerb/components-ui",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "main": "./index.js",
   "module": "./index.js",
@@ -29,7 +29,8 @@
     "react-dom": "^18.2.0 || ^19.0.0"
   },
   "dependencies": {
-    "react-json-view": "^1.21.3"
+    "react-json-view": "^1.21.3",
+    "@guidogerb/components-pages-protected": "workspace:*"
   },
   "devDependencies": {
     "react": "^19.1.1",

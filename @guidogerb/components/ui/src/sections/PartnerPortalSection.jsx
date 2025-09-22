@@ -1,7 +1,12 @@
 import Protected from '@guidogerb/components-pages-protected'
-import Welcome from '../welcome-page/index.jsx'
+import Welcome from '../artist'
 
-export function PartnerPortalSection({ logoutUri }) {
+export function PartnerPortalSection({
+  logoutUri,
+  WelcomeComponent = Welcome,
+  useAuthHook,
+  rehearsalResources,
+}) {
   return (
     <section className="protected" id="partner-portal">
       <h2>Partner operations portal</h2>
@@ -10,7 +15,7 @@ export function PartnerPortalSection({ logoutUri }) {
         plans with our production team.
       </p>
       <Protected logoutUri={logoutUri}>
-        <Welcome />
+        <WelcomeComponent useAuthHook={useAuthHook} rehearsalResources={rehearsalResources} />
       </Protected>
     </section>
   )

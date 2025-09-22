@@ -1,19 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { mockUseAuth } = vi.hoisted(() => ({
-  mockUseAuth: vi.fn(),
-}))
-
-vi.mock('@guidogerb/components-auth', () => ({
-  __esModule: true,
-  useAuth: mockUseAuth,
-}))
+const mockUseAuth = vi.fn()
 
 async function renderWelcome(props = {}) {
   const module = await import('../index.jsx')
   const Welcome = module.default
-  return render(<Welcome {...props} />)
+  return render(<Welcome useAuthHook={mockUseAuth} {...props} />)
 }
 
 describe('Gary Gerber welcome component', () => {
@@ -60,7 +53,14 @@ describe('Gary Gerber welcome component', () => {
       },
     })
 
-    await renderWelcome({ children: <div data-testid="nested">Portal content</div> })
+    await renderWelcome({
+      children: <div data-testid="nested">Portal content</div>,
+      rehearsalResources: {
+        stagePlotHref: '/files/stage-plot.pdf',
+        rehearsalChecklistHref: '/files/rehearsal-checklist.pdf',
+        productionEmailHref: 'mailto:hello@garygerber.com?subject=Collaboration%20Notes',
+      },
+    })
 
     expect(
       screen.getByRole('heading', { level: 3, name: 'Welcome back, Touring Pianist!' }),
@@ -100,7 +100,13 @@ describe('Gary Gerber welcome component', () => {
       },
     })
 
-    await renderWelcome()
+    const links = {
+      stagePlotHref: process.env.VITE_REHEARSAL_RESOURCES_STAGE_PLOT_URL,
+      rehearsalChecklistHref: process.env.VITE_REHEARSAL_RESOURCES_CHECKLIST_URL,
+      productionEmailHref: `mailto:${process.env.VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL}?subject=${encodeURIComponent(process.env.VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL_SUBJECT)}`,
+    }
+
+    await renderWelcome({ rehearsalResources: links })
 
     expect(
       screen.getByRole('heading', { level: 3, name: 'Welcome back, guest-performer!' }),

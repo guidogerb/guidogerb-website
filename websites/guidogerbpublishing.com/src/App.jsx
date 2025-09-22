@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Footer } from '@guidogerb/footer'
 import { Header, HeaderContextProvider } from '@guidogerb/header'
+import { useAuth } from '@guidogerb/components-auth'
 import './App.css'
 import headerSettings from './headerSettings.js'
 import footerSettings from './footerSettings.js'
@@ -11,7 +12,7 @@ import {
   PartnerPortalSection,
   PlatformSection,
   ResourcesSection,
-} from './website-components/sections/index.js'
+} from '@guidogerb/components-ui'
 
 const SECTION_MAP = {
   '/': 'top',
@@ -119,7 +120,7 @@ function App() {
           <DistributionSection />
           <ResourcesSection />
           <NewsletterSection />
-          <PartnerPortalSection logoutUri={import.meta.env.VITE_LOGOUT_URI} />
+          <PartnerPortalSection logoutUri={import.meta.env.VITE_LOGOUT_URI} useAuthHook={useAuth} />
         </main>
 
         <Footer {...footerSettings} onNavigate={handleNavigate} id="contact">

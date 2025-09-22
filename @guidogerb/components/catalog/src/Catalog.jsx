@@ -368,9 +368,8 @@ const defaultRenderProduct = ({ product, onSelect, viewMode }) => {
 defaultRenderProduct.displayName = 'CatalogProduct'
 
 const buildScopedNamespace = (namespace, { tenantId, environment } = {}) => {
-  const baseNamespace = typeof namespace === 'string' && namespace.trim()
-    ? namespace.trim()
-    : DEFAULT_STORAGE_NAMESPACE
+  const baseNamespace =
+    typeof namespace === 'string' && namespace.trim() ? namespace.trim() : DEFAULT_STORAGE_NAMESPACE
 
   const segments = [baseNamespace]
 
@@ -416,7 +415,6 @@ export function Catalog({
     return createClient({ baseUrl: apiBaseUrl })
   }, [apiBaseUrl, client])
 
-
   const scopedNamespace = useMemo(
     () => buildScopedIdentifier(storageNamespace, storageScope),
     [storageNamespace, storageScope],
@@ -431,7 +429,6 @@ export function Catalog({
     if (storage) return storage
     return createStorageController({ namespace: scopedNamespace })
   }, [scopedNamespace, storage])
-
 
   const storedPreferences = useMemo(
     () => readPreferences(resolvedStorage, scopedStorageKey) ?? {},

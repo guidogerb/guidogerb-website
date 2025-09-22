@@ -1,8 +1,5 @@
-import { useAuth } from '@guidogerb/components-auth'
-import rehearsalResources from '../../rehearsalResources.js'
-
-export default function Welcome({ children }) {
-  const auth = useAuth()
+export default function Welcome({ children, rehearsalResources = {}, useAuthHook }) {
+  const auth = typeof useAuthHook === 'function' ? useAuthHook() : null
 
   if (auth?.error) {
     return <div className="welcome-error">Sign-in failed: {auth.error.message}</div>

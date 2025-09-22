@@ -118,28 +118,32 @@ vi.mock('@guidogerb/components-shopping-cart', () => {
       persistState(items)
     }, [items, persistState])
 
-    const addItem = React.useCallback((product) => {
-      const transformed = transformProduct(product)
-      setCartCurrency(transformed.price?.currency ?? cartCurrency ?? currency ?? 'USD')
-      setItems((prev) => {
-        const existing = prev.find((item) => item.id === transformed.id)
-        if (existing) {
-          const updated = prev.map((item) =>
-            item.id === transformed.id
-              ? {
-                  ...item,
-                  quantity: ensureNumber(item.quantity, 1) + ensureNumber(transformed.quantity, 1),
-                }
-              : item,
-          )
-          persistState(updated)
-          return updated
-        }
-        const nextItems = [...prev, transformed]
-        persistState(nextItems)
-        return nextItems
-      })
-    }, [cartCurrency, currency, persistState])
+    const addItem = React.useCallback(
+      (product) => {
+        const transformed = transformProduct(product)
+        setCartCurrency(transformed.price?.currency ?? cartCurrency ?? currency ?? 'USD')
+        setItems((prev) => {
+          const existing = prev.find((item) => item.id === transformed.id)
+          if (existing) {
+            const updated = prev.map((item) =>
+              item.id === transformed.id
+                ? {
+                    ...item,
+                    quantity:
+                      ensureNumber(item.quantity, 1) + ensureNumber(transformed.quantity, 1),
+                  }
+                : item,
+            )
+            persistState(updated)
+            return updated
+          }
+          const nextItems = [...prev, transformed]
+          persistState(nextItems)
+          return nextItems
+        })
+      },
+      [cartCurrency, currency, persistState],
+    )
 
     const clearCart = React.useCallback(() => {
       setItems((prev) => {
@@ -196,11 +200,7 @@ vi.mock('@guidogerb/components-shopping-cart', () => {
           ),
         ),
       ),
-      React.createElement(
-        'span',
-        null,
-        `Total ${formatCurrency(totals.total, totals.currency)}`,
-      ),
+      React.createElement('span', null, `Total ${formatCurrency(totals.total, totals.currency)}`),
     )
   }
 

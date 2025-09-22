@@ -18,6 +18,65 @@ import { UserProfile } from './UserProfile.jsx'
 import { createPOSApi } from './services/api.js'
 import { confirmStripePayment, loadStripeInstance } from './services/stripe.js'
 
+// Lightweight namespaced cache over a Storage-like API (localStorage or custom)
+function createOfflineCache(storage, storageKey = 'guidogerb.pos.offline') {
+  // In-memory fallback if no storage available
+  const memory = new Map()
+
+  const readAll = () => {
+    if (!storage || typeof storage.getItem !== 'function') {
+      // reconstruct plain object from memory Map
+      const obj = {}
+      for (const [k, v] of memory.entries()) obj[k] = v
+      return obj
+    }
+    try {
+      const raw = storage.getItem(storageKey)
+      if (!raw) return {}
+      const parsed = JSON.parse(raw)
+      return parsed && typeof parsed === 'object' ? parsed : {}
+    } catch {
+      return {}
+    }
+  }
+
+  const writeAll = (obj) => {
+    if (!storage || typeof storage.setItem !== 'function') {
+      memory.clear()
+      Object.entries(obj || {}).forEach(([k, v]) => memory.set(k, v))
+      return
+    }
+    try {
+      storage.setItem(storageKey, JSON.stringify(obj ?? {}))
+    } catch {
+      // Ignore quota / serialization errors to avoid breaking UI
+    }
+  }
+
+  return {
+    get(key) {
+      const all = readAll()
+      // undefined if missing to match existing usage expectations
+      return Object.prototype.hasOwnProperty.call(all, key) ? all[key] : undefined
+    },
+    set(key, value) {
+      if (!key) return value
+      const all = readAll()
+      all[key] = value
+      writeAll(all)
+      return value
+    },
+    remove(key) {
+      if (!key) return
+      const all = readAll()
+      if (Object.prototype.hasOwnProperty.call(all, key)) {
+        delete all[key]
+        writeAll(all)
+      }
+    },
+  }
+}
+
 const formatMoney = (amount, currency = 'USD') => {
   try {
     return new Intl.NumberFormat(undefined, {
@@ -174,6 +233,7 @@ const PointOfSaleExperience = ({
   handoffStorage,
   handoffStorageKey = 'guidogerb.pos.handoffs',
   maxStoredHandoffs = 5,
+  offlineCache,
 }) => {
   const { items, totals, clearCart } = useCart()
   const {
@@ -199,7 +259,9 @@ const PointOfSaleExperience = ({
     return Array.isArray(cached) ? cached : []
   })
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(false)
-  const [activeInvoice, setActiveInvoice] = useState(() => offlineCache?.get('activeInvoice') ?? null)
+  const [activeInvoice, setActiveInvoice] = useState(
+    () => offlineCache?.get('activeInvoice') ?? null,
+  )
   const [checkoutError, setCheckoutError] = useState(null)
   const [isCreatingPaymentIntent, setIsCreatingPaymentIntent] = useState(false)
   const [paymentIntent, setPaymentIntent] = useState({ id: null, clientSecret: null })
@@ -935,7 +997,7 @@ export function PointOfSale({
 }) {
   const offlineCache = useMemo(() => {
     const storageSource =
-      offlineStorage ?? (typeof window !== 'undefined' ? window.localStorage ?? null : null)
+            offlineStorage ?? (typeof window !== 'undefined' ? window.localStorage ?? null : null)
     return createOfflineCache(storageSource, offlineStorageKey)
   }, [offlineStorage, offlineStorageKey])
 

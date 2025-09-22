@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Footer } from '@guidogerb/footer'
 import { Header, HeaderContextProvider } from '@guidogerb/header'
+import { useAuth } from '@guidogerb/components-auth'
 import './App.css'
 import headerSettings from './headerSettings.js'
 import footerSettings from './footerSettings.js'
-import AboutPressSection from './website-components/about-press/index.jsx'
-import ConsultingSection from './website-components/consulting-section/index.jsx'
-import NewsletterSignupSection from './website-components/newsletter-signup/index.jsx'
-import ProgramsHeroSection from './website-components/programs-hero/index.jsx'
-import RecordingsEducationSection from './website-components/recordings-education/index.jsx'
-import RehearsalRoomSection from './website-components/rehearsal-room/index.jsx'
-import Welcome from './website-components/welcome-page/index.jsx'
+import rehearsalResources from './rehearsalResources.js'
+import {
+  ProgramsHeroSection,
+  ConsultingSection,
+  RecordingsEducationSection,
+  AboutPressSection,
+  NewsletterSignupSection,
+  RehearsalRoomSection,
+  Welcome,
+} from '@guidogerb/components-ui'
 
 const SECTION_MAP = {
   '/': 'top',
@@ -121,7 +125,7 @@ function App() {
           <AboutPressSection />
           <NewsletterSignupSection />
           <RehearsalRoomSection logoutUri={import.meta.env.VITE_LOGOUT_URI}>
-            <Welcome />
+            <Welcome rehearsalResources={rehearsalResources} useAuthHook={useAuth} />
           </RehearsalRoomSection>
         </main>
 

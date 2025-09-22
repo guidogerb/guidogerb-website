@@ -13,11 +13,6 @@ vi.mock('@guidogerb/components-pages-protected', () => ({
   },
 }))
 
-vi.mock('../../welcome-page/index.jsx', () => ({
-  __esModule: true,
-  default: () => <div data-testid="welcome-component">Welcome module</div>,
-}))
-
 import {
   DistributionSection,
   HeroSection,
@@ -83,7 +78,9 @@ describe('marketing sections', () => {
   })
 
   it('renders the partner portal section with the protected wrapper', () => {
-    render(<PartnerPortalSection logoutUri="/logout" />)
+    const StubWelcome = () => <div data-testid="welcome-component">Welcome module</div>
+
+    render(<PartnerPortalSection logoutUri="/logout" WelcomeComponent={StubWelcome} />)
 
     expect(
       screen.getByRole('heading', { level: 2, name: 'Partner operations portal' }),
