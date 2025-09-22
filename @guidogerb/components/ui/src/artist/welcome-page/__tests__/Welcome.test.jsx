@@ -53,14 +53,7 @@ describe('Gary Gerber welcome component', () => {
       },
     })
 
-    await renderWelcome({
-      children: <div data-testid="nested">Portal content</div>,
-      rehearsalResources: {
-        stagePlotHref: '/files/stage-plot.pdf',
-        rehearsalChecklistHref: '/files/rehearsal-checklist.pdf',
-        productionEmailHref: 'mailto:hello@garygerber.com?subject=Collaboration%20Notes',
-      },
-    })
+    await renderWelcome({ children: <div data-testid="nested">Portal content</div> })
 
     expect(
       screen.getByRole('heading', { level: 3, name: 'Welcome back, Touring Pianist!' }),
@@ -100,13 +93,7 @@ describe('Gary Gerber welcome component', () => {
       },
     })
 
-    const links = {
-      stagePlotHref: process.env.VITE_REHEARSAL_RESOURCES_STAGE_PLOT_URL,
-      rehearsalChecklistHref: process.env.VITE_REHEARSAL_RESOURCES_CHECKLIST_URL,
-      productionEmailHref: `mailto:${process.env.VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL}?subject=${encodeURIComponent(process.env.VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL_SUBJECT)}`,
-    }
-
-    await renderWelcome({ rehearsalResources: links })
+    await renderWelcome()
 
     expect(
       screen.getByRole('heading', { level: 3, name: 'Welcome back, guest-performer!' }),
@@ -123,6 +110,43 @@ describe('Gary Gerber welcome component', () => {
     expect(screen.getByRole('link', { name: /Email production team/i })).toHaveAttribute(
       'href',
       'mailto:production@example.com?subject=Updated%20rehearsal%20notes',
+    )
+  })
+
+  it('prefers provided rehearsal resources over configuration defaults', async () => {
+    vi.stubEnv('VITE_REHEARSAL_RESOURCES_STAGE_PLOT_URL', 'https://cdn.example.com/env-stage.pdf')
+    vi.stubEnv('VITE_REHEARSAL_RESOURCES_CHECKLIST_URL', 'https://cdn.example.com/env-checklist.pdf')
+    vi.stubEnv('VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL', 'env-team@example.com')
+    vi.stubEnv('VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL_SUBJECT', 'Env subject should not appear')
+
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: {
+        profile: {
+          name: 'Touring Pianist',
+        },
+      },
+    })
+
+    await renderWelcome({
+      rehearsalResources: {
+        stagePlotHref: '/overrides/stage.pdf',
+        rehearsalChecklistHref: '/overrides/checklist.pdf',
+        productionEmailHref: 'mailto:custom@example.com?subject=Custom%20Plan',
+      },
+    })
+
+    expect(screen.getByRole('link', { name: /Download latest stage plot/i })).toHaveAttribute(
+      'href',
+      '/overrides/stage.pdf',
+    )
+    expect(screen.getByRole('link', { name: /Rehearsal checklist/i })).toHaveAttribute(
+      'href',
+      '/overrides/checklist.pdf',
+    )
+    expect(screen.getByRole('link', { name: /Email production team/i })).toHaveAttribute(
+      'href',
+      'mailto:custom@example.com?subject=Custom%20Plan',
     )
   })
 })
