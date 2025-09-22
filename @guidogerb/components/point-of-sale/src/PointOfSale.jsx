@@ -48,6 +48,87 @@ const buildInvoiceFromOrder = (order) => {
   }
 }
 
+const isStorageLike = (value) => {
+  if (!value || typeof value !== 'object') return false
+  const hasModernAPI = typeof value.get === 'function' && typeof value.set === 'function'
+  const hasLegacyAPI =
+    typeof value.getItem === 'function' && typeof value.setItem === 'function'
+  return hasModernAPI || hasLegacyAPI
+}
+
+const createOfflineCache = (storage, prefix = 'guidogerb.pos.offline') => {
+  if (!isStorageLike(storage)) return null
+
+  const useModernAPI = typeof storage.get === 'function' && typeof storage.set === 'function'
+  const useLegacyAPI =
+    typeof storage.getItem === 'function' && typeof storage.setItem === 'function'
+
+  const buildKey = (key) => `${prefix}:${key}`
+
+  const safeRead = (key) => {
+    try {
+      if (useModernAPI) {
+        const value = storage.get(key)
+        return value === undefined ? undefined : value
+      }
+      if (useLegacyAPI) {
+        const raw = storage.getItem(key)
+        if (raw === undefined || raw === null || raw === '') return undefined
+        try {
+          return JSON.parse(raw)
+        } catch (error) {
+          return undefined
+        }
+      }
+    } catch (error) {
+      return undefined
+    }
+    return undefined
+  }
+
+  const safeWrite = (key, value) => {
+    try {
+      if (value === undefined) {
+        safeRemove(key)
+        return
+      }
+      if (useModernAPI) {
+        storage.set(key, value)
+      } else if (useLegacyAPI) {
+        const payload = JSON.stringify(value)
+        storage.setItem(key, payload)
+      }
+    } catch (error) {
+      // Swallow storage failures so offline caching never breaks the POS flow.
+    }
+  }
+
+  const safeRemove = (key) => {
+    try {
+      if (useModernAPI && typeof storage.remove === 'function') {
+        storage.remove(key)
+      } else if (useLegacyAPI && typeof storage.removeItem === 'function') {
+        storage.removeItem(key)
+      }
+    } catch (error) {
+      // ignore removal errors
+    }
+  }
+
+  return {
+    get(section, fallback) {
+      const value = safeRead(buildKey(section))
+      return value === undefined ? fallback : value
+    },
+    set(section, value) {
+      safeWrite(buildKey(section), value)
+    },
+    remove(section) {
+      safeRemove(buildKey(section))
+    },
+  }
+}
+
 const PointOfSaleExperience = ({
   stripe,
   stripeError,
@@ -65,6 +146,7 @@ const PointOfSaleExperience = ({
   onPaymentError,
   shouldAutoCreatePaymentIntent = true,
   createInvoiceMetadata,
+  offlineCache,
 }) => {
   const { items, totals, clearCart } = useCart()
   const {
@@ -80,11 +162,17 @@ const PointOfSaleExperience = ({
   const [products, setProducts] = useState([])
   const [isLoadingProducts, setIsLoadingProducts] = useState(false)
   const [productsError, setProductsError] = useState(null)
-  const [orders, setOrders] = useState([])
+  const [orders, setOrders] = useState(() => {
+    const cached = offlineCache?.get('orders')
+    return Array.isArray(cached) ? cached : []
+  })
   const [isLoadingOrders, setIsLoadingOrders] = useState(false)
-  const [invoices, setInvoices] = useState([])
+  const [invoices, setInvoices] = useState(() => {
+    const cached = offlineCache?.get('invoices')
+    return Array.isArray(cached) ? cached : []
+  })
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(false)
-  const [activeInvoice, setActiveInvoice] = useState(null)
+  const [activeInvoice, setActiveInvoice] = useState(() => offlineCache?.get('activeInvoice') ?? null)
   const [checkoutError, setCheckoutError] = useState(null)
   const [isCreatingPaymentIntent, setIsCreatingPaymentIntent] = useState(false)
   const [paymentIntent, setPaymentIntent] = useState({ id: null, clientSecret: null })
@@ -182,6 +270,34 @@ const PointOfSaleExperience = ({
     }),
     [items, totals],
   )
+
+  useEffect(() => {
+    if (!offlineCache) return
+    if (!cartSnapshot?.items?.length) {
+      offlineCache.remove('cartSnapshot')
+      return
+    }
+    offlineCache.set('cartSnapshot', cartSnapshot)
+  }, [cartSnapshot, offlineCache])
+
+  useEffect(() => {
+    if (!offlineCache) return
+    offlineCache.set('orders', Array.isArray(orders) ? orders : [])
+  }, [offlineCache, orders])
+
+  useEffect(() => {
+    if (!offlineCache) return
+    offlineCache.set('invoices', Array.isArray(invoices) ? invoices : [])
+  }, [offlineCache, invoices])
+
+  useEffect(() => {
+    if (!offlineCache) return
+    if (!activeInvoice) {
+      offlineCache.remove('activeInvoice')
+      return
+    }
+    offlineCache.set('activeInvoice', activeInvoice)
+  }, [activeInvoice, offlineCache])
 
   useEffect(() => {
     if (!shouldAutoCreatePaymentIntent || !posApi?.createPaymentIntent) return undefined
@@ -535,6 +651,8 @@ export function PointOfSale({
   initialCart,
   cartStorage,
   cartStorageKey = 'guidogerb.pos.cart',
+  offlineStorage,
+  offlineStorageKey = 'guidogerb.pos.offline',
   currency = 'USD',
   taxRate = 0,
   discountRate = 0,
@@ -547,6 +665,72 @@ export function PointOfSale({
   stripeOptions,
   ...experienceProps
 }) {
+  const offlineCache = useMemo(() => {
+    const storageSource =
+      offlineStorage ?? (typeof window !== 'undefined' ? window.localStorage ?? null : null)
+    return createOfflineCache(storageSource, offlineStorageKey)
+  }, [offlineStorage, offlineStorageKey])
+
+  const resolvedCartStorage = useMemo(() => {
+    if (cartStorage) return cartStorage
+    if (!offlineCache) return undefined
+
+    const listeners = new Set()
+
+    const notify = (event) => {
+      listeners.forEach((listener) => {
+        try {
+          listener(event)
+        } catch (error) {
+          // Ignore listener errors so persistence never blocks rendering.
+        }
+      })
+    }
+
+    return {
+      get(key) {
+        if (!key) {
+          return offlineCache.get('cartState')
+        }
+        const namespaced = offlineCache.get(`cart:${key}`)
+        return namespaced === undefined ? offlineCache.get('cartState') : namespaced
+      },
+      set(key, value) {
+        if (!key) return value
+        offlineCache.set(`cart:${key}`, value)
+        offlineCache.set('cartState', value)
+        notify({ type: 'set', key, value })
+        return value
+      },
+      remove(key) {
+        if (!key) return
+        offlineCache.remove(`cart:${key}`)
+        offlineCache.remove('cartState')
+        notify({ type: 'remove', key })
+      },
+      subscribe(listener) {
+        if (typeof listener !== 'function') return () => {}
+        listeners.add(listener)
+        return () => {
+          listeners.delete(listener)
+        }
+      },
+    }
+  }, [cartStorage, offlineCache])
+
+  const [hydratedInitialCart] = useState(() => {
+    if (initialCart !== undefined) return initialCart
+    if (resolvedCartStorage?.get) {
+      const stored = resolvedCartStorage.get(cartStorageKey)
+      if (stored !== undefined) return stored
+    }
+    if (offlineCache) {
+      const fallback = offlineCache.get('cartState')
+      if (fallback !== undefined) return fallback
+    }
+    return initialCart
+  })
+
   const [stripe, setStripe] = useState(null)
   const [stripeError, setStripeError] = useState(null)
 
@@ -578,6 +762,7 @@ export function PointOfSale({
       stripe={stripe}
       stripeError={stripeError}
       withElements={withElements}
+      offlineCache={offlineCache}
     />
   )
 
@@ -588,8 +773,8 @@ export function PointOfSale({
   return (
     <UserProvider initialUser={initialUser} storage={userStorage} storageKey={userStorageKey}>
       <CartProvider
-        initialCart={initialCart}
-        storage={cartStorage}
+        initialCart={hydratedInitialCart}
+        storage={resolvedCartStorage}
         storageKey={cartStorageKey}
         currency={currency}
         taxRate={taxRate}

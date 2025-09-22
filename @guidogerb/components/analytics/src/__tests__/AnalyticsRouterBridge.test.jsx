@@ -93,9 +93,48 @@ describe('AnalyticsRouterBridge', () => {
       expect(onTrack).toHaveBeenCalledWith(
         expect.objectContaining({
           path: '/products/123',
-          params: expect.objectContaining({ page_title: 'Viewing /products/123' }),
+          params: expect.objectContaining({
+            page_title: 'Viewing /products/123',
+            page_path: '/products/123',
+          }),
         }),
       )
+    })
+  })
+
+  it('supports opting out of tracking via shouldTrack', async () => {
+    render(
+      <Analytics measurementId="G-ROUTER-SHOULD" sendPageView={false}>
+        <MemoryRouter initialEntries={['/']}> 
+          <AnalyticsRouterBridge trackInitialPageView shouldTrack={() => false} />
+        </MemoryRouter>
+      </Analytics>,
+    )
+
+    await waitFor(() => {
+      expect(window.dataLayer).toBeDefined()
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    const pageViewEvents = (window.dataLayer ?? []).filter((entry) => entry[1] === 'page_view')
+    expect(pageViewEvents).toHaveLength(0)
+  })
+
+  it('dispatches custom events when a non-page_view event name is provided', async () => {
+    render(
+      <Analytics measurementId="G-ROUTER-CUSTOM-EVENT" sendPageView={false}>
+        <MemoryRouter initialEntries={['/']}> 
+          <AnalyticsRouterBridge eventName="screen_view" trackInitialPageView />
+        </MemoryRouter>
+      </Analytics>,
+    )
+
+    await waitFor(() => {
+      const entry = window.dataLayer?.find(
+        (event) => event[0] === 'event' && event[1] === 'screen_view',
+      )
+      expect(entry?.[2]).toMatchObject({ page_path: '/' })
     })
   })
 })
