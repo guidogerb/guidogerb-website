@@ -1,5 +1,5 @@
 import Protected from '@guidogerb/components-pages-protected'
-import Welcome from '../artist'
+import Welcome from '../artist/welcome-page'
 
 export function PartnerPortalSection({
   logoutUri,
