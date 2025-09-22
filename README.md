@@ -15,6 +15,12 @@ Reusable packages for all four sites.
 - [`global-tasks.md`](./global-tasks.md) captures repository-wide work.
 - Each package or website folder includes a `tasks.md` outlining local follow-ups.
 
+## Architecture documentation
+
+- [`docs/SPEC.md`](./docs/SPEC.md) — comprehensive architecture and platform objectives.
+- [`docs/PUBLISHING.md`](./docs/PUBLISHING.md) — install, deployment, and operational runbooks.
+- [`docs/adr/README.md`](./docs/adr/README.md) — architecture decision record (ADR) index and workflow.
+
 ## Dev
 
 ```bash

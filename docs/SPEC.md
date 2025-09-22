@@ -2,6 +2,8 @@
 
 > Consolidated specification reflecting all confirmed recommendations (multi‑tenant + custom domains at launch; global sales enablement), ready for implementation kickoff.
 
+> Companion documentation: the [Architecture Decision Record log](./adr/README.md) captures accepted decisions, the [publishing guide](./PUBLISHING.md) outlines deployment workflows, and the [repository README](../README.md) links to workspace overviews.
+
 ## 1) Background & Objectives
 
 Build a scalable, offline‑capable marketplace for creative digital and physical products (music, albums, books/e‑books, videos, podcasts) plus subscriptions/tokens. Frontend is Vite + React deployed to AWS S3/CloudFront with a service worker for offline access to public routes. Backend is serverless on AWS (API Gateway + Python Lambdas) with DynamoDB as the primary datastore. Stripe powers payments, subscriptions, invoicing; crypto is feature‑flagged for Phase 2.
