@@ -1,0 +1,8 @@
+# Generated tenant content copied from website builds
+/tenants/
+
+# Allow placeholder assets to remain tracked
+!/_placeholder/
+!/_placeholder/index.html
+
+!.gitignore

@@ -96,6 +96,13 @@ corepack prepare pnpm@latest --activate
 pnpm -v
 ```
 
+### Simulated AWS Edge stack
+
+- [`infra/local-dev/README.md`](./infra/local-dev/README.md) describes a Docker
+  compose environment that mimics the production architecture (CloudFront + S3,
+  API Gateway + Lambda, API Gateway + ECS Fargate) with Cognito-style JWT
+  protection for host-based routing during local development.
+
 ## License
 
 GuidoGerb Publishing, LLC distributes this repository under the [Apache License 2.0](./LICENSE).
