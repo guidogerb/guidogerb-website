@@ -1,7 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { createStorageController } from '@guidogerb/components-storage'
 
 const DEFAULT_MODEL = 'gpt-4o-mini'
 const DEFAULT_HISTORY_LIMIT = 10
+const DEFAULT_STORAGE_NAMESPACE = 'guidogerb.ai-support'
+const DEFAULT_STORAGE_KEY = 'transcript'
+const DEFAULT_TENANT_ID = 'default'
+
+const isPlainObject = (value) =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
 
 /**
  * Normalize a single chat message.
@@ -86,6 +93,89 @@ function applyHistoryLimit(messages, limit) {
   }
 
   return [pinned, ...remainder.slice(-remainingSlots)]
+}
+
+const normalizeTenantKey = (value) => {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim()
+  }
+
+  if (value === null || value === undefined) {
+    return DEFAULT_TENANT_ID
+  }
+
+  return String(value)
+}
+
+const normalizeStorageKey = (value) => {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim()
+  }
+  return DEFAULT_STORAGE_KEY
+}
+
+const normalizeNamespace = (value) => {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim()
+  }
+  return DEFAULT_STORAGE_NAMESPACE
+}
+
+const normalizeRetentionOptions = (retention, context) => {
+  if (typeof retention === 'function') {
+    return normalizeRetentionOptions(retention(context), context)
+  }
+
+  if (typeof retention === 'number') {
+    return retention > 0 ? { maxAgeMs: retention } : {}
+  }
+
+  if (!isPlainObject(retention)) {
+    return {}
+  }
+
+  const options = {}
+
+  if (typeof retention.maxAgeMs === 'number' && retention.maxAgeMs > 0) {
+    options.maxAgeMs = retention.maxAgeMs
+  }
+
+  if (Number.isInteger(retention.maxMessages) && retention.maxMessages > 0) {
+    options.maxMessages = retention.maxMessages
+  }
+
+  return options
+}
+
+const sanitizeMessagesForStorage = (messages) =>
+  messages.map((message) => ({
+    role: typeof message?.role === 'string' ? message.role : 'assistant',
+    content:
+      typeof message?.content === 'string' ? message.content : String(message?.content ?? ''),
+  }))
+
+const extractStoredMessages = (value) => {
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  if (isPlainObject(value) && Array.isArray(value.messages)) {
+    return value.messages
+  }
+
+  return []
+}
+
+const getStoredUpdatedAt = (value) => {
+  if (
+    isPlainObject(value) &&
+    typeof value.updatedAt === 'number' &&
+    Number.isFinite(value.updatedAt)
+  ) {
+    return value.updatedAt
+  }
+
+  return undefined
 }
 
 async function evaluateGuardrail(guardrail, context) {
@@ -441,6 +531,12 @@ export function AiSupport({
   userContext,
   historyLimit = DEFAULT_HISTORY_LIMIT,
   initialMessages = [],
+  storage,
+  storageNamespace = DEFAULT_STORAGE_NAMESPACE,
+  storageKey = DEFAULT_STORAGE_KEY,
+  tenantId = DEFAULT_TENANT_ID,
+  persistConversation = true,
+  transcriptRetention,
   guardrail,
   embeddingRetriever,
   fetcher,
@@ -452,12 +548,139 @@ export function AiSupport({
     throw new Error('AiSupport requires an `endpoint` to send chat requests')
   }
 
-  const [messages, setMessages] = useState(() =>
-    applyHistoryLimit(normalizeMessages(initialMessages, { defaultRole: 'system' }), historyLimit),
+  const resolvedTenantId = useMemo(() => normalizeTenantKey(tenantId), [tenantId])
+  const resolvedNamespace = useMemo(() => normalizeNamespace(storageNamespace), [storageNamespace])
+  const resolvedStorageKey = useMemo(() => normalizeStorageKey(storageKey), [storageKey])
+
+  const retentionOptions = useMemo(
+    () => normalizeRetentionOptions(transcriptRetention, { tenantId: resolvedTenantId }),
+    [transcriptRetention, resolvedTenantId],
   )
+
+  const resolvedStorage = useMemo(() => {
+    if (!persistConversation) return null
+    if (storage) return storage
+    return createStorageController({ namespace: resolvedNamespace })
+  }, [persistConversation, storage, resolvedNamespace])
+
+  const conversationStorageKey = useMemo(
+    () => `${resolvedStorageKey}::${resolvedTenantId}`,
+    [resolvedStorageKey, resolvedTenantId],
+  )
+
+  const persistedTranscript = useMemo(() => {
+    if (!resolvedStorage || !persistConversation) {
+      return { messages: null, expired: false }
+    }
+
+    const storedValue = resolvedStorage.get(conversationStorageKey, null)
+
+    if (storedValue == null) {
+      return { messages: null, expired: false }
+    }
+
+    const storedMessages = normalizeMessages(extractStoredMessages(storedValue), {
+      defaultRole: 'system',
+    })
+
+    const normalizedMessages =
+      retentionOptions.maxMessages && retentionOptions.maxMessages > 0
+        ? applyHistoryLimit(storedMessages, retentionOptions.maxMessages)
+        : storedMessages
+
+    const updatedAt = getStoredUpdatedAt(storedValue)
+
+    const expired = Boolean(
+      retentionOptions.maxAgeMs &&
+        typeof updatedAt === 'number' &&
+        updatedAt > 0 &&
+        Date.now() - updatedAt > retentionOptions.maxAgeMs,
+    )
+
+    return {
+      messages: expired ? null : normalizedMessages,
+      expired,
+    }
+  }, [
+    conversationStorageKey,
+    persistConversation,
+    resolvedStorage,
+    retentionOptions.maxAgeMs,
+    retentionOptions.maxMessages,
+  ])
+
+  useEffect(() => {
+    if (!persistConversation || !resolvedStorage) return undefined
+    if (!persistedTranscript.expired) return undefined
+    resolvedStorage.remove(conversationStorageKey)
+    return undefined
+  }, [conversationStorageKey, persistConversation, resolvedStorage, persistedTranscript.expired])
+
+  const normalizedInitialMessages = useMemo(
+    () => normalizeMessages(initialMessages, { defaultRole: 'system' }),
+    [initialMessages],
+  )
+
+  const persistedMessages = persistedTranscript.messages
+
+  const baseMessages = useMemo(() => {
+    if (persistedMessages && persistedMessages.length > 0) {
+      return persistedMessages
+    }
+    return normalizedInitialMessages
+  }, [normalizedInitialMessages, persistedMessages])
+
+  const [messages, setMessages] = useState(() => applyHistoryLimit(baseMessages, historyLimit))
+  const baseMessagesRef = useRef(baseMessages)
+  const historyLimitRef = useRef(historyLimit)
+
+  useEffect(() => {
+    const baseChanged = baseMessagesRef.current !== baseMessages
+    const limitChanged = historyLimitRef.current !== historyLimit
+    if (!baseChanged && !limitChanged) {
+      return
+    }
+    baseMessagesRef.current = baseMessages
+    historyLimitRef.current = historyLimit
+    setMessages(applyHistoryLimit(baseMessages, historyLimit))
+  }, [baseMessages, historyLimit])
+
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
+
+  useEffect(() => {
+    if (!persistConversation || !resolvedStorage) {
+      return undefined
+    }
+
+    const sanitized = sanitizeMessagesForStorage(messages)
+
+    if (sanitized.length === 0) {
+      resolvedStorage.remove(conversationStorageKey)
+      return undefined
+    }
+
+    const limited =
+      retentionOptions.maxMessages && retentionOptions.maxMessages > 0
+        ? applyHistoryLimit(sanitized, retentionOptions.maxMessages)
+        : sanitized
+
+    resolvedStorage.set(conversationStorageKey, {
+      tenantId: resolvedTenantId,
+      updatedAt: Date.now(),
+      messages: limited,
+    })
+
+    return undefined
+  }, [
+    messages,
+    persistConversation,
+    resolvedStorage,
+    conversationStorageKey,
+    retentionOptions.maxMessages,
+    resolvedTenantId,
+  ])
 
   const fetchImpl = useMemo(() => fetcher ?? globalThis.fetch, [fetcher])
 

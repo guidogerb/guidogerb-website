@@ -109,6 +109,48 @@ describe('createProtectedRouteObjects', () => {
     expect(routes).toHaveLength(1)
   })
 
+  it('supports guard configuration objects on routes', () => {
+    const ConfigurableGuard = ({ children, tone, badge }) => (
+      <div data-testid="config-guard" data-tone={tone} data-badge={badge}>
+        {children}
+      </div>
+    )
+
+    const routes = createProtectedRouteObjects(
+      [
+        {
+          path: '/',
+          element: <div>Home</div>,
+          guard: { component: ConfigurableGuard, props: { badge: 'config', tone: 'config' } },
+          guardProps: { tone: 'route' },
+        },
+      ],
+      { guardProps: { tone: 'global', badge: 'global' } },
+    )
+
+    render(routes[0].element)
+
+    expect(screen.queryByTestId('guard')).not.toBeInTheDocument()
+    const guard = screen.getByTestId('config-guard')
+    expect(guard).toHaveAttribute('data-tone', 'route')
+    expect(guard).toHaveAttribute('data-badge', 'config')
+  })
+
+  it('allows disabling guards via guard configuration objects', () => {
+    const routes = createProtectedRouteObjects([
+      {
+        path: '/',
+        element: <div>Home</div>,
+        guard: { disabled: true },
+      },
+    ])
+
+    render(routes[0].element)
+
+    expect(screen.getByText('Home')).toBeInTheDocument()
+    expect(screen.queryByTestId('guard')).not.toBeInTheDocument()
+  })
+
   it('supports customizing the generated fallback copy', () => {
     const routes = createProtectedRouteObjects([{ path: '/', element: <div>Home</div> }], {
       defaultFallback: {

@@ -62,6 +62,38 @@ describe('Protected', () => {
     expect(screen.queryByText('secret child')).not.toBeInTheDocument()
   })
 
+  it('renders a custom fallback node when provided', () => {
+    mocks.useAuth.mockReturnValue({ isAuthenticated: false, isLoading: true })
+
+    render(
+      <Protected fallback={<div data-testid="custom-fallback">Loading tenant</div>}>
+        <div>secret child</div>
+      </Protected>,
+    )
+
+    expect(screen.getByTestId('custom-fallback')).toHaveTextContent('Loading tenant')
+    expect(screen.queryByText('secret child')).not.toBeInTheDocument()
+  })
+
+  it('supports functional fallbacks with access to auth state context', () => {
+    const contexts = []
+    mocks.useAuth.mockReturnValue({ isAuthenticated: false, isLoading: false })
+
+    render(
+      <Protected
+        fallback={(context) => {
+          contexts.push(context)
+          return <div>status: {context.status}</div>
+        }}
+      >
+        <div>secret child</div>
+      </Protected>,
+    )
+
+    expect(contexts[0]).toMatchObject({ status: 'unauthenticated', isLoading: true })
+    expect(screen.getByText('status: unauthenticated')).toBeInTheDocument()
+  })
+
   it('surfaces authentication errors from the auth context', () => {
     const error = new Error('Boom')
     mocks.useAuth.mockReturnValue({ error })

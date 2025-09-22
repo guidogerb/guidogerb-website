@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react'
 
 const GA_ENDPOINT = 'https://www.googletagmanager.com/gtag/js'
 const SCRIPT_ATTR = 'data-gg-analytics-loader'
@@ -17,6 +17,9 @@ export const AnalyticsContext = createContext({
   setUserProperties: noop,
   setUserId: noop,
   consent: noop,
+  getConsentHistory: () => [],
+  getLastConsentEvent: () => null,
+  subscribeToConsent: () => noop,
 })
 
 export const useAnalytics = () => useContext(AnalyticsContext)
@@ -88,8 +91,83 @@ const Analytics = ({
   defaultConsent,
   config,
   initialEvents = [],
+  onConsentEvent,
   children,
 }) => {
+  const consentHistoryRef = useRef([])
+  const consentListenersRef = useRef(new Set())
+  const onConsentEventRef = useRef(onConsentEvent)
+  const lastDefaultConsentRef = useRef(null)
+
+  onConsentEventRef.current = onConsentEvent
+
+  useEffect(() => {
+    consentHistoryRef.current = []
+    lastDefaultConsentRef.current = null
+  }, [measurementId])
+
+  const getLastConsentEvent = useCallback(() => {
+    const history = consentHistoryRef.current
+    return history.length > 0 ? history[history.length - 1] : null
+  }, [])
+
+  const getConsentHistory = useCallback(() => consentHistoryRef.current.slice(), [])
+
+  const subscribeToConsent = useCallback((listener) => {
+    if (typeof listener !== 'function') {
+      return () => {}
+    }
+    consentListenersRef.current.add(listener)
+    if (consentHistoryRef.current.length > 0) {
+      const snapshot = consentHistoryRef.current.slice()
+      const lastEvent = snapshot[snapshot.length - 1]
+      try {
+        listener(lastEvent, snapshot)
+      } catch (error) {
+        // Ignore listener errors so subscriptions remain safe.
+      }
+    }
+    return () => {
+      consentListenersRef.current.delete(listener)
+    }
+  }, [])
+
+  const notifyConsentEvent = useCallback(({ type, mode, settings }) => {
+    const eventType = type === 'update' ? 'update' : 'default'
+    const resolvedMode =
+      isNonEmptyString(mode) && mode !== 'default'
+        ? mode
+        : eventType === 'update'
+          ? 'update'
+          : 'default'
+    const normalizedSettings = isPlainObject(settings) ? { ...settings } : {}
+
+    const event = {
+      type: eventType,
+      mode: resolvedMode,
+      settings: normalizedSettings,
+      timestamp: Date.now(),
+    }
+
+    consentHistoryRef.current.push(event)
+    const snapshot = consentHistoryRef.current.slice()
+
+    consentListenersRef.current.forEach((listener) => {
+      try {
+        listener(event, snapshot)
+      } catch (error) {
+        // Swallow listener errors so they do not break analytics handling.
+      }
+    })
+
+    const handler = onConsentEventRef.current
+    if (typeof handler === 'function') {
+      handler(event, snapshot)
+    }
+
+    return event
+  }, [])
+
   const contextValue = useMemo(() => {
     const callGtag = (...args) => {
       if (!isBrowser() || !isNonEmptyString(measurementId)) return
@@ -137,10 +215,25 @@ const Analytics = ({
       consent: (mode, settings) => {
         if (!isPlainObject(settings)) return
         const normalizedMode = isNonEmptyString(mode) ? mode : 'default'
-        callGtag('consent', normalizedMode, settings)
+        const normalizedSettings = { ...settings }
+        callGtag('consent', normalizedMode, normalizedSettings)
+        notifyConsentEvent({
+          type: normalizedMode === 'default' ? 'default' : 'update',
+          mode: normalizedMode,
+          settings: normalizedSettings,
+        })
       },
+      getConsentHistory,
+      getLastConsentEvent,
+      subscribeToConsent,
     }
-  }, [measurementId])
+  }, [
+    getConsentHistory,
+    getLastConsentEvent,
+    measurementId,
+    notifyConsentEvent,
+    subscribeToConsent,
+  ])
 
   useEffect(() => {
     if (!isBrowser() || !isNonEmptyString(measurementId)) {
@@ -153,7 +246,18 @@ const Analytics = ({
     gtag('js', new Date())
 
     if (isPlainObject(defaultConsent)) {
-      gtag('consent', 'default', defaultConsent)
+      const serializedDefault = JSON.stringify(defaultConsent)
+      if (lastDefaultConsentRef.current !== serializedDefault) {
+        gtag('consent', 'default', defaultConsent)
+        notifyConsentEvent({
+          type: 'default',
+          mode: 'default',
+          settings: defaultConsent,
+        })
+        lastDefaultConsentRef.current = serializedDefault
+      }
+    } else {
+      lastDefaultConsentRef.current = null
     }
 
     const mergedConfig = buildConfig({ debugMode, sendPageView, config })
@@ -166,7 +270,15 @@ const Analytics = ({
     pushInitialEvents(initialEvents)
 
     return undefined
-  }, [measurementId, debugMode, sendPageView, defaultConsent, config, initialEvents])
+  }, [
+    measurementId,
+    debugMode,
+    sendPageView,
+    defaultConsent,
+    config,
+    initialEvents,
+    notifyConsentEvent,
+  ])
 
   return (
     <AnalyticsContext.Provider value={contextValue}>{children ?? null}</AnalyticsContext.Provider>

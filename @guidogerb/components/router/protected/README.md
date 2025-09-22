@@ -39,3 +39,14 @@ Set `protectFallback` to guard the catch-all route, or pass a custom `guard`
 component/`guardProps` to integrate alternative authentication flows. When you
 omit `fallback`, the helpers generate a default catch-all page – customise or
 disable it via the shared `defaultFallback` option.
+
+### Route configuration
+
+- `guard` – Supply a React component or a configuration object to customise the
+  guard for an individual route. Configuration objects support `component`,
+  `props`, and `disabled` keys so routes can inject bespoke guards or opt out of
+  protection entirely.
+- `guardProps` – Route-level props merge with the package-level `guardProps`
+  options. When both are provided, route props win.
+- `isProtected` – Explicitly set to `false` to keep a route public without
+  touching guard configuration objects.

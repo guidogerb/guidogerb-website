@@ -109,27 +109,29 @@ The component expects a classic GraphQL response envelope (`{ data, errors }`) a
 when the `errors` array is populated or `data.catalog` is missing.
 
 ## Props
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `apiBaseUrl` | `string` | — | Base URL forwarded to `createClient` when an explicit `client` is not provided. |
-| `client` | `{ post(path, options) => Promise<any> }` | — | Preconfigured API client instance. Overrides `apiBaseUrl`. |
-| `graphQLEndpoint` | `string` | `"/graphql"` | Path invoked on the client when issuing catalog queries. |
-| `query` | `string` | `DEFAULT_CATALOG_QUERY` | GraphQL document string used for catalog requests. |
-| `storage` | `StorageController` | memory-scoped store | Storage controller powering persisted preferences. |
-| `storageNamespace` | `string` | `'guidogerb.catalog'` | Namespace passed to `createStorageController` when `storage` is omitted. |
-| `tenantId` | `string` | — | Segment appended to the namespace so persisted preferences stay tenant-specific. |
-| `environment` | `string` | — | Optional scope appended to the namespace (for example `staging`, `prod`). |
-| `storageKey` | `string` | `'catalog.preferences'` | Storage key used to persist layout + filter state. |
-| `initialView` | `'grid'` &#124; `'list'` | `'grid'` | Initial layout mode. Persisted overrides take precedence. |
-| `initialFilters` | `Partial<{ types: string[]; fulfillment: string[]; availability: string[]; tags: string[]; search: string }>` | `{}` | Seeds the filter state and search term. |
-| `initialSort` | `keyof Catalog.SORT_OPTIONS` | `'featured'` | Default sort key applied before user interaction. |
-| `pageSize` | `number` | `24` | Number of records requested per GraphQL page. |
-| `onProductSelect` | `(product) => void` | — | Handler invoked when a product CTA is activated. |
-| `onData` | `({ items, pageInfo, raw }) => void` | — | Fired after each successful fetch with normalized products. |
-| `renderProduct` | `({ product, viewMode, onSelect }) => ReactNode` | built-in renderer | Custom renderer for catalog entries. |
-| `searchPlaceholder` | `string` | `'Search catalog'` | Placeholder text for the search input. |
-| `emptyState` | `ReactNode` | `'No products match your filters.'` | Message displayed when zero results remain after filtering. |
+| Prop                    | Type                                                                                                          | Default                             | Description                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
+| `apiBaseUrl`            | `string`                                                                                                      | —                                   | Base URL forwarded to `createClient` when an explicit `client` is not provided. |
+| `client`                | `{ post(path, options) => Promise<any> }`                                                                     | —                                   | Preconfigured API client instance. Overrides `apiBaseUrl`.                      |
+| `graphQLEndpoint`       | `string`                                                                                                      | `"/graphql"`                        | Path invoked on the client when issuing catalog queries.                        |
+| `query`                 | `string`                                                                                                      | `DEFAULT_CATALOG_QUERY`             | GraphQL document string used for catalog requests.                              |
+| `storage`               | `StorageController`                                                                                           |
+| memory-scoped store     | Storage controller powering persisted preferences.                                                            |
+| `storageNamespace`      | `string`                                                                                                      |
+| `'guidogerb.catalog'`   | Namespace passed to `createStorageController` when `storage` is omitted.                                      |
+| `storageKey`            | `string`                                                                                                      |
+| `'catalog.preferences'` | Storage key used to persist layout + filter state.                                                            |
+| `storageScope`          | `{ tenantId?: string; environment?: string }`                                                                 |
+| `undefined`             | Appends tenant/environment segments to the namespace and key for isolation.                                   |
+| `initialView`           | `'grid' &#124; 'list'`                                                                                        | `'grid'`                            | Initial layout mode. Persisted overrides take precedence.                       |
+| `initialFilters`        | `Partial<{ types: string[]; fulfillment: string[]; availability: string[]; tags: string[]; search: string }>` | `{}`                                | Seeds the filter state and search term.                                         |
+| `initialSort`           | `keyof Catalog.SORT_OPTIONS`                                                                                  | `'featured'`                        | Default sort key applied before user interaction.                               |
+| `pageSize`              | `number`                                                                                                      | `24`                                | Number of records requested per GraphQL page.                                   |
+| `onProductSelect`       | `(product) => void`                                                                                           | —                                   | Handler invoked when a product CTA is activated.                                |
+| `onData`                | `({ items, pageInfo, raw }) => void`                                                                          | —                                   | Fired after each successful fetch with normalized products.                     |
+| `renderProduct`         | `({ product, viewMode, onSelect }) => ReactNode`                                                              | built-in renderer                   | Custom renderer for catalog entries.                                            |
+| `searchPlaceholder`     | `string`                                                                                                      | `'Search catalog'`                  | Placeholder text for the search input.                                          |
+| `emptyState`            | `ReactNode`                                                                                                   | `'No products match your filters.'` | Message displayed when zero results remain after filtering.                     |
 
 ## Accessibility & customization
 

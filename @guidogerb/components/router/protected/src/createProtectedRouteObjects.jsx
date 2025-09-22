@@ -1,5 +1,6 @@
 import Protected from '@guidogerb/components-pages-protected'
 import { createRouteObjects } from '@guidogerb/components-router-public'
+import { applyGuard } from './applyGuard.jsx'
 
 export function createProtectedRouteObjects(routes, options = {}) {
   const {
@@ -11,23 +12,13 @@ export function createProtectedRouteObjects(routes, options = {}) {
     wrapElement,
   } = options
 
-  const guardWrapper = (element, route = {}) => {
-    let output = element
-
-    if (
-      route.guard === false ||
-      route.isProtected === false ||
-      (route.isFallback && !protectFallback)
-    ) {
-      output = element
-    } else {
-      const GuardComponent = route.guard || guard
-      const mergedProps = { ...(guardProps ?? {}), ...(route.guardProps ?? {}) }
-      output = <GuardComponent {...mergedProps}>{element}</GuardComponent>
-    }
-
-    return wrapElement ? wrapElement(output, route) : output
-  }
+  const guardWrapper = (element, route = {}) =>
+    applyGuard(element, route, {
+      guard,
+      guardProps,
+      protectFallback,
+      afterGuard: wrapElement,
+    })
 
   return createRouteObjects(routes, {
     fallback,

@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { AppBasic, useAppApiClient } from '../App.jsx'
 
@@ -17,6 +18,11 @@ const mocks = vi.hoisted(() => {
     useAuth: vi.fn(() => ({ isAuthenticated: true })),
     registerSW: vi.fn(),
     createClient: vi.fn(() => ({ id: 'generated-client' })),
+    protectedRouter: vi.fn(),
+    storage: vi.fn(),
+    headerProvider: vi.fn(),
+    header: vi.fn(),
+    footer: vi.fn(),
   }
 })
 
@@ -41,6 +47,65 @@ vi.mock('@guidogerb/components-sw', () => ({
   unregisterSW: vi.fn(),
 }))
 
+vi.mock('@guidogerb/components-router-protected', async () => {
+  const actual = await vi.importActual('@guidogerb/components-router-protected')
+  return {
+    __esModule: true,
+    ...actual,
+    ProtectedRouter: vi.fn((props) => {
+      mocks.protectedRouter(props)
+      return actual.ProtectedRouter(props)
+    }),
+  }
+})
+
+vi.mock('@guidogerb/components-storage', async () => {
+  const actual = await vi.importActual('@guidogerb/components-storage')
+  const WrappedStorage = (props) => {
+    mocks.storage(props)
+    return actual.Storage(props)
+  }
+  return {
+    __esModule: true,
+    ...actual,
+    Storage: WrappedStorage,
+    default: WrappedStorage,
+  }
+})
+
+vi.mock('@guidogerb/header', async () => {
+  const actual = await vi.importActual('@guidogerb/header')
+  const HeaderContextProvider = (props) => {
+    mocks.headerProvider(props)
+    return actual.HeaderContextProvider(props)
+  }
+  const Header = (props) => {
+    mocks.header(props)
+    return actual.Header(props)
+  }
+  return {
+    __esModule: true,
+    ...actual,
+    HeaderContextProvider,
+    Header,
+    default: HeaderContextProvider,
+  }
+})
+
+vi.mock('@guidogerb/footer', async () => {
+  const actual = await vi.importActual('@guidogerb/footer')
+  const Footer = (props) => {
+    mocks.footer(props)
+    return actual.Footer(props)
+  }
+  return {
+    __esModule: true,
+    ...actual,
+    Footer,
+    default: Footer,
+  }
+})
+
 describe('AppBasic', () => {
   beforeEach(() => {
     mocks.authProvider.mockClear()
@@ -48,6 +113,11 @@ describe('AppBasic', () => {
     mocks.useAuth.mockReturnValue({ isAuthenticated: true })
     mocks.registerSW.mockClear()
     mocks.createClient.mockClear()
+    mocks.protectedRouter.mockClear()
+    mocks.storage.mockClear()
+    mocks.headerProvider.mockClear()
+    mocks.header.mockClear()
+    mocks.footer.mockClear()
     window.history.replaceState({}, '', '/')
   })
 
@@ -170,5 +240,150 @@ describe('AppBasic', () => {
   it('does not register the service worker when disabled', async () => {
     render(<AppBasic serviceWorker={{ enabled: false }} />)
     expect(mocks.registerSW).not.toHaveBeenCalled()
+  })
+
+  it('forwards custom service worker options when provided', async () => {
+    render(
+      <AppBasic
+        serviceWorker={{
+          url: '/tenant/sw.js',
+          immediate: true,
+          scope: '/tenant',
+          onOfflineReady: vi.fn(),
+        }}
+      />,
+    )
+
+    await waitFor(() => {
+      expect(mocks.registerSW).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: '/tenant/sw.js',
+          immediate: true,
+          scope: '/tenant',
+        }),
+      )
+    })
+  })
+
+  it('invokes navigation handlers from the marketing shell preview', async () => {
+    const user = userEvent.setup()
+    const handleNavigate = vi.fn()
+
+    render(<AppBasic navigation={{ onNavigate: handleNavigate }} />)
+
+    const previewNav = await screen.findByRole('navigation', { name: /app navigation/i })
+    const dashboardLink = within(previewNav).getByRole('link', { name: /dashboard/i })
+
+    expect(within(previewNav).getByRole('link', { name: /welcome/i })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+
+    await user.click(dashboardLink)
+
+    expect(handleNavigate).toHaveBeenCalledTimes(1)
+    expect(handleNavigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        item: expect.objectContaining({ id: 'dashboard', href: '/dashboard' }),
+      }),
+    )
+  })
+
+  it('wires route definitions and guard metadata into the protected router', async () => {
+    function Reports() {
+      return <div>Reports</div>
+    }
+
+    function About() {
+      return <div>About Guidogerb</div>
+    }
+
+    window.history.replaceState({}, '', '/app-shell/')
+
+    render(
+      <AppBasic
+        publicPages={{
+          routes: [{ path: '/about', Component: About }],
+          fallback: { element: <div>Public fallback</div> },
+        }}
+        protectedPages={{
+          basename: '/app-shell',
+          routes: [
+            {
+              path: '/reports',
+              Component: Reports,
+              guard: { props: { fallback: <div>Guard loading</div> } },
+            },
+          ],
+          fallback: { element: <div>Missing page</div>, isProtected: true },
+          protectFallback: true,
+          routerOptions: { future: { v7_normalizeFormMethod: true } },
+        }}
+      />,
+    )
+
+    await waitFor(() => expect(mocks.protectedRouter).toHaveBeenCalled())
+
+    const routerProps = mocks.protectedRouter.mock.calls.at(-1)?.[0] ?? {}
+
+    expect(routerProps.routes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: '/', isProtected: false }),
+        expect.objectContaining({ path: '/about', isProtected: false }),
+        expect.objectContaining({ path: '/dashboard', isProtected: true }),
+        expect.objectContaining({ path: '/reports', isProtected: true }),
+      ]),
+    )
+
+    expect(routerProps.fallback).toEqual(expect.objectContaining({ path: '*', isFallback: true }))
+    const expectedLogout = `${window.location.origin}/auth/logout`
+    expect(routerProps.guardProps).toEqual(expect.objectContaining({ logoutUri: expectedLogout }))
+    expect(routerProps.protectFallback).toBe(true)
+    expect(routerProps.basename).toBe('/app-shell')
+    expect(routerProps.routerOptions).toEqual({ future: { v7_normalizeFormMethod: true } })
+  })
+
+  it('applies navigation overrides to header and footer components', () => {
+    const handleNavigate = vi.fn()
+    const navItems = [
+      { id: 'home', label: 'Home', href: '/' },
+      { id: 'account', label: 'Account', href: '/account' },
+    ]
+
+    render(
+      <AppBasic
+        navigation={{ items: navItems, activePath: '/account', onNavigate: handleNavigate }}
+      />,
+    )
+
+    const providerProps = mocks.headerProvider.mock.calls.at(-1)?.[0] ?? {}
+    expect(providerProps.defaultSettings?.primaryLinks).toHaveLength(navItems.length)
+    expect(providerProps.defaultSettings?.primaryLinks).toEqual(
+      expect.arrayContaining(navItems.map((item) => expect.objectContaining(item))),
+    )
+
+    const headerProps = mocks.header.mock.calls.at(-1)?.[0] ?? {}
+    expect(headerProps.activePath).toBe('/account')
+    expect(headerProps.onNavigate).toBe(handleNavigate)
+
+    const footerProps = mocks.footer.mock.calls.at(-1)?.[0] ?? {}
+    expect(footerProps.onNavigate).toBe(handleNavigate)
+  })
+
+  it('configures storage namespace and forwards persistence props', () => {
+    render(<AppBasic />)
+
+    const defaultStorageProps = mocks.storage.mock.calls.at(-1)?.[0] ?? {}
+    expect(defaultStorageProps.namespace).toBe('guidogerb.app')
+
+    cleanup()
+    mocks.storage.mockClear()
+
+    render(<AppBasic storage={{ namespace: 'tenant.app', mode: 'session', persist: false }} />)
+
+    const storageProps = mocks.storage.mock.calls.at(-1)?.[0] ?? {}
+    expect(storageProps.namespace).toBe('tenant.app')
+    expect(storageProps.mode).toBe('session')
+    expect(storageProps.persist).toBe(false)
   })
 })

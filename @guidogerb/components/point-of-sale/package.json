@@ -24,6 +24,7 @@
     "react": ">=19"
   },
   "dependencies": {
+    "@guidogerb/components-analytics": "workspace:*",
     "@guidogerb/components-catalog": "workspace:*",
     "@guidogerb/components-shopping-cart": "workspace:*",
     "@guidogerb/components-storage": "workspace:*",

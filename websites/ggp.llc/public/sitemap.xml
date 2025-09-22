@@ -4,15 +4,15 @@
 >
 
   <url>
-    <loc>https://this-is-my-story.org</loc>
-    <lastmod>2025-09-21T04:48:10.904Z</lastmod>
+    <loc>https://ggp.llc</loc>
+    <lastmod>2025-09-22T00:49:23.653Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://this-is-my-story.org/auth/callback</loc>
-    <lastmod>2025-09-21T04:48:10.904Z</lastmod>
+    <loc>https://ggp.llc/auth/callback</loc>
+    <lastmod>2025-09-22T00:49:23.653Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -1,4 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+
+import { SlotEditorOverlay } from './editing/SlotEditorOverlay.jsx'
+import { useSlotEditing } from './editing/useSlotEditing.js'
 
 const BREAKPOINT_ORDER = ['xs', 'sm', 'md', 'lg', 'xl']
 
@@ -512,10 +515,18 @@ export function ResponsiveSlot({
   style,
   role,
   variant,
+  editableId,
+  propsJSON,
+  onClick,
   children,
   ...rest
 }) {
-  const { registry, activeBreakpoint, resolveToken: tokenResolver } = useResponsiveSlotContext()
+  const {
+    registry,
+    activeBreakpoint,
+    breakpoints,
+    resolveToken: tokenResolver,
+  } = useResponsiveSlotContext()
   const parentContext = useContext(SlotInstanceContext)
   const slotRef = useRef(null)
 
@@ -529,20 +540,60 @@ export function ResponsiveSlot({
     [inheritedMeta, definitionMeta],
   )
   const defaultVariant = meta.defaultVariant || 'default'
-  const variantName = variant ?? defaultVariant
 
   const baseSizes =
     inherit && parentContext?.byBreakpoint
       ? parentContext.byBreakpoint
       : (definition?.sizes ?? (definition && !definition.sizes ? definition : undefined))
 
+  const propOverrides = useMemo(() => {
+    if (!sizes || sizes === 'content') return undefined
+    return cloneBreakpointOverrides(sizes)
+  }, [sizes])
+
+  const {
+    isEditable: isSlotEditable,
+    isEditingEnabled,
+    isActive: isActiveEditable,
+    shouldShowOverlay,
+    setActive,
+    recordOverflow,
+    publishDraft,
+    discardDraft,
+    updateSize,
+    updateVariant,
+    updateProps,
+    clearBreakpoint,
+    overrides: editingOverrides,
+    variant: variantFromEditing,
+    props: editingProps,
+    draft: editingDraft,
+    status: editingStatus,
+    error: editingError,
+    isDirty,
+    overflowEvents,
+    lastUpdatedAt,
+  } = useSlotEditing({
+    editableId,
+    slotKey: slot,
+    defaultVariant,
+    variantProp: variant,
+    propOverrides,
+    propsJSON,
+  })
+
+  const combinedOverrides = useMemo(() => {
+    if (isContentOnly) return undefined
+    return mergeBreakpointOverrides(propOverrides, editingOverrides)
+  }, [isContentOnly, propOverrides, editingOverrides])
+
   const mergedSizes = useMemo(() => {
     if (isContentOnly) return null
     if (!baseSizes && process.env.NODE_ENV !== 'production') {
       console.warn(`ResponsiveSlot: slot "${slot}" is not defined in the registry.`)
     }
-    return mergeSlotSizes(baseSizes || {}, sizes === 'content' ? {} : sizes, tokenResolver)
-  }, [baseSizes, sizes, isContentOnly, slot, tokenResolver])
+    return mergeSlotSizes(baseSizes || {}, combinedOverrides || {}, tokenResolver)
+  }, [baseSizes, combinedOverrides, isContentOnly, slot, tokenResolver])
 
   const resolvedSize = mergedSizes
     ? resolveBreakpointSize(activeBreakpoint, mergedSizes)
@@ -571,14 +622,18 @@ export function ResponsiveSlot({
         display: 'grid',
         placeItems: 'stretch',
         overflow,
+        position: 'relative',
       }
     : { display: 'contents' }
+
+  const variantName = variantFromEditing ?? defaultVariant
+  const propsPayload = editingProps
 
   const datasetProps = {
     'data-slot-key': slot,
     'data-slot-variant': variantName,
+    'data-slot-default-variant': defaultVariant,
   }
-  datasetProps['data-slot-default-variant'] = defaultVariant
   if (meta?.label) datasetProps['data-slot-label'] = meta.label
   if (meta?.description) datasetProps['data-slot-description'] = meta.description
   if (meta?.design?.figmaComponent)
@@ -588,6 +643,18 @@ export function ResponsiveSlot({
   if (meta?.tags) {
     const tags = Array.isArray(meta.tags) ? meta.tags.join(',') : meta.tags
     datasetProps['data-slot-tags'] = tags
+  }
+  if (editableId) {
+    datasetProps['data-slot-editable-id'] = editableId
+  }
+  if (isSlotEditable) {
+    datasetProps['data-slot-editable'] = 'true'
+    if (isDirty) {
+      datasetProps['data-slot-dirty'] = 'true'
+    }
+    if (editingStatus === 'saving') {
+      datasetProps['data-slot-status'] = 'saving'
+    }
   }
   const variantMeta = meta?.variants?.[variantName]
   if (variantMeta?.label) {
@@ -617,37 +684,75 @@ export function ResponsiveSlot({
 
       overflowWarningCache.add(warningKey)
 
+      const detail = {
+        inlineBudget: element.style.getPropertyValue('--slot-inline-size') || resolvedSize.inline,
+        blockBudget: element.style.getPropertyValue('--slot-block-size') || resolvedSize.block,
+        breakpoint: activeBreakpoint,
+        timestamp: Date.now(),
+      }
+
+      recordOverflow(detail)
+
       console.warn(
         `ResponsiveSlot: content overflow detected for slot "${slot}" at breakpoint "${activeBreakpoint}".`,
         {
-          inlineBudget: element.style.getPropertyValue('--slot-inline-size') || resolvedSize.inline,
-          blockBudget: element.style.getPropertyValue('--slot-block-size') || resolvedSize.block,
+          inlineBudget: detail.inlineBudget,
+          blockBudget: detail.blockBudget,
         },
       )
     })
-  }, [isContentOnly, slot, activeBreakpoint, resolvedSize])
+  }, [isContentOnly, slot, activeBreakpoint, resolvedSize, recordOverflow])
 
-  if (isContentOnly) {
-    return (
-      <Component
-        {...rest}
-        {...datasetProps}
-        role={role ?? 'presentation'}
-        style={{
-          ...(style || {}),
-          display: 'contents',
-        }}
-      >
-        {children}
-      </Component>
-    )
-  }
+  const handleClick = useCallback(
+    (event) => {
+      if (typeof onClick === 'function') {
+        onClick(event)
+      }
+      if (!event.defaultPrevented && isSlotEditable && isEditingEnabled) {
+        setActive()
+      }
+    },
+    [onClick, isSlotEditable, isEditingEnabled, setActive],
+  )
+
+  const overlayElement =
+    shouldShowOverlay && mergedSizes ? (
+      <SlotEditorOverlay
+        slotKey={slot}
+        slotLabel={meta?.label || slot}
+        editableId={editableId}
+        variant={variantName}
+        variantOptions={meta?.variants || {}}
+        onVariantChange={updateVariant}
+        breakpoints={breakpoints}
+        activeBreakpoint={activeBreakpoint}
+        sizes={mergedSizes}
+        draftSizes={editingOverrides || {}}
+        onSizeChange={updateSize}
+        onClearBreakpoint={clearBreakpoint}
+        propsJSON={propsPayload}
+        onPropsChange={updateProps}
+        publishDraft={publishDraft}
+        discardDraft={discardDraft}
+        isDirty={isDirty}
+        status={editingStatus}
+        error={editingError}
+        lastUpdatedAt={lastUpdatedAt}
+        overflowEvents={overflowEvents}
+        isActive={isActiveEditable}
+        onActivate={setActive}
+      />
+    ) : null
+
+  const componentOnClick = isContentOnly ? onClick : handleClick
+  const componentRef = isContentOnly ? undefined : slotRef
 
   const element = (
     <Component
       {...rest}
-      ref={slotRef}
+      ref={componentRef}
       role={role ?? 'presentation'}
+      onClick={componentOnClick}
       {...datasetProps}
       style={{
         ...cssVariables,
@@ -655,6 +760,7 @@ export function ResponsiveSlot({
         ...(style || {}),
       }}
     >
+      {!isContentOnly ? overlayElement : null}
       {children}
     </Component>
   )
@@ -665,9 +771,86 @@ export function ResponsiveSlot({
       byBreakpoint: mergedSizes || {},
       meta,
       variant: variantName,
+      editableId,
+      props: propsPayload,
+      editing: isSlotEditable
+        ? {
+            isEditing: isEditingEnabled,
+            isActive: isActiveEditable,
+            isDirty,
+            status: editingStatus,
+            draft: editingDraft,
+            publish: publishDraft,
+            discard: discardDraft,
+            updateSize,
+            updateVariant,
+            updateProps,
+            clearBreakpoint,
+            overflowEvents,
+            lastUpdatedAt,
+          }
+        : null,
     }),
-    [slot, mergedSizes, meta, variantName],
+    [
+      slot,
+      mergedSizes,
+      meta,
+      variantName,
+      editableId,
+      propsPayload,
+      isSlotEditable,
+      isEditingEnabled,
+      isActiveEditable,
+      isDirty,
+      editingStatus,
+      editingDraft,
+      publishDraft,
+      discardDraft,
+      updateSize,
+      updateVariant,
+      updateProps,
+      clearBreakpoint,
+      overflowEvents,
+      lastUpdatedAt,
+    ],
   )
 
   return <SlotInstanceContext.Provider value={contextValue}>{element}</SlotInstanceContext.Provider>
+}
+
+function cloneBreakpointOverrides(map) {
+  if (!map || typeof map !== 'object') return undefined
+
+  const cloned = {}
+  for (const [breakpoint, entry] of Object.entries(map)) {
+    if (!ALLOWED_BREAKPOINTS.has(breakpoint)) continue
+    if (!entry || typeof entry !== 'object') continue
+    cloned[breakpoint] = { ...entry }
+  }
+
+  return Object.keys(cloned).length > 0 ? cloned : undefined
+}
+
+function mergeBreakpointOverrides(baseOverrides, editingOverrides) {
+  if (!baseOverrides && !editingOverrides) return undefined
+
+  const merged = {}
+
+  if (baseOverrides) {
+    for (const [breakpoint, entry] of Object.entries(baseOverrides)) {
+      if (!ALLOWED_BREAKPOINTS.has(breakpoint)) continue
+      if (!entry || typeof entry !== 'object') continue
+      merged[breakpoint] = { ...entry }
+    }
+  }
+
+  if (editingOverrides) {
+    for (const [breakpoint, entry] of Object.entries(editingOverrides)) {
+      if (!ALLOWED_BREAKPOINTS.has(breakpoint)) continue
+      if (!entry || typeof entry !== 'object') continue
+      merged[breakpoint] = { ...(merged[breakpoint] || {}), ...entry }
+    }
+  }
+
+  return Object.keys(merged).length > 0 ? merged : undefined
 }

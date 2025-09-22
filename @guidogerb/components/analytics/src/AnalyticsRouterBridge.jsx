@@ -7,6 +7,8 @@ const defaultShouldTrack = () => true
 const isPlainObject = (value) =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
 
+const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0
+
 const buildDefaultParams = () => {
   const params = {}
 
@@ -36,7 +38,9 @@ export function useAnalyticsPageViews(options = {}) {
     trackInitialPageView = false,
     includeSearch = true,
     includeHash = false,
+    includeReferrer = true,
     getPath,
+    getReferrer,
     getParams: paramsBuilder,
     shouldTrack = defaultShouldTrack,
     onTrack,
@@ -89,16 +93,26 @@ export function useAnalyticsPageViews(options = {}) {
       return
     }
 
+    const previousPath = lastTrackedPathRef.current
     lastTrackedKeyRef.current = historyKey
     lastTrackedPathRef.current = path
 
-    const context = { location, navigationType, path, isInitial }
+    const context = { location, navigationType, path, isInitial, previousPath }
 
     if (typeof shouldTrack === 'function' && !shouldTrack(context)) {
       return
     }
 
     const defaults = buildDefaultParams()
+    let referrer
+    if (typeof getReferrer === 'function') {
+      referrer = getReferrer(context)
+    } else if (includeReferrer && isNonEmptyString(previousPath) && previousPath !== path) {
+      referrer = previousPath
+    }
+    if (isNonEmptyString(referrer)) {
+      defaults.page_referrer = referrer
+    }
     let extraParams = {}
     if (typeof paramsBuilder === 'function') {
       extraParams = paramsBuilder(context)
@@ -119,8 +133,10 @@ export function useAnalyticsPageViews(options = {}) {
   }, [
     analytics,
     getPath,
+    getReferrer,
     hash,
     includeHash,
+    includeReferrer,
     includeSearch,
     key,
     navigationType,
