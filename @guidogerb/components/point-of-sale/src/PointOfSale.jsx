@@ -997,7 +997,7 @@ export function PointOfSale({
 }) {
   const offlineCache = useMemo(() => {
     const storageSource =
-            offlineStorage ?? (typeof window !== 'undefined' ? window.localStorage ?? null : null)
+      offlineStorage ?? (typeof window !== 'undefined' ? (window.localStorage ?? null) : null)
     return createOfflineCache(storageSource, offlineStorageKey)
   }, [offlineStorage, offlineStorageKey])
 
