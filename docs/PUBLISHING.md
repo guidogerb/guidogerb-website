@@ -2,6 +2,8 @@
 
 This document consolidates all install and deployment instructions for **Stream4Cloud Phase-1**.
 
+> Related references: the [SPEC](./SPEC.md) details platform architecture, the [ADR log](./adr/README.md) captures accepted decisions, and the [repository README](../README.md) maps workspaces and shared packages.
+
 ---
 
 ## Architecture summary (SPEC-1)
