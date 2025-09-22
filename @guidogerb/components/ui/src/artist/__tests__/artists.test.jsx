@@ -5,13 +5,17 @@ const { mockProtected } = vi.hoisted(() => ({
   mockProtected: vi.fn(),
 }))
 
-vi.mock('@guidogerb/components-pages-protected', () => ({
-  __esModule: true,
-  default: (props) => {
-    mockProtected(props)
-    return <div data-testid="protected-mock">{props.children}</div>
-  },
-}))
+vi.mock(
+  '@guidogerb/components-pages-protected',
+  () => ({
+    __esModule: true,
+    default: (props) => {
+      mockProtected(props)
+      return <div data-testid="protected-mock">{props.children}</div>
+    },
+  }),
+  { virtual: true },
+)
 
 import AboutPressSection from '../about-press/index.jsx'
 import ConsultingSection from '../consulting-section/index.jsx'
