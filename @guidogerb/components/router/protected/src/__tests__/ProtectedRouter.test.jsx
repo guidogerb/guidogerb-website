@@ -4,11 +4,29 @@ import { vi } from 'vitest'
 import { ProtectedRouter } from '../ProtectedRouter.jsx'
 
 const guardSpy = vi.fn()
+const authState = { isAuthenticated: true, error: null }
 
 vi.mock('@guidogerb/components-pages-protected', () => ({
   __esModule: true,
   default: ({ children, label }) => {
     guardSpy(label)
+
+    if (authState.error) {
+      return (
+        <div data-testid="default-guard-error" data-label={label}>
+          Sign-in failed: {authState.error.message}
+        </div>
+      )
+    }
+
+    if (!authState.isAuthenticated) {
+      return (
+        <div data-testid="default-guard-loading" data-label={label}>
+          Protected Loading...
+        </div>
+      )
+    }
+
     return (
       <div data-testid="default-guard" data-label={label}>
         {children}
@@ -20,6 +38,8 @@ vi.mock('@guidogerb/components-pages-protected', () => ({
 describe('ProtectedRouter', () => {
   beforeEach(() => {
     guardSpy.mockClear()
+    authState.isAuthenticated = true
+    authState.error = null
   })
 
   it('wraps protected routes in the default guard', () => {
@@ -206,5 +226,39 @@ describe('ProtectedRouter', () => {
       '/inicio',
     )
     expect(screen.queryByTestId('default-guard')).not.toBeInTheDocument()
+  })
+
+  it('leaves fallback content public while authentication is pending', () => {
+    authState.isAuthenticated = false
+
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/missing'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+        fallback={<div>Missing</div>}
+      />,
+    )
+
+    expect(screen.getByText('Missing')).toBeInTheDocument()
+    expect(screen.queryByTestId('default-guard-loading')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('default-guard')).not.toBeInTheDocument()
+  })
+
+  it('shows the guard loading state when protecting fallbacks during sign-in', () => {
+    authState.isAuthenticated = false
+
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/missing'] }}
+        routes={[{ path: '/', element: <div>Home</div> }]}
+        fallback={<div>Missing</div>}
+        protectFallback
+      />,
+    )
+
+    expect(screen.getByTestId('default-guard-loading')).toHaveTextContent('Protected Loading...')
+    expect(screen.queryByText('Missing')).not.toBeInTheDocument()
   })
 })
