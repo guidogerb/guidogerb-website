@@ -18,7 +18,11 @@
   "files": [
     "index.js",
     "src/JsonViewer/JsonViewer.jsx",
-    "src/ResponsiveSlot/ResponsiveSlot.jsx"
+    "src/ResponsiveSlot/ResponsiveSlot.jsx",
+    "src/ResponsiveSlot/editing/EditModeContext.jsx",
+    "src/ResponsiveSlot/editing/SlotEditorOverlay.jsx",
+    "src/ResponsiveSlot/editing/useSlotEditing.js",
+    "src/ResponsiveSlot/editing/localDraftStorage.js"
   ],
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",

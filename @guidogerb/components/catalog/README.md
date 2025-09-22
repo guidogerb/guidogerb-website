@@ -34,16 +34,15 @@ pnpm add @guidogerb/components-catalog
 import { useMemo } from 'react'
 import { Catalog } from '@guidogerb/components-catalog'
 import { createClient } from '@guidogerb/components-api'
-import { createStorageController } from '@guidogerb/components-storage'
 
 const client = createClient({ baseUrl: 'https://commerce.api.guidogerb.com' })
-const storage = createStorageController({ namespace: 'tenant-123.catalog' })
 
 export function StorefrontCatalog() {
   return (
     <Catalog
       client={client}
-      storage={storage}
+      tenantId="tenant-123"
+      environment="production"
       graphQLEndpoint="/graphql/catalog"
       pageSize={32}
       onProductSelect={(product) => {
@@ -110,7 +109,6 @@ The component expects a classic GraphQL response envelope (`{ data, errors }`) a
 when the `errors` array is populated or `data.catalog` is missing.
 
 ## Props
-
 | Prop                    | Type                                                                                                          | Default                             | Description                                                                     |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------- |
 | `apiBaseUrl`            | `string`                                                                                                      | —                                   | Base URL forwarded to `createClient` when an explicit `client` is not provided. |

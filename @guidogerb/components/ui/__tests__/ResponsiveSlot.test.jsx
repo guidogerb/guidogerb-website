@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { renderToString } from 'react-dom/server'
 
 import {
@@ -8,6 +8,31 @@ import {
   useResponsiveSlotMeta,
   useResponsiveSlotSize,
 } from '../src/ResponsiveSlot/ResponsiveSlot.jsx'
+import { EditModeProvider } from '../src/ResponsiveSlot/editing/EditModeContext.jsx'
+
+class MockResizeObserver {
+  static instance
+
+  constructor(callback) {
+    this.callback = callback
+    MockResizeObserver.instance = this
+  }
+
+  observe(element) {
+    this.element = element
+  }
+
+  unobserve() {}
+
+  disconnect() {}
+
+  static trigger() {
+    const instance = MockResizeObserver.instance
+    if (instance && typeof instance.callback === 'function' && instance.element) {
+      instance.callback([{ target: instance.element }])
+    }
+  }
+}
 
 function createMatchMedia(initialWidth) {
   let width = initialWidth
@@ -372,6 +397,130 @@ describe('ResponsiveSlot', () => {
       )
     } finally {
       warnSpy.mockRestore()
+    }
+  })
+
+  it('supports runtime editing with local drafts, publishing, and overflow diagnostics', async () => {
+    const originalResizeObserver = window.ResizeObserver
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const fetchMock = vi.fn(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            data: { upsertSlotInstance: { updatedAt: '2025-09-21T00:00:00.000Z' } },
+          }),
+      }),
+    )
+
+    window.localStorage.clear()
+    window.ResizeObserver = MockResizeObserver
+
+    function EditingProbe() {
+      const instance = useResponsiveSlotInstance()
+      return (
+        <div
+          data-testid="editing-probe"
+          data-variant={instance?.variant || 'none'}
+          data-props={JSON.stringify(instance?.props || {})}
+        >
+          <button
+            type="button"
+            data-testid="publish-button"
+            onClick={() => instance?.editing?.publish()}
+          >
+            Publish now
+          </button>
+        </div>
+      )
+    }
+
+    try {
+      render(
+        <EditModeProvider initialMode graphqlEndpoint="/graphql" fetcher={fetchMock}>
+          <ResponsiveSlotProvider>
+            <ResponsiveSlot
+              slot="catalog.card"
+              editableId="slot-1"
+              propsJSON={{ foo: 'bar' }}
+              data-testid="slot-element"
+            >
+              <EditingProbe />
+            </ResponsiveSlot>
+          </ResponsiveSlotProvider>
+        </EditModeProvider>,
+      )
+
+      const overlay = await screen.findByTestId('slot-editor-overlay')
+
+      const inlineInput = within(overlay).getByLabelText('Inline')
+      fireEvent.change(inlineInput, { target: { value: '30rem' } })
+
+      await waitFor(() => {
+        const draft = window.localStorage.getItem('gg:slot:slot-1:v1')
+        expect(draft).toContain('30rem')
+      })
+
+      const slot = screen.getByTestId('slot-element')
+      await waitFor(() => {
+        expect(slot.style.getPropertyValue('--slot-inline-size')).toBe('30rem')
+      })
+
+      const variantSelect = within(overlay).getByLabelText('Variant')
+      fireEvent.change(variantSelect, { target: { value: 'compact' } })
+
+      await waitFor(() => {
+        expect(slot.dataset.slotVariant).toBe('compact')
+        expect(screen.getByTestId('editing-probe').dataset.variant).toBe('compact')
+      })
+
+      const propsTextarea = within(overlay).getByLabelText('Props JSON')
+      fireEvent.change(propsTextarea, { target: { value: '{"foo":"baz"}' } })
+
+      await waitFor(() => {
+        expect(screen.getByTestId('editing-probe').dataset.props).toBe('{"foo":"baz"}')
+      })
+
+      await waitFor(() => {
+        expect(MockResizeObserver.instance?.element).toBe(slot)
+      })
+
+      Object.defineProperty(slot, 'scrollWidth', { value: 400, configurable: true })
+      Object.defineProperty(slot, 'clientWidth', { value: 200, configurable: true })
+      Object.defineProperty(slot, 'scrollHeight', { value: 280, configurable: true })
+      Object.defineProperty(slot, 'clientHeight', { value: 200, configurable: true })
+
+      await act(async () => {
+        MockResizeObserver.trigger()
+      })
+
+      await waitFor(() => {
+        expect(within(overlay).getByText(/Overflow events/)).toBeInTheDocument()
+      })
+
+      delete slot.scrollWidth
+      delete slot.clientWidth
+      delete slot.scrollHeight
+      delete slot.clientHeight
+
+      fireEvent.click(screen.getByTestId('publish-button'))
+
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+      await waitFor(() => {
+        expect(window.localStorage.getItem('gg:slot:slot-1:v1')).toBeNull()
+      })
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/graphql',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+        }),
+      )
+    } finally {
+      window.ResizeObserver = originalResizeObserver
+      warnSpy.mockRestore()
+      window.localStorage.clear()
+      MockResizeObserver.instance = null
     }
   })
 })

@@ -46,6 +46,7 @@ describe('AnalyticsRouterBridge', () => {
           event[2]?.page_path === '/about?ref=spec',
       )
       expect(entry).toBeDefined()
+      expect(entry?.[2]?.page_referrer).toBe('/')
     })
   })
 
@@ -93,48 +94,64 @@ describe('AnalyticsRouterBridge', () => {
       expect(onTrack).toHaveBeenCalledWith(
         expect.objectContaining({
           path: '/products/123',
-          params: expect.objectContaining({
-            page_title: 'Viewing /products/123',
-            page_path: '/products/123',
-          }),
+          params: expect.objectContaining({ page_title: 'Viewing /products/123' }),
+          previousPath: '/',
         }),
       )
     })
   })
 
-  it('supports opting out of tracking via shouldTrack', async () => {
+  it('allows customizing or disabling referrer tracking', async () => {
+    const customReferrer = vi.fn(({ previousPath }) => `custom:${previousPath ?? 'none'}`)
+
     render(
-      <Analytics measurementId="G-ROUTER-SHOULD" sendPageView={false}>
-        <MemoryRouter initialEntries={['/']}> 
-          <AnalyticsRouterBridge trackInitialPageView shouldTrack={() => false} />
+      <Analytics measurementId="G-ROUTER-REF" sendPageView={false}>
+        <MemoryRouter initialEntries={['/landing']}>
+          <AnalyticsRouterBridge getReferrer={customReferrer} />
+          <Routes>
+            <Route path="/landing" element={<NavigateOnMount to="/docs" />} />
+            <Route path="/docs" element={<NavigateOnMount to="/docs/api" />} />
+            <Route path="/docs/api" element={<div>Docs</div>} />
+          </Routes>
         </MemoryRouter>
       </Analytics>,
     )
 
     await waitFor(() => {
-      expect(window.dataLayer).toBeDefined()
+      const entries = window.dataLayer?.filter(
+        (event) => event[0] === 'event' && event[1] === 'page_view',
+      )
+      expect(entries?.length).toBeGreaterThanOrEqual(2)
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 0))
+    const lastEntry = window.dataLayer
+      ?.filter((event) => event[0] === 'event' && event[1] === 'page_view')
+      .pop()
 
-    const pageViewEvents = (window.dataLayer ?? []).filter((entry) => entry[1] === 'page_view')
-    expect(pageViewEvents).toHaveLength(0)
-  })
+    expect(lastEntry?.[2]?.page_referrer).toBe('custom:/docs')
+    expect(customReferrer).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/docs/api', previousPath: '/docs' }),
+    )
 
-  it('dispatches custom events when a non-page_view event name is provided', async () => {
+    window.dataLayer = []
+
     render(
-      <Analytics measurementId="G-ROUTER-CUSTOM-EVENT" sendPageView={false}>
-        <MemoryRouter initialEntries={['/']}> 
-          <AnalyticsRouterBridge eventName="screen_view" trackInitialPageView />
+      <Analytics measurementId="G-ROUTER-REF-OFF" sendPageView={false}>
+        <MemoryRouter initialEntries={['/landing']}>
+          <AnalyticsRouterBridge includeReferrer={false} />
+          <Routes>
+            <Route path="/landing" element={<NavigateOnMount to="/settings" />} />
+            <Route path="/settings" element={<div>Settings</div>} />
+          </Routes>
         </MemoryRouter>
       </Analytics>,
     )
 
     await waitFor(() => {
       const entry = window.dataLayer?.find(
-        (event) => event[0] === 'event' && event[1] === 'screen_view',
+        (event) => event[0] === 'event' && event[1] === 'page_view',
       )
-      expect(entry?.[2]).toMatchObject({ page_path: '/' })
+      expect(entry?.[2]?.page_referrer).toBeUndefined()
     })
   })
 })

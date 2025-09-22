@@ -48,85 +48,110 @@ const buildInvoiceFromOrder = (order) => {
   }
 }
 
-const isStorageLike = (value) => {
-  if (!value || typeof value !== 'object') return false
-  const hasModernAPI = typeof value.get === 'function' && typeof value.set === 'function'
-  const hasLegacyAPI =
-    typeof value.getItem === 'function' && typeof value.setItem === 'function'
-  return hasModernAPI || hasLegacyAPI
-}
+const buildOrderFromInvoice = (invoice, { totals = {}, user } = {}) => {
+  if (!invoice) return null
 
-const createOfflineCache = (storage, prefix = 'guidogerb.pos.offline') => {
-  if (!isStorageLike(storage)) return null
-
-  const useModernAPI = typeof storage.get === 'function' && typeof storage.set === 'function'
-  const useLegacyAPI =
-    typeof storage.getItem === 'function' && typeof storage.setItem === 'function'
-
-  const buildKey = (key) => `${prefix}:${key}`
-
-  const safeRead = (key) => {
-    try {
-      if (useModernAPI) {
-        const value = storage.get(key)
-        return value === undefined ? undefined : value
-      }
-      if (useLegacyAPI) {
-        const raw = storage.getItem(key)
-        if (raw === undefined || raw === null || raw === '') return undefined
-        try {
-          return JSON.parse(raw)
-        } catch (error) {
-          return undefined
-        }
-      }
-    } catch (error) {
-      return undefined
-    }
-    return undefined
-  }
-
-  const safeWrite = (key, value) => {
-    try {
-      if (value === undefined) {
-        safeRemove(key)
-        return
-      }
-      if (useModernAPI) {
-        storage.set(key, value)
-      } else if (useLegacyAPI) {
-        const payload = JSON.stringify(value)
-        storage.setItem(key, payload)
-      }
-    } catch (error) {
-      // Swallow storage failures so offline caching never breaks the POS flow.
-    }
-  }
-
-  const safeRemove = (key) => {
-    try {
-      if (useModernAPI && typeof storage.remove === 'function') {
-        storage.remove(key)
-      } else if (useLegacyAPI && typeof storage.removeItem === 'function') {
-        storage.removeItem(key)
-      }
-    } catch (error) {
-      // ignore removal errors
-    }
-  }
+  const invoiceTotals = invoice.totals ?? {}
+  const amount = invoiceTotals.total ?? totals.total ?? 0
+  const currency = invoiceTotals.currency ?? totals.currency ?? 'USD'
 
   return {
-    get(section, fallback) {
-      const value = safeRead(buildKey(section))
-      return value === undefined ? fallback : value
+    id: invoice.id ?? invoice.number ?? `order-${Date.now()}`,
+    number: invoice.number ?? invoice.id ?? `ORDER-${Date.now()}`,
+    status: invoice.status ?? 'PAID',
+    total: {
+      amount,
+      currency,
     },
-    set(section, value) {
-      safeWrite(buildKey(section), value)
-    },
-    remove(section) {
-      safeRemove(buildKey(section))
-    },
+    customer:
+      invoice.customer ??
+      (user
+        ? {
+            email: user.email,
+            name: user.name,
+          }
+        : null),
+    createdAt: invoice.issuedAt ?? new Date().toISOString(),
+    paymentIntentId: invoice.paymentIntentId ?? invoice.paymentIntent?.id ?? null,
   }
+}
+
+const HANDOFF_STATUS_SYNCED = 'synced'
+const HANDOFF_STATUS_PENDING = 'pending'
+
+const createHandoffId = (entry) => {
+  if (!entry || typeof entry !== 'object') {
+    return `handoff-${Date.now()}-${Math.random().toString(16).slice(2)}`
+  }
+
+  return (
+    entry.id ??
+    entry.invoice?.id ??
+    entry.paymentIntentId ??
+    entry.order?.id ??
+    `handoff-${Date.now()}-${Math.random().toString(16).slice(2)}`
+  )
+}
+
+const normalizeHandoffEntries = (entries, limit = 5) => {
+  if (!Array.isArray(entries) || limit <= 0) return []
+
+  const normalized = []
+  const seen = new Set()
+
+  for (const entry of entries) {
+    if (!entry || typeof entry !== 'object') continue
+    const id = createHandoffId(entry)
+    if (seen.has(id)) continue
+    seen.add(id)
+    normalized.push({
+      ...entry,
+      id,
+      status:
+        entry.status === HANDOFF_STATUS_PENDING ? HANDOFF_STATUS_PENDING : HANDOFF_STATUS_SYNCED,
+      createdAt: entry.createdAt ?? Date.now(),
+    })
+    if (normalized.length >= limit) break
+  }
+
+  return normalized
+}
+
+const handoffEntriesEqual = (a, b) => {
+  if (a === b) return true
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false
+  for (let index = 0; index < a.length; index += 1) {
+    const left = a[index]
+    const right = b[index]
+    if (!left || !right) return false
+    if (left.id !== right.id) return false
+    if (left.status !== right.status) return false
+    if ((left.invoice?.id ?? null) !== (right.invoice?.id ?? null)) return false
+    if ((left.order?.id ?? null) !== (right.order?.id ?? null)) return false
+    if ((left.paymentIntentId ?? null) !== (right.paymentIntentId ?? null)) return false
+    if ((left.userId ?? null) !== (right.userId ?? null)) return false
+  }
+  return true
+}
+
+const mergeByKey = (existing = [], incoming = [], getKey = (item) => item?.id) => {
+  const map = new Map()
+
+  for (const item of existing) {
+    if (!item || typeof item !== 'object') continue
+    const key = getKey(item)
+    if (!key) continue
+    map.set(key, item)
+  }
+
+  for (const item of incoming) {
+    if (!item || typeof item !== 'object') continue
+    const key = getKey(item)
+    if (!key) continue
+    map.set(key, { ...map.get(key), ...item })
+  }
+
+  return Array.from(map.values())
 }
 
 const PointOfSaleExperience = ({
@@ -146,7 +171,9 @@ const PointOfSaleExperience = ({
   onPaymentError,
   shouldAutoCreatePaymentIntent = true,
   createInvoiceMetadata,
-  offlineCache,
+  handoffStorage,
+  handoffStorageKey = 'guidogerb.pos.handoffs',
+  maxStoredHandoffs = 5,
 }) => {
   const { items, totals, clearCart } = useCart()
   const {
@@ -176,6 +203,60 @@ const PointOfSaleExperience = ({
   const [checkoutError, setCheckoutError] = useState(null)
   const [isCreatingPaymentIntent, setIsCreatingPaymentIntent] = useState(false)
   const [paymentIntent, setPaymentIntent] = useState({ id: null, clientSecret: null })
+
+  const supportsHandoffs = Boolean(handoffStorage?.get && maxStoredHandoffs > 0)
+
+  const loadHandoffs = useCallback(() => {
+    if (!supportsHandoffs) return []
+    try {
+      const stored = handoffStorage.get?.(handoffStorageKey, [])
+      return normalizeHandoffEntries(stored, maxStoredHandoffs)
+    } catch (error) {
+      console.error('Failed to load POS handoffs', error)
+      return []
+    }
+  }, [handoffStorage, handoffStorageKey, maxStoredHandoffs, supportsHandoffs])
+
+  const [handoffs, setHandoffs] = useState(() => loadHandoffs())
+
+  useEffect(() => {
+    if (!supportsHandoffs) return
+    setHandoffs((prev) => {
+      const next = loadHandoffs()
+      return handoffEntriesEqual(prev, next) ? prev : next
+    })
+  }, [loadHandoffs, supportsHandoffs])
+
+  useEffect(() => {
+    if (!supportsHandoffs || typeof handoffStorage?.subscribe !== 'function') return undefined
+    const unsubscribe = handoffStorage.subscribe((event) => {
+      if (!event) return
+      if (event.type === 'clear' || event.key === undefined || event.key === handoffStorageKey) {
+        setHandoffs((prev) => {
+          const next = loadHandoffs()
+          return handoffEntriesEqual(prev, next) ? prev : next
+        })
+      } else if (event.type === 'set' && event.key === handoffStorageKey) {
+        const next = normalizeHandoffEntries(event.value, maxStoredHandoffs)
+        setHandoffs((prev) => (handoffEntriesEqual(prev, next) ? prev : next))
+      }
+    })
+    return unsubscribe
+  }, [handoffStorage, handoffStorageKey, loadHandoffs, maxStoredHandoffs, supportsHandoffs])
+
+  const updateHandoffs = useCallback(
+    (updater) => {
+      if (!handoffStorage?.set || maxStoredHandoffs <= 0) return
+      setHandoffs((prev) => {
+        const nextEntries = typeof updater === 'function' ? updater(prev) : (updater ?? [])
+        const normalized = normalizeHandoffEntries(nextEntries, maxStoredHandoffs)
+        if (handoffEntriesEqual(prev, normalized)) return prev
+        handoffStorage.set(handoffStorageKey, normalized)
+        return normalized
+      })
+    },
+    [handoffStorage, handoffStorageKey, maxStoredHandoffs],
+  )
 
   const posApi = useMemo(() => {
     if (api) return api
@@ -251,6 +332,27 @@ const PointOfSaleExperience = ({
     loadOrders()
     loadInvoices()
   }, [loadProducts, loadOrders, loadInvoices])
+
+  useEffect(() => {
+    if (!handoffs.length) return
+
+    const handoffInvoices = handoffs.map((entry) => entry.invoice).filter(Boolean)
+    if (handoffInvoices.length > 0) {
+      setInvoices((prev) => mergeByKey(prev, handoffInvoices, (item) => item?.id ?? item?.number))
+    }
+
+    const handoffOrders = handoffs.map((entry) => entry.order).filter(Boolean)
+    if (handoffOrders.length > 0) {
+      setOrders((prev) => mergeByKey(prev, handoffOrders, (item) => item?.id ?? item?.number))
+    }
+
+    if (!activeInvoice) {
+      const latestInvoice = handoffInvoices[0]
+      if (latestInvoice) {
+        setActiveInvoice(latestInvoice)
+      }
+    }
+  }, [activeInvoice, handoffs])
 
   const cartSnapshot = useMemo(
     () => ({
@@ -365,81 +467,120 @@ const PointOfSaleExperience = ({
         promoCode: totals.promoCode,
       }
 
-      try {
-        let invoiceResponse = null
-        if (posApi?.createInvoice) {
+      const metadataPayload = createInvoiceMetadata?.({
+        paymentIntent: paymentIntentResult,
+        cart: snapshot,
+        user,
+        context,
+      })
+
+      const fallbackInvoice = {
+        id: paymentIntentResult?.id ?? `invoice-${Date.now()}`,
+        number: paymentIntentResult?.id ?? `INV-${Date.now()}`,
+        status: paymentIntentResult?.status ?? 'SUCCEEDED',
+        issuedAt: new Date().toISOString(),
+        customer: { name: user?.name, email: user?.email },
+        items: snapshot.items,
+        totals: snapshot.totals,
+        paymentIntentId: paymentIntentResult?.id ?? null,
+      }
+
+      let invoiceResponse = null
+      let resolvedInvoice = fallbackInvoice
+      let orderRecord = null
+      let persistenceStatus = HANDOFF_STATUS_PENDING
+      let persistenceError = null
+
+      if (posApi?.createInvoice) {
+        try {
           invoiceResponse = await posApi.createInvoice({
             cart: snapshot,
             paymentIntent: paymentIntentResult,
             user,
-            metadata: createInvoiceMetadata?.({
-              paymentIntent: paymentIntentResult,
-              cart: snapshot,
-              user,
-              context,
-            }),
+            metadata: metadataPayload,
           })
+          resolvedInvoice = invoiceResponse?.invoice ?? invoiceResponse ?? fallbackInvoice
+          persistenceStatus = HANDOFF_STATUS_SYNCED
+        } catch (error) {
+          persistenceError = error
+          resolvedInvoice = fallbackInvoice
         }
+      }
 
-        const resolvedInvoice = invoiceResponse?.invoice ??
-          invoiceResponse ?? {
-            id: paymentIntentResult?.id,
-            number: paymentIntentResult?.id,
-            status: paymentIntentResult?.status ?? 'SUCCEEDED',
-            issuedAt: new Date().toISOString(),
-            customer: { name: user?.name, email: user?.email },
-            items: snapshot.items,
-            totals: snapshot.totals,
-          }
+      if (!resolvedInvoice) {
+        resolvedInvoice = fallbackInvoice
+      }
 
-        setActiveInvoice(resolvedInvoice)
-        setInvoices((prev) => {
-          if (!resolvedInvoice) return prev
-          const exists = prev.some((entry) => entry.id === resolvedInvoice.id)
-          return exists ? prev : [resolvedInvoice, ...prev]
-        })
+      orderRecord =
+        invoiceResponse?.order ??
+        buildOrderFromInvoice(resolvedInvoice, { totals: snapshot.totals, user }) ??
+        buildOrderFromInvoice(fallbackInvoice, { totals: snapshot.totals, user })
 
-        const orderRecord = invoiceResponse?.order ?? {
-          id: resolvedInvoice?.id ?? paymentIntentResult?.id,
-          number: resolvedInvoice?.number ?? resolvedInvoice?.id,
-          status: resolvedInvoice?.status ?? paymentIntentResult?.status ?? 'SUCCEEDED',
-          total: {
-            amount: resolvedInvoice?.totals?.total ?? totals.total,
-            currency: resolvedInvoice?.totals?.currency ?? totals.currency,
-          },
-          customer: resolvedInvoice?.customer ?? {
-            email: user?.email,
-            name: user?.name,
-          },
-          createdAt: resolvedInvoice?.issuedAt ?? new Date().toISOString(),
-        }
+      setActiveInvoice(resolvedInvoice)
+      setInvoices((prev) => mergeByKey(prev, [resolvedInvoice], (item) => item?.id ?? item?.number))
 
-        setOrders((prev) => [orderRecord, ...prev])
+      if (orderRecord) {
+        setOrders((prev) => mergeByKey(prev, [orderRecord], (item) => item?.id ?? item?.number))
+      }
 
-        if (posApi?.recordOrder) {
+      if (persistenceStatus === HANDOFF_STATUS_SYNCED && posApi?.recordOrder) {
+        try {
           await posApi.recordOrder({
             invoice: resolvedInvoice,
             paymentIntent: paymentIntentResult,
             cart: snapshot,
             user,
           })
+        } catch (error) {
+          persistenceError = persistenceError ?? error
+          persistenceStatus = HANDOFF_STATUS_PENDING
         }
+      }
 
-        clearCart()
-        setPaymentIntent({ id: null, clientSecret: null })
-        setView('invoice')
-        setCheckoutError(null)
-        onInvoiceCreate?.(resolvedInvoice)
-        onOrderComplete?.({
-          invoice: resolvedInvoice,
-          paymentIntent: paymentIntentResult,
-          order: orderRecord,
-          context,
+      if (supportsHandoffs && handoffStorage?.set) {
+        updateHandoffs((current) => {
+          const filtered = current.filter(
+            (entry) =>
+              entry.id !== resolvedInvoice.id &&
+              entry.paymentIntentId !== (paymentIntentResult?.id ?? entry.paymentIntentId),
+          )
+          const nextEntry = {
+            id: resolvedInvoice?.id ?? paymentIntentResult?.id ?? createHandoffId(null),
+            createdAt: Date.now(),
+            status: persistenceStatus,
+            invoice: resolvedInvoice,
+            order: orderRecord,
+            cart: snapshot,
+            paymentIntent: paymentIntentResult,
+            paymentIntentId: paymentIntentResult?.id ?? null,
+            user: user ? { id: user.id, name: user.name, email: user.email } : null,
+            metadata: metadataPayload,
+          }
+          return [nextEntry, ...filtered]
         })
+      }
+
+      clearCart()
+      setPaymentIntent({ id: null, clientSecret: null })
+      setView('invoice')
+
+      if (persistenceStatus === HANDOFF_STATUS_SYNCED) {
+        setCheckoutError(null)
+      } else if (persistenceError) {
+        setCheckoutError(persistenceError)
+        onPaymentError?.(persistenceError)
+      }
+
+      onInvoiceCreate?.(resolvedInvoice)
+      onOrderComplete?.({
+        invoice: resolvedInvoice,
+        paymentIntent: paymentIntentResult,
+        order: orderRecord,
+        context,
+      })
+
+      if (persistenceStatus === HANDOFF_STATUS_SYNCED) {
         refreshHistory()
-      } catch (error) {
-        setCheckoutError(error)
-        onPaymentError?.(error)
       }
     },
     [
@@ -451,9 +592,12 @@ const PointOfSaleExperience = ({
       onPaymentError,
       posApi,
       refreshHistory,
+      handoffStorage,
+      supportsHandoffs,
       totals.currency,
       totals.promoCode,
       totals.total,
+      updateHandoffs,
       user,
     ],
   )
@@ -468,16 +612,58 @@ const PointOfSaleExperience = ({
 
   const handleSelectInvoiceFromOrder = useCallback(
     (order) => {
+      if (!order) return
+
       const invoiceMatch = invoices.find(
         (invoice) =>
           invoice.id === order.invoiceId ||
           invoice.number === order.number ||
           invoice.paymentIntentId === order.paymentIntentId,
       )
-      setActiveInvoice(invoiceMatch ?? buildInvoiceFromOrder(order))
-      setView('invoice')
+
+      if (invoiceMatch) {
+        setActiveInvoice(invoiceMatch)
+        setView('invoice')
+        return
+      }
+
+      const fallbackInvoice = buildInvoiceFromOrder(order)
+
+      const invoiceId =
+        order.invoiceId ?? order.invoice_id ?? order.number ?? order.id ?? order.paymentIntentId
+
+      if (!posApi?.getInvoice || !invoiceId) {
+        setActiveInvoice(fallbackInvoice)
+        setView('invoice')
+        return
+      }
+
+      setIsLoadingInvoices(true)
+
+      posApi
+        .getInvoice({ id: invoiceId })
+        .then((fetchedInvoice) => {
+          const resolved = fetchedInvoice ?? fallbackInvoice
+          if (resolved) {
+            setActiveInvoice(resolved)
+            setInvoices((prev) => {
+              const exists = prev.some((entry) => entry?.id === resolved.id)
+              return exists ? prev : [resolved, ...prev]
+            })
+          } else {
+            setActiveInvoice(fallbackInvoice)
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch invoice details', error)
+          setActiveInvoice(fallbackInvoice)
+        })
+        .finally(() => {
+          setIsLoadingInvoices(false)
+          setView('invoice')
+        })
     },
-    [invoices],
+    [invoices, posApi],
   )
 
   const profileContext = useMemo(
@@ -491,6 +677,88 @@ const PointOfSaleExperience = ({
     }),
     [logout, setStripeCustomerId, updateProfile, user, userLoading, userStatus],
   )
+
+  useEffect(() => {
+    if (!supportsHandoffs || !posApi?.createInvoice) return
+    const pending = handoffs.filter((entry) => entry.status === HANDOFF_STATUS_PENDING)
+    if (pending.length === 0) return
+
+    let cancelled = false
+
+    const syncPending = async () => {
+      for (const entry of pending) {
+        if (cancelled) return
+        const paymentIntentPayload =
+          entry.paymentIntent ?? (entry.paymentIntentId ? { id: entry.paymentIntentId } : null)
+        const userSnapshot = entry.user ?? user
+        try {
+          const invoiceResponse = await posApi.createInvoice({
+            cart: entry.cart,
+            paymentIntent: paymentIntentPayload,
+            user: userSnapshot,
+            metadata: entry.metadata,
+          })
+
+          if (cancelled) return
+
+          const resolvedInvoice =
+            invoiceResponse?.invoice ?? invoiceResponse ?? entry.invoice ?? null
+          const orderRecord =
+            invoiceResponse?.order ??
+            entry.order ??
+            buildOrderFromInvoice(resolvedInvoice, {
+              totals: entry.cart?.totals ?? totals,
+              user: userSnapshot,
+            })
+
+          if (posApi.recordOrder && resolvedInvoice) {
+            try {
+              await posApi.recordOrder({
+                invoice: resolvedInvoice,
+                paymentIntent: paymentIntentPayload,
+                cart: entry.cart,
+                user: userSnapshot,
+              })
+            } catch (orderError) {
+              console.error('Failed to sync offline order record', orderError)
+            }
+          }
+
+          updateHandoffs((current) =>
+            current.map((handoff) =>
+              handoff.id === entry.id
+                ? {
+                    ...handoff,
+                    status: HANDOFF_STATUS_SYNCED,
+                    invoice: resolvedInvoice ?? handoff.invoice,
+                    order: orderRecord ?? handoff.order,
+                  }
+                : handoff,
+            ),
+          )
+
+          if (resolvedInvoice) {
+            setInvoices((prev) =>
+              mergeByKey(prev, [resolvedInvoice], (item) => item?.id ?? item?.number),
+            )
+          }
+
+          if (orderRecord) {
+            setOrders((prev) => mergeByKey(prev, [orderRecord], (item) => item?.id ?? item?.number))
+          }
+        } catch (error) {
+          if (cancelled) return
+          console.error('Failed to sync POS handoff', error)
+        }
+      }
+    }
+
+    syncPending()
+
+    return () => {
+      cancelled = true
+    }
+  }, [handoffs, posApi, supportsHandoffs, totals, updateHandoffs, user])
 
   const profileNode = useMemo(() => {
     if (renderProfile) {

@@ -56,6 +56,7 @@ export const DEFAULT_CATALOG_QUERY = `
 `
 
 const DEFAULT_SORT_KEY = 'featured'
+const DEFAULT_STORAGE_NAMESPACE = 'guidogerb.catalog'
 
 const SORT_OPTIONS = {
   featured: {
@@ -366,13 +367,37 @@ const defaultRenderProduct = ({ product, onSelect, viewMode }) => {
 
 defaultRenderProduct.displayName = 'CatalogProduct'
 
+const buildScopedNamespace = (namespace, { tenantId, environment } = {}) => {
+  const baseNamespace = typeof namespace === 'string' && namespace.trim()
+    ? namespace.trim()
+    : DEFAULT_STORAGE_NAMESPACE
+
+  const segments = [baseNamespace]
+
+  const appendSegment = (value) => {
+    if (value === undefined || value === null) return
+    const segment = String(value).trim()
+    if (!segment) return
+    if (!segments.includes(segment)) {
+      segments.push(segment)
+    }
+  }
+
+  appendSegment(tenantId)
+  appendSegment(environment)
+
+  return segments.join('::')
+}
+
 export function Catalog({
   apiBaseUrl,
   client,
   graphQLEndpoint = '/graphql',
   query = DEFAULT_CATALOG_QUERY,
   storage,
-  storageNamespace = 'guidogerb.catalog',
+  storageNamespace = DEFAULT_STORAGE_NAMESPACE,
+  tenantId,
+  environment,
   storageKey = 'catalog.preferences',
   storageScope,
   initialView = 'grid',
@@ -391,6 +416,7 @@ export function Catalog({
     return createClient({ baseUrl: apiBaseUrl })
   }, [apiBaseUrl, client])
 
+
   const scopedNamespace = useMemo(
     () => buildScopedIdentifier(storageNamespace, storageScope),
     [storageNamespace, storageScope],
@@ -405,6 +431,7 @@ export function Catalog({
     if (storage) return storage
     return createStorageController({ namespace: scopedNamespace })
   }, [scopedNamespace, storage])
+
 
   const storedPreferences = useMemo(
     () => readPreferences(resolvedStorage, scopedStorageKey) ?? {},

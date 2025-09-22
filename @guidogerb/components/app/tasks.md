@@ -10,8 +10,8 @@ pre-configured Guidogerb experience without re-implementing provider wiring.
 | Capture placeholder scope in README     | 2025-09-19  | 2025-09-21      | 2025-09-19    | complete    | Documented that the package currently exports a stub while long-term variants are prepared.                                     |
 | Design shared app shell structure       | 2025-09-19  | 2025-09-21      | -             | in-progress | Finalise the provider order, layout regions, and dependency contracts that every variant must honour.                           |
 | Blueprint `<AppBasic />` provider stack | 2025-09-21  | 2025-09-21      | -             | in-progress | Specify default values and tenant-provided props for the base variant so router, auth, API, and UI layers interoperate.         |
-| Scaffold `<AppBasic />` component       | 2025-09-21  | 2025-09-21      | -             | todo        | Implement the React component that composes all required providers and renders public/protected routes plus shared chrome.      |
-| Harden `<AppBasic />` smoke tests       | 2025-09-21  | 2025-09-21      | -             | todo        | Extend the current render-only test suite with mocked providers to guard against regression in routing, auth, and data loading. |
+| Scaffold `<AppBasic />` component       | 2025-09-21  | 2025-09-21      | 2025-09-21    | complete    | Implement the React component that composes all required providers and renders public/protected routes plus shared chrome.      |
+| Harden `<AppBasic />` smoke tests       | 2025-09-21  | 2025-09-21      | 2025-09-21    | complete    | Extend the current render-only test suite with mocked providers to guard against regression in routing, auth, and data loading. |
 | Add future variant specs                | 2025-09-21  | 2025-09-21      | -             | backlog     | Capture follow-up variants (e.g., analytics-heavy, commerce) after the basic template lands.                                    |
 
 ## `<AppBasic />` implementation notes
@@ -39,5 +39,5 @@ pre-configured Guidogerb experience without re-implementing provider wiring.
 - **`@guidogerb/components-ui` widgets** — provide baseline layout wrappers (header, footer, page
   sections) so tenants only slot in copy, imagery, or feature components.
 
-The initial component keeps rendering a simple placeholder until the tasks above land. The smoke test
-ensures we can replace the internals without breaking consumers.
+`<AppBasic />` now renders the composed provider stack, marketing landing, and protected routes.
+The expanded test suite guards provider wiring so future variants can build on a stable baseline.

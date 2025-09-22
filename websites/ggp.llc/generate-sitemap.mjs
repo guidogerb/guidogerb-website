@@ -42,8 +42,7 @@ function loadEnvLikeVite() {
 const env = loadEnvLikeVite()
 const sitePort = env.VITE_SITE_PORT || (mode === 'production' ? '' : '4173')
 const siteUrl =
-  env.VITE_SITE_URL ||
-  (mode === 'production' ? 'https://this-is-my-story.org' : 'https://local.this-is-my-story.org')
+  env.VITE_SITE_URL || (mode === 'production' ? 'https://ggp.llc' : 'https://local.ggp.llc')
 
 // Define your public routes here. Start minimal; expand as you add pages.
 const routes = [

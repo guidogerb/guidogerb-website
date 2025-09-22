@@ -84,11 +84,17 @@ function CustomAnalyticsBridge() {
     getParams: ({ location }) => ({
       page_title: `Tenant portal — ${location.pathname}`,
     }),
+    getReferrer: ({ previousPath }) => (previousPath ? `tenant-portal:${previousPath}` : undefined),
   })
 
   return null
 }
 ```
+
+`includeReferrer` is enabled by default so GA4 receives a `page_referrer`
+parameter derived from the last tracked path. Disable it with
+`includeReferrer={false}` or return your own value from `getReferrer` when you
+need to normalise tenant-specific URLs.
 
 ## Component API
 
