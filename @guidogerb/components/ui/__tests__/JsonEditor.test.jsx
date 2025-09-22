@@ -62,11 +62,7 @@ describe('JsonEditor', () => {
     const handleErrorChange = vi.fn()
 
     const { rerender } = render(
-      <JsonEditor
-        label="Props"
-        value={{ foo: 'bar' }}
-        onErrorChange={handleErrorChange}
-      />,
+      <JsonEditor label="Props" value={{ foo: 'bar' }} onErrorChange={handleErrorChange} />,
     )
 
     const textarea = screen.getByLabelText('Props')
@@ -74,13 +70,7 @@ describe('JsonEditor', () => {
     fireEvent.change(textarea, { target: { value: '{invalid' } })
     expect(screen.getByText(/JSON error:/)).toBeInTheDocument()
 
-    rerender(
-      <JsonEditor
-        label="Props"
-        value={{ baz: 2 }}
-        onErrorChange={handleErrorChange}
-      />,
-    )
+    rerender(<JsonEditor label="Props" value={{ baz: 2 }} onErrorChange={handleErrorChange} />)
 
     expect(textarea.value).toContain('"baz": 2')
     expect(handleErrorChange).toHaveBeenLastCalledWith(null)
@@ -91,11 +81,7 @@ describe('JsonEditor', () => {
     const handleTextareaChange = vi.fn()
 
     render(
-      <JsonEditor
-        label="Props"
-        value={null}
-        textareaProps={{ onChange: handleTextareaChange }}
-      />,
+      <JsonEditor label="Props" value={null} textareaProps={{ onChange: handleTextareaChange }} />,
     )
 
     const textarea = screen.getByLabelText('Props')

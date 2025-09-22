@@ -94,9 +94,8 @@ export default function Welcome({ children, rehearsalResources, useAuthHook }) {
   const name =
     auth?.user?.profile?.['cognito:username'] ?? auth?.user?.profile?.name ?? 'userNotAvailable'
   const email = auth?.user?.profile?.email
-  const { stagePlotHref, rehearsalChecklistHref, productionEmailHref } = resolveRehearsalResources(
-    rehearsalResources,
-  )
+  const { stagePlotHref, rehearsalChecklistHref, productionEmailHref } =
+    resolveRehearsalResources(rehearsalResources)
 
   return (
     <div className="welcome-card">

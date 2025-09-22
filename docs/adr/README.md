@@ -29,14 +29,17 @@ outcomes for choices that affect multiple packages or tenant sites.
 - Tags: short, keywords
 
 ## Context
+
 - Why the decision is needed.
 - Key constraints, research, and related documents.
 
 ## Decision
+
 - Summary of the selected approach.
 - How it interacts with other systems or packages.
 
 ## Consequences
+
 - Follow-up actions, risks, and monitoring.
 - References to impacted workspaces and docs.
 ```

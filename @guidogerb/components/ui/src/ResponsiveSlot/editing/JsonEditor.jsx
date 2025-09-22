@@ -130,7 +130,10 @@ export function JsonEditor({
 
   return (
     <div style={{ ...defaultContainerStyle, ...(containerStyle || {}) }}>
-      <label htmlFor={textareaIdValue} style={{ ...defaultLabelStyle, ...(labelProps.style || {}) }}>
+      <label
+        htmlFor={textareaIdValue}
+        style={{ ...defaultLabelStyle, ...(labelProps.style || {}) }}
+      >
         {label}
       </label>
       <textarea
@@ -143,9 +146,7 @@ export function JsonEditor({
         style={{ ...defaultTextareaStyle, ...(textareaStyle || {}) }}
         {...restTextareaProps}
       />
-      {description ? (
-        <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{description}</div>
-      ) : null}
+      {description ? <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>{description}</div> : null}
       {error ? (
         <div id={`${textareaIdValue}-error`} style={{ ...defaultErrorStyle }}>
           {errorMessagePrefix} {error}

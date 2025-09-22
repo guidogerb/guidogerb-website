@@ -115,7 +115,10 @@ describe('Gary Gerber welcome component', () => {
 
   it('prefers provided rehearsal resources over configuration defaults', async () => {
     vi.stubEnv('VITE_REHEARSAL_RESOURCES_STAGE_PLOT_URL', 'https://cdn.example.com/env-stage.pdf')
-    vi.stubEnv('VITE_REHEARSAL_RESOURCES_CHECKLIST_URL', 'https://cdn.example.com/env-checklist.pdf')
+    vi.stubEnv(
+      'VITE_REHEARSAL_RESOURCES_CHECKLIST_URL',
+      'https://cdn.example.com/env-checklist.pdf',
+    )
     vi.stubEnv('VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL', 'env-team@example.com')
     vi.stubEnv('VITE_REHEARSAL_RESOURCES_PRODUCTION_EMAIL_SUBJECT', 'Env subject should not appear')
 
