@@ -1,8 +1,10 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { createStorageController } from '@guidogerb/components-storage'
+import * as storageModule from '@guidogerb/components-storage'
 import { Catalog } from '../Catalog.jsx'
+
+const { createStorageController } = storageModule
 
 const buildProduct = (overrides = {}) => ({
   id: `prod-${Math.random().toString(16).slice(2)}`,
@@ -195,5 +197,27 @@ describe('Catalog', () => {
     await user.click(cta)
 
     expect(handleSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'stream-1' }))
+  })
+
+  it('scopes generated storage namespaces with tenant and environment context', async () => {
+    const spy = vi.spyOn(storageModule, 'createStorageController')
+    const client = {
+      post: vi.fn().mockResolvedValue(buildGraphQLPayload({ items: [] })),
+    }
+
+    try {
+      render(
+        <Catalog client={client} tenantId="tenant-123" environment="production" />,
+      )
+
+      await waitFor(() => {
+        expect(spy).toHaveBeenCalled()
+      })
+
+      const call = spy.mock.calls.at(-1)?.[0] ?? {}
+      expect(call.namespace).toBe('guidogerb.catalog::tenant-123::production')
+    } finally {
+      spy.mockRestore()
+    }
   })
 })
