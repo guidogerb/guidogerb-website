@@ -1,5 +1,4 @@
 import './App.css'
-import Protected from '@guidogerb/components-pages-protected'
 import Welcome from './website-components/welcome-page/index.jsx'
 
 function App() {
@@ -11,10 +10,7 @@ function App() {
       </div>
 
       <div style={{ border: '1px solid #ccc', padding: 12, marginTop: 16 }}>
-        {/* Protected section (requires sign-in) */}
-        <Protected logoutUri={import.meta.env.VITE_LOGOUT_URI}>
-          <Welcome />
-        </Protected>
+        <Welcome />
       </div>
     </>
   )

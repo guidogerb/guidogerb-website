@@ -52,28 +52,45 @@ const routes = [
 ]
 
 const now = new Date().toISOString()
-const urlset = routes
-  .map(
-    (r) => `
+
+// Prefer template replacement if a sitemap.xml exists and contains {{LASTMOD}}
+const outDir = path.join(root, 'public')
+fs.mkdirSync(outDir, { recursive: true })
+const sitemapPath = path.join(outDir, 'sitemap.xml')
+let xml = null
+
+if (fs.existsSync(sitemapPath)) {
+  try {
+    const template = fs.readFileSync(sitemapPath, 'utf8')
+    if (template.includes('{{LASTMOD}}') && mode === 'production') {
+      xml = template.replace(/\{\{LASTMOD\}\}/g, now)
+    }
+  } catch {
+    // ignore and fall back
+  }
+}
+
+if (!xml) {
+  const urlset = routes
+    .map(
+      (r) => `
   <url>
     <loc>${siteUrl.replace(/\/$/, '')}${r === '/' ? '' : r}</loc>
     <lastmod>${now}</lastmod>
     <changefreq>${mode === 'production' ? 'weekly' : 'daily'}</changefreq>
     <priority>${r === '/' ? '1.0' : '0.8'}</priority>
   </url>`,
-  )
-  .join('\n')
+    )
+    .join('\n')
 
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
->
 ${urlset}
 </urlset>
 `
+}
 
-const outDir = path.join(root, 'public')
-fs.mkdirSync(outDir, { recursive: true })
-fs.writeFileSync(path.join(outDir, 'sitemap.xml'), xml, 'utf8')
+fs.writeFileSync(sitemapPath, xml, 'utf8')
 
-console.log(`Sitemap generated for mode=${mode} at ${path.join(outDir, 'sitemap.xml')}`)
+console.log(`Sitemap generated for mode=${mode} at ${sitemapPath}`)
