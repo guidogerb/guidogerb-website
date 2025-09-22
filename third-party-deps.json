@@ -16,9 +16,7 @@
     "name": "@testing-library/jest-dom",
     "license": "MIT",
     "feature": "Adds DOM-specific matchers so assertions can verify accessibility-friendly output.",
-    "packages": [
-      "package.json"
-    ]
+    "packages": ["package.json"]
   },
   {
     "name": "@testing-library/react",
@@ -137,25 +135,19 @@
     "name": "jsdom",
     "license": "MIT",
     "feature": "Creates a browser-like DOM implementation required for rendering components in Node-based tests.",
-    "packages": [
-      "package.json"
-    ]
+    "packages": ["package.json"]
   },
   {
     "name": "prettier",
     "license": "MIT",
     "feature": "Formats source files to a consistent style across the project.",
-    "packages": [
-      "package.json"
-    ]
+    "packages": ["package.json"]
   },
   {
     "name": "rimraf",
     "license": "ISC",
     "feature": "Offers cross-platform removal of build artifacts during cleanup tasks.",
-    "packages": [
-      "package.json"
-    ]
+    "packages": ["package.json"]
   },
   {
     "name": "vite-plugin-mkcert",
