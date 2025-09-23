@@ -1,106 +1,25 @@
-import { useCallback, useEffect, useState } from 'react'
 import Protected from '@guidogerb/components-pages-protected'
 import { Footer } from '@guidogerb/footer'
 import { Header, HeaderContextProvider } from '@guidogerb/header'
+import { ErrorShell } from '@guidogerb/components-pages-public'
+import { PublicRouter } from '@guidogerb/components-router-public'
 import './App.css'
 import headerSettings from './headerSettings.js'
 import footerSettings from './footerSettings.js'
 import Welcome from './website-components/welcome-page/index.jsx'
+import { MARKETING_PATHS, useMarketingNavigation } from './useMarketingNavigation.js'
 
-const SECTION_MAP = {
-  '/': 'top',
-  '/fermentation': 'fermentation',
-  '/cheese-lab': 'cheese-lab',
-  '/events': 'events',
-  '/market': 'market',
-  '/newsletter': 'newsletter',
-  '/partners': 'partner-hub',
-  '/contact': 'contact',
-}
+const MAINTENANCE_PATH = '/maintenance'
 
-const getInitialPath = () => {
-  if (typeof window === 'undefined') return '/'
-  return window.location.pathname || '/'
-}
+const marketingRoutes = MARKETING_PATHS.map((path) => ({ path, element: <LandingRoute /> }))
 
-function scrollToSection(id) {
-  if (!id || typeof document === 'undefined') return
-  const element = document.getElementById(id)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-}
+const routes = [
+  ...marketingRoutes,
+  { path: MAINTENANCE_PATH, element: <MaintenanceRoute /> },
+]
 
-function useActivePath() {
-  const [activePath, setActivePath] = useState(() => getInitialPath())
-
-  useEffect(() => {
-    const handlePopState = () => {
-      const nextPath = getInitialPath()
-      setActivePath(nextPath)
-      const sectionId = SECTION_MAP[nextPath]
-      if (sectionId) {
-        scrollToSection(sectionId)
-      }
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const sectionId = SECTION_MAP[getInitialPath()]
-    if (sectionId) {
-      scrollToSection(sectionId)
-    }
-  }, [])
-
-  return [activePath, setActivePath]
-}
-
-function App() {
-  const [activePath, setActivePath] = useActivePath()
-
-  const handleNavigate = useCallback(
-    ({ item }) => {
-      if (!item?.href || typeof window === 'undefined') return
-
-      const href = String(item.href)
-
-      if (href.startsWith('mailto:') || href.startsWith('tel:')) {
-        window.location.href = href
-        return
-      }
-
-      try {
-        const url = new URL(href, window.location.origin)
-
-        if (item.external || url.origin !== window.location.origin) {
-          window.open(url.href, '_blank', 'noopener')
-          return
-        }
-
-        const targetPath = url.pathname || '/'
-        const sectionId =
-          SECTION_MAP[targetPath] || (url.hash ? url.hash.replace('#', '') : undefined)
-
-        window.history.pushState({}, '', targetPath)
-        setActivePath(targetPath)
-
-        if (sectionId) {
-          scrollToSection(sectionId)
-        } else {
-          window.location.assign(url.href)
-        }
-      } catch {
-        window.location.assign(href)
-      }
-    },
-    [setActivePath],
-  )
+function LandingRoute() {
+  const { activePath, handleNavigate } = useMarketingNavigation()
 
   return (
     <HeaderContextProvider defaultSettings={headerSettings}>
@@ -273,6 +192,83 @@ function App() {
       </div>
     </HeaderContextProvider>
   )
+}
+
+function NotFoundRoute() {
+  const { activePath, handleNavigate, navigateHome } = useMarketingNavigation()
+
+  return (
+    <HeaderContextProvider defaultSettings={headerSettings}>
+      <ErrorShell
+        className="error-shell--pickle"
+        statusCode={404}
+        statusLabel="HTTP status code"
+        title="Jar not on this shelf"
+        description="We hunted through every brining rack but couldn’t find that page."
+        actionsLabel="Helpful links"
+        actions={[
+          {
+            label: 'Return to fermentation hub',
+            href: '/',
+            variant: 'primary',
+            onClick: navigateHome,
+          },
+          {
+            label: 'Email the fermentation team',
+            href: 'mailto:partners@picklecheeze.com?subject=Portal%20support',
+          },
+        ]}
+        header={<Header activePath={activePath} onNavigate={handleNavigate} />}
+        footer={<Footer {...footerSettings} onNavigate={handleNavigate} />}
+      >
+        <p>
+          Double-check the link or head back to the fermentation hub to keep browsing seasonal jars,
+          partner resources, and workshop dates.
+        </p>
+      </ErrorShell>
+    </HeaderContextProvider>
+  )
+}
+
+function MaintenanceRoute() {
+  const { activePath, handleNavigate, navigateHome } = useMarketingNavigation()
+
+  return (
+    <HeaderContextProvider defaultSettings={headerSettings}>
+      <ErrorShell
+        className="error-shell--pickle"
+        statusCode={503}
+        statusLabel="Service status"
+        title="Fermentation kitchen is curing updates"
+        description="We’re refreshing partner resources and will be back online shortly."
+        actionsLabel="While you wait"
+        actions={[
+          {
+            label: 'Check back on the homepage',
+            href: '/',
+            variant: 'primary',
+            onClick: navigateHome,
+          },
+          {
+            label: 'Follow our brine dispatch on Instagram',
+            href: 'https://instagram.com/picklecheeze',
+            external: true,
+          },
+        ]}
+        header={<Header activePath={activePath} onNavigate={handleNavigate} />}
+        footer={<Footer {...footerSettings} onNavigate={handleNavigate} />}
+      >
+        <p>
+          Reach out at <a href="mailto:hello@picklecheeze.com">hello@picklecheeze.com</a> if you
+          need inventory sheets or delivery updates while we finish the release.
+        </p>
+      </ErrorShell>
+    </HeaderContextProvider>
+  )
+}
+
+function App() {
+  return <PublicRouter routes={routes} fallback={<NotFoundRoute />} />
 }
 
 export default App
