@@ -1,5 +1,6 @@
 import { useAuth } from '@guidogerb/components-auth'
 import { getPartnerFeatureFlags } from '../../featureFlags.js'
+import { getPartnerResourceLinks } from '../../partnerResources.js'
 
 export default function Welcome({ children }) {
   const auth = useAuth()
@@ -12,34 +13,11 @@ export default function Welcome({ children }) {
     return <div className="welcome-loading">Loading partner pantry…</div>
   }
 
-  const name =
-    auth?.user?.profile?.['cognito:username'] ?? auth?.user?.profile?.name ?? 'guest partner'
-  const email = auth?.user?.profile?.email
+  const profile = auth?.user?.profile ?? {}
+  const name = profile['cognito:username'] ?? profile.name ?? 'guest partner'
+  const email = profile.email
   const features = getPartnerFeatureFlags()
-
-  const resourceLinks = []
-
-  if (features.showInventoryDownload) {
-    resourceLinks.push({
-      href: '/files/picklecheeze-cellar-inventory.pdf',
-      label: 'Download current cellar inventory',
-    })
-  }
-
-  if (features.showCareGuide) {
-    resourceLinks.push({
-      href: '/files/cheese-care-guide.pdf',
-      label: 'Cheeze care & plating guide',
-    })
-  }
-
-  if (features.showContactEmail) {
-    resourceLinks.push({
-      href: 'mailto:partners@picklecheeze.com?subject=Partner%20portal%20question',
-      label: 'Email the fermentation team',
-    })
-  }
-
+  const resourceLinks = getPartnerResourceLinks(features)
   const hasResources = resourceLinks.length > 0
 
   return (
@@ -53,7 +31,7 @@ export default function Welcome({ children }) {
       {hasResources ? (
         <ul className="welcome-links">
           {resourceLinks.map((link) => (
-            <li key={link.href}>
+            <li key={link.id ?? link.href}>
               <a href={link.href}>{link.label}</a>
             </li>
           ))}
