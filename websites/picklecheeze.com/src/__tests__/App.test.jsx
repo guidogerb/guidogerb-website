@@ -133,6 +133,84 @@ describe('PickleCheeze website App', () => {
     pushStateSpy.mockRestore()
   })
 
+  const headerNavigationScenarios = [
+    {
+      navName: /Primary navigation/i,
+      linkName: 'Fermentation club',
+      expectedPath: '/fermentation',
+      sectionId: 'fermentation',
+    },
+    {
+      navName: /Primary navigation/i,
+      linkName: 'Cheeze lab',
+      expectedPath: '/cheese-lab',
+      sectionId: 'cheese-lab',
+    },
+    {
+      navName: /Primary navigation/i,
+      linkName: 'Events & tastings',
+      expectedPath: '/events',
+      sectionId: 'events',
+    },
+    {
+      navName: /Secondary navigation/i,
+      linkName: 'Marketplace',
+      expectedPath: '/market',
+      sectionId: 'market',
+    },
+    {
+      navName: /Secondary navigation/i,
+      linkName: 'Brine dispatch',
+      expectedPath: '/newsletter',
+      sectionId: 'newsletter',
+    },
+    {
+      navName: /Utility navigation/i,
+      linkName: 'Partner portal',
+      expectedPath: '/partners',
+      sectionId: 'partner-hub',
+    },
+    {
+      navName: /Utility navigation/i,
+      linkName: 'Contact',
+      expectedPath: '/contact',
+      sectionId: 'contact',
+    },
+  ]
+
+  it.each(headerNavigationScenarios)(
+    ({ sectionId, linkName }) => `scrolls to the ${sectionId} section when clicking ${linkName} in the header`,
+    async ({ navName, linkName, expectedPath, sectionId }) => {
+      vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+
+      const pushStateSpy = vi.spyOn(window.history, 'pushState')
+
+      await renderApp()
+
+      const user = userEvent.setup()
+      const navigation = screen.getByRole('navigation', { name: navName })
+      const link = await within(navigation).findByRole('link', {
+        name: new RegExp(linkName, 'i'),
+      })
+
+      await user.click(link)
+
+      const lastPush = pushStateSpy.mock.calls.at(-1)
+      expect(lastPush?.[2]).toBe(expectedPath)
+
+      await waitFor(() => {
+        const lastScrollCall = scrollSpy.mock.calls.at(-1)
+        expect(lastScrollCall?.[0]).toHaveProperty('id', sectionId)
+      })
+
+      await waitFor(() => {
+        expect(link).toHaveAttribute('aria-current', 'page')
+      })
+
+      pushStateSpy.mockRestore()
+    },
+  )
+
   it('renders the shared footer and routes footer links through the navigation handler', async () => {
     vi.stubEnv('VITE_LOGOUT_URI', '/logout')
 
