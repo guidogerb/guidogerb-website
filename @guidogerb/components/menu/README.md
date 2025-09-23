@@ -47,6 +47,22 @@ export function PrimaryNav() {
 The component emits structural class names (e.g., `gg-navigation-menu__item`)
 so consuming apps can style the menu without overriding behavior.
 
+### Keyboard interactions
+
+`NavigationMenu` manages a roving `tabindex` so arrow keys can cycle focus without
+leaving the navigation landmark. Built-in behaviour includes:
+
+- **Horizontal menus** — `ArrowRight`/`ArrowLeft` move between top-level items,
+  while `ArrowDown` enters a child list when one exists.
+- **Vertical menus** — `ArrowDown`/`ArrowUp` move within the current list and
+  `ArrowRight` dives into nested menus.
+- **Nested menus** — `ArrowLeft` or `Escape` return focus to the parent trigger
+  without escaping the navigation region.
+- **Home/End** — Jump to the first or last item within the active list.
+
+Custom renderers should spread the provided `linkProps` onto the interactive
+element so these keyboard affordances remain intact.
+
 ## Theming with CSS custom properties
 
 Pair the menu with `@guidogerb/css/tokens.css` to gain access to custom
