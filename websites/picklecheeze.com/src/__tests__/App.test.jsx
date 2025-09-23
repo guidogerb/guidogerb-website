@@ -24,7 +24,8 @@ vi.mock('@guidogerb/components-auth', () => ({
 
 vi.mock('../App.css', () => ({}), { virtual: true })
 
-async function renderApp() {
+async function renderApp({ initialPath = '/' } = {}) {
+  window.history.replaceState({}, '', initialPath)
   const AppModule = await import('../App.jsx')
   const App = AppModule.default
   return render(<App />)
@@ -58,6 +59,8 @@ describe('PickleCheeze website App', () => {
         scrollSpy(this, ...args)
       }
     }
+
+    window.history.replaceState({}, '', '/')
   })
 
   afterEach(() => {
@@ -117,7 +120,8 @@ describe('PickleCheeze website App', () => {
 
     await user.click(fermentationLink)
 
-    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/fermentation')
+    const lastPush = pushStateSpy.mock.calls.at(-1)
+    expect(lastPush?.[2]).toBe('/fermentation')
 
     const lastScrollCall = scrollSpy.mock.calls.at(-1)
     expect(lastScrollCall?.[0]).toHaveProperty('id', 'fermentation')
@@ -148,10 +152,87 @@ describe('PickleCheeze website App', () => {
 
     await user.click(portalLink)
 
-    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/partners')
+    const footerPush = pushStateSpy.mock.calls.at(-1)
+    expect(footerPush?.[2]).toBe('/partners')
     const lastScrollCall = scrollSpy.mock.calls.at(-1)
     expect(lastScrollCall?.[0]).toHaveProperty('id', 'partner-hub')
 
     pushStateSpy.mockRestore()
+  })
+
+  it('displays the maintenance message when the maintenance route is visited', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+
+    await renderApp({ initialPath: '/maintenance' })
+
+    expect(
+      screen.getByRole('heading', {
+        level: 1,
+        name: 'Fermentation kitchen is curing updates',
+      }),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText('We’re refreshing partner resources and will be back online shortly.'),
+    ).toBeInTheDocument()
+
+    const actions = screen.getByRole('group', { name: /While you wait/i })
+    expect(within(actions).getByRole('link', { name: /Check back on the homepage/i })).toBeVisible()
+  })
+
+  it('surfaces a branded not-found page for unknown routes', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+
+    const user = userEvent.setup()
+
+    await renderApp({ initialPath: '/missing' })
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Jar not on this shelf' }),
+    ).toBeInTheDocument()
+
+    const supportLink = screen.getByRole('link', { name: 'Email the fermentation team' })
+    expect(supportLink).toHaveAttribute(
+      'href',
+      'mailto:partners@picklecheeze.com?subject=Portal%20support',
+    )
+
+    const homeLink = screen.getByRole('link', { name: 'Return to fermentation hub' })
+    await user.click(homeLink)
+
+    await screen.findByRole('heading', {
+      level: 1,
+      name: /PickleCheeze cultures vegetables and plant-based cheeze/i,
+    })
+  })
+
+  it('hides gated partner resources when feature flags are disabled', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+    vi.stubEnv('VITE_FLAG_PARTNER_INVENTORY', 'false')
+    vi.stubEnv('VITE_FLAG_PARTNER_CARE_GUIDE', 'false')
+    vi.stubEnv('VITE_FLAG_PARTNER_CONTACT_EMAIL', 'false')
+
+    await renderApp()
+
+    const partnerHeading = screen.getByRole('heading', { level: 2, name: 'Partner pantry' })
+    const partnerSection = partnerHeading.closest('section') ?? partnerHeading.parentElement
+
+    expect(partnerSection).toBeTruthy()
+
+    expect(
+      within(partnerSection).queryByRole('link', { name: /Download current cellar inventory/i }),
+    ).not.toBeInTheDocument()
+
+    expect(
+      within(partnerSection).queryByRole('link', { name: /Cheeze care & plating guide/i }),
+    ).not.toBeInTheDocument()
+
+    expect(
+      within(partnerSection).queryByRole('link', { name: 'Email the fermentation team' }),
+    ).not.toBeInTheDocument()
+
+    expect(
+      within(partnerSection).getByText(/New partner resources are curing/i),
+    ).toBeInTheDocument()
   })
 })
