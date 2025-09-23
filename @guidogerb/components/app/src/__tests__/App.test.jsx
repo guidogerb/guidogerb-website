@@ -1,7 +1,15 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
-import { AppBasic, useAppApiClient } from '../App.jsx'
+import {
+  APP_SHELL_LAYOUT_BLUEPRINT,
+  APP_SHELL_PROVIDER_BLUEPRINT,
+  APP_BASIC_TENANT_CONTROLS,
+  AppBasic,
+  createAppBasicPlan,
+  useAppApiClient,
+  useAppBasicPlan,
+} from '../App.jsx'
 
 const mocks = vi.hoisted(() => {
   return {
@@ -385,5 +393,108 @@ describe('AppBasic', () => {
     expect(storageProps.namespace).toBe('tenant.app')
     expect(storageProps.mode).toBe('session')
     expect(storageProps.persist).toBe(false)
+  })
+
+  it('provides the runtime plan through context', async () => {
+    function PlanProbe() {
+      const plan = useAppBasicPlan()
+      if (!plan) return null
+      return (
+        <div
+          data-testid="plan"
+          data-variant={plan.variant}
+          data-providers={plan.providerBlueprint.order.join(',')}
+        >
+          {plan.providers.auth.logoutUri}
+        </div>
+      )
+    }
+
+    render(
+      <AppBasic auth={{ postLogoutRedirectUri: 'https://tenant.example/logout' }}>
+        <PlanProbe />
+      </AppBasic>,
+    )
+
+    const planNode = await screen.findByTestId('plan')
+    expect(planNode).toHaveAttribute('data-variant', 'basic')
+    expect(planNode).toHaveAttribute('data-providers', 'storage,auth,header,ui')
+    expect(planNode).toHaveTextContent('https://tenant.example/logout')
+  })
+})
+
+describe('App shell blueprint', () => {
+  it('documents provider order and layout regions', () => {
+    expect(APP_SHELL_PROVIDER_BLUEPRINT.order).toEqual(['storage', 'auth', 'header', 'ui'])
+    expect(APP_SHELL_PROVIDER_BLUEPRINT.definitions.auth.package).toBe(
+      '@guidogerb/components-auth',
+    )
+    expect(APP_SHELL_LAYOUT_BLUEPRINT.regions.map((region) => region.id)).toEqual([
+      'header',
+      'main',
+      'footer',
+    ])
+    expect(APP_SHELL_LAYOUT_BLUEPRINT.regions[0]?.role).toBe('banner')
+  })
+})
+
+describe('createAppBasicPlan', () => {
+  it('produces defaults and tenant controls for the base variant', () => {
+    const plan = createAppBasicPlan()
+
+    expect(plan.variant).toBe('basic')
+    expect(plan.providers.storage.props.namespace).toBe('guidogerb.app')
+    expect(plan.providers.auth.logoutUri).toMatch(/\/auth\/logout$/)
+    expect(plan.defaults.auth.logoutUri).toMatch(/\/auth\/logout$/)
+    expect(plan.tenantControls).toBe(APP_BASIC_TENANT_CONTROLS)
+    expect(plan.layout.main.props.className).toBe('gg-app-basic__main')
+    expect(plan.router.routes.some((route) => route.path === '/')).toBe(true)
+  })
+
+  it('reflects tenant overrides inside the plan metadata', () => {
+    function Reports() {
+      return <div>Reports</div>
+    }
+
+    const plan = createAppBasicPlan({
+      navigation: {
+        items: [
+          { id: 'home', label: 'Home', href: '/' },
+          { id: 'account', label: 'Account', href: '/account' },
+        ],
+        activePath: '/account',
+        onNavigate: vi.fn(),
+      },
+      auth: {
+        clientId: 'tenant-client',
+        logoutUri: 'https://tenant.example/logout',
+      },
+      protectedPages: {
+        routes: [{ path: '/reports', Component: Reports }],
+        protectFallback: true,
+        routerOptions: { basename: '/app' },
+      },
+      serviceWorker: {
+        url: '/tenant/sw.js',
+        scope: '/tenant',
+      },
+      storage: {
+        namespace: 'tenant.app',
+        mode: 'session',
+      },
+      mainProps: {
+        className: 'tenant-main',
+      },
+    })
+
+    expect(plan.providers.auth.props.client_id).toBe('tenant-client')
+    expect(plan.providers.auth.logoutUri).toBe('https://tenant.example/logout')
+    expect(plan.router.routes.some((route) => route.path === '/reports')).toBe(true)
+    expect(plan.router.protectFallback).toBe(true)
+    expect(plan.router.passthroughProps.routerOptions?.basename).toBe('/app')
+    expect(plan.serviceWorker.url).toBe('/tenant/sw.js')
+    expect(plan.serviceWorker.options.scope).toBe('/tenant')
+    expect(plan.providers.storage.props.namespace).toBe('tenant.app')
+    expect(plan.layout.main.props.className).toContain('tenant-main')
   })
 })
