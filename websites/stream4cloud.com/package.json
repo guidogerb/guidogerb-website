@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@guidogerb/components-api": "workspace:*",
+    "@guidogerb/components-analytics": "workspace:*",
     "@guidogerb/components-auth": "workspace:*",
     "@guidogerb/components-menu": "workspace:*",
     "@guidogerb/components-pages-protected": "workspace:*",
