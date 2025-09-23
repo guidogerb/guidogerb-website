@@ -1,8 +1,44 @@
-import { useMemo } from 'react'
-import './App.css'
+import { useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { PublicRouter } from '@guidogerb/components-router-public'
+import { ErrorShell } from '@guidogerb/components-pages-public'
 import { useAuth } from '@guidogerb/components-auth'
 import Welcome from './website-components/welcome-page/index.jsx'
+import './App.css'
 import storyCircle from './assets/story-circle.svg'
+
+const COMMUNITY_HIGHLIGHTS = [
+  {
+    title: 'Story circles',
+    description:
+      'Weekly gatherings that pair facilitators with accessible prompts so every voice has room to unfold.',
+    bullets: [
+      'Neighborhood-hosted spaces with ASL interpretation and language access partners.',
+      'Childcare stipends, transit passes, and meals for every participant.',
+      'Audio engineers capturing archival-quality recordings that storytellers control.',
+    ],
+  },
+  {
+    title: 'Mobile oral history studio',
+    description:
+      'A traveling recording setup that visits libraries, shelters, and community centers across the region.',
+    bullets: [
+      'On-site coaching and release-form support for first-time storytellers.',
+      'Instant transcripts with large-print review copies for accessibility.',
+      'Secure cloud libraries with playlists that can be shared with families and partners.',
+    ],
+  },
+  {
+    title: 'Story coaching for organizers',
+    description:
+      'Workshops that equip mutual aid teams with narrative strategy and trauma-informed facilitation skills.',
+    bullets: [
+      'Collective care practices that center healing and informed consent.',
+      'Media kits, press outreach templates, and social copy to amplify calls to action.',
+      'Micro-grants that fund community showcases and pop-up listening sessions.',
+    ],
+  },
+]
 
 function StorytellerStudioSection({ auth }) {
   const teaser = (
@@ -64,9 +100,7 @@ function StorytellerStudioSection({ auth }) {
                 </a>
               </li>
               <li>
-                <a href="https://stories.this-is-my-story.org/pitch">
-                  Pitch your next episode idea
-                </a>
+                <a href="https://stories.this-is-my-story.org/pitch">Pitch your next episode idea</a>
               </li>
             </ul>
           </div>
@@ -75,9 +109,7 @@ function StorytellerStudioSection({ auth }) {
             <h3>Upcoming workshops</h3>
             <p>Members receive priority registration and travel support for every cohort.</p>
             <ul>
-              <li>
-                Story circle facilitation lab — February 12, hybrid with captioned livestream.
-              </li>
+              <li>Story circle facilitation lab — February 12, hybrid with captioned livestream.</li>
               <li>Mutual aid storytelling clinic — March 8, featuring neighborhood organizers.</li>
               <li>Digital archiving sprint — April 3, collaboration with the public library.</li>
             </ul>
@@ -90,44 +122,8 @@ function StorytellerStudioSection({ auth }) {
   return teaser
 }
 
-function App() {
+function LandingRoute() {
   const auth = useAuth()
-
-  const communityHighlights = useMemo(
-    () => [
-      {
-        title: 'Story circles',
-        description:
-          'Weekly gatherings that pair facilitators with accessible prompts so every voice has room to unfold.',
-        bullets: [
-          'Neighborhood-hosted spaces with ASL interpretation and language access partners.',
-          'Childcare stipends, transit passes, and meals for every participant.',
-          'Audio engineers capturing archival-quality recordings that storytellers control.',
-        ],
-      },
-      {
-        title: 'Mobile oral history studio',
-        description:
-          'A traveling recording setup that visits libraries, shelters, and community centers across the region.',
-        bullets: [
-          'On-site coaching and release-form support for first-time storytellers.',
-          'Instant transcripts with large-print review copies for accessibility.',
-          'Secure cloud libraries with playlists that can be shared with families and partners.',
-        ],
-      },
-      {
-        title: 'Story coaching for organizers',
-        description:
-          'Workshops that equip mutual aid teams with narrative strategy and trauma-informed facilitation skills.',
-        bullets: [
-          'Collective care practices that center healing and informed consent.',
-          'Media kits, press outreach templates, and social copy to amplify calls to action.',
-          'Micro-grants that fund community showcases and pop-up listening sessions.',
-        ],
-      },
-    ],
-    [],
-  )
 
   return (
     <div className="story-app">
@@ -153,7 +149,7 @@ function App() {
         <section className="programs" id="programs">
           <h2>Community storytelling programs</h2>
           <div className="programs-grid" role="list">
-            {communityHighlights.map((highlight) => (
+            {COMMUNITY_HIGHLIGHTS.map((highlight) => (
               <article key={highlight.title} className="program-card" role="listitem">
                 <h3>{highlight.title}</h3>
                 <p>{highlight.description}</p>
@@ -197,6 +193,89 @@ function App() {
         </section>
       </main>
     </div>
+  )
+}
+
+function useNavigateHome() {
+  const navigate = useNavigate()
+  return useCallback(
+    (event) => {
+      if (event?.preventDefault) {
+        event.preventDefault()
+      }
+      navigate('/')
+    },
+    [navigate],
+  )
+}
+
+function NotFoundRoute() {
+  const navigateHome = useNavigateHome()
+
+  return (
+    <ErrorShell
+      className="story-error-shell"
+      statusCode={404}
+      statusLabel="HTTP status code"
+      title="Story not found in the archive"
+      description="We couldn’t locate that page in the storytelling library."
+      actionsLabel="Try these options"
+      actions={[
+        { label: 'Return to storyteller hub', href: '/', variant: 'primary', onClick: navigateHome },
+        {
+          label: 'Email the community team',
+          href: 'mailto:care@this-is-my-story.org?subject=Storyteller%20portal%20support',
+        },
+      ]}
+    >
+      <p>
+        Double-check the link or head back to the storyteller hub to explore featured programs, studio
+        resources, and ways to collaborate with our mutual aid partners.
+      </p>
+    </ErrorShell>
+  )
+}
+
+function MaintenanceRoute() {
+  const navigateHome = useNavigateHome()
+
+  return (
+    <ErrorShell
+      className="story-error-shell"
+      statusCode={503}
+      statusLabel="Service status"
+      title="Storyteller studio is preparing updates"
+      description="We’re refreshing portal resources and will reopen the studio shortly."
+      actionsLabel="While you wait"
+      actions={[
+        { label: 'Return to storyteller hub', href: '/', variant: 'primary', onClick: navigateHome },
+        {
+          label: 'Request a community update',
+          href: 'mailto:care@this-is-my-story.org?subject=Community%20storytelling%20updates',
+        },
+      ]}
+    >
+      <p>
+        Reach out if you need accessibility resources or recording support while we finish this release. Our team
+        will send fresh timelines and workshop invitations as soon as the studio doors open again.
+      </p>
+    </ErrorShell>
+  )
+}
+
+const routes = [
+  { path: '/', element: <LandingRoute /> },
+  { path: '/maintenance', element: <MaintenanceRoute /> },
+]
+
+function App({ router, routerOptions }) {
+  return (
+    <PublicRouter
+      routes={routes}
+      fallback={<NotFoundRoute />}
+      router={router}
+      routerOptions={routerOptions}
+    />
   )
 }
 

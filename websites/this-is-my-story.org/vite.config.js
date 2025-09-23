@@ -81,20 +81,25 @@ export default ({ mode }) => {
     }
   }
 
-  return defineConfig({
-    logLevel: 'silent',
-    resolve: {
-      conditions: [mode],
-    },
-    plugins: [
-      react(),
+  const plugins = [react()]
+
+  if (mode !== 'test') {
+    plugins.push(
       mkcert({
         force: true,
         hosts: [localHost, wildcardLocalHost, ip],
       }),
       restrictHosts(allowedHosts),
       printPreviewUrls(),
-    ],
+    )
+  }
+
+  return defineConfig({
+    logLevel: 'silent',
+    resolve: {
+      conditions: [mode],
+    },
+    plugins,
     base: env.VITE_BASE_PATH || '/',
     server: {
       https: true,
