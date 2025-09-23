@@ -152,6 +152,16 @@ describe('Stream4Cloud marketing app', () => {
       screen.getByRole('heading', { level: 2, name: /partner success hub preview/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /partner hub/i })).toHaveAttribute('href', '#partner')
+    expect(
+      screen.getByRole('heading', { level: 2, name: /broadcast partner outcomes/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Plan your next premiere' })).toHaveAttribute(
+      'href',
+      'https://stream4cloud.com/launch',
+    )
+    expect(
+      screen.getByRole('heading', { level: 3, name: /signal uptime commitments/i }),
+    ).toBeInTheDocument()
   })
 
   it('serves an offline landing route with reconnect guidance', async () => {

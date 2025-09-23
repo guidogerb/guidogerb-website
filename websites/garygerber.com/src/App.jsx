@@ -7,6 +7,7 @@ import headerSettings from './headerSettings.js'
 import footerSettings from './footerSettings.js'
 import rehearsalResources from './rehearsalResources.js'
 import RehearsalResourcesLanding from './RehearsalResourcesLanding.jsx'
+import RehearsalPortalNavigation from './RehearsalPortalNavigation.jsx'
 import NotFound from './NotFound.jsx'
 import {
   ProgramsHeroSection,
@@ -18,21 +19,20 @@ import {
   Welcome,
 } from '@guidogerb/components-ui'
 
-const SECTION_MAP = {
-  '/': 'top',
-  '/programs': 'programs',
-  '/consulting': 'consulting',
-  '/about': 'about',
-  '/recordings': 'recordings',
-  '/education': 'education',
-  '/press': 'press',
-  '/newsletter': 'newsletter',
-  '/contact': 'contact',
-  '/rehearsal': 'client-access',
-  '/rehearsal/resources': 'client-access',
+const ROUTES = {
+  '/': { view: 'marketing', sectionId: 'top' },
+  '/programs': { view: 'marketing', sectionId: 'programs' },
+  '/consulting': { view: 'marketing', sectionId: 'consulting' },
+  '/about': { view: 'marketing', sectionId: 'about' },
+  '/recordings': { view: 'marketing', sectionId: 'recordings' },
+  '/education': { view: 'marketing', sectionId: 'education' },
+  '/press': { view: 'marketing', sectionId: 'press' },
+  '/newsletter': { view: 'marketing', sectionId: 'newsletter' },
+  '/contact': { view: 'marketing', sectionId: 'contact' },
+  '/auth/callback': { view: 'marketing' },
+  '/rehearsal': { view: 'rehearsal-overview', sectionId: 'client-access' },
+  '/rehearsal/resources': { view: 'rehearsal-resources', sectionId: 'client-access' },
 }
-
-const AUXILIARY_PATHS = new Set(['/auth/callback'])
 
 const getInitialPath = () => {
   if (typeof window === 'undefined') return '/'
@@ -57,9 +57,17 @@ const normalizePath = (value) => {
 
 const resolveRoute = (pathname) => {
   const normalized = normalizePath(pathname)
-  const sectionId = SECTION_MAP[normalized]
-  const isKnown = Boolean(sectionId) || AUXILIARY_PATHS.has(normalized)
-  return { path: normalized, sectionId, isKnown }
+  const config = ROUTES[normalized]
+  if (config) {
+    return {
+      path: normalized,
+      view: config.view,
+      sectionId: config.sectionId,
+      isKnown: true,
+    }
+  }
+
+  return { path: normalized, view: 'not-found', sectionId: undefined, isKnown: false }
 }
 
 function useRouteState() {
@@ -116,7 +124,7 @@ function App() {
 
         const targetPath = normalizePath(url.pathname || '/')
         const sectionId =
-          SECTION_MAP[targetPath] || (url.hash ? url.hash.replace('#', '') : undefined)
+          ROUTES[targetPath]?.sectionId || (url.hash ? url.hash.replace('#', '') : undefined)
 
         if (!sectionId) {
           window.location.assign(url.href)
@@ -146,28 +154,90 @@ function App() {
     [navigateToRoute],
   )
 
+  const handlePortalNavigate = useCallback(
+    (event, targetPath) => {
+      if (event) {
+        event.preventDefault()
+      }
+
+      if (!targetPath || typeof window === 'undefined') return
+
+      window.history.pushState({}, '', targetPath)
+      navigateToRoute(targetPath)
+    },
+    [navigateToRoute],
+  )
+
+  let mainContent
+
+  if (!route.isKnown) {
+    mainContent = (
+      <NotFound onNavigateHome={handleNotFoundNavigate} resources={rehearsalResources} />
+    )
+  } else if (route.view === 'rehearsal-overview') {
+    mainContent = (
+      <section className="rehearsal-portal" aria-labelledby="rehearsal-portal-title">
+        <header className="rehearsal-portal__intro">
+          <p className="rehearsal-portal__eyebrow">Collaborator portal</p>
+          <h2 id="rehearsal-portal-title">Plan the residency with the production team</h2>
+          <p>
+            Sign in to coordinate stage plots, download hospitality notes, and review the next call
+            times with Gary’s production crew. Use the quick links below to dive into the resource
+            library or reach the team directly.
+          </p>
+        </header>
+        <RehearsalRoomSection logoutUri={import.meta.env.VITE_LOGOUT_URI}>
+          <Welcome rehearsalResources={rehearsalResources} useAuthHook={useAuth}>
+            <RehearsalPortalNavigation
+              onNavigate={handlePortalNavigate}
+              resources={rehearsalResources}
+            />
+          </Welcome>
+        </RehearsalRoomSection>
+      </section>
+    )
+  } else if (route.view === 'rehearsal-resources') {
+    mainContent = (
+      <section className="rehearsal-portal" aria-labelledby="rehearsal-resources-title">
+        <header className="rehearsal-portal__intro">
+          <p className="rehearsal-portal__eyebrow">Rehearsal library</p>
+          <h2 id="rehearsal-resources-title">Upcoming call times &amp; download vault</h2>
+          <p>
+            Download the latest production assets, confirm call times, and subscribe to the shared
+            calendar so every residency stays in sync.
+          </p>
+        </header>
+        <RehearsalRoomSection logoutUri={import.meta.env.VITE_LOGOUT_URI}>
+          <Welcome rehearsalResources={rehearsalResources} useAuthHook={useAuth}>
+            <RehearsalResourcesLanding resources={rehearsalResources} />
+          </Welcome>
+        </RehearsalRoomSection>
+      </section>
+    )
+  } else {
+    mainContent = (
+      <>
+        <ProgramsHeroSection />
+        <ConsultingSection />
+        <RecordingsEducationSection />
+        <AboutPressSection />
+        <NewsletterSignupSection />
+        <RehearsalRoomSection logoutUri={import.meta.env.VITE_LOGOUT_URI}>
+          <Welcome rehearsalResources={rehearsalResources} useAuthHook={useAuth}>
+            <RehearsalResourcesLanding resources={rehearsalResources} />
+          </Welcome>
+        </RehearsalRoomSection>
+      </>
+    )
+  }
+
   return (
     <HeaderContextProvider defaultSettings={headerSettings}>
       <div className="app-shell" id="top">
         <Header activePath={route.path} onNavigate={handleNavigate} />
 
         <main className="app-main">
-          {route.isKnown ? (
-            <>
-              <ProgramsHeroSection />
-              <ConsultingSection />
-              <RecordingsEducationSection />
-              <AboutPressSection />
-              <NewsletterSignupSection />
-              <RehearsalRoomSection logoutUri={import.meta.env.VITE_LOGOUT_URI}>
-                <Welcome rehearsalResources={rehearsalResources} useAuthHook={useAuth}>
-                  <RehearsalResourcesLanding resources={rehearsalResources} />
-                </Welcome>
-              </RehearsalRoomSection>
-            </>
-          ) : (
-            <NotFound onNavigateHome={handleNotFoundNavigate} resources={rehearsalResources} />
-          )}
+          {mainContent}
         </main>
 
         <Footer {...footerSettings} onNavigate={handleNavigate} id="contact">

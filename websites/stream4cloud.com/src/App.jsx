@@ -68,6 +68,54 @@ const partnerSignals = [
   },
 ]
 
+const broadcasterOutcomes = [
+  {
+    title: 'Expedite launch windows',
+    description:
+      'Templatized runbooks align ticketing, marketing, and production so international premieres go live on schedule.',
+    cta: { label: 'Plan your next premiere', href: 'https://stream4cloud.com/launch' },
+  },
+  {
+    title: 'Grow monetization velocity',
+    description:
+      'Bundle SSAI policies, sponsorship takeovers, and paywall tiers while analytics surface conversion pivots in real time.',
+    cta: { label: 'Explore revenue playbooks', href: 'https://stream4cloud.com/monetization' },
+  },
+  {
+    title: 'Protect show-day confidence',
+    description:
+      'Integrated rehearsal sandboxes, telemetry alerts, and escalation protocols keep every broadcast calm and measurable.',
+    cta: { label: 'Schedule a readiness review', href: 'https://calendly.com/stream4cloud/readiness' },
+  },
+]
+
+const operationsPillars = [
+  {
+    title: 'Signal uptime commitments',
+    bullets: [
+      'Active-active ingest orchestrated across AWS Regions with automatic failover.',
+      'Edge health scoring reroutes viewers before QoE dips below broadcast thresholds.',
+      'Live incident dashboards keep production, ad ops, and partners aligned in minutes.',
+    ],
+  },
+  {
+    title: 'Automated broadcast logistics',
+    bullets: [
+      'Rehearsal staging provisions encoders, captions, and ad markers in a single click.',
+      'Calendar sync keeps talent, sponsorships, and marketing launches coordinated.',
+      'Role-based workflows ensure approvals and notifications never block go-live.',
+    ],
+  },
+  {
+    title: 'Audience trust and compliance',
+    bullets: [
+      'WCAG AA viewer experience with multilingual captions and keyboard parity.',
+      'GDPR tooling, KMS encryption, and PCI SAQ-A boundaries for procurement reviews.',
+      'Audit-ready logs stream into your SIEM or data lake with zero manual exports.',
+    ],
+  },
+]
+
 const routes = [
   { path: '/', element: <LandingRoute /> },
   { path: '/offline', element: <OfflineRoute /> },
@@ -144,6 +192,49 @@ function LandingRoute() {
             <article key={heading}>
               <h3>{heading}</h3>
               <p>{copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="broadcaster-outcomes" aria-labelledby="stream4cloud-outcomes">
+        <div className="broadcaster-outcomes__intro">
+          <h2 id="stream4cloud-outcomes">Broadcast partner outcomes</h2>
+          <p>
+            Stream orchestration, monetization, and partner success operate as one playbook so your
+            control room can focus on the story instead of stitching together tools.
+          </p>
+        </div>
+        <div className="broadcaster-outcomes__grid">
+          {broadcasterOutcomes.map(({ title, description, cta }) => (
+            <article key={title}>
+              <h3>{title}</h3>
+              <p>{description}</p>
+              <a className="broadcaster-outcomes__cta" href={cta.href}>
+                {cta.label}
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="operations" aria-labelledby="stream4cloud-operations">
+        <div className="operations__intro">
+          <h2 id="stream4cloud-operations">Operational guardrails engineered for broadcast</h2>
+          <p>
+            Automation and telemetry keep your team ahead of spikes in demand, ad inventory shifts,
+            or venue connectivity surprises.
+          </p>
+        </div>
+        <div className="operations__grid">
+          {operationsPillars.map(({ title, bullets }) => (
+            <article key={title}>
+              <h3>{title}</h3>
+              <ul>
+                {bullets.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
+                ))}
+              </ul>
             </article>
           ))}
         </div>
