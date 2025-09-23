@@ -104,9 +104,7 @@ describe('Gary Gerber website App', () => {
       }),
     ).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' })).toBeInTheDocument()
-    expect(
-      screen.getByText('Tech rehearsal — Northern Lights residency'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Tech rehearsal — Northern Lights residency')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Open full calendar' })).toHaveAttribute(
       'href',
       'https://calendar.google.com/calendar/u/0?cid=Z2FyeWdlcmJlci5jb21fcmVoZWFyc2Fsc0BleGFtcGxlLmNvbQ',

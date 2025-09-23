@@ -27,14 +27,12 @@ const INTEGRATION_GUIDES = [
   {
     href: 'https://support.stream4cloud.com/integrations/encoders',
     label: 'Encoder integration quick-start',
-    description:
-      'Step-by-step profiles for LiveU, OBS, AWS Elemental, and hardware switchers.',
+    description: 'Step-by-step profiles for LiveU, OBS, AWS Elemental, and hardware switchers.',
   },
   {
     href: 'https://support.stream4cloud.com/integrations/crm-to-stream',
     label: 'CRM to stream automation',
-    description:
-      'Automate talent scheduling, metadata sync, and entitlement provisioning.',
+    description: 'Automate talent scheduling, metadata sync, and entitlement provisioning.',
   },
   {
     href: 'https://support.stream4cloud.com/integrations/analytics',
@@ -48,8 +46,7 @@ const SUPPORT_CONTACTS = [
   {
     href: 'mailto:success@stream4cloud.com',
     label: 'Partner success desk',
-    description:
-      'Email for run-of-show reviews, rehearsal staging, and SLA alignment questions.',
+    description: 'Email for run-of-show reviews, rehearsal staging, and SLA alignment questions.',
   },
   {
     href: 'tel:+18005550135',
@@ -71,8 +68,7 @@ export default function Welcome({ children }) {
   const analytics = useAnalytics()
   const isAuthenticated = Boolean(auth?.isAuthenticated)
   const profile = auth?.user?.profile ?? {}
-  const collaboratorName =
-    profile?.['cognito:username'] ?? profile?.name ?? 'userNotAvailable'
+  const collaboratorName = profile?.['cognito:username'] ?? profile?.name ?? 'userNotAvailable'
 
   useEffect(() => {
     if (!isAuthenticated) return

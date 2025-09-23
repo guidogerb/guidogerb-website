@@ -58,9 +58,7 @@ export function getPartnerResourceLinks(features = {}, env = import.meta.env) {
   const source = env ?? {}
 
   return RESOURCE_DEFINITIONS.reduce((links, definition) => {
-    const isEnabled = definition.featureFlag
-      ? features?.[definition.featureFlag] ?? true
-      : true
+    const isEnabled = definition.featureFlag ? (features?.[definition.featureFlag] ?? true) : true
 
     if (!isEnabled) {
       return links

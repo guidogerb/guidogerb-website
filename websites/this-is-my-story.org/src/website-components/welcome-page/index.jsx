@@ -10,11 +10,13 @@ const STORY_PROMPTS = [
   },
   {
     title: 'Celebrate a supporting voice',
-    description: 'Share a quote from someone who encouraged you this week and how it shaped your next steps.',
+    description:
+      'Share a quote from someone who encouraged you this week and how it shaped your next steps.',
   },
   {
     title: 'Mark a turning point',
-    description: 'Capture the moment something shifted—what you felt before, during, and after the change.',
+    description:
+      'Capture the moment something shifted—what you felt before, during, and after the change.',
   },
 ]
 
@@ -47,7 +49,8 @@ const CARE_TEAM_CONNECTIONS = [
   {
     href: 'https://calendly.com/this-is-my-story/story-coach',
     label: 'Book a coaching session',
-    description: 'Meet with a story coach to outline interviews, structure scenes, or plan recordings.',
+    description:
+      'Meet with a story coach to outline interviews, structure scenes, or plan recordings.',
   },
   {
     href: 'tel:+18005551234',
@@ -64,8 +67,7 @@ export default function Welcome({ children }) {
   const lastLoggedPayloadRef = useRef(null)
 
   const profile = auth?.user?.profile ?? {}
-  const storytellerName =
-    profile?.['cognito:username'] ?? profile?.name ?? 'storyteller'
+  const storytellerName = profile?.['cognito:username'] ?? profile?.name ?? 'storyteller'
   const isAuthenticated = Boolean(auth?.isAuthenticated)
 
   useEffect(() => {
@@ -105,8 +107,8 @@ export default function Welcome({ children }) {
       <header>
         <h3 id="this-is-my-story-welcome-heading">Welcome {name}</h3>
         <p>
-          The storyteller studio is ready whenever inspiration strikes. Capture fresh memories, document
-          your voice, and share the milestones your community is waiting to celebrate.
+          The storyteller studio is ready whenever inspiration strikes. Capture fresh memories,
+          document your voice, and share the milestones your community is waiting to celebrate.
         </p>
       </header>
 

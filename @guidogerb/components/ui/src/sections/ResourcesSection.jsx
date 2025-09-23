@@ -54,7 +54,10 @@ const sanitizeColumn = (column, fallback = {}) => {
     .map((candidate) => (isNonEmptyString(candidate) ? candidate.trim() : null))
     .find(Boolean)
 
-  const features = sanitizeFeatures(column.features ?? column.bullets ?? column.items, fallback.features)
+  const features = sanitizeFeatures(
+    column.features ?? column.bullets ?? column.items,
+    fallback.features,
+  )
 
   return {
     title: title ?? fallback.title,

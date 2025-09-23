@@ -66,7 +66,10 @@ describe('GGP.llc welcome component', () => {
     const filingsLinks = within(filingsHeading.closest('section')).getAllByRole('link')
     expect(filingsLinks[0]).toHaveAttribute('href', 'https://compliance.ggp.llc/filings/calendar')
     expect(filingsLinks[0]).toHaveTextContent('Review filing calendar')
-    expect(filingsLinks[1]).toHaveAttribute('href', 'https://compliance.ggp.llc/forms/annual-report')
+    expect(filingsLinks[1]).toHaveAttribute(
+      'href',
+      'https://compliance.ggp.llc/forms/annual-report',
+    )
     expect(filingsLinks[1]).toHaveTextContent('Submit annual compliance report')
     expect(filingsLinks[2]).toHaveAttribute(
       'href',
@@ -79,7 +82,10 @@ describe('GGP.llc welcome component', () => {
     const licensingLinks = within(licensingHeading.closest('section')).getAllByRole('link')
     expect(licensingLinks[0]).toHaveAttribute('href', 'https://portal.ggp.llc/licensing/dashboard')
     expect(licensingLinks[0]).toHaveTextContent('Open licensing cases')
-    expect(licensingLinks[1]).toHaveAttribute('href', 'https://portal.ggp.llc/licensing/escalations')
+    expect(licensingLinks[1]).toHaveAttribute(
+      'href',
+      'https://portal.ggp.llc/licensing/escalations',
+    )
     expect(licensingLinks[2]).toHaveAttribute('href', 'https://portal.ggp.llc/licensing/renewals')
 
     const aiHeading = screen.getByRole('heading', { level: 4, name: 'AI assistance & training' })

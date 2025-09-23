@@ -71,7 +71,7 @@ beforeAll(() => {
 
   class RequestShim {
     constructor(resource, init = {}) {
-      this.url = typeof resource === 'string' ? resource : resource?.url ?? ''
+      this.url = typeof resource === 'string' ? resource : (resource?.url ?? '')
       this.method = init.method ?? 'GET'
       this.signal = init.signal ?? null
       if (init.headers) {
@@ -124,17 +124,20 @@ describe('Stream4Cloud marketing app', () => {
       }),
     ).toBeInTheDocument()
 
-    expect(
-      screen.getByRole('link', { name: /book a control room tour/i }),
-    ).toHaveAttribute('href', expect.stringContaining('calendly.com/stream4cloud'))
+    expect(screen.getByRole('link', { name: /book a control room tour/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('calendly.com/stream4cloud'),
+    )
 
     expect(screen.getByText('Global PoPs')).toBeInTheDocument()
     expect(screen.getByText(/zero-touch ad breaks/i)).toBeInTheDocument()
 
-    const workflow = screen.getByRole('heading', {
-      level: 2,
-      name: /broadcast workflow built for teams/i,
-    }).closest('section')
+    const workflow = screen
+      .getByRole('heading', {
+        level: 2,
+        name: /broadcast workflow built for teams/i,
+      })
+      .closest('section')
 
     expect(workflow).not.toBeNull()
     const workflowQueries = within(workflow ?? document.body)
@@ -155,7 +158,10 @@ describe('Stream4Cloud marketing app', () => {
     await renderApp(['/offline'])
 
     expect(screen.getByRole('heading', { level: 1, name: /you.?re offline/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /return to stream4cloud home/i })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: /return to stream4cloud home/i })).toHaveAttribute(
+      'href',
+      '/',
+    )
   })
 
   it('links to the offline help center from the generated fallback', async () => {

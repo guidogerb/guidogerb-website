@@ -14,10 +14,7 @@ import {
 import './App.css'
 import headerSettings from './headerSettings.js'
 import footerSettings from './footerSettings.js'
-import {
-  fetchMarketingContent,
-  getDefaultMarketingContent,
-} from './marketingContent.js'
+import { fetchMarketingContent, getDefaultMarketingContent } from './marketingContent.js'
 import Welcome from './website-components/welcome-page/index.jsx'
 
 const SECTION_MAP = {
@@ -96,9 +93,9 @@ function SiteLayout({ activePath, onNavigate, children }) {
         <div className="footer-contact">
           <h2>Work with GuidoGerb Publishing</h2>
           <p>
-            Email <a href="mailto:hello@guidogerbpublishing.com">hello@guidogerbpublishing.com</a> or call{' '}
-            <a href="tel:+12125559876">+1 (212) 555-9876</a> to discuss catalog development, distribution, or rights
-            management partnerships.
+            Email <a href="mailto:hello@guidogerbpublishing.com">hello@guidogerbpublishing.com</a>{' '}
+            or call <a href="tel:+12125559876">+1 (212) 555-9876</a> to discuss catalog development,
+            distribution, or rights management partnerships.
           </p>
           <p>Headquarters in New York with a distributed production and licensing team.</p>
         </div>
@@ -214,7 +211,13 @@ function AppRouter() {
     <Routes>
       <Route
         path="/partner-portal"
-        element={<PartnerPortalPage activePath={activePath} onNavigate={handleNavigate} logoutUri={logoutUri} />}
+        element={
+          <PartnerPortalPage
+            activePath={activePath}
+            onNavigate={handleNavigate}
+            logoutUri={logoutUri}
+          />
+        }
       />
       <Route
         path="/*"

@@ -92,7 +92,8 @@ const sanitizeArticles = (articles, fallback) => {
       }
 
       const title = pickString(article.title, article.heading) ?? base.title
-      const description = pickString(article.description, article.copy, article.body) ?? base.description
+      const description =
+        pickString(article.description, article.copy, article.body) ?? base.description
       const featuresSource = article.features ?? article.bullets ?? article.items
 
       const features = Array.isArray(featuresSource)
@@ -104,7 +105,8 @@ const sanitizeArticles = (articles, fallback) => {
       return {
         title,
         description,
-        features: features.length > 0 ? features : Array.isArray(base.features) ? [...base.features] : [],
+        features:
+          features.length > 0 ? features : Array.isArray(base.features) ? [...base.features] : [],
       }
     })
     .filter(
@@ -124,15 +126,27 @@ const sanitizeNewsletter = (newsletter, fallback) => {
 
   return {
     title: pickString(newsletter.title, newsletter.heading) ?? fallback.title,
-    description: pickString(newsletter.description, newsletter.copy, newsletter.body) ?? fallback.description,
-    formLabel: pickString(newsletter.formLabel, newsletter['form_label'], newsletter.formTitle) ?? fallback.formLabel,
-    buttonLabel: pickString(newsletter.buttonLabel, newsletter.ctaLabel, newsletter.cta?.label) ?? fallback.buttonLabel,
+    description:
+      pickString(newsletter.description, newsletter.copy, newsletter.body) ?? fallback.description,
+    formLabel:
+      pickString(newsletter.formLabel, newsletter['form_label'], newsletter.formTitle) ??
+      fallback.formLabel,
+    buttonLabel:
+      pickString(newsletter.buttonLabel, newsletter.ctaLabel, newsletter.cta?.label) ??
+      fallback.buttonLabel,
     placeholder:
-      pickString(newsletter.placeholder, newsletter.inputPlaceholder, newsletter.input?.placeholder) ??
-      fallback.placeholder,
+      pickString(
+        newsletter.placeholder,
+        newsletter.inputPlaceholder,
+        newsletter.input?.placeholder,
+      ) ?? fallback.placeholder,
     inputLabel:
-      pickString(newsletter.inputLabel, newsletter['input_label'], newsletter.input?.label, newsletter.label) ??
-      fallback.inputLabel,
+      pickString(
+        newsletter.inputLabel,
+        newsletter['input_label'],
+        newsletter.input?.label,
+        newsletter.label,
+      ) ?? fallback.inputLabel,
   }
 }
 
@@ -156,11 +170,18 @@ export const normalizeMarketingContent = (content) => {
     hero: {
       eyebrow: pickString(heroSource.eyebrow, heroSource.tagline) ?? fallback.hero.eyebrow,
       title: pickString(heroSource.title, heroSource.heading) ?? fallback.hero.title,
-      lede: pickString(heroSource.lede, heroSource.description, heroSource.copy) ?? fallback.hero.lede,
+      lede:
+        pickString(heroSource.lede, heroSource.description, heroSource.copy) ?? fallback.hero.lede,
       highlightsLabel:
-        pickString(heroSource.highlightsLabel, heroSource['highlights_label'], heroSource.metricsLabel) ??
-        fallback.hero.highlightsLabel,
-      highlights: sanitizeHighlights(heroSource.highlights ?? heroSource.metrics, fallback.hero.highlights),
+        pickString(
+          heroSource.highlightsLabel,
+          heroSource['highlights_label'],
+          heroSource.metricsLabel,
+        ) ?? fallback.hero.highlightsLabel,
+      highlights: sanitizeHighlights(
+        heroSource.highlights ?? heroSource.metrics,
+        fallback.hero.highlights,
+      ),
     },
     platform: sanitizeArticles(source.platform ?? source.platformSections, fallback.platform),
     distribution: sanitizeArticles(source.distribution, fallback.distribution),
@@ -176,7 +197,11 @@ export const buildMarketingContentUrl = (baseUrl) => {
   return `${trimmed}${MARKETING_CONTENT_ENDPOINT}`
 }
 
-export const fetchMarketingContent = async ({ baseUrl, fetchImpl = globalThis.fetch, signal } = {}) => {
+export const fetchMarketingContent = async ({
+  baseUrl,
+  fetchImpl = globalThis.fetch,
+  signal,
+} = {}) => {
   const url = buildMarketingContentUrl(baseUrl)
   if (!url || typeof fetchImpl !== 'function') {
     return getDefaultMarketingContent()

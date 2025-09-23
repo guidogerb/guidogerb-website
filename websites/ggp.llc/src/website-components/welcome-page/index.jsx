@@ -75,7 +75,10 @@ export default function Welcome({ children }) {
 
   const profile = auth?.user?.profile ?? {}
   const name =
-    profile.name ?? profile['cognito:username'] ?? profile.preferred_username ?? DEFAULT_COLLABORATOR_NAME
+    profile.name ??
+    profile['cognito:username'] ??
+    profile.preferred_username ??
+    DEFAULT_COLLABORATOR_NAME
   const email = profile.email
   const agency = profile['custom:agencyName']
 
@@ -88,8 +91,8 @@ export default function Welcome({ children }) {
       </header>
 
       <p className="ggp-welcome__intro">
-        Review licensing pipelines, collaborate on compliance responses, and surface AI guidance to keep
-        multi-state filings on track.
+        Review licensing pipelines, collaborate on compliance responses, and surface AI guidance to
+        keep multi-state filings on track.
       </p>
 
       <div className="ggp-welcome__sections">

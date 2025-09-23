@@ -45,13 +45,18 @@ function StorytellerStudioSection({ auth }) {
     <div className="studio-teaser" aria-labelledby="studio-teaser-heading">
       <h3 id="studio-teaser-heading">Join the storyteller studio</h3>
       <p>
-        Sign in to reserve recording time, collaborate with producers, and publish new stories into the
-        community archive.
+        Sign in to reserve recording time, collaborate with producers, and publish new stories into
+        the community archive.
       </p>
       <ul>
         <li>Downloadable interview roadmaps and caption templates for every story format.</li>
-        <li>Quarterly critique circles with guest editors, ASL interpreters, and accessibility coaches.</li>
-        <li>Mutual aid micro-grants that cover childcare, transit, and assistive technology needs.</li>
+        <li>
+          Quarterly critique circles with guest editors, ASL interpreters, and accessibility
+          coaches.
+        </li>
+        <li>
+          Mutual aid micro-grants that cover childcare, transit, and assistive technology needs.
+        </li>
       </ul>
       <a className="studio-signin" href="/auth/sign-in">
         Sign in to share your story
@@ -100,7 +105,9 @@ function StorytellerStudioSection({ auth }) {
                 </a>
               </li>
               <li>
-                <a href="https://stories.this-is-my-story.org/pitch">Pitch your next episode idea</a>
+                <a href="https://stories.this-is-my-story.org/pitch">
+                  Pitch your next episode idea
+                </a>
               </li>
             </ul>
           </div>
@@ -109,7 +116,9 @@ function StorytellerStudioSection({ auth }) {
             <h3>Upcoming workshops</h3>
             <p>Members receive priority registration and travel support for every cohort.</p>
             <ul>
-              <li>Story circle facilitation lab — February 12, hybrid with captioned livestream.</li>
+              <li>
+                Story circle facilitation lab — February 12, hybrid with captioned livestream.
+              </li>
               <li>Mutual aid storytelling clinic — March 8, featuring neighborhood organizers.</li>
               <li>Digital archiving sprint — April 3, collaboration with the public library.</li>
             </ul>
@@ -131,9 +140,9 @@ function LandingRoute() {
         <p className="hero-eyebrow">Community Storytelling Cooperative</p>
         <h1>Amplify the voices shaping our neighborhoods</h1>
         <p className="hero-lede">
-          We partner with grassroots organizers, mutual aid teams, and youth media labs to document lived
-          experiences. Every story is captured with consent, archived responsibly, and delivered back to the
-          communities that created it.
+          We partner with grassroots organizers, mutual aid teams, and youth media labs to document
+          lived experiences. Every story is captured with consent, archived responsibly, and
+          delivered back to the communities that created it.
         </p>
         <div className="hero-cta">
           <a className="hero-cta-primary" href="#programs">
@@ -167,17 +176,22 @@ function LandingRoute() {
           <div className="highlight-text">
             <h2 id="highlight-heading">Stories that travel further</h2>
             <p>
-              Our digital studio pairs storytellers with editors, illustrators, and audio producers. Together we
-              craft immersive pieces that honor the storyteller and equip partners to take action.
+              Our digital studio pairs storytellers with editors, illustrators, and audio producers.
+              Together we craft immersive pieces that honor the storyteller and equip partners to
+              take action.
             </p>
             <p>
-              Every project receives an accessibility review and descriptive metadata so archives stay searchable
-              for generations. We share the final stories through community radio, pop-up galleries, and partner
-              newsletters.
+              Every project receives an accessibility review and descriptive metadata so archives
+              stay searchable for generations. We share the final stories through community radio,
+              pop-up galleries, and partner newsletters.
             </p>
           </div>
           <figure className="highlight-figure">
-            <img src={storyCircle} alt="Collage of storytellers sharing their experiences" loading="lazy" />
+            <img
+              src={storyCircle}
+              alt="Collage of storytellers sharing their experiences"
+              loading="lazy"
+            />
           </figure>
         </section>
 
@@ -185,8 +199,9 @@ function LandingRoute() {
           <div className="studio-header">
             <h2>Storyteller studio</h2>
             <p>
-              Members collaborate with producers to turn lived experiences into episodes, zines, and interactive
-              archives. Studio membership is free for community organizers, caregivers, and youth reporters.
+              Members collaborate with producers to turn lived experiences into episodes, zines, and
+              interactive archives. Studio membership is free for community organizers, caregivers,
+              and youth reporters.
             </p>
           </div>
           <StorytellerStudioSection auth={auth} />
@@ -221,7 +236,12 @@ function NotFoundRoute() {
       description="We couldn’t locate that page in the storytelling library."
       actionsLabel="Try these options"
       actions={[
-        { label: 'Return to storyteller hub', href: '/', variant: 'primary', onClick: navigateHome },
+        {
+          label: 'Return to storyteller hub',
+          href: '/',
+          variant: 'primary',
+          onClick: navigateHome,
+        },
         {
           label: 'Email the community team',
           href: 'mailto:care@this-is-my-story.org?subject=Storyteller%20portal%20support',
@@ -229,8 +249,8 @@ function NotFoundRoute() {
       ]}
     >
       <p>
-        Double-check the link or head back to the storyteller hub to explore featured programs, studio
-        resources, and ways to collaborate with our mutual aid partners.
+        Double-check the link or head back to the storyteller hub to explore featured programs,
+        studio resources, and ways to collaborate with our mutual aid partners.
       </p>
     </ErrorShell>
   )
@@ -248,7 +268,12 @@ function MaintenanceRoute() {
       description="We’re refreshing portal resources and will reopen the studio shortly."
       actionsLabel="While you wait"
       actions={[
-        { label: 'Return to storyteller hub', href: '/', variant: 'primary', onClick: navigateHome },
+        {
+          label: 'Return to storyteller hub',
+          href: '/',
+          variant: 'primary',
+          onClick: navigateHome,
+        },
         {
           label: 'Request a community update',
           href: 'mailto:care@this-is-my-story.org?subject=Community%20storytelling%20updates',
@@ -256,8 +281,9 @@ function MaintenanceRoute() {
       ]}
     >
       <p>
-        Reach out if you need accessibility resources or recording support while we finish this release. Our team
-        will send fresh timelines and workshop invitations as soon as the studio doors open again.
+        Reach out if you need accessibility resources or recording support while we finish this
+        release. Our team will send fresh timelines and workshop invitations as soon as the studio
+        doors open again.
       </p>
     </ErrorShell>
   )

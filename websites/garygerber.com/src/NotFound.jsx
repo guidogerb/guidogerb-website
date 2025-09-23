@@ -13,8 +13,8 @@ export default function NotFound({ onNavigateHome, resources = {} }) {
       <p className="not-found__eyebrow">404</p>
       <h1 id="not-found-title">We couldn’t find that page</h1>
       <p>
-        It looks like the link has been retired between tour stops. Head back to the main stage or reach
-        out so we can resend the right rehearsal materials.
+        It looks like the link has been retired between tour stops. Head back to the main stage or
+        reach out so we can resend the right rehearsal materials.
       </p>
       <div className="not-found__actions">
         <a href="/" onClick={onNavigateHome} data-variant="primary">

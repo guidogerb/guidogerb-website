@@ -29,7 +29,11 @@ export default {
       title: 'Connect',
       links: [
         { label: 'Contact team', href: '/contact' },
-        { label: 'Modernization briefings', href: 'https://calendly.com/ggp-regulation/modernization', external: true },
+        {
+          label: 'Modernization briefings',
+          href: 'https://calendly.com/ggp-regulation/modernization',
+          external: true,
+        },
       ],
     },
   ],

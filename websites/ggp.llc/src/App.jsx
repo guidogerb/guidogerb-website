@@ -69,18 +69,15 @@ const modernizationPillars = [
 const aiSupportHighlights = [
   {
     title: 'AI policy copilot',
-    copy:
-      'Draft determinations, summarize case files, and transform guidance into citizen-ready explanations.',
+    copy: 'Draft determinations, summarize case files, and transform guidance into citizen-ready explanations.',
   },
   {
     title: 'Responsible guardrails',
-    copy:
-      'Human-in-the-loop reviews, auditable prompts, and jurisdiction-specific retention controls.',
+    copy: 'Human-in-the-loop reviews, auditable prompts, and jurisdiction-specific retention controls.',
   },
   {
     title: 'Training enablement',
-    copy:
-      'Scenario-based learning accelerates onboarding for new analysts, examiners, and adjudicators.',
+    copy: 'Scenario-based learning accelerates onboarding for new analysts, examiners, and adjudicators.',
   },
 ]
 
@@ -154,7 +151,11 @@ const PORTAL_ROUTES = [
   { path: '/portal/ai', element: <PortalRoute module="ai" /> },
 ]
 
-const routes = [...MARKETING_ROUTES, ...PORTAL_ROUTES, { path: MAINTENANCE_PATH, element: <MaintenanceRoute /> }]
+const routes = [
+  ...MARKETING_ROUTES,
+  ...PORTAL_ROUTES,
+  { path: MAINTENANCE_PATH, element: <MaintenanceRoute /> },
+]
 
 function LandingRoute() {
   const { activePath, handleNavigate, navigateHome } = useRegulatorNavigation()
@@ -169,12 +170,13 @@ function LandingRoute() {
             <div className="ggp-hero__content">
               <p className="ggp-hero__eyebrow">Government modernization without disruption</p>
               <h1 id="ggp-hero-heading">
-                GGP Regulatory Platform unifies licensing, compliance, analytics, and AI assistance for state
-                agencies.
+                GGP Regulatory Platform unifies licensing, compliance, analytics, and AI assistance
+                for state agencies.
               </h1>
               <p className="ggp-hero__lede">
-                Coordinate cross-agency casework, shrink backlogs, and deliver transparent outcomes the public
-                can trust—all on a secure cloud foundation validated for government workloads.
+                Coordinate cross-agency casework, shrink backlogs, and deliver transparent outcomes
+                the public can trust—all on a secure cloud foundation validated for government
+                workloads.
               </p>
               <div className="ggp-hero__actions" role="group" aria-label="Primary actions">
                 <a
@@ -205,10 +207,12 @@ function LandingRoute() {
 
           <section className="ggp-modernization" aria-labelledby="ggp-modernization-heading">
             <div className="ggp-section__intro">
-              <h2 id="ggp-modernization-heading">Operational pillars for every regulatory mandate</h2>
+              <h2 id="ggp-modernization-heading">
+                Operational pillars for every regulatory mandate
+              </h2>
               <p>
-                Modular capabilities let licensing, compliance, and oversight teams adopt modern workflows at
-                their own pace—without losing statutory nuance or historical context.
+                Modular capabilities let licensing, compliance, and oversight teams adopt modern
+                workflows at their own pace—without losing statutory nuance or historical context.
               </p>
             </div>
             <div className="ggp-modernization__grid">
@@ -230,8 +234,8 @@ function LandingRoute() {
             <div className="ggp-section__intro">
               <h2 id="ggp-ai-heading">Responsible AI that keeps humans in control</h2>
               <p>
-                GGP’s AI assistance program is designed with policy, ethics, and transparency teams to ensure
-                every suggestion is reviewable, explainable, and auditable.
+                GGP’s AI assistance program is designed with policy, ethics, and transparency teams
+                to ensure every suggestion is reviewable, explainable, and auditable.
               </p>
             </div>
             <div className="ggp-ai__grid">
@@ -248,9 +252,9 @@ function LandingRoute() {
             <div className="ggp-portal__copy">
               <h2 id="ggp-portal-heading">Portal preview: a secure home for regulators</h2>
               <p>
-                Invite cross-agency collaborators into a shared workspace that keeps sensitive data protected,
-                workflows transparent, and outcomes measurable. The portal aligns intake, investigations, and
-                oversight in one place.
+                Invite cross-agency collaborators into a shared workspace that keeps sensitive data
+                protected, workflows transparent, and outcomes measurable. The portal aligns intake,
+                investigations, and oversight in one place.
               </p>
               <ul className="ggp-portal__highlights">
                 {portalHighlights.map((highlight) => (
@@ -271,8 +275,8 @@ function LandingRoute() {
               >
                 <Welcome>
                   <p>
-                    Coordinate licensing reviews, document enforcement actions, and share analytics snapshots with
-                    leadership without leaving the secure workspace.
+                    Coordinate licensing reviews, document enforcement actions, and share analytics
+                    snapshots with leadership without leaving the secure workspace.
                   </p>
                 </Welcome>
               </Protected>
@@ -283,8 +287,8 @@ function LandingRoute() {
             <div className="ggp-contact__card">
               <h2 id="ggp-contact-heading">Partner with the GGP modernization team</h2>
               <p>
-                We work with CIOs, program directors, and policy leaders to deliver phased modernization that
-                earns trust from frontline staff and the public.
+                We work with CIOs, program directors, and policy leaders to deliver phased
+                modernization that earns trust from frontline staff and the public.
               </p>
               <dl className="ggp-contact__details">
                 <div>
@@ -337,9 +341,9 @@ function PortalRoute({ module = 'licensing' }) {
             <div className="ggp-portal-surface">
               <Welcome>
                 <p>
-                  Access queue intelligence, review statutory guidance, and coordinate with partner agencies in
-                  one shared workspace. Upcoming releases will add deep links into analytics, filings, and AI
-                  assistance.
+                  Access queue intelligence, review statutory guidance, and coordinate with partner
+                  agencies in one shared workspace. Upcoming releases will add deep links into
+                  analytics, filings, and AI assistance.
                 </p>
               </Welcome>
               <section className="ggp-portal-roadmap" aria-label="Upcoming workspace capabilities">
@@ -387,8 +391,8 @@ function NotFoundRoute() {
         footer={<Footer {...footerSettings} onNavigate={handleNavigate} />}
       >
         <p>
-          Double-check the link or head back to the regulatory platform overview to continue learning how GGP
-          modernizes licensing, compliance, analytics, and AI assistance.
+          Double-check the link or head back to the regulatory platform overview to continue
+          learning how GGP modernizes licensing, compliance, analytics, and AI assistance.
         </p>
       </ErrorShell>
     </HeaderContextProvider>
@@ -425,8 +429,8 @@ function MaintenanceRoute() {
       >
         <p>
           Our team is briefly pausing access while we roll out new oversight tooling. Reach out at{' '}
-          <a href="mailto:innovation@ggp.llc">innovation@ggp.llc</a> for regulatory updates or to request a
-          dedicated status briefing.
+          <a href="mailto:innovation@ggp.llc">innovation@ggp.llc</a> for regulatory updates or to
+          request a dedicated status briefing.
         </p>
       </ErrorShell>
     </HeaderContextProvider>

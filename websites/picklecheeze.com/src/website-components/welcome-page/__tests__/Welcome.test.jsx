@@ -68,10 +68,9 @@ describe('PickleCheeze welcome component', () => {
     expect(screen.getByText('Signed in as ferment@example.com')).toBeInTheDocument()
     expect(screen.getByTestId('nested')).toBeInTheDocument()
 
-    expect(screen.getByRole('link', { name: /Download current cellar inventory/i })).toHaveAttribute(
-      'href',
-      '/files/picklecheeze-cellar-inventory.pdf',
-    )
+    expect(
+      screen.getByRole('link', { name: /Download current cellar inventory/i }),
+    ).toHaveAttribute('href', '/files/picklecheeze-cellar-inventory.pdf')
     expect(screen.getByRole('link', { name: /Cheeze care & plating guide/i })).toHaveAttribute(
       'href',
       '/files/cheese-care-guide.pdf',
@@ -102,10 +101,9 @@ describe('PickleCheeze welcome component', () => {
     expect(
       screen.getByRole('heading', { level: 3, name: 'Welcome back, cellar-chief!' }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Download current cellar inventory/i })).toHaveAttribute(
-      'href',
-      'https://cdn.example.com/inventory.pdf',
-    )
+    expect(
+      screen.getByRole('link', { name: /Download current cellar inventory/i }),
+    ).toHaveAttribute('href', 'https://cdn.example.com/inventory.pdf')
     expect(screen.getByRole('link', { name: /Cheeze care & plating guide/i })).toHaveAttribute(
       'href',
       '/assets/care-guide.pdf',

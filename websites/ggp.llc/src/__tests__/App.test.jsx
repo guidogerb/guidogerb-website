@@ -189,12 +189,14 @@ describe('GGP.llc website App', () => {
       }),
     ).toBeInTheDocument()
 
-    expect(
-      screen.getByRole('link', { name: 'Return to modernization overview' }),
-    ).toHaveAttribute('href', '/')
-    expect(
-      screen.getByRole('link', { name: 'Email modernization support' }),
-    ).toHaveAttribute('href', expect.stringContaining('innovation@ggp.llc'))
+    expect(screen.getByRole('link', { name: 'Return to modernization overview' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+    expect(screen.getByRole('link', { name: 'Email modernization support' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('innovation@ggp.llc'),
+    )
   })
 
   it('serves a maintenance route with compliance-focused messaging', async () => {
@@ -204,9 +206,10 @@ describe('GGP.llc website App', () => {
       screen.getByRole('heading', { level: 1, name: 'Portal maintenance in progress' }),
     ).toBeInTheDocument()
 
-    expect(
-      screen.getByRole('link', { name: 'Schedule a modernization briefing' }),
-    ).toHaveAttribute('href', 'https://calendly.com/ggp-regulation/modernization')
+    expect(screen.getByRole('link', { name: 'Schedule a modernization briefing' })).toHaveAttribute(
+      'href',
+      'https://calendly.com/ggp-regulation/modernization',
+    )
 
     expect(screen.getByText(/roll out new oversight tooling/i)).toBeInTheDocument()
   })

@@ -14,10 +14,7 @@ export const SECTION_MAP = Object.freeze({
 
 export const AUXILIARY_PATHS = Object.freeze(['/auth/callback'])
 
-export const MARKETING_PATHS = Object.freeze([
-  ...Object.keys(SECTION_MAP),
-  ...AUXILIARY_PATHS,
-])
+export const MARKETING_PATHS = Object.freeze([...Object.keys(SECTION_MAP), ...AUXILIARY_PATHS])
 
 function scrollToSection(id) {
   if (!id || typeof document === 'undefined') return

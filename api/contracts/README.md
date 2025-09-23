@@ -6,11 +6,11 @@ publishes lifecycle events to EventBridge. Contracts are defined in
 
 ## REST operations
 
-| Operation                | Method | Path      | Description |
-| ------------------------ | ------ | --------- | ----------- |
-| `GetHealthStatus`        | GET    | `/health` | Exposes readiness information for load balancers and observability checks. |
-| `CreateStreamWorkflow`   | POST   | `/streams` | Validates provisioning requests and hands the payload to the Step Functions orchestrator. |
-| `UpdateStreamStatus`     | PUT    | `/streams` | Accepts lifecycle updates emitted by orchestration tasks. |
+| Operation              | Method | Path       | Description                                                                               |
+| ---------------------- | ------ | ---------- | ----------------------------------------------------------------------------------------- |
+| `GetHealthStatus`      | GET    | `/health`  | Exposes readiness information for load balancers and observability checks.                |
+| `CreateStreamWorkflow` | POST   | `/streams` | Validates provisioning requests and hands the payload to the Step Functions orchestrator. |
+| `UpdateStreamStatus`   | PUT    | `/streams` | Accepts lifecycle updates emitted by orchestration tasks.                                 |
 
 ### Shared behaviours
 
@@ -20,10 +20,10 @@ publishes lifecycle events to EventBridge. Contracts are defined in
 
 ## Event contracts
 
-| Event name | Detail type | Description |
-| ---------- | ----------- | ----------- |
-| `StreamProvisionRequested` | `StreamProvisionRequested` | Emitted as soon as a broadcaster submits a provisioning request. Includes stream metadata and ingest endpoints. |
-| `StreamLifecycleProgressed` | `StreamLifecycleProgressed` | Broadcast lifecycle update emitted by orchestration tasks (e.g. `PROVISIONING`, `READY`, `LIVE`). |
+| Event name                  | Detail type                 | Description                                                                                                     |
+| --------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `StreamProvisionRequested`  | `StreamProvisionRequested`  | Emitted as soon as a broadcaster submits a provisioning request. Includes stream metadata and ingest endpoints. |
+| `StreamLifecycleProgressed` | `StreamLifecycleProgressed` | Broadcast lifecycle update emitted by orchestration tasks (e.g. `PROVISIONING`, `READY`, `LIVE`).               |
 
 ## Orchestration
 

@@ -133,7 +133,9 @@ describe('This-Is-My-Story welcome component', () => {
 
     await renderWelcome()
 
-    expect(screen.getByRole('heading', { level: 3, name: 'Welcome memorykeeper' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Welcome memorykeeper' }),
+    ).toBeInTheDocument()
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledWith(

@@ -126,11 +126,13 @@ describe('Stream4Cloud welcome component', () => {
       'href',
       'https://support.stream4cloud.com/docs/control-room-readiness',
     )
-    expect(
-      screen.getByRole('link', { name: 'Partner success desk' }),
-    ).toHaveAttribute('href', 'mailto:success@stream4cloud.com')
-    expect(
-      screen.getByRole('link', { name: 'Schedule a redundancy workshop' }),
-    ).toHaveAttribute('href', 'https://calendly.com/stream4cloud/broadcaster-onboarding')
+    expect(screen.getByRole('link', { name: 'Partner success desk' })).toHaveAttribute(
+      'href',
+      'mailto:success@stream4cloud.com',
+    )
+    expect(screen.getByRole('link', { name: 'Schedule a redundancy workshop' })).toHaveAttribute(
+      'href',
+      'https://calendly.com/stream4cloud/broadcaster-onboarding',
+    )
   })
 })

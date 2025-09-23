@@ -16,19 +16,19 @@ site.
 
 ### Required environment variables
 
-| Variable | Description |
-| -------- | ----------- |
-| `VITE_COGNITO_CLIENT_ID` | App client ID for the PickleCheeze Cognito user pool. |
-| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Discovery endpoint for the hosted UI. |
-| `VITE_REDIRECT_URI` | Callback URL that Cognito should redirect to after login (`https://.../auth/callback`). |
-| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI` | Where Cognito should send users after logout. |
-| `VITE_RESPONSE_TYPE` | Usually `code` (PKCE). |
-| `VITE_COGNITO_SCOPE` | Space-separated scopes; defaults to `openid email phone profile`. |
-| `VITE_API_BASE_URL` | Backing API gateway for partner resources (currently unused but reserved). |
-| `VITE_ENABLE_SW` | `true`/`false` flag that controls service-worker registration. |
-| `VITE_FLAG_PARTNER_INVENTORY` | Enables the cellar inventory PDF link in the protected partner welcome card. |
-| `VITE_FLAG_PARTNER_CARE_GUIDE` | Enables the cheeze care guide download in the protected partner welcome card. |
-| `VITE_FLAG_PARTNER_CONTACT_EMAIL` | Enables the partner support email link in the protected partner welcome card. |
+| Variable                                                | Description                                                                             |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `VITE_COGNITO_CLIENT_ID`                                | App client ID for the PickleCheeze Cognito user pool.                                   |
+| `VITE_COGNITO_AUTHORITY` or `VITE_COGNITO_METADATA_URL` | Discovery endpoint for the hosted UI.                                                   |
+| `VITE_REDIRECT_URI`                                     | Callback URL that Cognito should redirect to after login (`https://.../auth/callback`). |
+| `VITE_COGNITO_POST_LOGOUT_REDIRECT_URI`                 | Where Cognito should send users after logout.                                           |
+| `VITE_RESPONSE_TYPE`                                    | Usually `code` (PKCE).                                                                  |
+| `VITE_COGNITO_SCOPE`                                    | Space-separated scopes; defaults to `openid email phone profile`.                       |
+| `VITE_API_BASE_URL`                                     | Backing API gateway for partner resources (currently unused but reserved).              |
+| `VITE_ENABLE_SW`                                        | `true`/`false` flag that controls service-worker registration.                          |
+| `VITE_FLAG_PARTNER_INVENTORY`                           | Enables the cellar inventory PDF link in the protected partner welcome card.            |
+| `VITE_FLAG_PARTNER_CARE_GUIDE`                          | Enables the cheeze care guide download in the protected partner welcome card.           |
+| `VITE_FLAG_PARTNER_CONTACT_EMAIL`                       | Enables the partner support email link in the protected partner welcome card.           |
 
 ## Structure
 

@@ -108,9 +108,7 @@ describe('marketingContent helpers', () => {
       json: () =>
         Promise.resolve({
           hero: { eyebrow: 'Eyebrow from CMS' },
-          distribution: [
-            { title: 'CMS Distribution', description: 'Desc', items: ['Bullet'] },
-          ],
+          distribution: [{ title: 'CMS Distribution', description: 'Desc', items: ['Bullet'] }],
         }),
     })
 

@@ -19,10 +19,7 @@ const MAINTENANCE_PATH = '/maintenance'
 
 const marketingRoutes = MARKETING_PATHS.map((path) => ({ path, element: <LandingRoute /> }))
 
-const routes = [
-  ...marketingRoutes,
-  { path: MAINTENANCE_PATH, element: <MaintenanceRoute /> },
-]
+const routes = [...marketingRoutes, { path: MAINTENANCE_PATH, element: <MaintenanceRoute /> }]
 
 function LandingRoute() {
   const { activePath, handleNavigate } = useMarketingNavigation()

@@ -85,7 +85,9 @@ describe('marketing sections', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Workflow automation' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Workflow automation' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('Automate rights ingest')).toBeInTheDocument()
     expect(screen.getByText('Metadata sync')).toBeInTheDocument()
   })
@@ -142,7 +144,9 @@ describe('marketing sections', () => {
       />,
     )
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Submission criteria' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Submission criteria' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('Detailed spec')).toBeInTheDocument()
     expect(screen.getByText('PDF templates')).toBeInTheDocument()
   })

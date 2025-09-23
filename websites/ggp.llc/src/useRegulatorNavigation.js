@@ -13,10 +13,7 @@ export const SECTION_MAP = Object.freeze({
 
 export const AUXILIARY_PATHS = Object.freeze(['/auth/callback'])
 
-export const MARKETING_PATHS = Object.freeze([
-  ...Object.keys(SECTION_MAP),
-  ...AUXILIARY_PATHS,
-])
+export const MARKETING_PATHS = Object.freeze([...Object.keys(SECTION_MAP), ...AUXILIARY_PATHS])
 
 function scrollToSection(id) {
   if (!id || typeof document === 'undefined') return
@@ -59,7 +56,8 @@ export function useRegulatorNavigation() {
         }
 
         const targetPath = url.pathname || '/'
-        const sectionId = SECTION_MAP[targetPath] || (url.hash ? url.hash.replace('#', '') : undefined)
+        const sectionId =
+          SECTION_MAP[targetPath] || (url.hash ? url.hash.replace('#', '') : undefined)
 
         if (sectionId) {
           if (targetPath !== activePath) {

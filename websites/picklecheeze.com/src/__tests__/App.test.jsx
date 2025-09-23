@@ -179,7 +179,8 @@ describe('PickleCheeze website App', () => {
   ]
 
   it.each(headerNavigationScenarios)(
-    ({ sectionId, linkName }) => `scrolls to the ${sectionId} section when clicking ${linkName} in the header`,
+    ({ sectionId, linkName }) =>
+      `scrolls to the ${sectionId} section when clicking ${linkName} in the header`,
     async ({ navName, linkName, expectedPath, sectionId }) => {
       vi.stubEnv('VITE_LOGOUT_URI', '/logout')
 

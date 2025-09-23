@@ -59,7 +59,9 @@ describe('This-Is-My-Story.org App', () => {
     ).toHaveAttribute('href', '/auth/sign-in')
 
     expect(
-      screen.getByText('Mutual aid micro-grants that cover childcare, transit, and assistive technology needs.'),
+      screen.getByText(
+        'Mutual aid micro-grants that cover childcare, transit, and assistive technology needs.',
+      ),
     ).toBeInTheDocument()
 
     expect(
@@ -92,16 +94,19 @@ describe('This-Is-My-Story.org App', () => {
 
     expect(screen.getByText('Signed in as taylor@example.org.')).toBeInTheDocument()
 
-    expect(
-      screen.getByRole('link', { name: 'Download story release form' }),
-    ).toHaveAttribute('href', 'https://stories.this-is-my-story.org/resources/release-form.pdf')
+    expect(screen.getByRole('link', { name: 'Download story release form' })).toHaveAttribute(
+      'href',
+      'https://stories.this-is-my-story.org/resources/release-form.pdf',
+    )
 
     expect(
       screen.getByRole('heading', { level: 3, name: 'Upcoming workshops' }),
     ).toBeInTheDocument()
 
     expect(
-      screen.getByText('Digital archiving sprint — April 3, collaboration with the public library.'),
+      screen.getByText(
+        'Digital archiving sprint — April 3, collaboration with the public library.',
+      ),
     ).toBeInTheDocument()
   })
 
@@ -114,8 +119,13 @@ describe('This-Is-My-Story.org App', () => {
       screen.getByRole('heading', { level: 1, name: 'Story not found in the archive' }),
     ).toBeInTheDocument()
 
-    expect(screen.getByRole('link', { name: 'Return to storyteller hub' })).toHaveAttribute('href', '/')
-    expect(screen.getByText(/Double-check the link or head back to the storyteller hub/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Return to storyteller hub' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+    expect(
+      screen.getByText(/Double-check the link or head back to the storyteller hub/i),
+    ).toBeInTheDocument()
   })
 
   it('serves a maintenance page with community guidance', async () => {
@@ -127,10 +137,13 @@ describe('This-Is-My-Story.org App', () => {
       screen.getByRole('heading', { level: 1, name: 'Storyteller studio is preparing updates' }),
     ).toBeInTheDocument()
 
-    expect(
-      screen.getByRole('link', { name: 'Request a community update' }),
-    ).toHaveAttribute('href', expect.stringContaining('care@this-is-my-story.org'))
+    expect(screen.getByRole('link', { name: 'Request a community update' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('care@this-is-my-story.org'),
+    )
 
-    expect(screen.getByText(/will send fresh timelines and workshop invitations/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/will send fresh timelines and workshop invitations/i),
+    ).toBeInTheDocument()
   })
 })

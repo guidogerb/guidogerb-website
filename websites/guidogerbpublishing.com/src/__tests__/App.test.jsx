@@ -163,32 +163,30 @@ describe('GuidoGerb Publishing website App', () => {
     vi.stubEnv('VITE_API_BASE_URL', 'https://cms.example.com')
 
     const originalFetch = global.fetch
-    const fetchSpy = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            hero: {
-              title: 'CMS Powered Publishing',
-              highlights: [{ label: '50+', description: 'campaigns launched' }],
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          hero: {
+            title: 'CMS Powered Publishing',
+            highlights: [{ label: '50+', description: 'campaigns launched' }],
+          },
+          platform: [
+            {
+              title: 'CMS Platform',
+              description: 'Author content streamed from CMS',
+              features: ['CMS bullet'],
             },
-            platform: [
-              {
-                title: 'CMS Platform',
-                description: 'Author content streamed from CMS',
-                features: ['CMS bullet'],
-              },
-            ],
-            newsletter: {
-              title: 'CMS Newsletter',
-              description: 'Stay in sync',
-              formLabel: 'CMS Form',
-              buttonLabel: 'Join CMS',
-              placeholder: 'cms@example.com',
-            },
-          }),
-      })
+          ],
+          newsletter: {
+            title: 'CMS Newsletter',
+            description: 'Stay in sync',
+            formLabel: 'CMS Form',
+            buttonLabel: 'Join CMS',
+            placeholder: 'cms@example.com',
+          },
+        }),
+    })
 
     global.fetch = fetchSpy
 

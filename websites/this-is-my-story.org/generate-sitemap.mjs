@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// Lightweight env loader respecting Vite’s naming
+// Lightweight env loader respecting Vite's naming
 const mode = process.argv[2] || 'development'
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)))
 
@@ -40,7 +40,6 @@ function loadEnvLikeVite() {
 }
 
 const env = loadEnvLikeVite()
-const sitePort = env.VITE_SITE_PORT || (mode === 'production' ? '' : '4173')
 const siteUrl =
   env.VITE_SITE_URL ||
   (mode === 'production' ? 'https://this-is-my-story.org' : 'https://local.this-is-my-story.org')
@@ -53,6 +52,8 @@ const routes = [
 ]
 
 const now = new Date().toISOString()
+// eslint-disable-next-line
+const LASTMOD_PLACEHOLDER = '{{LASTMOD}}'
 
 // Prefer template replacement if a sitemap.xml exists and contains {{LASTMOD}}
 const outDir = path.join(root, 'public')
@@ -63,8 +64,14 @@ let xml = null
 if (fs.existsSync(sitemapPath)) {
   try {
     const template = fs.readFileSync(sitemapPath, 'utf8')
-    if (template.includes('{{LASTMOD}}') && mode === 'production') {
-      xml = template.replace(/\{\{LASTMOD\}\}/g, now)
+    // eslint-disable-next-line no-useless-escape
+    if (template.includes(LASTMOD_PLACEHOLDER)) {
+      if (mode === 'production') {
+        xml = template.replace(/\{\{LASTMOD\}\}/g, now)
+      } else {
+        // In non-production, keep the placeholder
+        xml = template
+      }
     }
   } catch {
     // ignore and fall back
@@ -77,7 +84,7 @@ if (!xml) {
       (r) => `
   <url>
     <loc>${siteUrl.replace(/\/$/, '')}${r === '/' ? '' : r}</loc>
-    <lastmod>${now}</lastmod>
+    <lastmod>${mode === 'production' ? now : LASTMOD_PLACEHOLDER}</lastmod>
     <changefreq>${mode === 'production' ? 'weekly' : 'daily'}</changefreq>
     <priority>${r === '/' ? '1.0' : '0.8'}</priority>
   </url>`,

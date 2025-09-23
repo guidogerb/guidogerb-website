@@ -56,18 +56,15 @@ const workflowHighlights = [
 const partnerSignals = [
   {
     heading: 'Launch playbooks',
-    copy:
-      'Follow curated timelines that align marketing, production, and sponsor activations with automated reminders.',
+    copy: 'Follow curated timelines that align marketing, production, and sponsor activations with automated reminders.',
   },
   {
     heading: 'Incident response',
-    copy:
-      '24/7 partner success coordinates network operations, reroutes ingest, and communicates status updates.',
+    copy: '24/7 partner success coordinates network operations, reroutes ingest, and communicates status updates.',
   },
   {
     heading: 'Compliance assured',
-    copy:
-      'PCI SAQ-A boundaries, GDPR tooling, and KMS-encrypted storage meet enterprise procurement requirements.',
+    copy: 'PCI SAQ-A boundaries, GDPR tooling, and KMS-encrypted storage meet enterprise procurement requirements.',
   },
 ]
 
@@ -82,14 +79,21 @@ function LandingRoute() {
       <section className="hero" aria-labelledby="stream4cloud-hero">
         <p className="eyebrow">Enterprise streaming without fire drills</p>
         <h1 id="stream4cloud-hero">
-          Stream4Cloud orchestrates your live control room across ingest, monetization, and audience experience.
+          Stream4Cloud orchestrates your live control room across ingest, monetization, and audience
+          experience.
         </h1>
         <p className="lede">
-          Spin up broadcasts in hours—not weeks. We bundle AWS-native infrastructure, automation, and partner
-          success so crews can focus on storytelling while the platform keeps quality high and viewers engaged.
+          Spin up broadcasts in hours—not weeks. We bundle AWS-native infrastructure, automation,
+          and partner success so crews can focus on storytelling while the platform keeps quality
+          high and viewers engaged.
         </p>
         <div className="hero-actions" role="group" aria-label="Key actions">
-          <a className="action action--primary" href="https://calendly.com/stream4cloud/demo" target="_blank" rel="noreferrer">
+          <a
+            className="action action--primary"
+            href="https://calendly.com/stream4cloud/demo"
+            target="_blank"
+            rel="noreferrer"
+          >
             Book a control room tour
           </a>
           <a className="action action--secondary" href="mailto:partners@stream4cloud.com">
@@ -149,12 +153,18 @@ function LandingRoute() {
         <div>
           <h2 id="stream4cloud-cta">Ready for the next live moment?</h2>
           <p>
-            Tell us about your upcoming premiere, sports season, or benefit stream. We’ll align production,
-            monetization, and audience targets so launch day is calm, measurable, and repeatable.
+            Tell us about your upcoming premiere, sports season, or benefit stream. We’ll align
+            production, monetization, and audience targets so launch day is calm, measurable, and
+            repeatable.
           </p>
         </div>
         <div className="cta-actions">
-          <a className="action action--primary" href="https://stream4cloud.com/request-proposal" target="_blank" rel="noreferrer">
+          <a
+            className="action action--primary"
+            href="https://stream4cloud.com/request-proposal"
+            target="_blank"
+            rel="noreferrer"
+          >
             Request a proposal
           </a>
           <a className="action action--ghost" href="tel:+18005550135">
@@ -167,8 +177,9 @@ function LandingRoute() {
         <div className="partner-copy">
           <h2 id="stream4cloud-partner">Partner success hub preview</h2>
           <p>
-            Signed-in collaborators access rehearsal timelines, integration kits, and escalation contacts tailored to
-            each production. Our service worker keeps critical playbooks ready even if connectivity drops at the venue.
+            Signed-in collaborators access rehearsal timelines, integration kits, and escalation
+            contacts tailored to each production. Our service worker keeps critical playbooks ready
+            even if connectivity drops at the venue.
           </p>
         </div>
         <div className="partner-panel" role="presentation">
@@ -185,8 +196,9 @@ function OfflineRoute() {
       <section className="offline-card">
         <h1 id="offline-heading">You’re offline</h1>
         <p>
-          Cached resources are available for critical broadcasts, but some analytics and configuration pages require an
-          active connection. Reconnect to continue orchestrating your event.
+          Cached resources are available for critical broadcasts, but some analytics and
+          configuration pages require an active connection. Reconnect to continue orchestrating your
+          event.
         </p>
         <a className="action action--secondary" href="/">
           Return to Stream4Cloud home
@@ -197,7 +209,10 @@ function OfflineRoute() {
 }
 
 function toFragmentId(title) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 }
 
 function App({ router, routerOptions }) {

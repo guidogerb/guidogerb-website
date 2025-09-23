@@ -38,17 +38,20 @@ export default function RehearsalResourcesLanding({ resources = {} }) {
         <p className="rehearsal-resources__eyebrow">Rehearsal library</p>
         <h3>Everything you need for the next residency</h3>
         <p>
-          Setlists, call times, and production contacts refresh here the moment we publish an update.
-          Bookmark the page so you always have the latest logistics.
+          Setlists, call times, and production contacts refresh here the moment we publish an
+          update. Bookmark the page so you always have the latest logistics.
         </p>
       </header>
 
       <div className="rehearsal-resources__grid">
-        <section className="rehearsal-resources__panel" aria-labelledby="rehearsal-schedule-heading">
+        <section
+          className="rehearsal-resources__panel"
+          aria-labelledby="rehearsal-schedule-heading"
+        >
           <h4 id="rehearsal-schedule-heading">Upcoming schedule</h4>
           <p>
-            Review call times for each rehearsal block. We’ll flag hospitality windows and livestream
-            holds as soon as they change.
+            Review call times for each rehearsal block. We’ll flag hospitality windows and
+            livestream holds as soon as they change.
           </p>
           <ul className="rehearsal-resources__events">
             {upcomingEvents.map((event) => (
@@ -110,13 +113,18 @@ export default function RehearsalResourcesLanding({ resources = {} }) {
           ) : null}
         </section>
 
-        <section className="rehearsal-resources__panel" aria-labelledby="rehearsal-contacts-heading">
+        <section
+          className="rehearsal-resources__panel"
+          aria-labelledby="rehearsal-contacts-heading"
+        >
           <h4 id="rehearsal-contacts-heading">Production contacts</h4>
           <ul className="rehearsal-resources__contacts">
             {contacts.map((contact) => (
               <li key={contact.id}>
                 <h5>{contact.name}</h5>
-                {contact.role ? <p className="rehearsal-resources__contact-role">{contact.role}</p> : null}
+                {contact.role ? (
+                  <p className="rehearsal-resources__contact-role">{contact.role}</p>
+                ) : null}
                 <ul className="rehearsal-resources__contact-links">
                   {contact.phoneHref ? (
                     <li>

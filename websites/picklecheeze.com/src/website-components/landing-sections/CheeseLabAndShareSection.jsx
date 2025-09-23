@@ -4,8 +4,8 @@ export function CheeseLabAndShareSection() {
       <article>
         <h2>Cheeze lab experiments</h2>
         <p>
-          Rind-aged wheels develop in our temperature-controlled lab with cultures we propagate
-          from the very produce we ferment. Expect washed rinds, cave-aged blues, and creamy spreads
+          Rind-aged wheels develop in our temperature-controlled lab with cultures we propagate from
+          the very produce we ferment. Expect washed rinds, cave-aged blues, and creamy spreads
           ready for service.
         </p>
         <ul className="feature-list">

@@ -39,9 +39,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Lint all packages
-        run: npm run lint
-        continue-on-error: true
+      #      - name: Lint all packages
+      #        run: npm run lint
+      #        continue-on-error: true
 
       - name: Format check
         run: pnpm format:check

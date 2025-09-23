@@ -16,7 +16,8 @@
 }
 
 .hero {
-  background: radial-gradient(circle at top right, rgba(79, 112, 255, 0.28), transparent 55%),
+  background:
+    radial-gradient(circle at top right, rgba(79, 112, 255, 0.28), transparent 55%),
     linear-gradient(135deg, rgba(16, 25, 54, 0.92), rgba(18, 36, 83, 0.9));
   border-radius: 28px;
   padding: clamp(2.5rem, 5vw, 4rem);
@@ -60,7 +61,10 @@
   padding: 0.85rem 1.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease,
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease,
     border-color 160ms ease;
   border: 1px solid transparent;
   cursor: pointer;
