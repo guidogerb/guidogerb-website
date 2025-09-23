@@ -32,5 +32,21 @@ publishes lifecycle events to EventBridge. Contracts are defined in
 - Emitted events are documented in the `emits_events` field so dashboards and
   downstream services can subscribe confidently.
 
+### `StreamLifecycleOrchestrator` states
+
+| State                         | Type    | Integration                           | Purpose                                                                                           | Transitions / Events |
+| ----------------------------- | ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------- |
+| `ValidateProvisionRequest`    | `Task`  | `arn:aws:states:::lambda:invoke`      | Validates required fields and normalizes metadata before the workflow progresses.                 | `success → PersistProvisionRequest`, `failure → HandleProvisionFailure` |
+| `PersistProvisionRequest`     | `Task`  | `arn:aws:states:::dynamodb:putItem`   | Stores the request for auditability and to unblock operator dashboards.                           | `success → EmitProvisionRequestedEvent`, `failure → HandleProvisionFailure` |
+| `EmitProvisionRequestedEvent` | `Task`  | `arn:aws:states:::events:putEvents`   | Publishes `StreamProvisionRequested` so ticketing and analytics systems can react immediately.    | `success → ProvisionEncoderInfrastructure`, `failure → HandleProvisionFailure`; emits `StreamProvisionRequested` |
+| `ProvisionEncoderInfrastructure` | `Task` | `arn:aws:states:::aws-sdk:medialive:startChannel` | Allocates encoder inputs and transport flows handled by the media control plane.                  | `success → ConfigurePlaybackEndpoints`, `failure → HandleProvisionFailure` |
+| `ConfigurePlaybackEndpoints`  | `Task`  | `arn:aws:states:::aws-sdk:cloudfront:updateDistribution` | Configures playback origins, entitlements, and CDN distribution updates.                          | `success → AwaitLifecycleConfirmation`, `failure → HandleProvisionFailure` |
+| `AwaitLifecycleConfirmation`  | `Task`  | `arn:aws:states:::events:waitForEvent` | Waits up to 15 minutes for a `StreamLifecycleProgressed` event reporting READY or FAILED status.  | `ready → PublishReadyNotification`, `failed → HandleProvisionFailure`, `timeout → HandleProvisionFailure` |
+| `PublishReadyNotification`    | `Task`  | `arn:aws:states:::events:putEvents`   | Emits `StreamLifecycleProgressed` (READY) to fan out to the portal and monitoring tools.           | `success → RecordCompletion`, `failure → HandleProvisionFailure`; emits `StreamLifecycleProgressed` |
+| `RecordCompletion`            | `Task`  | `arn:aws:states:::dynamodb:updateItem` | Persists the READY timestamp and reconciles outstanding provisioning metadata.                     | `success → WorkflowSucceeded`, `failure → HandleProvisionFailure` |
+| `HandleProvisionFailure`      | `Task`  | `arn:aws:states:::lambda:invoke`      | Captures failure context, emits a FAILED lifecycle event, and notifies on-call operators.          | `success → WorkflowFailed`; emits `StreamLifecycleProgressed` |
+| `WorkflowSucceeded`           | `Succeed` | -                                   | Terminal success node once playback configuration is confirmed.                                   | - |
+| `WorkflowFailed`              | `Fail`  | -                                     | Terminal failure path reached for validation, provisioning, or confirmation issues.               | - |
+
 Consult `build_openapi_document()` for an OpenAPI 3.1 representation of these
 contracts.

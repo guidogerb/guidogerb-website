@@ -45,6 +45,19 @@ class EventContract:
 
 
 @dataclass(frozen=True)
+class StateMachineState:
+  """State executed by the StreamLifecycleOrchestrator Step Function."""
+
+  name: str
+  state_type: str
+  description: str
+  integration: Optional[str] = None
+  transitions: Dict[str, str] = field(default_factory=dict)
+  emits_events: List[str] = field(default_factory=list)
+  timeout_seconds: Optional[int] = None
+
+
+@dataclass(frozen=True)
 class StateMachineContract:
   """Step Functions orchestration flow used by the streaming platform."""
 
@@ -52,6 +65,7 @@ class StateMachineContract:
   description: str
   input_schema: JsonSchema
   emits_events: List[str]
+  states: List[StateMachineState] = field(default_factory=list)
 
 
 CREATE_STREAM_REQUEST_SCHEMA: JsonSchema = {
@@ -335,6 +349,97 @@ EVENT_CONTRACTS: List[EventContract] = [
 ]
 
 
+STREAM_LIFECYCLE_ORCHESTRATOR_STATES: List[StateMachineState] = [
+  StateMachineState(
+    name='ValidateProvisionRequest',
+    state_type='Task',
+    description=(
+      'Invoke the validation Lambda to ensure the payload includes ingest endpoints, '
+      'title, and scheduling metadata before the workflow continues.'
+    ),
+    integration='arn:aws:states:::lambda:invoke',
+    transitions={'success': 'PersistProvisionRequest', 'failure': 'HandleProvisionFailure'},
+  ),
+  StateMachineState(
+    name='PersistProvisionRequest',
+    state_type='Task',
+    description='Store the normalized request so operations can audit provisioning attempts.',
+    integration='arn:aws:states:::dynamodb:putItem',
+    transitions={'success': 'EmitProvisionRequestedEvent', 'failure': 'HandleProvisionFailure'},
+  ),
+  StateMachineState(
+    name='EmitProvisionRequestedEvent',
+    state_type='Task',
+    description='Publish the StreamProvisionRequested event for dashboards and ticketing hooks.',
+    integration='arn:aws:states:::events:putEvents',
+    transitions={'success': 'ProvisionEncoderInfrastructure', 'failure': 'HandleProvisionFailure'},
+    emits_events=['StreamProvisionRequested'],
+  ),
+  StateMachineState(
+    name='ProvisionEncoderInfrastructure',
+    state_type='Task',
+    description='Call the media control Lambda to allocate encoder inputs and media flows.',
+    integration='arn:aws:states:::aws-sdk:medialive:startChannel',
+    transitions={'success': 'ConfigurePlaybackEndpoints', 'failure': 'HandleProvisionFailure'},
+  ),
+  StateMachineState(
+    name='ConfigurePlaybackEndpoints',
+    state_type='Task',
+    description='Update playback origins, CloudFront distributions, and entitlement metadata.',
+    integration='arn:aws:states:::aws-sdk:cloudfront:updateDistribution',
+    transitions={'success': 'AwaitLifecycleConfirmation', 'failure': 'HandleProvisionFailure'},
+  ),
+  StateMachineState(
+    name='AwaitLifecycleConfirmation',
+    state_type='Task',
+    description=(
+      'Pause execution until operations emit a StreamLifecycleProgressed event with READY '
+      'or FAILED status, enforcing a 15 minute timeout.'
+    ),
+    integration='arn:aws:states:::events:waitForEvent',
+    transitions={
+      'ready': 'PublishReadyNotification',
+      'failed': 'HandleProvisionFailure',
+      'timeout': 'HandleProvisionFailure',
+    },
+    timeout_seconds=900,
+  ),
+  StateMachineState(
+    name='PublishReadyNotification',
+    state_type='Task',
+    description='Inform downstream services that the stream is ready for rehearsal or go-live.',
+    integration='arn:aws:states:::events:putEvents',
+    transitions={'success': 'RecordCompletion', 'failure': 'HandleProvisionFailure'},
+    emits_events=['StreamLifecycleProgressed'],
+  ),
+  StateMachineState(
+    name='RecordCompletion',
+    state_type='Task',
+    description='Mark the workflow as complete and persist the READY timestamp in DynamoDB.',
+    integration='arn:aws:states:::dynamodb:updateItem',
+    transitions={'success': 'WorkflowSucceeded', 'failure': 'HandleProvisionFailure'},
+  ),
+  StateMachineState(
+    name='HandleProvisionFailure',
+    state_type='Task',
+    description='Capture failure context, emit a FAILED lifecycle update, and notify operators.',
+    integration='arn:aws:states:::lambda:invoke',
+    transitions={'success': 'WorkflowFailed', 'failure': 'WorkflowFailed'},
+    emits_events=['StreamLifecycleProgressed'],
+  ),
+  StateMachineState(
+    name='WorkflowSucceeded',
+    state_type='Succeed',
+    description='Terminal state representing a successful provisioning run.',
+  ),
+  StateMachineState(
+    name='WorkflowFailed',
+    state_type='Fail',
+    description='Terminal state reached whenever provisioning encounters unrecoverable errors.',
+  ),
+]
+
+
 STATE_MACHINES: List[StateMachineContract] = [
   StateMachineContract(
     name='StreamLifecycleOrchestrator',
@@ -348,6 +453,7 @@ STATE_MACHINES: List[StateMachineContract] = [
       'properties': CREATE_STREAM_REQUEST_SCHEMA['properties'],
     },
     emits_events=[event.detail_type for event in EVENT_CONTRACTS],
+    states=STREAM_LIFECYCLE_ORCHESTRATOR_STATES,
   ),
 ]
 
@@ -410,15 +516,40 @@ def build_openapi_document() -> Dict[str, object]:
     for event in EVENT_CONTRACTS
   ]
 
-  document['x-guidogerb-stateMachines'] = [
-    {
+  state_machine_entries: List[Dict[str, object]] = []
+  for state_machine in STATE_MACHINES:
+    entry: Dict[str, object] = {
       'name': state_machine.name,
       'description': state_machine.description,
       'inputSchema': state_machine.input_schema,
       'emits': state_machine.emits_events,
     }
-    for state_machine in STATE_MACHINES
-  ]
+
+    if state_machine.states:
+      states_payload: List[Dict[str, object]] = []
+      for state in state_machine.states:
+        state_entry: Dict[str, object] = {
+          'name': state.name,
+          'type': state.state_type,
+          'description': state.description,
+        }
+
+        if state.integration is not None:
+          state_entry['integration'] = state.integration
+        if state.transitions:
+          state_entry['transitions'] = state.transitions
+        if state.emits_events:
+          state_entry['emits'] = state.emits_events
+        if state.timeout_seconds is not None:
+          state_entry['timeoutSeconds'] = state.timeout_seconds
+
+        states_payload.append(state_entry)
+
+      entry['states'] = states_payload
+
+    state_machine_entries.append(entry)
+
+  document['x-guidogerb-stateMachines'] = state_machine_entries
 
   return document
 
@@ -432,4 +563,5 @@ __all__ = [
   'RestOperation',
   'RestResponse',
   'StateMachineContract',
+  'StateMachineState',
 ]

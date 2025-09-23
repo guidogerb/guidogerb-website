@@ -25,21 +25,19 @@ describe('Gary Gerber welcome component', () => {
       error: { message: 'Sign-in blocked' },
     })
 
-    const { container } = await renderWelcome()
+    await renderWelcome()
 
-    const error = container.querySelector('.welcome-error')
-    expect(error).toBeInTheDocument()
-    expect(error).toHaveTextContent('Sign-in failed: Sign-in blocked')
+    expect(screen.getByText('Sign-in failed: Sign-in blocked')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument()
   })
 
   it('shows a loading indicator while authentication resolves', async () => {
     mockUseAuth.mockReturnValue({ isAuthenticated: false })
 
-    const { container } = await renderWelcome()
+    await renderWelcome()
 
-    const loading = container.querySelector('.welcome-loading')
-    expect(loading).toBeInTheDocument()
-    expect(loading).toHaveTextContent('Loading rehearsal room…')
+    expect(screen.getByText('Loading rehearsal room…')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument()
   })
 
   it('renders collaborator details and default rehearsal resources when authenticated', async () => {
@@ -60,6 +58,11 @@ describe('Gary Gerber welcome component', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Signed in as pianist@example.com')).toBeInTheDocument()
     expect(screen.getByTestId('nested')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /You now have access to scores, stage plots, and rehearsal notes for upcoming engagements\./i,
+      ),
+    ).toBeInTheDocument()
 
     expect(screen.getByRole('link', { name: /Download latest stage plot/i })).toHaveAttribute(
       'href',
@@ -151,5 +154,24 @@ describe('Gary Gerber welcome component', () => {
       'href',
       'mailto:custom@example.com?subject=Custom%20Plan',
     )
+  })
+
+  it('falls back to a default collaborator identity when profile information is unavailable', async () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: {
+        profile: {},
+      },
+    })
+
+    await renderWelcome()
+
+    expect(screen.getByRole('heading', { level: 3, name: 'Welcome back, userNotAvailable!' })).toBeInTheDocument()
+    expect(screen.queryByText(/Signed in as/i)).not.toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /You now have access to scores, stage plots, and rehearsal notes for upcoming engagements\./i,
+      ),
+    ).toBeInTheDocument()
   })
 })
