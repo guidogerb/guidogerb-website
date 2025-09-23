@@ -39,6 +39,8 @@ describe('Gary Gerber website App', () => {
 
     originalScrollIntoView = globalThis.Element?.prototype?.scrollIntoView
 
+    window.history.replaceState({}, '', '/')
+
     mockProtected.mockClear()
 
     mockUseAuth.mockReset()
@@ -65,6 +67,7 @@ describe('Gary Gerber website App', () => {
       globalThis.Element.prototype.scrollIntoView = originalScrollIntoView
     }
     vi.unstubAllEnvs()
+    window.history.replaceState({}, '', '/')
   })
 
   it('renders the landing page content and configures the rehearsal room guard', async () => {
@@ -94,6 +97,21 @@ describe('Gary Gerber website App', () => {
     ).toBeInTheDocument()
 
     expect(screen.getByText('Signed in as guest@example.com')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        level: 3,
+        name: 'Everything you need for the next residency',
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' })).toBeInTheDocument()
+    expect(
+      screen.getByText('Tech rehearsal — Northern Lights residency'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Open full calendar' })).toHaveAttribute(
+      'href',
+      'https://calendar.google.com/calendar/u/0?cid=Z2FyeWdlcmJlci5jb21fcmVoZWFyc2Fsc0BleGFtcGxlLmNvbQ',
+    )
+    expect(screen.getByRole('link', { name: 'Call +1 (612) 555-0148' })).toBeInTheDocument()
 
     expect(mockProtected).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -148,6 +166,38 @@ describe('Gary Gerber website App', () => {
     expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/rehearsal')
     const lastScrollCall = scrollSpy.mock.calls.at(-1)
     expect(lastScrollCall?.[0]).toHaveProperty('id', 'client-access')
+
+    pushStateSpy.mockRestore()
+  })
+
+  it('renders a localized not-found page when navigating to an unknown route', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+
+    window.history.replaceState({}, '', '/missing-page')
+    const pushStateSpy = vi.spyOn(window.history, 'pushState')
+
+    await renderApp()
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'We couldn’t find that page' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/the link has been retired between tour stops/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Email production team' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('hello@garygerber.com'),
+    )
+    expect(screen.getByRole('link', { name: 'Call +1 (612) 555-0148' })).toHaveAttribute(
+      'href',
+      'tel:+16125550148',
+    )
+    expect(mockProtected).not.toHaveBeenCalled()
+
+    const user = userEvent.setup()
+    const homeLink = screen.getByRole('link', { name: 'Back to main stage' })
+
+    await user.click(homeLink)
+
+    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/')
 
     pushStateSpy.mockRestore()
   })

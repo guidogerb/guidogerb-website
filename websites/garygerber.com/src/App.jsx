@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Footer } from '@guidogerb/footer'
 import { Header, HeaderContextProvider } from '@guidogerb/header'
 import { useAuth } from '@guidogerb/components-auth'
@@ -6,6 +6,8 @@ import './App.css'
 import headerSettings from './headerSettings.js'
 import footerSettings from './footerSettings.js'
 import rehearsalResources from './rehearsalResources.js'
+import RehearsalResourcesLanding from './RehearsalResourcesLanding.jsx'
+import NotFound from './NotFound.jsx'
 import {
   ProgramsHeroSection,
   ConsultingSection,
@@ -27,7 +29,10 @@ const SECTION_MAP = {
   '/newsletter': 'newsletter',
   '/contact': 'contact',
   '/rehearsal': 'client-access',
+  '/rehearsal/resources': 'client-access',
 }
+
+const AUXILIARY_PATHS = new Set(['/auth/callback'])
 
 const getInitialPath = () => {
   if (typeof window === 'undefined') return '/'
@@ -42,17 +47,28 @@ function scrollToSection(id) {
   }
 }
 
-function useActivePath() {
-  const [activePath, setActivePath] = useState(() => getInitialPath())
+const normalizePath = (value) => {
+  if (!value || typeof value !== 'string') return '/'
+  if (value.length > 1 && value.endsWith('/')) {
+    return value.replace(/\/+$/, '')
+  }
+  return value || '/'
+}
+
+const resolveRoute = (pathname) => {
+  const normalized = normalizePath(pathname)
+  const sectionId = SECTION_MAP[normalized]
+  const isKnown = Boolean(sectionId) || AUXILIARY_PATHS.has(normalized)
+  return { path: normalized, sectionId, isKnown }
+}
+
+function useRouteState() {
+  const [route, setRoute] = useState(() => resolveRoute(getInitialPath()))
 
   useEffect(() => {
     const handlePopState = () => {
-      const nextPath = getInitialPath()
-      setActivePath(nextPath)
-      const sectionId = SECTION_MAP[nextPath]
-      if (sectionId) {
-        scrollToSection(sectionId)
-      }
+      const next = resolveRoute(getInitialPath())
+      setRoute(next)
     }
 
     window.addEventListener('popstate', handlePopState)
@@ -62,18 +78,22 @@ function useActivePath() {
   }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    const sectionId = SECTION_MAP[getInitialPath()]
-    if (sectionId) {
-      scrollToSection(sectionId)
+    if (route.sectionId) {
+      scrollToSection(route.sectionId)
     }
+  }, [route.sectionId, route.path])
+
+  const navigateToRoute = useCallback((nextPath) => {
+    const resolved = resolveRoute(nextPath)
+    setRoute(resolved)
+    return resolved
   }, [])
 
-  return [activePath, setActivePath]
+  return useMemo(() => [route, navigateToRoute], [route, navigateToRoute])
 }
 
 function App() {
-  const [activePath, setActivePath] = useActivePath()
+  const [route, navigateToRoute] = useRouteState()
 
   const handleNavigate = useCallback(
     ({ item }) => {
@@ -94,39 +114,60 @@ function App() {
           return
         }
 
-        const targetPath = url.pathname || '/'
+        const targetPath = normalizePath(url.pathname || '/')
         const sectionId =
           SECTION_MAP[targetPath] || (url.hash ? url.hash.replace('#', '') : undefined)
 
-        window.history.pushState({}, '', targetPath)
-        setActivePath(targetPath)
-
-        if (sectionId) {
-          scrollToSection(sectionId)
-        } else {
+        if (!sectionId) {
           window.location.assign(url.href)
+          return
         }
+
+        window.history.pushState({}, '', targetPath)
+        navigateToRoute(targetPath)
       } catch {
         window.location.assign(href)
       }
     },
-    [setActivePath],
+    [navigateToRoute],
+  )
+
+  const handleNotFoundNavigate = useCallback(
+    (event) => {
+      if (event) {
+        event.preventDefault()
+      }
+
+      if (typeof window === 'undefined') return
+
+      window.history.pushState({}, '', '/')
+      navigateToRoute('/')
+    },
+    [navigateToRoute],
   )
 
   return (
     <HeaderContextProvider defaultSettings={headerSettings}>
       <div className="app-shell" id="top">
-        <Header activePath={activePath} onNavigate={handleNavigate} />
+        <Header activePath={route.path} onNavigate={handleNavigate} />
 
         <main className="app-main">
-          <ProgramsHeroSection />
-          <ConsultingSection />
-          <RecordingsEducationSection />
-          <AboutPressSection />
-          <NewsletterSignupSection />
-          <RehearsalRoomSection logoutUri={import.meta.env.VITE_LOGOUT_URI}>
-            <Welcome rehearsalResources={rehearsalResources} useAuthHook={useAuth} />
-          </RehearsalRoomSection>
+          {route.isKnown ? (
+            <>
+              <ProgramsHeroSection />
+              <ConsultingSection />
+              <RecordingsEducationSection />
+              <AboutPressSection />
+              <NewsletterSignupSection />
+              <RehearsalRoomSection logoutUri={import.meta.env.VITE_LOGOUT_URI}>
+                <Welcome rehearsalResources={rehearsalResources} useAuthHook={useAuth}>
+                  <RehearsalResourcesLanding resources={rehearsalResources} />
+                </Welcome>
+              </RehearsalRoomSection>
+            </>
+          ) : (
+            <NotFound onNavigateHome={handleNotFoundNavigate} resources={rehearsalResources} />
+          )}
         </main>
 
         <Footer {...footerSettings} onNavigate={handleNavigate} id="contact">
@@ -134,8 +175,7 @@ function App() {
             <h2>Bookings &amp; inquiries</h2>
             <p>
               Email <a href="mailto:hello@garygerber.com">hello@garygerber.com</a> or call{' '}
-              <a href="tel:+16125550123">+1 (612) 555-0123</a> for availability and partnership
-              details.
+              <a href="tel:+16125550123">+1 (612) 555-0123</a> for availability and partnership details.
             </p>
             <p>Based in Minneapolis, performing worldwide.</p>
           </div>
