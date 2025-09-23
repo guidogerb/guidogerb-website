@@ -1,0 +1,6 @@
+export { FermentationHeroSection } from './FermentationHeroSection.jsx'
+export { CheeseLabAndShareSection } from './CheeseLabAndShareSection.jsx'
+export { EventsAndWholesaleSection } from './EventsAndWholesaleSection.jsx'
+export { MarketplacePreviewSection } from './MarketplacePreviewSection.jsx'
+export { NewsletterSignupSection } from './NewsletterSignupSection.jsx'
+export { PartnerHubSection } from './PartnerHubSection.jsx'
