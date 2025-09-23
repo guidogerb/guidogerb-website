@@ -50,6 +50,7 @@ export default ({ mode }) => {
 
   const allowedHosts = [localHost]
   const env = loadEnv(mode, process.cwd(), '')
+  const isVitest = process.env.VITEST === 'true'
 
   let buildOptions = {
     sourcemap: mode === 'development',
@@ -81,23 +82,29 @@ export default ({ mode }) => {
     }
   }
 
-  return defineConfig({
-    logLevel: 'silent',
-    resolve: {
-      conditions: [mode],
-    },
-    plugins: [
-      react(),
+  const plugins = [react(), restrictHosts(allowedHosts)]
+
+  if (!isVitest) {
+    plugins.push(
       mkcert({
         force: true,
         hosts: [localHost, wildcardLocalHost, ip],
       }),
-      restrictHosts(allowedHosts),
       printPreviewUrls(),
-    ],
+    )
+  }
+
+  return defineConfig({
+    logLevel: 'silent',
+    resolve: isVitest
+      ? {}
+      : {
+          conditions: [mode, 'import', 'module', 'browser', 'default'].filter(Boolean),
+        },
+    plugins,
     base: env.VITE_BASE_PATH || '/',
     server: {
-      https: true,
+      https: !isVitest,
       host: true,
       port: 443,
       strictPort: true,
