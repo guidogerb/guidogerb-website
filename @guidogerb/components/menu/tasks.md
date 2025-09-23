@@ -3,5 +3,5 @@
 | name                                      | createdDate | lastUpdatedDate | completedDate | status      | description                                                                                      |
 | ----------------------------------------- | ----------- | --------------- | ------------- | ----------- | ------------------------------------------------------------------------------------------------ |
 | Refresh navigation documentation          | 2025-09-19  | 2025-09-19      | 2025-09-19    | complete    | Checked that the README explains item shapes, props, and active-path handling for shared menus.  |
-| Enhance keyboard support for nested items | 2025-09-19  | 2025-09-19      | -             | in progress | Implement arrow key roving tabindex behaviour and focus trapping for mega-menu variants.         |
+| Enhance keyboard support for nested items | 2025-09-19  | 2025-09-27      | 2025-09-27    | complete    | Implement arrow key roving tabindex behaviour and focus trapping for mega-menu variants.         |
 | Provide theming tokens for menu states    | 2025-09-19  | 2025-09-21      | 2025-09-21    | complete    | Publish CSS custom properties for hover, focus, and current states so tenants can align styling. |

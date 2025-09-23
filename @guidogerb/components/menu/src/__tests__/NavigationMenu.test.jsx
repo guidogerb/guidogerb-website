@@ -70,11 +70,14 @@ describe('App', () => {
   })
 
   it('supports custom link renderers', () => {
-    const renderLink = ({ item, linkProps }) => (
-      <button type="button" onClick={linkProps.onClick}>
-        {item.label}
-      </button>
-    )
+    const renderLink = ({ item, linkProps }) => {
+      const { href: _unusedHref, ...rest } = linkProps
+      return (
+        <button type="button" {...rest}>
+          {item.label}
+        </button>
+      )
+    }
 
     render(
       <NavigationMenu
@@ -92,5 +95,88 @@ describe('App', () => {
     expect(nav).toHaveClass('gg-navigation-menu--vertical')
 
     expect(screen.getAllByRole('button')).toHaveLength(2)
+  })
+
+  it('manages roving tabindex for horizontal menus', async () => {
+    const user = userEvent.setup()
+
+    render(<NavigationMenu items={buildItems()} label="Main navigation" />)
+
+    const home = screen.getByRole('link', { name: 'Home' })
+    const catalog = screen.getByRole('link', { name: /Catalog/ })
+
+    await user.tab()
+
+    expect(home).toHaveFocus()
+    expect(home).toHaveAttribute('tabindex', '0')
+    expect(catalog).toHaveAttribute('tabindex', '-1')
+
+    await user.keyboard('{ArrowRight}')
+
+    expect(catalog).toHaveFocus()
+    expect(catalog).toHaveAttribute('tabindex', '0')
+    expect(home).toHaveAttribute('tabindex', '-1')
+
+    await user.keyboard('{ArrowLeft}')
+
+    expect(home).toHaveFocus()
+  })
+
+  it('allows entering and leaving nested menus with arrow keys', async () => {
+    const user = userEvent.setup()
+
+    render(<NavigationMenu items={buildItems()} label="Main navigation" />)
+
+    const catalog = screen.getByRole('link', { name: /Catalog/ })
+    const music = screen.getByRole('link', { name: 'Music' })
+    const books = screen.getByRole('link', { name: 'Books' })
+
+    await user.tab()
+    await user.keyboard('{ArrowRight}')
+    expect(catalog).toHaveFocus()
+
+    await user.keyboard('{ArrowDown}')
+    expect(music).toHaveFocus()
+    expect(music).toHaveAttribute('tabindex', '0')
+
+    await user.keyboard('{ArrowDown}')
+    expect(books).toHaveFocus()
+
+    await user.keyboard('{ArrowLeft}')
+    expect(catalog).toHaveFocus()
+
+    await user.keyboard('{ArrowDown}')
+    expect(music).toHaveFocus()
+
+    await user.keyboard('{Escape}')
+    expect(catalog).toHaveFocus()
+  })
+
+  it('supports vertical navigation focus management', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <NavigationMenu
+        items={buildItems()}
+        orientation="vertical"
+        label="Sidebar navigation"
+      />,
+    )
+
+    const home = screen.getByRole('link', { name: 'Home' })
+    const catalog = screen.getByRole('link', { name: /Catalog/ })
+    const blog = screen.getByRole('link', { name: 'Blog' })
+
+    await user.tab()
+    expect(home).toHaveFocus()
+
+    await user.keyboard('{ArrowDown}')
+    expect(catalog).toHaveFocus()
+
+    await user.keyboard('{End}')
+    expect(blog).toHaveFocus()
+
+    await user.keyboard('{ArrowUp}')
+    expect(catalog).toHaveFocus()
   })
 })
