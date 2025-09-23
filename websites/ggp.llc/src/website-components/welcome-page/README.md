@@ -1,8 +1,10 @@
 # GGP.llc welcome page component
 
-Placeholder authenticated welcome view for the regulator portal. Currently renders generic copy
-until portal requirements are finalised.
+Authenticated welcome view for the regulator portal.
 
-- Uses `useAuth()` from `@guidogerb/components-auth` to gate access and surface error/loading states.
-- Designed to host quick links to filings, licensing dashboards, and AI assistance tools in future iterations.
-- Accepts children so the host application can append additional portal widgets.
+- Uses `useAuth()` from `@guidogerb/components-auth` to surface error/loading states and personalise
+  the greeting with the collaborator's profile details.
+- Presents curated sections for filings, licensing dashboards, and AI assistance with
+  multi-tenant-friendly links.
+- Accepts children so the host application can append additional portal widgets beneath the
+  resource overview.
