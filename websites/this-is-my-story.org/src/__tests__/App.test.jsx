@@ -13,7 +13,8 @@ vi.mock('@guidogerb/components-auth', () => ({
 vi.mock('../App.css', () => ({}), { virtual: true })
 vi.mock('../assets/story-circle.svg', () => ({ default: 'story-circle.svg' }))
 
-async function renderApp() {
+async function renderApp({ initialPath = '/' } = {}) {
+  window.history.replaceState({}, '', initialPath)
   const module = await import('../App.jsx')
   const App = module.default
   return render(<App />)
@@ -23,7 +24,6 @@ describe('This-Is-My-Story.org App', () => {
   beforeEach(() => {
     vi.resetModules()
     mockUseAuth.mockReset()
-    window.history.replaceState({}, '', '/')
   })
 
   it('renders storytelling content and teaser copy for guests', async () => {
@@ -103,5 +103,34 @@ describe('This-Is-My-Story.org App', () => {
     expect(
       screen.getByText('Digital archiving sprint — April 3, collaboration with the public library.'),
     ).toBeInTheDocument()
+  })
+
+  it('renders a branded error page when a route is missing', async () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false })
+
+    await renderApp({ initialPath: '/missing' })
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Story not found in the archive' }),
+    ).toBeInTheDocument()
+
+    expect(screen.getByRole('link', { name: 'Return to storyteller hub' })).toHaveAttribute('href', '/')
+    expect(screen.getByText(/Double-check the link or head back to the storyteller hub/i)).toBeInTheDocument()
+  })
+
+  it('serves a maintenance page with community guidance', async () => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false })
+
+    await renderApp({ initialPath: '/maintenance' })
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Storyteller studio is preparing updates' }),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('link', { name: 'Request a community update' }),
+    ).toHaveAttribute('href', expect.stringContaining('care@this-is-my-story.org'))
+
+    expect(screen.getByText(/will send fresh timelines and workshop invitations/i)).toBeInTheDocument()
   })
 })

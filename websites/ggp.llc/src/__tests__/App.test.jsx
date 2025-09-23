@@ -178,4 +178,36 @@ describe('GGP.llc website App', () => {
 
     pushStateSpy.mockRestore()
   })
+
+  it('renders a branded 404 fallback when navigating to an unknown path', async () => {
+    await renderApp({ initialPath: '/missing' })
+
+    expect(
+      screen.getByRole('heading', {
+        level: 1,
+        name: 'Regulatory page unavailable',
+      }),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('link', { name: 'Return to modernization overview' }),
+    ).toHaveAttribute('href', '/')
+    expect(
+      screen.getByRole('link', { name: 'Email modernization support' }),
+    ).toHaveAttribute('href', expect.stringContaining('innovation@ggp.llc'))
+  })
+
+  it('serves a maintenance route with compliance-focused messaging', async () => {
+    await renderApp({ initialPath: '/maintenance' })
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Portal maintenance in progress' }),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('link', { name: 'Schedule a modernization briefing' }),
+    ).toHaveAttribute('href', 'https://calendly.com/ggp-regulation/modernization')
+
+    expect(screen.getByText(/roll out new oversight tooling/i)).toBeInTheDocument()
+  })
 })

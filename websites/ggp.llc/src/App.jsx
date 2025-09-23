@@ -1,4 +1,5 @@
 import Protected from '@guidogerb/components-pages-protected'
+import { ErrorShell } from '@guidogerb/components-pages-public'
 import { Footer } from '@guidogerb/footer'
 import { Header, HeaderContextProvider } from '@guidogerb/header'
 import { PublicRouter } from '@guidogerb/components-router-public'
@@ -141,6 +142,8 @@ const portalSkeleton = {
   },
 }
 
+const MAINTENANCE_PATH = '/maintenance'
+
 const MARKETING_ROUTES = MARKETING_PATHS.map((path) => ({ path, element: <LandingRoute /> }))
 
 const PORTAL_ROUTES = [
@@ -151,7 +154,7 @@ const PORTAL_ROUTES = [
   { path: '/portal/ai', element: <PortalRoute module="ai" /> },
 ]
 
-const routes = [...MARKETING_ROUTES, ...PORTAL_ROUTES]
+const routes = [...MARKETING_ROUTES, ...PORTAL_ROUTES, { path: MAINTENANCE_PATH, element: <MaintenanceRoute /> }]
 
 function LandingRoute() {
   const { activePath, handleNavigate, navigateHome } = useRegulatorNavigation()
@@ -356,8 +359,82 @@ function PortalRoute({ module = 'licensing' }) {
   )
 }
 
+function NotFoundRoute() {
+  const { activePath, handleNavigate, navigateHome } = useRegulatorNavigation()
+
+  return (
+    <HeaderContextProvider defaultSettings={headerSettings}>
+      <ErrorShell
+        className="ggp-error-shell"
+        statusCode={404}
+        statusLabel="HTTP status code"
+        title="Regulatory page unavailable"
+        description="We couldn’t find the requested page inside the modernization workspace."
+        actionsLabel="Continue exploring"
+        actions={[
+          {
+            label: 'Return to modernization overview',
+            href: '/',
+            variant: 'primary',
+            onClick: navigateHome,
+          },
+          {
+            label: 'Email modernization support',
+            href: 'mailto:innovation@ggp.llc?subject=Regulatory%20portal%20help',
+          },
+        ]}
+        header={<Header activePath={activePath} onNavigate={handleNavigate} />}
+        footer={<Footer {...footerSettings} onNavigate={handleNavigate} />}
+      >
+        <p>
+          Double-check the link or head back to the regulatory platform overview to continue learning how GGP
+          modernizes licensing, compliance, analytics, and AI assistance.
+        </p>
+      </ErrorShell>
+    </HeaderContextProvider>
+  )
+}
+
+function MaintenanceRoute() {
+  const { activePath, handleNavigate, navigateHome } = useRegulatorNavigation()
+
+  return (
+    <HeaderContextProvider defaultSettings={headerSettings}>
+      <ErrorShell
+        className="ggp-error-shell"
+        statusCode={503}
+        statusLabel="Service status"
+        title="Portal maintenance in progress"
+        description="We’re applying compliance and security updates to the regulatory workspace."
+        actionsLabel="Stay informed"
+        actions={[
+          {
+            label: 'Check modernization overview',
+            href: '/',
+            variant: 'primary',
+            onClick: navigateHome,
+          },
+          {
+            label: 'Schedule a modernization briefing',
+            href: 'https://calendly.com/ggp-regulation/modernization',
+            external: true,
+          },
+        ]}
+        header={<Header activePath={activePath} onNavigate={handleNavigate} />}
+        footer={<Footer {...footerSettings} onNavigate={handleNavigate} />}
+      >
+        <p>
+          Our team is briefly pausing access while we roll out new oversight tooling. Reach out at{' '}
+          <a href="mailto:innovation@ggp.llc">innovation@ggp.llc</a> for regulatory updates or to request a
+          dedicated status briefing.
+        </p>
+      </ErrorShell>
+    </HeaderContextProvider>
+  )
+}
+
 function App() {
-  return <PublicRouter routes={routes} />
+  return <PublicRouter routes={routes} fallback={<NotFoundRoute />} />
 }
 
 export default App
