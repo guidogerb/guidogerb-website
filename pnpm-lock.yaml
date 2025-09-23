@@ -805,6 +805,9 @@ importers:
 
   websites/this-is-my-story.org:
     dependencies:
+      '@guidogerb/components-analytics':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/analytics
       '@guidogerb/components-api':
         specifier: workspace:*
         version: link:../../@guidogerb/components/api-client
