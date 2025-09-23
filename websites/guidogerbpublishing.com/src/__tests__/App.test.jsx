@@ -58,6 +58,10 @@ describe('GuidoGerb Publishing website App', () => {
         scrollSpy(this, ...args)
       }
     }
+
+    if (typeof window !== 'undefined' && window?.history) {
+      window.history.replaceState({}, '', '/')
+    }
   })
 
   afterEach(() => {
@@ -113,7 +117,8 @@ describe('GuidoGerb Publishing website App', () => {
 
     await user.click(platformLink)
 
-    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/platform')
+    const lastPush = pushStateSpy.mock.calls.at(-1)
+    expect(lastPush?.[2]).toBe('/platform')
 
     const lastScrollCall = scrollSpy.mock.calls.at(-1)
     expect(lastScrollCall?.[0]).toHaveProperty('id', 'platform')
@@ -144,10 +149,62 @@ describe('GuidoGerb Publishing website App', () => {
 
     await user.click(partnerLink)
 
-    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/partner-portal')
-    const lastScrollCall = scrollSpy.mock.calls.at(-1)
-    expect(lastScrollCall?.[0]).toHaveProperty('id', 'partner-portal')
+    const lastPush = pushStateSpy.mock.calls.at(-1)
+    expect(lastPush?.[2]).toBe('/partner-portal')
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/partner-portal')
+    })
 
     pushStateSpy.mockRestore()
+  })
+
+  it('loads CMS-driven marketing content when the API base URL is configured', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+    vi.stubEnv('VITE_API_BASE_URL', 'https://cms.example.com')
+
+    const originalFetch = global.fetch
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            hero: {
+              title: 'CMS Powered Publishing',
+              highlights: [{ label: '50+', description: 'campaigns launched' }],
+            },
+            platform: [
+              {
+                title: 'CMS Platform',
+                description: 'Author content streamed from CMS',
+                features: ['CMS bullet'],
+              },
+            ],
+            newsletter: {
+              title: 'CMS Newsletter',
+              description: 'Stay in sync',
+              formLabel: 'CMS Form',
+              buttonLabel: 'Join CMS',
+              placeholder: 'cms@example.com',
+            },
+          }),
+      })
+
+    global.fetch = fetchSpy
+
+    try {
+      await renderApp()
+
+      await screen.findByRole('heading', { level: 1, name: 'CMS Powered Publishing' })
+      expect(screen.getByText('Author content streamed from CMS')).toBeInTheDocument()
+      expect(screen.getByText('CMS bullet')).toBeInTheDocument()
+      expect(screen.getByRole('form', { name: 'CMS Form' })).toBeInTheDocument()
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://cms.example.com/cms/publishing/marketing',
+        expect.objectContaining({ headers: { Accept: 'application/json' } }),
+      )
+    } finally {
+      global.fetch = originalFetch
+    }
   })
 })
