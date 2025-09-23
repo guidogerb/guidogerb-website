@@ -34,6 +34,45 @@ chrome so tenant projects can render both public and authenticated routes withou
 Override navigation, header, footer, authentication, API client, storage, service worker, theming,
 and page collections through the component props.
 
+#### Blueprint & planning helpers
+
+`@guidogerb/components-app` now exports metadata describing the shared shell contract so new
+variants can reason about provider order and tenant extension points:
+
+- **`APP_SHELL_PROVIDER_BLUEPRINT`** – ordered list of providers (`storage → auth → header → ui`)
+  with the package each slot relies on.
+- **`APP_SHELL_LAYOUT_BLUEPRINT`** – layout regions (`header`, `main`, `footer`) that every
+  variant must render along with the ARIA role and dependency hints.
+- **`createAppBasicPlan(props)`** – pure helper that normalises `<AppBasic />` props into a plan
+  object containing defaults, resolved provider props, router wiring, and tenant controls.
+- **`useAppBasicPlan()`** – hook that exposes the runtime plan from context for diagnostics or
+  custom analytics.
+
+```jsx
+import {
+  AppBasic,
+  APP_SHELL_PROVIDER_BLUEPRINT,
+  createAppBasicPlan,
+  useAppBasicPlan,
+} from '@guidogerb/components-app'
+
+const plan = createAppBasicPlan()
+console.log(plan.providerBlueprint.order) // ['storage', 'auth', 'header', 'ui']
+
+function DebugPanel() {
+  const runtimePlan = useAppBasicPlan()
+  return <pre>{JSON.stringify(runtimePlan?.router.routes.map((route) => route.path), null, 2)}</pre>
+}
+
+function App() {
+  return (
+    <AppBasic>
+      <DebugPanel />
+    </AppBasic>
+  )
+}
+```
+
 ## Testing
 
 Run the Vitest suite directly from this package while the workspace manifest is being updated:

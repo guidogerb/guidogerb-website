@@ -59,20 +59,165 @@ const DEFAULT_FOOTER_PROPS = Object.freeze({
   copyright: `© ${CURRENT_YEAR} Guido & Gerber, LLC`,
 })
 
-const DEFAULT_HEADER_SETTINGS = createHeaderSettings({
-  brand: {
-    title: 'Guido & Gerber',
-    tagline: 'Stories for every stage',
-    href: '/',
-    logoSrc: null,
-  },
-  primaryLinks: DEFAULT_NAVIGATION_ITEMS,
-  showAuthControls: true,
-  showTenantSwitcher: false,
-  showThemeToggle: true,
+const DEFAULT_HEADER_SETTINGS = Object.freeze(
+  createHeaderSettings({
+    brand: {
+      title: 'Guido & Gerber',
+      tagline: 'Stories for every stage',
+      href: '/',
+      logoSrc: null,
+    },
+    primaryLinks: DEFAULT_NAVIGATION_ITEMS,
+    showAuthControls: true,
+    showTenantSwitcher: false,
+    showThemeToggle: true,
+  }),
+)
+
+export const APP_SHELL_PROVIDER_BLUEPRINT = Object.freeze({
+  order: Object.freeze(['storage', 'auth', 'header', 'ui']),
+  definitions: Object.freeze({
+    storage: Object.freeze({
+      id: 'storage',
+      package: '@guidogerb/components-storage',
+      description:
+        'Wraps the application with a persistent namespace used by authentication and offline caches.',
+      provides: Object.freeze(['StorageContext']),
+      dependsOn: Object.freeze([]),
+    }),
+    auth: Object.freeze({
+      id: 'auth',
+      package: '@guidogerb/components-auth',
+      description:
+        'Provides OIDC authentication context and guards protected routes before they render.',
+      provides: Object.freeze(['AuthContext']),
+      dependsOn: Object.freeze(['storage']),
+    }),
+    header: Object.freeze({
+      id: 'header',
+      package: '@guidogerb/header',
+      description: 'Hydrates navigation chrome and exposes header state to variant layouts.',
+      provides: Object.freeze(['HeaderContext']),
+      dependsOn: Object.freeze(['auth']),
+    }),
+    ui: Object.freeze({
+      id: 'ui',
+      package: '@guidogerb/components-ui',
+      description: 'Registers responsive slot tokens so shared chrome renders consistently.',
+      provides: Object.freeze(['ResponsiveSlotContext']),
+      dependsOn: Object.freeze(['header']),
+    }),
+  }),
 })
 
-const AppBasicContext = createContext({ apiClient: null })
+export const APP_SHELL_LAYOUT_BLUEPRINT = Object.freeze({
+  regions: Object.freeze([
+    Object.freeze({
+      id: 'header',
+      component: '@guidogerb/header',
+      role: 'banner',
+      description: 'Site-wide header chrome with navigation and auth affordances.',
+      dependsOn: Object.freeze(['navigation', 'auth', 'ui']),
+    }),
+    Object.freeze({
+      id: 'main',
+      component: '@guidogerb/components-router-protected',
+      role: 'main',
+      description: 'Marketing routes and the protected dashboard rendered through a guarded router.',
+      dependsOn: Object.freeze(['routes', 'auth']),
+    }),
+    Object.freeze({
+      id: 'footer',
+      component: '@guidogerb/footer',
+      role: 'contentinfo',
+      description: 'Shared footer with support, legal, and social navigation links.',
+      dependsOn: Object.freeze(['navigation']),
+    }),
+  ]),
+})
+
+export const APP_BASIC_TENANT_CONTROLS = Object.freeze({
+  api: Object.freeze([
+    'client',
+    'baseUrl',
+    'getAccessToken',
+    'fetch',
+    'logger',
+    'retry',
+    'defaultHeaders',
+    'userAgent',
+  ]),
+  auth: Object.freeze([
+    'authority',
+    'metadataUrl',
+    'metadata_url',
+    'client_id',
+    'clientId',
+    'redirect_uri',
+    'redirectUri',
+    'response_type',
+    'responseType',
+    'scope',
+    'post_logout_redirect_uri',
+    'postLogoutRedirectUri',
+    'loginCallbackPath',
+    'logoutUri',
+    'provider',
+  ]),
+  navigation: Object.freeze(['items', 'activePath', 'onNavigate']),
+  header: Object.freeze(['settings', 'baseSettings', 'props']),
+  footer: Object.freeze([
+    'brand',
+    'description',
+    'sections',
+    'socialLinks',
+    'legalLinks',
+    'copyright',
+    'onNavigate',
+    'children',
+    'className',
+    'id',
+    'style',
+  ]),
+  publicPages: Object.freeze(['landing', 'routes', 'fallback']),
+  protectedPages: Object.freeze([
+    'routes',
+    'basename',
+    'router',
+    'routerOptions',
+    'wrapElement',
+    'fallback',
+    'protectFallback',
+  ]),
+  storage: Object.freeze(['namespace', 'mode', 'persist', 'adapter']),
+  serviceWorker: Object.freeze(['enabled', 'url', 'scope', 'immediate', 'onOfflineReady', 'onNeedRefresh']),
+  theme: Object.freeze(['registry', 'tokens', 'defaultBreakpoint', 'resolveToken']),
+  main: Object.freeze(['className', 'id', 'style', 'role']),
+})
+
+export const APP_BASIC_DEFAULTS = Object.freeze({
+  storage: Object.freeze({ namespace: DEFAULT_STORAGE_NAMESPACE }),
+  api: Object.freeze({ baseUrl: DEFAULT_API_BASE_URL }),
+  auth: Object.freeze({
+    authority: DEFAULT_AUTH_AUTHORITY,
+    client_id: DEFAULT_AUTH_CLIENT_ID,
+    loginCallbackPath: DEFAULT_LOGIN_CALLBACK_PATH,
+    scope: 'openid email phone profile',
+  }),
+  navigation: Object.freeze({
+    items: DEFAULT_NAVIGATION_ITEMS,
+    activePath: '/',
+  }),
+  headerSettings: DEFAULT_HEADER_SETTINGS,
+  footer: DEFAULT_FOOTER_PROPS,
+  serviceWorker: Object.freeze({ enabled: true, url: '/sw.js' }),
+  layout: Object.freeze({
+    rootClassName: 'gg-app gg-app--basic',
+    mainClassName: 'gg-app-basic__main',
+  }),
+})
+
+const AppBasicContext = createContext({ apiClient: null, plan: null })
 
 const isObject = (value) => typeof value === 'object' && value !== null
 
@@ -449,9 +594,138 @@ const normalizeThemeOptions = (themeConfig) => {
   }
 }
 
+export const createAppBasicPlan = ({
+  className,
+  api,
+  auth,
+  navigation,
+  header,
+  footer,
+  publicPages,
+  protectedPages,
+  storage,
+  serviceWorker,
+  theme,
+  mainProps,
+} = {}) => {
+  const apiOptions = normalizeApiOptions(api)
+  const { providerProps: authProviderProps, logoutUri } = normalizeAuthOptions(auth)
+  const navigationConfig = normalizeNavigationConfig(navigation)
+  const footerConfig = normalizeFooterConfig(footer, navigationConfig)
+
+  const headerOverrides = isObject(header?.settings) ? header.settings : {}
+  const headerSettings = createHeaderSettings(
+    {
+      ...headerOverrides,
+      primaryLinks: headerOverrides.primaryLinks ?? navigationConfig.items,
+    },
+    header?.baseSettings ?? DEFAULT_HEADER_SETTINGS,
+  )
+
+  const headerPropsBase = isObject(header?.props) ? header.props : {}
+  const headerProps = {
+    ...headerPropsBase,
+    activePath: headerPropsBase.activePath ?? navigationConfig.activePath,
+    onNavigate: headerPropsBase.onNavigate ?? navigationConfig.onNavigate,
+  }
+
+  const publicConfig = normalizePublicPages(publicPages, { navigation: navigationConfig })
+  const protectedConfig = normalizeProtectedPages(protectedPages)
+
+  const combinedRoutes = [publicConfig.landing, ...publicConfig.routes, ...protectedConfig.routes]
+    .filter(Boolean)
+    .map((route) => ({
+      ...route,
+      isProtected: route.isProtected ?? false,
+    }))
+
+  const fallbackRoute = protectedConfig.fallback ?? publicConfig.fallback ?? null
+  const guardProps = { logoutUri }
+
+  const storageConfig = isObject(storage) ? storage : {}
+  const { namespace = DEFAULT_STORAGE_NAMESPACE, ...storageRest } = storageConfig
+  const storageProps = { namespace, ...storageRest }
+
+  const swConfig = isObject(serviceWorker) ? serviceWorker : {}
+  const { enabled: swEnabledRaw, url: swUrlRaw, ...swOptions } = swConfig
+  const swEnabled = swEnabledRaw !== false
+  const swUrl =
+    typeof swUrlRaw === 'string' && swUrlRaw.length > 0
+      ? swUrlRaw
+      : APP_BASIC_DEFAULTS.serviceWorker.url
+
+  const themeOptions = normalizeThemeOptions(theme)
+
+  const rootClassName = ['gg-app', 'gg-app--basic', className].filter(Boolean).join(' ')
+
+  const resolvedMainProps = isObject(mainProps) ? mainProps : {}
+  const mainClassName = ['gg-app-basic__main', resolvedMainProps.className]
+    .filter(Boolean)
+    .join(' ')
+  const mainAttributes = { ...resolvedMainProps, className: mainClassName }
+
+  const routerPassthrough = {}
+  const routerOptions = protectedConfig.routerOptions ?? {}
+  if (routerOptions.basename) routerPassthrough.basename = routerOptions.basename
+  if (routerOptions.router) routerPassthrough.router = routerOptions.router
+  if (routerOptions.routerOptions) routerPassthrough.routerOptions = routerOptions.routerOptions
+  if (routerOptions.wrapElement) routerPassthrough.wrapElement = routerOptions.wrapElement
+
+  const defaultLogoutUri = `${resolveOrigin()}${DEFAULT_LOGOUT_PATH}`
+
+  const defaults = {
+    storage: APP_BASIC_DEFAULTS.storage,
+    api: APP_BASIC_DEFAULTS.api,
+    auth: {
+      ...APP_BASIC_DEFAULTS.auth,
+      post_logout_redirect_uri: defaultLogoutUri,
+      logoutUri: defaultLogoutUri,
+    },
+    navigation: APP_BASIC_DEFAULTS.navigation,
+    headerSettings: APP_BASIC_DEFAULTS.headerSettings,
+    footer: APP_BASIC_DEFAULTS.footer,
+    serviceWorker: APP_BASIC_DEFAULTS.serviceWorker,
+    layout: APP_BASIC_DEFAULTS.layout,
+  }
+
+  return {
+    variant: 'basic',
+    providerBlueprint: APP_SHELL_PROVIDER_BLUEPRINT,
+    layoutBlueprint: APP_SHELL_LAYOUT_BLUEPRINT,
+    defaults,
+    tenantControls: APP_BASIC_TENANT_CONTROLS,
+    providers: {
+      storage: { id: 'storage', props: storageProps },
+      auth: { id: 'auth', props: authProviderProps, logoutUri },
+      header: { id: 'header', settings: headerSettings, props: headerProps },
+      ui: { id: 'ui', props: themeOptions },
+    },
+    navigation: navigationConfig,
+    publicPages: publicConfig,
+    protectedPages: protectedConfig,
+    router: {
+      routes: combinedRoutes,
+      fallback: fallbackRoute,
+      guardProps,
+      protectFallback: protectedConfig.protectFallback,
+      passthroughProps: routerPassthrough,
+    },
+    layout: {
+      root: { className: rootClassName, dataAttributes: { 'data-app-variant': 'basic' } },
+      header: { props: headerProps },
+      main: { props: mainAttributes },
+      footer: { props: footerConfig },
+    },
+    serviceWorker: { enabled: swEnabled, url: swUrl, options: swOptions },
+    api: apiOptions,
+  }
+}
+
 export const useAppBasicContext = () => useContext(AppBasicContext)
 
 export const useAppApiClient = () => useAppBasicContext()?.apiClient ?? null
+
+export const useAppBasicPlan = () => useAppBasicContext()?.plan ?? null
 
 export const AppBasic = ({
   className,
@@ -469,124 +743,103 @@ export const AppBasic = ({
   mainProps,
   ...rest
 }) => {
-  const apiOptions = useMemo(() => normalizeApiOptions(api), [api])
+  const plan = useMemo(
+    () =>
+      createAppBasicPlan({
+        className,
+        api,
+        auth,
+        navigation,
+        header,
+        footer,
+        publicPages,
+        protectedPages,
+        storage,
+        serviceWorker,
+        theme,
+        mainProps,
+      }),
+    [
+      className,
+      api,
+      auth,
+      navigation,
+      header,
+      footer,
+      publicPages,
+      protectedPages,
+      storage,
+      serviceWorker,
+      theme,
+      mainProps,
+    ],
+  )
+
+  const {
+    api: apiOptions,
+    providers,
+    router,
+    layout: layoutPlan,
+    serviceWorker: serviceWorkerConfig,
+  } = plan
+
+  const {
+    client: providedClient,
+    baseUrl: apiBaseUrl,
+    getAccessToken,
+    fetch: fetchImpl,
+    logger: loggerImpl,
+    retry: retryOptions,
+    defaultHeaders,
+    userAgent,
+  } = apiOptions
+
   const apiClient = useMemo(() => {
-    if (apiOptions.client) return apiOptions.client
+    if (providedClient) return providedClient
     return createClient({
-      baseUrl: apiOptions.baseUrl,
-      getAccessToken: apiOptions.getAccessToken,
-      fetch: apiOptions.fetch,
-      logger: apiOptions.logger,
-      retry: apiOptions.retry,
-      defaultHeaders: apiOptions.defaultHeaders,
-      userAgent: apiOptions.userAgent,
+      baseUrl: apiBaseUrl,
+      getAccessToken,
+      fetch: fetchImpl,
+      logger: loggerImpl,
+      retry: retryOptions,
+      defaultHeaders,
+      userAgent,
     })
   }, [
-    apiOptions.baseUrl,
-    apiOptions.client,
-    apiOptions.defaultHeaders,
-    apiOptions.fetch,
-    apiOptions.getAccessToken,
-    apiOptions.logger,
-    apiOptions.retry,
-    apiOptions.userAgent,
+    providedClient,
+    apiBaseUrl,
+    getAccessToken,
+    fetchImpl,
+    loggerImpl,
+    retryOptions,
+    defaultHeaders,
+    userAgent,
   ])
 
-  const { providerProps: authProviderProps, logoutUri } = useMemo(
-    () => normalizeAuthOptions(auth),
-    [auth],
-  )
-
-  const navigationConfig = useMemo(() => normalizeNavigationConfig(navigation), [navigation])
-
-  const footerConfig = useMemo(
-    () => normalizeFooterConfig(footer, navigationConfig),
-    [footer, navigationConfig],
-  )
-
-  const headerSettings = useMemo(() => {
-    const overrides = isObject(header?.settings) ? header.settings : {}
-    return createHeaderSettings(
-      {
-        ...overrides,
-        primaryLinks: overrides.primaryLinks ?? navigationConfig.items,
-      },
-      header?.baseSettings ?? DEFAULT_HEADER_SETTINGS,
-    )
-  }, [header?.baseSettings, header?.settings, navigationConfig.items])
-
-  const headerProps = useMemo(() => {
-    const props = isObject(header?.props) ? header.props : {}
-    return {
-      ...props,
-      activePath: props.activePath ?? navigationConfig.activePath,
-      onNavigate: props.onNavigate ?? navigationConfig.onNavigate,
-    }
-  }, [header?.props, navigationConfig.activePath, navigationConfig.onNavigate])
-
-  const publicConfig = useMemo(
-    () => normalizePublicPages(publicPages, { navigation: navigationConfig }),
-    [publicPages, navigationConfig],
-  )
-
-  const protectedConfig = useMemo(() => normalizeProtectedPages(protectedPages), [protectedPages])
-
-  const combinedRoutes = useMemo(() => {
-    const routes = [publicConfig.landing, ...publicConfig.routes, ...protectedConfig.routes]
-      .filter(Boolean)
-      .map((route) => ({
-        ...route,
-        isProtected: route.isProtected ?? false,
-      }))
-    return routes
-  }, [publicConfig.landing, publicConfig.routes, protectedConfig.routes])
-
-  const fallbackRoute = useMemo(() => {
-    return protectedConfig.fallback ?? publicConfig.fallback ?? null
-  }, [protectedConfig.fallback, publicConfig.fallback])
-
-  const guardProps = useMemo(() => ({ logoutUri }), [logoutUri])
-
-  const storageConfig = isObject(storage) ? storage : {}
-  const { namespace = DEFAULT_STORAGE_NAMESPACE, ...storageRest } = storageConfig
-
-  const { swEnabled, swUrl, swOptions } = useMemo(() => {
-    const config = isObject(serviceWorker) ? serviceWorker : {}
-    const { enabled, url, ...rest } = config
-    return {
-      swEnabled: enabled !== false,
-      swUrl: typeof url === 'string' && url.length > 0 ? url : '/sw.js',
-      swOptions: rest,
-    }
-  }, [serviceWorker])
+  const { enabled: swEnabled, url: swUrl, options: swOptions } = serviceWorkerConfig
 
   useEffect(() => {
     if (!swEnabled) return
     registerSW({ url: swUrl, ...swOptions })
   }, [swEnabled, swUrl, swOptions])
 
-  const themeOptions = useMemo(() => normalizeThemeOptions(theme), [theme])
+  const contextValue = useMemo(() => ({ apiClient, plan }), [apiClient, plan])
 
-  const contextValue = useMemo(() => ({ apiClient }), [apiClient])
-
-  const rootClassName = useMemo(
-    () => ['gg-app', 'gg-app--basic', className].filter(Boolean).join(' '),
-    [className],
-  )
-
-  const protectedRouterProps = useMemo(() => {
-    const options = protectedConfig.routerOptions ?? {}
-    const routerProps = {}
-    if (options.basename) routerProps.basename = options.basename
-    if (options.router) routerProps.router = options.router
-    if (options.routerOptions) routerProps.routerOptions = options.routerOptions
-    if (options.wrapElement) routerProps.wrapElement = options.wrapElement
-    return routerProps
-  }, [protectedConfig.routerOptions])
+  const storageProps = providers.storage.props ?? {}
+  const authProviderProps = providers.auth.props ?? {}
+  const { logoutUri } = providers.auth
+  const headerSettings = providers.header.settings
+  const headerProps = providers.header.props ?? {}
+  const themeOptions = providers.ui.props ?? {}
+  const guardProps = router.guardProps ?? { logoutUri }
+  const protectedRouterProps = router.passthroughProps ?? {}
+  const rootAttributes = layoutPlan.root ?? { className: 'gg-app gg-app--basic', dataAttributes: {} }
+  const mainAttributes = layoutPlan.main?.props ?? { className: 'gg-app-basic__main' }
+  const footerConfig = layoutPlan.footer?.props ?? DEFAULT_FOOTER_PROPS
 
   return (
     <AppBasicContext.Provider value={contextValue}>
-      <Storage namespace={namespace} {...storageRest}>
+      <Storage {...storageProps}>
         <AuthProvider {...authProviderProps}>
           <HeaderContextProvider defaultSettings={headerSettings}>
             <ResponsiveSlotProvider
@@ -595,14 +848,18 @@ export const AppBasic = ({
               defaultBreakpoint={themeOptions.defaultBreakpoint}
               resolveToken={themeOptions.resolveToken}
             >
-              <div data-app-variant="basic" className={rootClassName} {...rest}>
+              <div
+                {...(rootAttributes.dataAttributes ?? {})}
+                className={rootAttributes.className ?? APP_BASIC_DEFAULTS.layout.rootClassName}
+                {...rest}
+              >
                 <Header {...headerProps} />
-                <main className="gg-app-basic__main" {...(mainProps ?? {})}>
+                <main {...mainAttributes}>
                   <ProtectedRouter
-                    routes={combinedRoutes}
-                    fallback={fallbackRoute}
+                    routes={router.routes}
+                    fallback={router.fallback}
                     guardProps={guardProps}
-                    protectFallback={protectedConfig.protectFallback}
+                    protectFallback={router.protectFallback}
                     {...protectedRouterProps}
                   />
                   {children}
