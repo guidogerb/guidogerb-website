@@ -199,4 +199,51 @@ describe('Gary Gerber website App', () => {
 
     pushStateSpy.mockRestore()
   })
+
+  it('renders the rehearsal overview route with quick navigation to the resource library', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+    window.history.replaceState({}, '', '/rehearsal')
+
+    const pushStateSpy = vi.spyOn(window.history, 'pushState')
+
+    await renderApp()
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Client rehearsal room' }),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('heading', { level: 4, name: 'Rehearsal quick access' }),
+    ).toBeInTheDocument()
+
+    const user = userEvent.setup()
+    const openResourcesLink = screen.getByRole('link', { name: 'Open rehearsal resources' })
+
+    await user.click(openResourcesLink)
+
+    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/rehearsal/resources')
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' }),
+      ).toBeInTheDocument()
+    })
+
+    pushStateSpy.mockRestore()
+  })
+
+  it('renders the rehearsal library directly when routed to the resource path', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+    window.history.replaceState({}, '', '/rehearsal/resources')
+
+    await renderApp()
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Client rehearsal room' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 4, name: 'Rehearsal quick access' })).toBeNull()
+    expect(
+      screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' }),
+    ).toBeInTheDocument()
+  })
 })
