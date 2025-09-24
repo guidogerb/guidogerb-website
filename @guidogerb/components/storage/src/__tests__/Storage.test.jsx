@@ -405,7 +405,12 @@ describe('Storage provider', () => {
     await waitFor(() => {
       expect(screen.getByTestId('presence')).toHaveTextContent('yes')
       expect(events).toContainEqual(
-        expect.objectContaining({ type: 'set', value: 'remote', source: 'external', present: true }),
+        expect.objectContaining({
+          type: 'set',
+          value: 'remote',
+          source: 'external',
+          present: true,
+        }),
       )
     })
 
