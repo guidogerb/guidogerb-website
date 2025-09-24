@@ -27,22 +27,33 @@ commands it will execute.
 
 ### `AddCF-Tenant.ps1`
 
-Captures the input contract and guard rails for the forthcoming automation that
-will provision a brand new tenant inside the shared CloudFront distribution. The
-script validates the tenant domain, human readable display name, distribution
-identifier, and the list of environment secret keys to ensure callers cannot
-accidentally scaffold duplicate tenants or provide malformed configuration. The
-orchestration that scaffolds a workspace and updates repository wiring will plug
-into this validated contract in upcoming tasks documented in
-[`tasks.md`](./tasks.md).
+Validates the tenant contract **and** scaffolds a new Vite/React workspace wired
+to the shared CloudFront distribution. The script ensures the domain, human
+readable display name, distribution identifier, and environment secret keys are
+well-formed before generating a site that renders the shared `<AppBasic />`
+shell. Successful runs create the `websites/<domain>/` workspace, update root
+pnpm workspaces and build scripts, append the CloudFront distribution map, and
+extend local development assets (nginx configs, sync scripts) so the tenant
+flows through existing tooling automatically. Usage example:
+
+```powershell
+pwsh ./AddCF-Tenant.ps1 \
+  -Domain 'exampletenant.com' \
+  -DisplayName 'Example Tenant' \
+  -DistributionId 'EGG1850W4K2XV' \
+  -EnvSecretKeys @('VITE_API_BASE_URL','VITE_COGNITO_CLIENT_ID')
+```
+
+Follow-on automation (documented in [`tasks.md`](./tasks.md)) will generalise
+CI/CD workflows and regression testing around the generated scaffold.
 
 ## Supporting data files
 
 ### `cf-distributions.json`
 
-A manually maintained map of tenant domains to CloudFront distribution IDs used
-by release and invalidation workflows. This file will eventually become
-automatically generated once the `AddCF-Tenant` automation lands.
+Map of tenant domains to CloudFront distribution IDs used by release and
+invalidation workflows. `AddCF-Tenant.ps1` now updates the file automatically
+whenever a new tenant scaffold is created.
 
 ### `invalidation.json`
 
@@ -58,18 +69,14 @@ purposes.
 
 ## Tenant automation roadmap
 
-A new automation pass will:
+The current automation covers end-to-end scaffolding. Upcoming work will:
 
-- Provision CloudFront tenants without manual CLI usage.
-- Generate a Vite/React workspace for the new domain (including `AppBasic`
-  wiring and tenant-specific environment files).
-- Update configuration files, scripts, and GitHub Actions workflows so new
-  tenants participate in builds, deployments, and local development without
-  manual edits.
-- Provide verification that root `package.json` scripts (`clean`, `install`,
-  `build`, `lint`, `format`, `preview`) continue to succeed across every
-  workspace after scaffolding a tenant.
-- Ship regression tests that assert the automation produced a runnable website
-  and the preview server renders the welcome page.
+- Generalise GitHub Actions so build/deploy matrices discover tenants generated
+  by the script and pull their secrets from a shared contract.
+- Add regression tests that invoke `AddCF-Tenant.ps1` in CI, run `pnpm
+  clean/install/build/lint/format`, and boot a preview to verify the welcome
+  experience renders.
+- Publish operator runbooks that document IAM requirements, cleanup steps, and
+  post-scaffold verification.
 
 See [`tasks.md`](./tasks.md) for the detailed breakdown.
