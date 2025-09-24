@@ -461,7 +461,7 @@ src/
 - [ ] Build `useBreakpointKey()` with `matchMedia` subscriptions and cleanup.
 - [ ] Add SSR/SSG default fallback support via provider prop.
 - [ ] Build `resolveSizes(slotKey, bp, overrides)` with deep merge + fallbacks.
-- [ ] Implement double‑buffered CSS variable algorithm and atomic flip.
+- [x] Implement double‑buffered CSS variable algorithm and atomic flip.
 - [ ] Expose `useResponsiveSlotSize()` hook returning resolved sizes + active breakpoint.
 
 #### 3) Wrapper Component
@@ -506,7 +506,7 @@ src/
 ### 8) Diagnostics & Perf
 
 - [ ] Implement shared `ResizeObserver` hook; log overflows (dev only).
-- [ ] Add perf marks around hydrate flip; expose counters in `window.__GG__` (dev only).
+- [x] Add perf marks around hydrate flip; expose counters in `window.__GG__` (dev only).
 
 #### 9) Testing
 

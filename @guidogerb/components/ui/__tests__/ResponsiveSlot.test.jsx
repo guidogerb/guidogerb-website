@@ -125,15 +125,17 @@ describe('ResponsiveSlot', () => {
       </ResponsiveSlotProvider>,
     )
 
-    expect(markup).toContain('--slot-inline-size:24rem')
-    expect(markup).toContain('--slot-block-size:26rem')
-    expect(markup).toContain('inline-size:var(--slot-inline-size)')
+    expect(markup).toContain('--slot-inline-size-A:24rem')
+    expect(markup).toContain('--slot-inline-size-B:24rem')
+    expect(markup).toContain('--slot-inline:24rem')
+    expect(markup).toContain('inline-size:var(--slot-inline)')
     expect(markup).toContain('role="presentation"')
     expect(markup).toContain('data-slot-key="catalog.card"')
     expect(markup).toContain('data-slot-label="Catalog Card"')
     expect(markup).toContain('data-slot-default-variant="default"')
     expect(markup).toContain('data-slot-variant-label="Default"')
     expect(markup).toContain('data-slot-tags="commerce,grid"')
+    expect(markup).toContain('data-slot-buffer="A"')
   })
 
   it('updates CSS variables when the active breakpoint changes', async () => {
@@ -153,8 +155,11 @@ describe('ResponsiveSlot', () => {
       const slot = await screen.findByTestId('slot')
 
       await waitFor(() => {
-        expect(slot.style.getPropertyValue('--slot-inline-size')).toBe('min(100%, 20rem)')
-        expect(slot.style.getPropertyValue('--slot-block-size')).toBe('24rem')
+        expect(slot.dataset.slotBuffer).toBe('B')
+        expect(slot.style.getPropertyValue('--slot-inline-size-A')).toBe('22rem')
+        expect(slot.style.getPropertyValue('--slot-inline-size-B')).toBe('min(100%, 20rem)')
+        expect(slot.style.getPropertyValue('--slot-inline')).toBe('min(100%, 20rem)')
+        expect(slot.style.getPropertyValue('--slot-block')).toBe('24rem')
         expect(slot.dataset.slotDefaultVariant).toBe('default')
         expect(slot.dataset.slotVariantLabel).toBe('Default')
       })
@@ -164,11 +169,62 @@ describe('ResponsiveSlot', () => {
       })
 
       await waitFor(() => {
-        expect(slot.style.getPropertyValue('--slot-inline-size')).toBe('24rem')
-        expect(slot.style.getPropertyValue('--slot-block-size')).toBe('26rem')
+        expect(slot.dataset.slotBuffer).toBe('A')
+        expect(slot.style.getPropertyValue('--slot-inline-size-A')).toBe('24rem')
+        expect(slot.style.getPropertyValue('--slot-inline-size-B')).toBe('min(100%, 20rem)')
+        expect(slot.style.getPropertyValue('--slot-inline')).toBe('24rem')
+        expect(slot.style.getPropertyValue('--slot-block')).toBe('26rem')
       })
     } finally {
       window.matchMedia = originalMatchMedia
+    }
+  })
+
+  it('records buffer flip metrics and performance marks during hydration', async () => {
+    const originalMatchMedia = window.matchMedia
+    const mockMatchMedia = createMatchMedia(420)
+    window.matchMedia = mockMatchMedia
+
+    const performance = window.performance
+    const markSpy =
+      performance && typeof performance.mark === 'function'
+        ? vi.spyOn(performance, 'mark')
+        : null
+    const measureSpy =
+      performance && typeof performance.measure === 'function'
+        ? vi.spyOn(performance, 'measure')
+        : null
+
+    delete window.__GG__
+
+    try {
+      render(
+        <ResponsiveSlotProvider defaultBreakpoint="md">
+          <ResponsiveSlot slot="catalog.card" data-testid="slot-buffer-test">
+            <div />
+          </ResponsiveSlot>
+        </ResponsiveSlotProvider>,
+      )
+
+      await waitFor(() => {
+        expect(window.__GG__?.responsiveSlot?.bufferFlips ?? 0).toBeGreaterThanOrEqual(1)
+      })
+
+      const metrics = window.__GG__?.responsiveSlot
+      expect(metrics).toBeDefined()
+      expect(metrics.lastFlip?.slot).toBe('catalog.card')
+      expect(['A', 'B']).toContain(metrics.lastFlip?.from)
+      expect(['A', 'B']).toContain(metrics.lastFlip?.to)
+      expect(typeof metrics.lastFlip?.timestamp).toBe('number')
+
+      if (markSpy) {
+        expect(markSpy).toHaveBeenCalled()
+      }
+    } finally {
+      if (markSpy) markSpy.mockRestore()
+      if (measureSpy) measureSpy.mockRestore()
+      window.matchMedia = originalMatchMedia
+      delete window.__GG__
     }
   })
 
