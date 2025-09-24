@@ -42,6 +42,15 @@ export function SlotEditorOverlay({
   })
   const [jsonError, setJsonError] = useState(null)
 
+  const formattedLastUpdatedAt = useMemo(() => {
+    if (!lastUpdatedAt) return null
+    try {
+      return new Date(lastUpdatedAt).toLocaleString()
+    } catch (error) {
+      return String(lastUpdatedAt)
+    }
+  }, [lastUpdatedAt])
+
   useEffect(() => {
     if (activeBreakpoint) {
       setSelectedBreakpoint((current) =>
@@ -135,8 +144,8 @@ export function SlotEditorOverlay({
           </div>
           <div style={{ textAlign: 'right', fontSize: '0.75rem', lineHeight: 1.3 }}>
             <div>{statusLabel}</div>
-            {lastUpdatedAt ? (
-              <div style={{ opacity: 0.7 }}>Updated {new Date(lastUpdatedAt).toLocaleString()}</div>
+            {formattedLastUpdatedAt ? (
+              <div style={{ opacity: 0.7 }}>Updated {formattedLastUpdatedAt}</div>
             ) : null}
             {error ? (
               <div style={{ color: '#f87171' }}>{error.message || String(error)}</div>

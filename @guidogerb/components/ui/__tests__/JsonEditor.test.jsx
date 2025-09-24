@@ -89,4 +89,16 @@ describe('JsonEditor', () => {
 
     expect(handleTextareaChange).toHaveBeenCalledTimes(1)
   })
+
+  it('avoids emitting redundant onErrorChange callbacks when value text is unchanged', () => {
+    const handleErrorChange = vi.fn()
+
+    const { rerender } = render(
+      <JsonEditor label="Props" value={{ foo: 'bar' }} onErrorChange={handleErrorChange} />,
+    )
+
+    rerender(<JsonEditor label="Props" value={{ foo: 'bar' }} onErrorChange={handleErrorChange} />)
+
+    expect(handleErrorChange).not.toHaveBeenCalled()
+  })
 })

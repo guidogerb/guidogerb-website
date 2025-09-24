@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 function formatJson(value) {
   if (value == null) {
@@ -83,12 +83,28 @@ export function JsonEditor({
   const textareaIdValue = id ?? textareaId ?? generatedId
   const [textValue, setTextValue] = useState(() => formatJson(value))
   const [error, setError] = useState(null)
+  const textRef = useRef(textValue)
+  const errorRef = useRef(error)
+
+  useEffect(() => {
+    textRef.current = textValue
+  }, [textValue])
+
+  useEffect(() => {
+    errorRef.current = error
+  }, [error])
 
   useEffect(() => {
     const formatted = formatJson(value)
-    setTextValue(formatted)
-    setError(null)
-    if (typeof onErrorChange === 'function') {
+    if (textRef.current !== formatted) {
+      setTextValue(formatted)
+    }
+    if (errorRef.current !== null) {
+      setError(null)
+      if (typeof onErrorChange === 'function') {
+        onErrorChange(null)
+      }
+    } else if (typeof onErrorChange === 'function' && textRef.current !== formatted) {
       onErrorChange(null)
     }
   }, [value, onErrorChange])
@@ -114,8 +130,12 @@ export function JsonEditor({
         onErrorChange(parseError)
       }
     } else {
-      setError(null)
-      if (typeof onErrorChange === 'function') {
+      if (errorRef.current !== null) {
+        setError(null)
+        if (typeof onErrorChange === 'function') {
+          onErrorChange(null)
+        }
+      } else if (typeof onErrorChange === 'function') {
         onErrorChange(null)
       }
       if (typeof onChange === 'function') {

@@ -246,7 +246,10 @@ const PointOfSaleExperience = ({
   } = useUser()
 
   const [view, setView] = useState('pos')
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState(() => {
+    const cached = offlineCache?.get('products')
+    return Array.isArray(cached) ? cached : []
+  })
   const [isLoadingProducts, setIsLoadingProducts] = useState(false)
   const [productsError, setProductsError] = useState(null)
   const [orders, setOrders] = useState(() => {
@@ -342,13 +345,28 @@ const PointOfSaleExperience = ({
         : Array.isArray(result?.items)
           ? result.items
           : []
-      setProducts(items)
+      if (items.length > 0) {
+        setProducts(items)
+        offlineCache?.set?.('products', items)
+      } else {
+        const cached = offlineCache?.get?.('products')
+        if (Array.isArray(cached) && cached.length > 0) {
+          setProducts(cached)
+        } else {
+          setProducts(items)
+          offlineCache?.set?.('products', items)
+        }
+      }
     } catch (error) {
       setProductsError(error)
+      const cached = offlineCache?.get?.('products')
+      if (Array.isArray(cached) && cached.length > 0) {
+        setProducts(cached)
+      }
     } finally {
       setIsLoadingProducts(false)
     }
-  }, [posApi, user?.id])
+  }, [offlineCache, posApi, user?.id])
 
   const loadOrders = useCallback(async () => {
     if (!posApi?.listOrders) return

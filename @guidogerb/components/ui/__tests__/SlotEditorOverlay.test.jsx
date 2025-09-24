@@ -63,4 +63,74 @@ describe('SlotEditorOverlay', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Discard' }))
     expect(handleDiscard).toHaveBeenCalled()
   })
+
+  it('renders a formatted last updated timestamp when available', () => {
+    const toLocaleSpy = vi.spyOn(Date.prototype, 'toLocaleString').mockReturnValue(
+      '09/19/2025, 12:00:00 AM',
+    )
+
+    try {
+      render(
+        <SlotEditorOverlay
+          slotKey="test.slot"
+          slotLabel="Test Slot"
+          editableId="slot-1"
+          variant="default"
+          breakpoints={[{ key: 'md' }]}
+          activeBreakpoint="md"
+          sizes={{ md: {} }}
+          draftSizes={{}}
+          propsJSON={{}}
+          publishDraft={() => {}}
+          discardDraft={() => {}}
+          isDirty={false}
+          status="idle"
+          error={null}
+          lastUpdatedAt="2025-09-19T00:00:00.000Z"
+          isActive
+        />,
+      )
+
+      expect(screen.getByText('Updated 09/19/2025, 12:00:00 AM')).toBeInTheDocument()
+    } finally {
+      toLocaleSpy.mockRestore()
+    }
+  })
+
+  it('falls back to the raw lastUpdatedAt value when formatting fails', () => {
+    const toLocaleSpy = vi
+      .spyOn(Date.prototype, 'toLocaleString')
+      .mockImplementation(() => {
+        throw new Error('locale failure')
+      })
+
+    try {
+      render(
+        <SlotEditorOverlay
+          slotKey="test.slot"
+          slotLabel="Test Slot"
+          editableId="slot-1"
+          variant="default"
+          breakpoints={[{ key: 'md' }]}
+          activeBreakpoint="md"
+          sizes={{ md: {} }}
+          draftSizes={{}}
+          propsJSON={{}}
+          publishDraft={() => {}}
+          discardDraft={() => {}}
+          isDirty={false}
+          status="idle"
+          error={null}
+          lastUpdatedAt="2025-09-19T00:00:00.000Z"
+          isActive
+        />,
+      )
+
+      expect(
+        screen.getByText('Updated 2025-09-19T00:00:00.000Z'),
+      ).toBeInTheDocument()
+    } finally {
+      toLocaleSpy.mockRestore()
+    }
+  })
 })

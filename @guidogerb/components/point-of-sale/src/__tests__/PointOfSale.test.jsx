@@ -273,6 +273,25 @@ const createMockStorage = () => {
   }
 }
 
+const createOfflineStorageMock = (initialData) => {
+  const store = new Map()
+
+  if (initialData) {
+    store.set('guidogerb.pos.offline', JSON.stringify(initialData))
+  }
+
+  return {
+    getItem: vi.fn((key) => (store.has(key) ? store.get(key) : null)),
+    setItem: vi.fn((key, value) => {
+      store.set(key, value)
+    }),
+    removeItem: vi.fn((key) => {
+      store.delete(key)
+    }),
+    snapshot: () => Object.fromEntries(store.entries()),
+  }
+}
+
 describe('PointOfSale', () => {
   it('renders catalog, processes payment, and shows invoice + history', async () => {
     const invoiceStore = []
@@ -393,6 +412,89 @@ describe('PointOfSale', () => {
     expect(mockApi.recordOrder).toHaveBeenCalled()
   })
 
+  it('persists fetched products for offline reuse', async () => {
+    const offlineStorage = createOfflineStorageMock()
+
+    const mockApi = {
+      listProducts: vi.fn().mockResolvedValue([
+        {
+          id: 'prod-cache',
+          title: 'Cacheable Tee',
+          description: 'Stored for offline use',
+          price: { amount: 2500, currency: 'USD' },
+          availability: { status: 'AVAILABLE', fulfillment: 'PHYSICAL' },
+        },
+      ]),
+      listInvoices: vi.fn().mockResolvedValue([]),
+      listOrders: vi.fn().mockResolvedValue([]),
+    }
+
+    render(
+      <PointOfSale
+        withElements={false}
+        api={mockApi}
+        offlineStorage={offlineStorage}
+        initialUser={{ id: 'user-cache', name: 'Cache Keeper', email: 'cache@example.com' }}
+      />,
+    )
+
+    expect(await screen.findByText('Cacheable Tee')).toBeInTheDocument()
+
+    await waitFor(() => {
+      expect(offlineStorage.setItem).toHaveBeenCalled()
+      const persistedPayloads = offlineStorage.setItem.mock.calls
+        .map(([, value]) => value)
+        .filter(Boolean)
+      const containsProduct = persistedPayloads.some((value) => {
+        try {
+          const parsed = JSON.parse(value)
+          return Array.isArray(parsed.products)
+            ? parsed.products.some((product) => product.id === 'prod-cache')
+            : false
+        } catch (error) {
+          return false
+        }
+      })
+      expect(containsProduct).toBe(true)
+    })
+  })
+
+  it('reuses cached products when the API returns an empty catalog', async () => {
+    const cachedProducts = [
+      {
+        id: 'prod-offline',
+        title: 'Offline Espresso Beans',
+        description: 'A backup catalog entry',
+        price: { amount: 1800, currency: 'USD' },
+        availability: { status: 'AVAILABLE', fulfillment: 'PHYSICAL' },
+      },
+    ]
+
+    const offlineStorage = createOfflineStorageMock({ products: cachedProducts })
+
+    const mockApi = {
+      listProducts: vi.fn().mockResolvedValue([]),
+      listInvoices: vi.fn().mockResolvedValue([]),
+      listOrders: vi.fn().mockResolvedValue([]),
+    }
+
+    render(
+      <PointOfSale
+        withElements={false}
+        api={mockApi}
+        offlineStorage={offlineStorage}
+        initialUser={{ id: 'user-offline', name: 'Offline Operator', email: 'offline@example.com' }}
+      />,
+    )
+
+    expect(await screen.findByText('Offline Espresso Beans')).toBeInTheDocument()
+    await waitFor(() => expect(mockApi.listProducts).toHaveBeenCalled())
+    await waitFor(() => expect(screen.queryByText(/Loading products/)).not.toBeInTheDocument())
+
+    expect(screen.getByText('Offline Espresso Beans')).toBeInTheDocument()
+    expect(screen.queryByText('No products available.')).not.toBeInTheDocument()
+  })
+
   it('fetches invoice details when order is selected without local cache', async () => {
     const mockApi = {
       listProducts: vi.fn().mockResolvedValue([]),
@@ -460,6 +562,7 @@ describe('PointOfSale', () => {
 
   it('persists handoff entries after successful checkout', async () => {
     const storage = createMockStorage()
+    const offlineStorage = createOfflineStorageMock()
     const invoiceStore = []
     const orderStore = []
 
@@ -515,6 +618,7 @@ describe('PointOfSale', () => {
           confirmPayment={mockConfirmPayment}
           initialUser={{ id: 'user-2', name: 'Nina Simone', email: 'nina@example.com' }}
           handoffStorage={storage}
+          offlineStorage={offlineStorage}
         />
       </Elements>,
     )
@@ -545,6 +649,7 @@ describe('PointOfSale', () => {
 
   it('queues pending handoffs when invoice persistence fails', async () => {
     const storage = createMockStorage()
+    const offlineStorage = createOfflineStorageMock()
     const mockApi = {
       listProducts: vi.fn().mockResolvedValue([
         {
@@ -576,6 +681,7 @@ describe('PointOfSale', () => {
           confirmPayment={mockConfirmPayment}
           initialUser={{ id: 'user-3', name: 'Ella Fitzgerald', email: 'ella@example.com' }}
           handoffStorage={storage}
+          offlineStorage={offlineStorage}
         />
       </Elements>,
     )
