@@ -261,4 +261,19 @@ describe('ProtectedRouter', () => {
     expect(screen.getByTestId('default-guard-loading')).toHaveTextContent('Protected Loading...')
     expect(screen.queryByText('Missing')).not.toBeInTheDocument()
   })
+
+  it('redirects protected routes while preserving guard output', async () => {
+    render(
+      <ProtectedRouter
+        router={createMemoryRouter}
+        routerOptions={{ initialEntries: ['/legacy'] }}
+        routes={[
+          { path: '/legacy', redirectTo: '/dashboard' },
+          { path: '/dashboard', element: <div>Dashboard</div> },
+        ]}
+      />,
+    )
+
+    expect(await screen.findByTestId('default-guard')).toHaveTextContent('Dashboard')
+  })
 })

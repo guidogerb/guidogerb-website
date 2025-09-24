@@ -165,4 +165,16 @@ describe('createProtectedRouteObjects', () => {
     expect(fallback.element.props.title).toBe('Hola')
     expect(fallback.element.props.primaryAction).toMatchObject({ href: '/inicio', label: 'Inicio' })
   })
+
+  it('preserves route handle metadata for breadcrumb helpers', () => {
+    const handle = { breadcrumb: 'Dashboard' }
+    const routes = createProtectedRouteObjects([
+      { path: '/dashboard', element: <div>Dashboard</div>, handle },
+    ])
+
+    expect(routes[0].handle).toBe(handle)
+
+    render(routes[0].element)
+    expect(screen.getByTestId('guard')).toHaveTextContent('Dashboard')
+  })
 })
