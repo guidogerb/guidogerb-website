@@ -58,7 +58,13 @@ const resolveOverride = (overrides, key) => {
   return undefined
 }
 
-const buildContextValue = ({ namespace, defaultArea, fallbackArea, controllers }) => {
+const buildContextValue = ({
+  namespace,
+  defaultArea,
+  fallbackArea,
+  controllers,
+  logger = console,
+}) => {
   const entries = Array.from(controllers.entries())
   const controllersObject = Object.fromEntries(entries)
 
@@ -138,6 +144,69 @@ const buildContextValue = ({ namespace, defaultArea, fallbackArea, controllers }
     return () => {}
   }
 
+  const subscribeToValue = (key, listener, area = defaultArea) => {
+    if (!key || typeof listener !== 'function') {
+      return () => {}
+    }
+
+    const controller = getController(area)
+    if (!controller || typeof controller.subscribe !== 'function') {
+      return () => {}
+    }
+
+    let active = true
+
+    const invokeListener = (event) => {
+      if (!active) return
+      try {
+        listener(event)
+      } catch (error) {
+        if (logger?.warn) {
+          logger.warn('[storage] subscribeToValue listener threw an error', error)
+        }
+      }
+    }
+
+    const emitEvent = (type, value) => {
+      invokeListener({
+        type,
+        key,
+        area,
+        namespace,
+        value,
+        present: hasValue(key, area),
+      })
+    }
+
+    emitEvent('init', getValue(key, undefined, area))
+
+    const unsubscribe = controller.subscribe((event) => {
+      if (!event) return
+
+      if (event.type === 'clear') {
+        emitEvent('clear')
+        return
+      }
+
+      if (event.key !== key) return
+
+      emitEvent(event.type, event.value)
+    })
+
+    return () => {
+      active = false
+      if (typeof unsubscribe === 'function') {
+        try {
+          unsubscribe()
+        } catch (error) {
+          if (logger?.warn) {
+            logger.warn('[storage] subscribeToValue cleanup failed', error)
+          }
+        }
+      }
+    }
+  }
+
   return {
     namespace,
     defaultArea,
@@ -154,6 +223,7 @@ const buildContextValue = ({ namespace, defaultArea, fallbackArea, controllers }
     listValues,
     snapshot,
     subscribe,
+    subscribeToValue,
   }
 }
 
@@ -162,6 +232,7 @@ const DEFAULT_CONTEXT = buildContextValue({
   defaultArea: 'memory',
   fallbackArea: 'memory',
   controllers: new Map([['memory', createStorageController({ namespace: 'gg', area: 'memory' })]]),
+  logger: console,
 })
 
 export const StorageContext = createContext(DEFAULT_CONTEXT)
@@ -230,8 +301,8 @@ export const Storage = ({
   }, [normalizedAreas, overrides, controllerFactory, namespace, logger, defaultArea, fallbackArea])
 
   const contextValue = useMemo(
-    () => buildContextValue({ namespace, defaultArea, fallbackArea, controllers }),
-    [namespace, defaultArea, fallbackArea, controllers],
+    () => buildContextValue({ namespace, defaultArea, fallbackArea, controllers, logger }),
+    [namespace, defaultArea, fallbackArea, controllers, logger],
   )
 
   useEffect(() => {
@@ -323,6 +394,37 @@ export const useStoredValue = (key, { area, defaultValue } = {}) => {
   }, [controller, key])
 
   return [value, updateValue, removeValue]
+}
+
+export const useHasStoredValue = (key, { area } = {}) => {
+  const storage = useStorage()
+
+  const resolvePresence = useCallback(() => {
+    if (!key) return false
+    return storage.hasValue(key, area)
+  }, [storage, key, area])
+
+  const [present, setPresent] = useState(() => resolvePresence())
+
+  useEffect(() => {
+    setPresent(resolvePresence())
+    if (!key || typeof storage.subscribeToValue !== 'function') {
+      return undefined
+    }
+
+    const unsubscribe = storage.subscribeToValue(
+      key,
+      (event) => {
+        if (!event) return
+        setPresent(Boolean(event.present))
+      },
+      area,
+    )
+
+    return unsubscribe
+  }, [storage, key, area, resolvePresence])
+
+  return present
 }
 
 export default Storage

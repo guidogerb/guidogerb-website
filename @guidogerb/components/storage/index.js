@@ -6,6 +6,7 @@ export {
   useStorage,
   useStorageController,
   useStoredValue,
+  useHasStoredValue,
 } from './src/Storage.jsx'
 export { createStorageController } from './src/createStorageController.js'
 export {
