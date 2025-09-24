@@ -162,6 +162,30 @@ describe('Stream4Cloud marketing app', () => {
     expect(
       screen.getByRole('heading', { level: 3, name: /signal uptime commitments/i }),
     ).toBeInTheDocument()
+
+    expect(screen.getByRole('link', { name: 'Timeline' })).toHaveAttribute(
+      'href',
+      '#broadcast-timeline',
+    )
+
+    const timelineSection = screen
+      .getByRole('heading', { level: 2, name: /broadcast readiness timeline/i })
+      .closest('section')
+
+    expect(timelineSection).not.toBeNull()
+    const timelineQueries = within(timelineSection ?? document.body)
+    expect(
+      timelineQueries.getByRole('list', { name: /broadcast readiness steps/i }),
+    ).toBeInTheDocument()
+    expect(
+      timelineQueries.getByRole('heading', { level: 3, name: /align the launch blueprint/i }),
+    ).toBeInTheDocument()
+    expect(
+      timelineQueries.getByRole('heading', { level: 3, name: /measure and optimise the next season/i }),
+    ).toBeInTheDocument()
+    expect(
+      timelineQueries.getByText(/rehearsal reminders and run-of-show updates/i),
+    ).toBeInTheDocument()
   })
 
   it('serves an offline landing route with reconnect guidance', async () => {

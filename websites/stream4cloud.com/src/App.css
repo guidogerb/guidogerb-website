@@ -363,6 +363,107 @@
   margin-top: 0.35rem;
 }
 
+.timeline {
+  display: grid;
+  gap: 2rem;
+}
+
+.timeline__intro {
+  display: grid;
+  gap: 1rem;
+  max-width: 50rem;
+}
+
+.timeline__intro p {
+  margin: 0;
+  color: rgba(210, 222, 245, 0.8);
+  line-height: 1.6;
+}
+
+.timeline__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.timeline__item {
+  background: rgba(9, 14, 28, 0.82);
+  border-radius: 24px;
+  padding: 1.75rem 1.5rem;
+  border: 1px solid rgba(82, 120, 210, 0.4);
+  box-shadow: 0 22px 55px rgba(5, 9, 22, 0.5);
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 820px) {
+  .timeline__item {
+    grid-template-columns: auto 1fr;
+    padding: 2rem 2.25rem 2rem 1.75rem;
+  }
+}
+
+.timeline__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6f8cff, #a6c3ff);
+  color: #0a1020;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: 0 18px 38px rgba(52, 88, 200, 0.5);
+}
+
+.timeline__content {
+  display: grid;
+  gap: 1rem;
+}
+
+.timeline__content h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.timeline__content p {
+  margin: 0;
+  color: rgba(202, 214, 245, 0.78);
+  line-height: 1.6;
+}
+
+.timeline__milestones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.timeline__milestones li {
+  position: relative;
+  padding-left: 1.5rem;
+  color: rgba(196, 210, 242, 0.78);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.timeline__milestones li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #77a0ff, #b3ccff);
+  box-shadow: 0 0 0 2px rgba(12, 18, 38, 0.82);
+}
+
 .signals-grid h3 {
   margin: 0 0 0.75rem;
   font-size: 1.15rem;
@@ -442,6 +543,29 @@
 
 .partner-panel > * {
   color: inherit;
+}
+
+.partner-panel .upcoming-production {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(90, 130, 210, 0.35);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.partner-panel .upcoming-production a {
+  color: #aecdff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.partner-panel .upcoming-production a:hover,
+.partner-panel .upcoming-production a:focus-visible {
+  text-decoration: underline;
+}
+
+.partner-panel .upcoming-production strong {
+  color: #e3ecff;
 }
 
 .offline {
