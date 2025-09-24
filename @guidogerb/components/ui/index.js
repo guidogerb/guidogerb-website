@@ -1,8 +1,8 @@
+// Public responsive slot exports
+export * from './src/responsive-slot/index.js'
+
 // Re-export library entry for consumers that import from the package root
 export * from './src/JsonViewer/JsonViewer.jsx'
-export * from './src/ResponsiveSlot/ResponsiveSlot.jsx'
-export { EditModeProvider, useEditMode } from './src/ResponsiveSlot/editing/EditModeContext.jsx'
-export { JsonEditor } from './src/ResponsiveSlot/editing/JsonEditor.jsx'
 
 // Marketing site sections
 export { HeroSection } from './src/sections/HeroSection.jsx'

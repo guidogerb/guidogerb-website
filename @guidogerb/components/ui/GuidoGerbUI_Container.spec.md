@@ -452,8 +452,8 @@ src/
 
 #### 1) Foundations
 
-- [ ] Create `responsive-slot` module and exports from `@guidogerb/components/ui`.
-- [ ] Implement `SlotSizeMap`, `BreakpointKey`, `Registry` types with strict TS.
+- [x] Create `responsive-slot` module and exports from `@guidogerb/components/ui`.
+- [x] Implement `SlotSizeMap`, `BreakpointKey`, `Registry` types with strict TS.
 - [ ] Implement base presets (`catalog.card`, `dashboard.panel`, `hero.banner`, `list.row`).
 
 #### 2) Breakpoints & Sizing

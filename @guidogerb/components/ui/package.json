@@ -13,6 +13,11 @@
     ".": {
       "import": "./index.js",
       "require": "./index.js"
+    },
+    "./responsive-slot": {
+      "types": "./src/responsive-slot/index.d.ts",
+      "import": "./src/responsive-slot/index.js",
+      "require": "./src/responsive-slot/index.js"
     }
   },
   "files": [
@@ -23,7 +28,9 @@
     "src/ResponsiveSlot/editing/JsonEditor.jsx",
     "src/ResponsiveSlot/editing/SlotEditorOverlay.jsx",
     "src/ResponsiveSlot/editing/useSlotEditing.js",
-    "src/ResponsiveSlot/editing/localDraftStorage.js"
+    "src/ResponsiveSlot/editing/localDraftStorage.js",
+    "src/responsive-slot/index.js",
+    "src/responsive-slot/index.d.ts"
   ],
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
