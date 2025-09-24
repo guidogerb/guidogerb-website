@@ -25,14 +25,16 @@ invalidation request using either a shared JSON batch or a generated batch based
 on the provided paths. The helper can operate in dry-run mode to preview the
 commands it will execute.
 
-### `AddCF-Tenant.ps1` (planned)
+### `AddCF-Tenant.ps1`
 
-Reserved for future automation that provisions a brand new tenant inside the
-shared distribution. The script will create the distribution tenant, scaffold a
-new website workspace with the base Vite `<AppBasic />` wiring, and update every
-repository location that currently hard-codes domain names (GitHub workflows,
-root `package.json` scripts, local-dev nginx configs, etc.). Tasks for this work
-live in [`tasks.md`](./tasks.md).
+Captures the input contract and guard rails for the forthcoming automation that
+will provision a brand new tenant inside the shared CloudFront distribution. The
+script validates the tenant domain, human readable display name, distribution
+identifier, and the list of environment secret keys to ensure callers cannot
+accidentally scaffold duplicate tenants or provide malformed configuration. The
+orchestration that scaffolds a workspace and updates repository wiring will plug
+into this validated contract in upcoming tasks documented in
+[`tasks.md`](./tasks.md).
 
 ## Supporting data files
 
