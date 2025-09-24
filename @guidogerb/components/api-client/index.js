@@ -1,3 +1,5 @@
 export { createClient, ApiError } from './src/client.js'
 export { createApi } from './src/api.js'
+export { collectPaginatedResults } from './src/pagination.js'
+export { normalizeApiError } from './src/errors.js'
 export { createClient as default } from './src/client.js'
