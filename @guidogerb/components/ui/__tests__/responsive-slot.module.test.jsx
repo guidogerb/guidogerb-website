@@ -9,20 +9,30 @@ import {
 } from '../src/responsive-slot/index.js'
 
 describe('responsive-slot module exports', () => {
-  it('aliases GuidoGerbUI_Container to the existing ResponsiveSlot component', () => {
-    expect(ResponsiveSlot).toBe(GuidoGerbUI_Container)
-
+  it('renders equivalent markup via GuidoGerbUI_Container and ResponsiveSlot', () => {
     render(
       <ResponsiveSlotProvider defaultBreakpoint="lg">
-        <GuidoGerbUI_Container slot="catalog.card" data-testid="slot">
-          <div>Content</div>
-        </GuidoGerbUI_Container>
+        <div>
+          <GuidoGerbUI_Container slot="catalog.card" data-testid="container">
+            <div>Container child</div>
+          </GuidoGerbUI_Container>
+          <ResponsiveSlot slot="catalog.card" data-testid="legacy">
+            <div>Legacy child</div>
+          </ResponsiveSlot>
+        </div>
       </ResponsiveSlotProvider>,
     )
 
-    const slot = screen.getByTestId('slot')
-    expect(slot.dataset.slotKey).toBe('catalog.card')
-    expect(slot.dataset.slotLabel).toBe('Catalog Card')
+    const container = screen.getByTestId('container')
+    const legacy = screen.getByTestId('legacy')
+
+    expect(container.dataset.slotKey).toBe('catalog.card')
+    expect(container.dataset.slotLabel).toBe('Catalog Card')
+    expect(container.dataset.slotDefaultVariant).toBe('default')
+
+    expect(legacy.dataset.slotKey).toBe(container.dataset.slotKey)
+    expect(legacy.dataset.slotLabel).toBe(container.dataset.slotLabel)
+    expect(legacy.dataset.slotDefaultVariant).toBe(container.dataset.slotDefaultVariant)
   })
 
   it('exposes breakpoint descriptors and base presets', () => {

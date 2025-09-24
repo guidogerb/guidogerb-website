@@ -187,7 +187,9 @@ export function GuidoGerbUI_Container<E extends React.ElementType = 'div'>(
   props: GuidoGerbUI_ContainerProps<E>,
 ): JSX.Element
 
-export { GuidoGerbUI_Container as ResponsiveSlot }
+export function ResponsiveSlot<E extends React.ElementType = 'div'>(
+  props: GuidoGerbUI_ContainerProps<E>,
+): JSX.Element
 
 export const responsiveSlotBreakpoints: ReadonlyArray<ResponsiveSlotBreakpoint>
 
