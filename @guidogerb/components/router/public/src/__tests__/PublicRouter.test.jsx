@@ -1,3 +1,4 @@
+import { act } from 'react'
 import { render, screen } from '@testing-library/react'
 import { afterAll, beforeAll, vi } from 'vitest'
 import { createMemoryRouter, useLoaderData } from 'react-router-dom'
@@ -184,5 +185,44 @@ describe('PublicRouter', () => {
     const [routesArg] = factory.mock.calls[0]
     expect(routesArg[0].loader).toBe(loader)
     expect(routesArg[0].action).toBe(action)
+  })
+
+  it('navigates between public routes and falls back to the generated not-found view', async () => {
+    let routerInstance
+    const factory = vi.fn((routes, options) => {
+      routerInstance = createMemoryRouter(routes, options)
+      return routerInstance
+    })
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    render(
+      <PublicRouter
+        router={factory}
+        routerOptions={{ initialEntries: ['/'] }}
+        routes={[
+          { path: '/', element: <div>Landing</div> },
+          { path: '/pricing', element: <div>Pricing</div> },
+        ]}
+      />,
+    )
+
+    expect(factory).toHaveBeenCalled()
+    expect(screen.getByText('Landing')).toBeInTheDocument()
+
+    await act(async () => {
+      await routerInstance.navigate('/pricing')
+    })
+
+    expect(screen.getByText('Pricing')).toBeInTheDocument()
+
+    await act(async () => {
+      await routerInstance.navigate('/missing')
+    })
+
+    expect(screen.getByRole('heading', { level: 1, name: /page not found/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /go back home/i })).toHaveAttribute('href', '/')
+    expect(consoleError).not.toHaveBeenCalled()
+
+    consoleError.mockRestore()
   })
 })
