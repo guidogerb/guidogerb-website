@@ -15,6 +15,7 @@ pre-configured Guidogerb experience without re-implementing provider wiring.
 | Add future variant specs                | 2025-09-21  | 2025-09-29      | 2025-09-29    | complete | Captured analytics- and commerce-focused variant blueprints for downstream planning tools.                                      |
 | Document AppAnalytics variant spec      | 2025-09-29  | 2025-09-29      | 2025-09-29    | complete | Documented dashboards, routes, and provider additions for the analytics-heavy variant catalog entry.                            |
 | Document AppCommerce variant spec       | 2025-09-29  | 2025-09-29      | 2025-09-29    | complete | Outlined storefront, checkout, and point-of-sale defaults so the commerce variant can be prioritised next.                      |
+| Align `<AppBasic />` defaults with automation | 2025-09-30  | 2025-09-30      | -             | planned  | Define the props/slots the tenant generator must populate so scaffolded sites boot with working marketing and dashboard shells. |
 
 ## `<AppBasic />` implementation notes
 
