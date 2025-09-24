@@ -108,10 +108,108 @@ const DEFAULT_FALLBACK_SIZE = {
 }
 
 const ALLOWED_BREAKPOINTS = new Set(BREAKPOINT_ORDER)
+const BUFFER_PHASES = ['A', 'B']
+const BUFFER_TOGGLE = { A: 'B', B: 'A' }
 
 const overflowWarningCache = new Set()
 let resizeObserverSingleton
 const resizeObserverCallbacks = new Map()
+
+function cloneSizeMap(size) {
+  const source = size || DEFAULT_FALLBACK_SIZE
+  return {
+    inline: source.inline ?? DEFAULT_FALLBACK_SIZE.inline,
+    block: source.block ?? DEFAULT_FALLBACK_SIZE.block,
+    maxInline: source.maxInline ?? DEFAULT_FALLBACK_SIZE.maxInline,
+    maxBlock: source.maxBlock ?? DEFAULT_FALLBACK_SIZE.maxBlock,
+    minInline: source.minInline ?? DEFAULT_FALLBACK_SIZE.minInline,
+    minBlock: source.minBlock ?? DEFAULT_FALLBACK_SIZE.minBlock,
+  }
+}
+
+function sizesEqual(a, b) {
+  if (a === b) return true
+  if (!a || !b) return false
+  return (
+    a.inline === b.inline &&
+    a.block === b.block &&
+    a.maxInline === b.maxInline &&
+    a.maxBlock === b.maxBlock &&
+    a.minInline === b.minInline &&
+    a.minBlock === b.minBlock
+  )
+}
+
+function recordBufferFlip(slotKey, fromPhase, toPhase) {
+  if (process.env.NODE_ENV === 'production') return
+  if (typeof window === 'undefined') return
+
+  const global = window
+  const namespace = (global.__GG__ = global.__GG__ || {})
+  const metrics =
+    (namespace.responsiveSlot = namespace.responsiveSlot || {
+      bufferFlips: 0,
+      lastFlip: null,
+    })
+
+  metrics.bufferFlips += 1
+  metrics.lastFlip = {
+    slot: slotKey,
+    from: fromPhase,
+    to: toPhase,
+    timestamp: Date.now(),
+  }
+
+  const perf = global.performance
+  if (!perf || typeof perf.mark !== 'function') {
+    return
+  }
+
+  const baseName = `gg:slot:${slotKey}:buffer-flip`
+
+  try {
+    perf.mark(`${baseName}:start`)
+  } catch (error) {
+    // Ignore browsers that do not support performance marks or duplicate mark errors.
+  }
+
+  const finalize = () => {
+    try {
+      perf.mark(`${baseName}:end`)
+      if (typeof perf.measure === 'function') {
+        try {
+          perf.measure(`${baseName}`, `${baseName}:start`, `${baseName}:end`)
+        } catch (measureError) {
+          // Ignore measure errors caused by missing marks or unsupported browsers.
+        }
+      }
+    } catch (error) {
+      // Swallow end mark errors so diagnostics never break rendering.
+    } finally {
+      if (typeof perf.clearMarks === 'function') {
+        try {
+          perf.clearMarks(`${baseName}:start`)
+          perf.clearMarks(`${baseName}:end`)
+        } catch (clearMarkError) {
+          // Ignore failures when marks are already cleared.
+        }
+      }
+      if (typeof perf.clearMeasures === 'function') {
+        try {
+          perf.clearMeasures(`${baseName}`)
+        } catch (clearMeasureError) {
+          // Ignore unsupported clearMeasures implementations.
+        }
+      }
+    }
+  }
+
+  if (typeof global.requestAnimationFrame === 'function') {
+    global.requestAnimationFrame(() => finalize())
+  } else {
+    setTimeout(finalize, 0)
+  }
+}
 
 function getResizeObserver() {
   if (resizeObserverSingleton) return resizeObserverSingleton
@@ -598,26 +696,109 @@ export function ResponsiveSlot({
   const resolvedSize = mergedSizes
     ? resolveBreakpointSize(activeBreakpoint, mergedSizes)
     : DEFAULT_FALLBACK_SIZE
+  const [bufferState, setBufferState] = useState(() => ({
+    active: BUFFER_PHASES[0],
+    values: {
+      [BUFFER_PHASES[0]]: cloneSizeMap(resolvedSize),
+      [BUFFER_PHASES[1]]: cloneSizeMap(resolvedSize),
+    },
+    slotKey: slot,
+  }))
+
+  useEffect(() => {
+    if (!mergedSizes || isContentOnly) {
+      return
+    }
+
+    setBufferState((current) => {
+      if (!current || current.slotKey !== slot) {
+        return {
+          active: BUFFER_PHASES[0],
+          values: {
+            [BUFFER_PHASES[0]]: cloneSizeMap(resolvedSize),
+            [BUFFER_PHASES[1]]: cloneSizeMap(resolvedSize),
+          },
+          slotKey: slot,
+        }
+      }
+
+      const { active, values } = current
+      const activeSize = values?.[active]
+      if (sizesEqual(activeSize, resolvedSize)) {
+        return current
+      }
+
+      const nextPhase = BUFFER_TOGGLE[active] || BUFFER_PHASES[1]
+      const nextValues = {
+        ...values,
+        [nextPhase]: cloneSizeMap(resolvedSize),
+      }
+
+      recordBufferFlip(slot, active, nextPhase)
+
+      return {
+        active: nextPhase,
+        values: nextValues,
+        slotKey: slot,
+      }
+    })
+  }, [mergedSizes, isContentOnly, resolvedSize, slot])
+
+  const bufferValues = bufferState?.values || {}
+  const phaseA = bufferValues.A || cloneSizeMap(resolvedSize)
+  const phaseB = bufferValues.B || cloneSizeMap(resolvedSize)
+  const activePhase = bufferState?.active || BUFFER_PHASES[0]
+  const activeSize = activePhase === 'B' ? phaseB : phaseA
 
   const cssVariables = mergedSizes
     ? {
-        '--slot-inline-size': resolvedSize.inline,
-        '--slot-block-size': resolvedSize.block,
-        '--slot-max-inline-size': resolvedSize.maxInline,
-        '--slot-max-block-size': resolvedSize.maxBlock,
-        '--slot-min-inline-size': resolvedSize.minInline,
-        '--slot-min-block-size': resolvedSize.minBlock,
+        '--slot-inline-size-A': phaseA.inline,
+        '--slot-block-size-A': phaseA.block,
+        '--slot-max-inline-size-A': phaseA.maxInline,
+        '--slot-max-block-size-A': phaseA.maxBlock,
+        '--slot-min-inline-size-A': phaseA.minInline,
+        '--slot-min-block-size-A': phaseA.minBlock,
+        '--slot-inline-A': phaseA.inline,
+        '--slot-block-A': phaseA.block,
+        '--slot-max-inline-A': phaseA.maxInline,
+        '--slot-max-block-A': phaseA.maxBlock,
+        '--slot-min-inline-A': phaseA.minInline,
+        '--slot-min-block-A': phaseA.minBlock,
+        '--slot-inline-size-B': phaseB.inline,
+        '--slot-block-size-B': phaseB.block,
+        '--slot-max-inline-size-B': phaseB.maxInline,
+        '--slot-max-block-size-B': phaseB.maxBlock,
+        '--slot-min-inline-size-B': phaseB.minInline,
+        '--slot-min-block-size-B': phaseB.minBlock,
+        '--slot-inline-B': phaseB.inline,
+        '--slot-block-B': phaseB.block,
+        '--slot-max-inline-B': phaseB.maxInline,
+        '--slot-max-block-B': phaseB.maxBlock,
+        '--slot-min-inline-B': phaseB.minInline,
+        '--slot-min-block-B': phaseB.minBlock,
+        '--slot-inline-size': activeSize.inline,
+        '--slot-block-size': activeSize.block,
+        '--slot-max-inline-size': activeSize.maxInline,
+        '--slot-max-block-size': activeSize.maxBlock,
+        '--slot-min-inline-size': activeSize.minInline,
+        '--slot-min-block-size': activeSize.minBlock,
+        '--slot-inline': activeSize.inline,
+        '--slot-block': activeSize.block,
+        '--slot-max-inline': activeSize.maxInline,
+        '--slot-max-block': activeSize.maxBlock,
+        '--slot-min-inline': activeSize.minInline,
+        '--slot-min-block': activeSize.minBlock,
       }
     : {}
 
   const slotStyle = mergedSizes
     ? {
-        inlineSize: 'var(--slot-inline-size)',
-        blockSize: 'var(--slot-block-size)',
-        maxInlineSize: 'var(--slot-max-inline-size)',
-        maxBlockSize: 'var(--slot-max-block-size)',
-        minInlineSize: 'var(--slot-min-inline-size)',
-        minBlockSize: 'var(--slot-min-block-size)',
+        inlineSize: 'var(--slot-inline)',
+        blockSize: 'var(--slot-block)',
+        maxInlineSize: 'var(--slot-max-inline)',
+        maxBlockSize: 'var(--slot-max-block)',
+        minInlineSize: 'var(--slot-min-inline)',
+        minBlockSize: 'var(--slot-min-block)',
         contain: 'layout paint style',
         display: 'grid',
         placeItems: 'stretch',
@@ -646,6 +827,9 @@ export function ResponsiveSlot({
   }
   if (editableId) {
     datasetProps['data-slot-editable-id'] = editableId
+  }
+  if (mergedSizes && !isContentOnly) {
+    datasetProps['data-slot-buffer'] = activePhase
   }
   if (isSlotEditable) {
     datasetProps['data-slot-editable'] = 'true'
@@ -685,8 +869,14 @@ export function ResponsiveSlot({
       overflowWarningCache.add(warningKey)
 
       const detail = {
-        inlineBudget: element.style.getPropertyValue('--slot-inline-size') || resolvedSize.inline,
-        blockBudget: element.style.getPropertyValue('--slot-block-size') || resolvedSize.block,
+        inlineBudget:
+          element.style.getPropertyValue('--slot-inline') ||
+          element.style.getPropertyValue('--slot-inline-size') ||
+          activeSize.inline,
+        blockBudget:
+          element.style.getPropertyValue('--slot-block') ||
+          element.style.getPropertyValue('--slot-block-size') ||
+          activeSize.block,
         breakpoint: activeBreakpoint,
         timestamp: Date.now(),
       }
@@ -701,7 +891,18 @@ export function ResponsiveSlot({
         },
       )
     })
-  }, [isContentOnly, slot, activeBreakpoint, resolvedSize, recordOverflow])
+  }, [
+    isContentOnly,
+    slot,
+    activeBreakpoint,
+    activeSize.inline,
+    activeSize.block,
+    activeSize.maxInline,
+    activeSize.maxBlock,
+    activeSize.minInline,
+    activeSize.minBlock,
+    recordOverflow,
+  ])
 
   const handleClick = useCallback(
     (event) => {
