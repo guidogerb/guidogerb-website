@@ -459,10 +459,10 @@ src/
 #### 2) Breakpoints & Sizing
 
 - [x] Build `useBreakpointKey()` with `matchMedia` subscriptions and cleanup.
-- [ ] Add SSR/SSG default fallback support via provider prop.
+- [x] Add SSR/SSG default fallback support via provider prop.
 - [x] Build `resolveSizes(slotKey, bp, overrides)` with deep merge + fallbacks.
 - [x] Implement double‑buffered CSS variable algorithm and atomic flip.
-- [ ] Expose `useResponsiveSlotSize()` hook returning resolved sizes + active breakpoint.
+- [x] Expose `useResponsiveSlotSize()` hook returning resolved sizes + active breakpoint.
 
 #### 3) Wrapper Component
 

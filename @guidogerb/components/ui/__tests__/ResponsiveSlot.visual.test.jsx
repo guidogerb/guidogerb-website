@@ -47,7 +47,9 @@ describe('ResponsiveSlot visual baselines', () => {
       <div
         data-design-component="Catalog / Card"
         data-design-node="0:1"
+        data-slot-breakpoint="lg"
         data-slot-buffer="B"
+        data-slot-default-breakpoint="md"
         data-slot-default-variant="default"
         data-slot-description="Product tile used in merchandising grids and featured carousels."
         data-slot-key="catalog.card"
@@ -80,7 +82,9 @@ describe('ResponsiveSlot visual baselines', () => {
       <div
         data-design-component="Catalog / Card"
         data-design-node="0:1"
+        data-slot-breakpoint="xs"
         data-slot-buffer="B"
+        data-slot-default-breakpoint="md"
         data-slot-default-variant="default"
         data-slot-description="Product tile used in merchandising grids and featured carousels."
         data-slot-key="catalog.card"
