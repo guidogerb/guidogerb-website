@@ -31,6 +31,11 @@
   pattern so GitHub Actions, local `.env` files, and deployment tooling can rely
   on consistent naming.
 
+.PARAMETER RepoRoot
+  Optional override for the repository root. Primarily used by integration
+  tests and automation that invoke the script against a temporary worktree
+  rather than the canonical checkout inferred from the script location.
+
 .PARAMETER ValidateOnly
   Skips scaffolding and only performs validation. The validated contract is
   still emitted so callers can inspect the resolved workspace metadata.
@@ -64,6 +69,10 @@ param(
     [ValidateNotNullOrEmpty()]
     [string[]]
     $EnvSecretKeys,
+
+    [ValidateNotNullOrWhiteSpace()]
+    [string]
+    $RepoRoot,
 
     [switch]
     $ValidateOnly
@@ -1160,7 +1169,23 @@ export default createTenantPlan
 }
 
 
-$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$repoRoot = $null
+if ($PSBoundParameters.ContainsKey('RepoRoot')) {
+    if (-not (Test-Path -Path $RepoRoot -PathType Container)) {
+        throw "Provided RepoRoot '$RepoRoot' does not exist or is not a directory."
+    }
+
+    $repoRoot = (Resolve-Path -Path $RepoRoot).ProviderPath
+}
+else {
+    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+}
+
+$repoRoot = $repoRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+
+if (-not (Test-Path -Path $repoRoot -PathType Container)) {
+    throw "Resolved repository root '$repoRoot' does not exist or is not a directory."
+}
 $cfDistributionsPath = Join-Path $PSScriptRoot 'cf-distributions.json'
 
 if (-not (Test-Path -Path $cfDistributionsPath -PathType Leaf)) {
