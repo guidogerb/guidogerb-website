@@ -63,6 +63,38 @@ export function App() {
 }
 ```
 
+When a component needs to react to changes in persistence state without manually wiring event listeners, the
+`useHasStoredValue` hook offers a declarative wrapper around those checks:
+
+```jsx
+import { StorageProvider, useHasStoredValue, useStoredValue } from '@guidogerb/components-storage'
+
+function FeatureFlagToggle() {
+  const hasFlag = useHasStoredValue('flags.beta', { area: 'session' })
+  const [, setFlag, clearFlag] = useStoredValue('flags.beta', { area: 'session' })
+
+  return (
+    <div>
+      <p>Beta flag stored? {hasFlag ? 'yes' : 'no'}</p>
+      <button type="button" onClick={() => setFlag('enabled')}>
+        Enable
+      </button>
+      <button type="button" onClick={() => clearFlag()}>
+        Disable
+      </button>
+    </div>
+  )
+}
+
+export function App() {
+  return (
+    <StorageProvider namespace="guidogerb.app">
+      <FeatureFlagToggle />
+    </StorageProvider>
+  )
+}
+```
+
 ## Responsibilities
 
 - Expose a storage controller that abstracts serialization, schema validation, and feature detection for Web Storage APIs.

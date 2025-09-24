@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
-import Storage, { useStorage, useStoredValue } from '../Storage.jsx'
+import Storage, { useHasStoredValue, useStorage, useStoredValue } from '../Storage.jsx'
 
 describe('Storage provider', () => {
   it('renders children and exposes configured controllers', async () => {
@@ -229,6 +229,134 @@ describe('Storage provider', () => {
         '[storage] Listener cleanup failed',
         expect.any(Error),
       )
+    })
+  })
+
+  it('allows subscribing to specific value changes with presence metadata', async () => {
+    const user = userEvent.setup()
+    const events = []
+    const handleEvent = vi.fn((event) => {
+      events.push(event)
+    })
+
+    function Example() {
+      const storage = useStorage()
+      const [, setFeature, removeFeature] = useStoredValue('feature', { defaultValue: 'off' })
+
+      useEffect(() => storage.subscribeToValue('feature', handleEvent), [storage])
+
+      return (
+        <div>
+          <button type="button" onClick={() => setFeature('enabled')}>
+            enable
+          </button>
+          <button type="button" onClick={() => removeFeature()}>
+            remove
+          </button>
+          <button type="button" onClick={() => storage.clearArea()}>
+            clear
+          </button>
+        </div>
+      )
+    }
+
+    render(
+      <Storage namespace="subscribe-demo">
+        <Example />
+      </Storage>,
+    )
+
+    expect(handleEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'init', present: false }),
+    )
+
+    await user.click(screen.getByRole('button', { name: 'enable' }))
+    await waitFor(() => {
+      expect(handleEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'set', value: 'enabled', present: true }),
+      )
+    })
+
+    await user.click(screen.getByRole('button', { name: 'remove' }))
+    await waitFor(() => {
+      expect(handleEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'remove', present: false }),
+      )
+    })
+
+    await user.click(screen.getByRole('button', { name: 'enable' }))
+    await waitFor(() => {
+      expect(handleEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'set', present: true }),
+      )
+    })
+
+    await user.click(screen.getByRole('button', { name: 'clear' }))
+    await waitFor(() => {
+      expect(handleEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'clear', present: false }),
+      )
+    })
+
+    const eventTypes = events.map((event) => event.type)
+    expect(eventTypes[0]).toBe('init')
+    expect(eventTypes).toEqual(expect.arrayContaining(['set', 'remove', 'clear']))
+  })
+
+  it('tracks storage presence reactively via useHasStoredValue', async () => {
+    const user = userEvent.setup()
+
+    function Example() {
+      const storage = useStorage()
+      const hasToken = useHasStoredValue('session-token', { area: 'session' })
+      const [, setToken, removeToken] = useStoredValue('session-token', {
+        area: 'session',
+        defaultValue: null,
+      })
+
+      return (
+        <div>
+          <span data-testid="presence">{hasToken ? 'yes' : 'no'}</span>
+          <button type="button" onClick={() => setToken('value')}>
+            store
+          </button>
+          <button type="button" onClick={() => removeToken()}>
+            remove
+          </button>
+          <button type="button" onClick={() => storage.clearArea('session')}>
+            clear
+          </button>
+        </div>
+      )
+    }
+
+    render(
+      <Storage namespace="presence-demo" areas={['local', 'session']}>
+        <Example />
+      </Storage>,
+    )
+
+    const presence = screen.getByTestId('presence')
+    expect(presence).toHaveTextContent('no')
+
+    await user.click(screen.getByRole('button', { name: 'store' }))
+    await waitFor(() => {
+      expect(presence).toHaveTextContent('yes')
+    })
+
+    await user.click(screen.getByRole('button', { name: 'remove' }))
+    await waitFor(() => {
+      expect(presence).toHaveTextContent('no')
+    })
+
+    await user.click(screen.getByRole('button', { name: 'store' }))
+    await waitFor(() => {
+      expect(presence).toHaveTextContent('yes')
+    })
+
+    await user.click(screen.getByRole('button', { name: 'clear' }))
+    await waitFor(() => {
+      expect(presence).toHaveTextContent('no')
     })
   })
 })
