@@ -93,13 +93,11 @@ describe('collectPaginatedResults', () => {
   })
 
   it('treats exhausted pages as final when the item limit is met without a next cursor', async () => {
-    const fetchPage = vi
-      .fn()
-      .mockResolvedValueOnce({
-        items: ['alpha', 'beta', 'gamma'],
-        cursor: null,
-        hasNextPage: false,
-      })
+    const fetchPage = vi.fn().mockResolvedValueOnce({
+      items: ['alpha', 'beta', 'gamma'],
+      cursor: null,
+      hasNextPage: false,
+    })
 
     const result = await collectPaginatedResults({ fetchPage, maxItems: 2 })
 
