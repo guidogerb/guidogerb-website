@@ -29,7 +29,7 @@ export interface Logger {
   warn?: (...args: unknown[]) => void
 }
 
-export type PaginateStopReason = 'exhausted' | 'max-pages' | 'duplicate-cursor'
+export type PaginateStopReason = 'exhausted' | 'max-pages' | 'duplicate-cursor' | 'max-items'
 
 export interface PaginatedPageContext<TParams extends Record<string, any> = Record<string, any>> {
   page: number
@@ -63,6 +63,7 @@ export interface CollectPaginatedOptions<
   onPage?: (result: TResult, context: PaginatedPageContext<TParams>) => void | Promise<void>
   accumulateItems?: boolean
   stopOnDuplicateCursor?: boolean
+  maxItems?: number
 }
 
 export interface CollectPaginatedResult<
@@ -142,6 +143,7 @@ export interface NormalizedApiError {
   cause?: unknown
   isApiError: boolean
   original: unknown
+  requestId: string | null
 }
 
 export declare function normalizeApiError(error: unknown): NormalizedApiError

@@ -124,6 +124,7 @@ const coercePositiveInteger = (value, fallback) => {
  * @param {boolean} [options.accumulateItems=true] - Whether to collect items across pages.
  * @param {boolean} [options.stopOnDuplicateCursor=true] - Prevent infinite loops when a cursor repeats.
  * @param {number} [options.maxPages=50] - Safety cap for the number of requests issued.
+ * @param {number} [options.maxItems] - Optional guard that stops pagination once the aggregated item count reaches the limit.
  * @returns {Promise<{pages: Array, items?: Array, cursor: unknown, nextParams?: Object, pageCount: number, stopReason: string, hasMore: boolean}>}
  */
 export const collectPaginatedResults = async ({
@@ -137,16 +138,19 @@ export const collectPaginatedResults = async ({
   accumulateItems = true,
   stopOnDuplicateCursor = true,
   maxPages = 50,
+  maxItems,
 } = {}) => {
   if (typeof fetchPage !== 'function') {
     throw new TypeError('collectPaginatedResults requires a fetchPage function')
   }
 
   const limit = coercePositiveInteger(maxPages, 50)
+  const itemLimit = maxItems != null ? coercePositiveInteger(maxItems, null) : null
   const baseParams = cloneParams(initialParams)
   const pages = []
   const aggregatedItems = accumulateItems ? [] : undefined
   const seenCursors = new Set()
+  let totalItemsCollected = 0
 
   let cursorForNextPage = baseParams[cursorParam] ?? null
   let nextParams = { ...baseParams }
@@ -170,12 +174,14 @@ export const collectPaginatedResults = async ({
       })
     }
 
-    if (aggregatedItems) {
-      const items = extractItems(result, {
-        page: pageNumber,
-        cursor: cursorForNextPage,
-      })
-      if (Array.isArray(items) && items.length > 0) {
+    const extractionContext = {
+      page: pageNumber,
+      cursor: cursorForNextPage,
+    }
+    const items = extractItems(result, extractionContext)
+    if (Array.isArray(items) && items.length > 0) {
+      totalItemsCollected += items.length
+      if (aggregatedItems) {
         aggregatedItems.push(...items)
       }
     }
@@ -185,6 +191,18 @@ export const collectPaginatedResults = async ({
       previousCursor: cursorForNextPage,
       params: paramsForRequest,
     })
+
+    if (itemLimit != null && totalItemsCollected >= itemLimit) {
+      stopReason = 'max-items'
+      if (aggregatedItems && aggregatedItems.length > itemLimit) {
+        aggregatedItems.length = itemLimit
+      }
+      cursorForNextPage = nextCursor ?? null
+      if (cursorForNextPage !== null && cursorForNextPage !== undefined) {
+        nextParams = { ...baseParams, [cursorParam]: cursorForNextPage }
+      }
+      break
+    }
 
     const continuePaging = hasNext(result, {
       page: pageNumber,
@@ -231,7 +249,10 @@ export const collectPaginatedResults = async ({
         : undefined,
     pageCount: pages.length,
     stopReason,
-    hasMore: stopReason === 'max-pages',
+    hasMore:
+      (stopReason === 'max-pages' || stopReason === 'max-items') &&
+      cursorForNextPage !== null &&
+      cursorForNextPage !== undefined,
   }
 }
 

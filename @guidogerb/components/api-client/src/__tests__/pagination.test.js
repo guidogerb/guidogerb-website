@@ -62,6 +62,43 @@ describe('collectPaginatedResults', () => {
     expect(result.items).toEqual(['a', 'b'])
   })
 
+  it('stops when the aggregated item count reaches the configured limit', async () => {
+    const fetchPage = vi
+      .fn()
+      .mockResolvedValueOnce({ items: ['one', 'two'], cursor: 'cursor-a', hasNextPage: true })
+      .mockResolvedValueOnce({ items: ['three', 'four', 'five'], cursor: 'cursor-b', hasNextPage: true })
+
+    const result = await collectPaginatedResults({
+      fetchPage,
+      maxItems: 4,
+      initialParams: { tenantId: 'tenant-42' },
+    })
+
+    expect(fetchPage).toHaveBeenCalledTimes(2)
+    expect(fetchPage.mock.calls[0][0]).toEqual({ tenantId: 'tenant-42' })
+    expect(fetchPage.mock.calls[1][0]).toEqual({ tenantId: 'tenant-42', cursor: 'cursor-a' })
+    expect(result.items).toEqual(['one', 'two', 'three', 'four'])
+    expect(result.stopReason).toBe('max-items')
+    expect(result.cursor).toBe('cursor-b')
+    expect(result.nextParams).toEqual({ tenantId: 'tenant-42', cursor: 'cursor-b' })
+    expect(result.hasMore).toBe(true)
+  })
+
+  it('treats exhausted pages as final when the item limit is met without a next cursor', async () => {
+    const fetchPage = vi
+      .fn()
+      .mockResolvedValueOnce({ items: ['alpha', 'beta', 'gamma'], cursor: null, hasNextPage: false })
+
+    const result = await collectPaginatedResults({ fetchPage, maxItems: 2 })
+
+    expect(fetchPage).toHaveBeenCalledTimes(1)
+    expect(result.items).toEqual(['alpha', 'beta'])
+    expect(result.stopReason).toBe('max-items')
+    expect(result.cursor).toBeNull()
+    expect(result.nextParams).toBeUndefined()
+    expect(result.hasMore).toBe(false)
+  })
+
   it('prevents infinite loops when a cursor repeats unless explicitly disabled', async () => {
     const fetchPage = vi
       .fn()
