@@ -94,6 +94,22 @@ The `ResponsiveSlot` component already:
 
 However, the component still needs to be renamed, wrapped with the new editing capabilities, and migrated to the SSR-safe variable buffering defined in the spec.
 
+## Edit mode persistence
+
+`EditModeProvider` powers the runtime editing affordances exposed by `ResponsiveSlot`. By default the provider only keeps track of
+the current session state. Opt into persistence when designers want edit mode to remain enabled between reloads:
+
+```jsx
+<EditModeProvider persistState stateStorageKey="gg:edit-mode:demo">
+  <App />
+</EditModeProvider>
+```
+
+- `persistState` — stores the latest edit-mode toggle and active `editableId` in `localStorage` so returning to the page resumes
+  the previous state. The default is `false`.
+- `stateStorageKey` — override the storage key (defaults to `gg:edit-mode:v1`) when multiple apps share a domain or when tests
+  need isolated buckets.
+
 ## Planned API surface
 
 Once the specification is fulfilled, the package will export:

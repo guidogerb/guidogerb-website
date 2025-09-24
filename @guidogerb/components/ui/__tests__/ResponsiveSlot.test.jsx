@@ -778,4 +778,68 @@ describe('ResponsiveSlot', () => {
       MockResizeObserver.instance = null
     }
   })
+
+  it('highlights editable slots and updates sizing when handles are dragged', async () => {
+    render(
+      <EditModeProvider initialMode>
+        <ResponsiveSlotProvider>
+          <ResponsiveSlot slot="catalog.card" editableId="slot-2" data-testid="resizable-slot">
+            <div>Resizable content</div>
+          </ResponsiveSlot>
+        </ResponsiveSlotProvider>
+      </EditModeProvider>,
+    )
+
+    const slot = await screen.findByTestId('resizable-slot')
+    const originalGetBoundingClientRect = slot.getBoundingClientRect.bind(slot)
+    slot.getBoundingClientRect = () => ({
+      width: 320,
+      height: 280,
+      top: 0,
+      left: 0,
+      right: 320,
+      bottom: 280,
+      x: 0,
+      y: 0,
+      toJSON: () => {},
+    })
+
+    expect(slot.dataset.slotHighlight).toBe('true')
+    expect(slot.style.boxShadow).toContain('rgba(59, 130, 246')
+
+    const inlineHandle = screen.getByTestId('slot-resize-handle-inline')
+    fireEvent.pointerDown(inlineHandle, { pointerId: 1, clientX: 320, clientY: 140 })
+
+    await waitFor(() => {
+      expect(slot.dataset.slotResizing).toBe('true')
+    })
+
+    fireEvent.pointerMove(window, { pointerId: 1, clientX: 360, clientY: 140 })
+
+    await waitFor(() => {
+      expect(slot.style.getPropertyValue('--slot-inline')).toBe('360px')
+      expect(slot.style.getPropertyValue('--slot-max-inline')).toBe('360px')
+      expect(slot.style.getPropertyValue('--slot-min-inline')).toBe('360px')
+    })
+
+    fireEvent.pointerUp(window, { pointerId: 1 })
+
+    await waitFor(() => {
+      expect(slot.dataset.slotResizing).toBeUndefined()
+    })
+
+    const blockHandle = screen.getByTestId('slot-resize-handle-block')
+    fireEvent.pointerDown(blockHandle, { pointerId: 2, clientX: 160, clientY: 280 })
+    fireEvent.pointerMove(window, { pointerId: 2, clientX: 160, clientY: 320 })
+
+    await waitFor(() => {
+      expect(slot.style.getPropertyValue('--slot-block')).toBe('320px')
+      expect(slot.style.getPropertyValue('--slot-max-block')).toBe('320px')
+      expect(slot.style.getPropertyValue('--slot-min-block')).toBe('320px')
+    })
+
+    fireEvent.pointerUp(window, { pointerId: 2 })
+
+    slot.getBoundingClientRect = originalGetBoundingClientRect
+  })
 })
