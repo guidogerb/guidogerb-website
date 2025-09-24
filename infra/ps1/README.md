@@ -47,6 +47,8 @@ pwsh ./AddCF-Tenant.ps1 \
 Follow-on automation (documented in [`tasks.md`](./tasks.md)) will generalise
 CI/CD workflows and regression testing around the generated scaffold.
 
+Consult the [`AddCF-Tenant.ps1` operator runbook](./AddCF-Tenant.runbook.md) for step-by-step execution, IAM guidance, and cleanup procedures.
+
 ## Supporting data files
 
 ### `cf-distributions.json`
