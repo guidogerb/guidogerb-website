@@ -10,6 +10,18 @@ The package will eventually expose multiple `<App />` variants. Each variant com
 baseline infrastructure but tunes data sources, navigation, and page routes for a specific
 scenario.
 
+### Variant catalog helpers
+
+`@guidogerb/components-app` publishes metadata describing every planned variant. Consumers can
+inspect the catalog through the new `APP_VARIANT_SPECS` constant or helper functions.
+
+```js
+import { APP_VARIANT_SPECS, getAppVariantSpec } from '@guidogerb/components-app'
+
+const variants = Object.values(APP_VARIANT_SPECS)
+const analytics = getAppVariantSpec('analytics')
+```
+
 ### `<AppBasic />`
 
 The first variant focuses on marketing-forward sites that still require authenticated dashboards.
@@ -72,6 +84,33 @@ function App() {
   )
 }
 ```
+
+### `AppAnalytics`
+
+The analytics-focused variant builds on `<AppBasic />` with dashboards, benchmarking utilities, and
+instrumentation helpers.
+
+- **Target tenants** – labels and analytics teams tracking streaming KPIs, release velocity, and
+  territory performance.
+- **Provider additions** – registers `@guidogerb/components-analytics` after the API and storage
+  providers so consent-aware instrumentation is available across public and protected routes.
+- **Default routes** – introduces `/analytics` and `/reports` protected paths plus an optional
+  `/insights` marketing page showcasing curated case studies.
+- **Operational notes** – requires GA4 measurement IDs (or equivalent keys) and an export bucket for
+  scheduled report delivery.
+
+### `AppCommerce`
+
+The commerce variant layers catalog, checkout, and point-of-sale flows on top of `<AppBasic />`.
+
+- **Target tenants** – artists and partners monetising catalogues or managing inventory through
+  offline-friendly registers.
+- **Provider additions** – wires the catalog, shopping cart, and point-of-sale packages so product
+  data, checkout flows, and Stripe-powered registers reuse shared storage and analytics defaults.
+- **Default routes** – adds a `/shop` storefront plus `/orders` and `/catalog` protected workspaces
+  for fulfilment and merchandising teams.
+- **Operational notes** – expects Stripe publishable/secret keys, webhook endpoints, and inventory
+  integration settings; background sync keeps POS transactions resilient offline.
 
 ## Testing
 
