@@ -460,7 +460,7 @@ src/
 
 - [x] Build `useBreakpointKey()` with `matchMedia` subscriptions and cleanup.
 - [ ] Add SSR/SSG default fallback support via provider prop.
-- [ ] Build `resolveSizes(slotKey, bp, overrides)` with deep merge + fallbacks.
+- [x] Build `resolveSizes(slotKey, bp, overrides)` with deep merge + fallbacks.
 - [x] Implement double‑buffered CSS variable algorithm and atomic flip.
 - [ ] Expose `useResponsiveSlotSize()` hook returning resolved sizes + active breakpoint.
 
@@ -469,7 +469,7 @@ src/
 - [ ] Implement `GuidoGerbUI_Container` with `as`, `inherit`, `overflow`, `min*`/`max*` handling.
 - [ ] Apply logical sizing (`inline-size`, `block-size`, etc.) and `contain: layout paint style`.
 - [ ] Accessibility: default `role="presentation"`, passthrough ARIA props.
-- [ ] Dev only: warn on unknown `slot` keys or invalid size tokens.
+- [x] Dev only: warn on unknown `slot` keys or invalid size tokens.
 
 #### 4) Runtime Editor (MVP)
 
