@@ -4,6 +4,7 @@ export {
   useResponsiveSlotSize,
   useResponsiveSlotMeta,
   useResponsiveSlotInstance,
+  resolveResponsiveSlotSize,
   responsiveSlotBreakpoints,
   baseResponsiveSlots,
   ResponsiveSlot as GuidoGerbUI_Container,

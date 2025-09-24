@@ -153,6 +153,20 @@ export function useResponsiveSlotSize(
   overrides?: SlotSizeOverrides | 'content',
 ): ResponsiveSlotSize
 
+export interface ResolveResponsiveSlotSizeOptions {
+  slot: string
+  breakpoint: BreakpointKey
+  registry?: Registry
+  overrides?: SlotSizeOverrides | 'content'
+  tokenResolver?: (tokenName: string) => string | number | undefined | null
+  inheritedSizes?: SlotSizeOverrides
+  fallbackBreakpoint?: BreakpointKey
+}
+
+export function resolveResponsiveSlotSize(
+  options: ResolveResponsiveSlotSizeOptions,
+): Omit<ResponsiveSlotSize, 'breakpoint'>
+
 export function useResponsiveSlotMeta(slot: string): SlotMeta
 
 export function useResponsiveSlotInstance(): ResponsiveSlotInstance | null

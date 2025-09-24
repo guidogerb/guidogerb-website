@@ -289,6 +289,18 @@ const BUFFER_PHASES = ['A', 'B']
 const BUFFER_TOGGLE = { A: 'B', B: 'A' }
 
 const overflowWarningCache = new Set()
+const missingTokenWarnings = new Set()
+
+function warnMissingToken(tokenName) {
+  if (process.env.NODE_ENV === 'production') return
+  if (!tokenName) return
+  if (missingTokenWarnings.has(tokenName)) return
+
+  missingTokenWarnings.add(tokenName)
+  console.warn(
+    `ResponsiveSlot: token "${tokenName}" could not be resolved. Falling back to CSS variable reference.`,
+  )
+}
 let resizeObserverSingleton
 const resizeObserverCallbacks = new Map()
 
@@ -442,6 +454,7 @@ function resolveSizeValue(raw, defaultValue, resolver) {
       const tokenName = raw.slice('token:'.length)
       const resolved = resolver ? resolver(tokenName) : undefined
       if (resolved == null) {
+        warnMissingToken(tokenName)
         return `var(--${tokenName})`
       }
       return toCssUnit(resolved, defaultValue)
@@ -779,30 +792,62 @@ export function useBreakpointKey() {
   return normalizeBreakpointKey(activeBreakpoint, defaultBreakpoint)
 }
 
-export function useResponsiveSlotSize(slot, overrides) {
-  const { registry, activeBreakpoint, resolveToken: tokenResolver } = useResponsiveSlotContext()
+export function resolveResponsiveSlotSize({
+  slot,
+  breakpoint,
+  registry = baseResponsiveSlots,
+  overrides,
+  tokenResolver,
+  inheritedSizes,
+  fallbackBreakpoint = 'md',
+}) {
+  if (overrides === 'content') {
+    return cloneSizeMap(DEFAULT_FALLBACK_SIZE)
+  }
 
   const definition = registry?.[slot]
-  const baseSizes = definition?.sizes ?? (definition && !definition.sizes ? definition : {})
-  const normalizedOverrides = overrides === 'content' ? {} : overrides
+  const baseSizes =
+    inheritedSizes ?? definition?.sizes ?? (definition && !definition.sizes ? definition : undefined)
+  const mergedOverrides = overrides || undefined
 
-  const merged = useMemo(
-    () => mergeSlotSizes(baseSizes || {}, normalizedOverrides || {}, tokenResolver),
-    [baseSizes, normalizedOverrides, tokenResolver],
+  const merged = mergeSlotSizes(baseSizes || {}, mergedOverrides || {}, tokenResolver)
+
+  if (!merged || Object.keys(merged).length === 0) {
+    return cloneSizeMap(DEFAULT_FALLBACK_SIZE)
+  }
+
+  const resolved = resolveBreakpointSize(normalizeBreakpointKey(breakpoint, fallbackBreakpoint), merged)
+  return cloneSizeMap(resolved)
+}
+
+export function useResponsiveSlotSize(slot, overrides) {
+  const {
+    registry,
+    activeBreakpoint,
+    resolveToken: tokenResolver,
+    defaultBreakpoint,
+  } = useResponsiveSlotContext()
+
+  const size = useMemo(
+    () =>
+      resolveResponsiveSlotSize({
+        slot,
+        breakpoint: activeBreakpoint,
+        registry,
+        overrides,
+        tokenResolver,
+        fallbackBreakpoint: defaultBreakpoint,
+      }),
+    [activeBreakpoint, defaultBreakpoint, overrides, registry, slot, tokenResolver],
   )
 
-  return useMemo(() => {
-    const resolved = resolveBreakpointSize(activeBreakpoint, merged)
-    return {
-      inline: resolved.inline,
-      block: resolved.block,
-      maxInline: resolved.maxInline,
-      maxBlock: resolved.maxBlock,
-      minInline: resolved.minInline,
-      minBlock: resolved.minBlock,
-      breakpoint: activeBreakpoint,
-    }
-  }, [activeBreakpoint, merged])
+  return useMemo(
+    () => ({
+      ...size,
+      breakpoint: normalizeBreakpointKey(activeBreakpoint, defaultBreakpoint),
+    }),
+    [activeBreakpoint, defaultBreakpoint, size],
+  )
 }
 
 export function useResponsiveSlotMeta(slot) {

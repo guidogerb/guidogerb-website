@@ -4,6 +4,7 @@ import { renderToString } from 'react-dom/server'
 import {
   ResponsiveSlot,
   ResponsiveSlotProvider,
+  resolveResponsiveSlotSize,
   useBreakpointKey,
   useResponsiveSlotInstance,
   useResponsiveSlotMeta,
@@ -553,6 +554,67 @@ describe('ResponsiveSlot', () => {
       expect(warnSpy).toHaveBeenCalledWith(
         'ResponsiveSlot: slot "unknown.slot" is not defined in the registry.',
       )
+    } finally {
+      warnSpy.mockRestore()
+    }
+  })
+
+  it('resolves sizes via helper with registry overrides and breakpoint fallbacks', () => {
+    const size = resolveResponsiveSlotSize({
+      slot: 'feature.card',
+      breakpoint: 'xl',
+      registry: {
+        'feature.card': {
+          sizes: {
+            sm: { inline: '18rem', block: '24rem', maxBlock: '26rem' },
+            lg: { inline: '24rem', block: '28rem', maxInline: '28rem', maxBlock: '30rem' },
+          },
+        },
+      },
+      overrides: {
+        lg: { block: '30rem', minBlock: '20rem', maxBlock: '32rem' },
+      },
+    })
+
+    expect(size).toMatchObject({
+      inline: '24rem',
+      block: '30rem',
+      maxInline: '28rem',
+      maxBlock: '32rem',
+      minBlock: '20rem',
+    })
+  })
+
+  it('warns once when a token cannot be resolved for size values', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    try {
+      const first = resolveResponsiveSlotSize({
+        slot: 'token.slot',
+        breakpoint: 'lg',
+        registry: {
+          'token.slot': {
+            sizes: { lg: { inline: 'token:space-xxl', block: 'token:space-xxl' } },
+          },
+        },
+        tokenResolver: () => undefined,
+      })
+
+      const second = resolveResponsiveSlotSize({
+        slot: 'token.slot',
+        breakpoint: 'lg',
+        registry: {
+          'token.slot': {
+            sizes: { lg: { inline: 'token:space-xxl', block: 'token:space-xxl' } },
+          },
+        },
+        tokenResolver: () => undefined,
+      })
+
+      expect(first.inline).toBe('var(--space-xxl)')
+      expect(second.block).toBe('var(--space-xxl)')
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy.mock.calls[0][0]).toContain('token "space-xxl" could not be resolved')
     } finally {
       warnSpy.mockRestore()
     }
