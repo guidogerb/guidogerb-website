@@ -29,6 +29,7 @@
     "src/ResponsiveSlot/editing/SlotEditorOverlay.jsx",
     "src/ResponsiveSlot/editing/useSlotEditing.js",
     "src/ResponsiveSlot/editing/localDraftStorage.js",
+    "src/responsive-slot/GuidoGerbUI_Container.jsx",
     "src/responsive-slot/index.js",
     "src/responsive-slot/index.d.ts"
   ],
