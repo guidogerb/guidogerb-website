@@ -10,11 +10,12 @@ It also owns the configuration switches that let applications enable, disable, o
 ## Exports
 
 - `Storage` / `StorageProvider` — React context provider that provisions scoped storage controllers for the requested areas
-  (local, session, or memory) and notifies listeners when values change.
+  (local, session, or memory), exposes helpers such as `hasValue`/`setValue`, and notifies listeners when values change.
 - `useStorage` — hook for reading the underlying controllers, listing configured areas, and issuing imperative reads/writes.
 - `useStoredValue` — stateful helper that keeps component state in sync with a key in the selected storage area and exposes
   setters/removers similar to `useState`.
-- `createStorageController` — factory for constructing standalone controllers when direct access is needed outside React.
+- `createStorageController` — factory for constructing standalone controllers when direct access is needed outside React,
+  now including a lightweight `has(key)` helper for existence checks without triggering deserialization.
 - `createCachePreferenceChannel` / `DEFAULT_CACHE_PREFERENCES` — observable cache governance helpers that persist toggles,
   broadcast updates via `BroadcastChannel`, and keep service worker subscribers in sync.
 
@@ -42,6 +43,26 @@ export function App() {
 }
 ```
 
+The storage context also exposes imperative helpers when you need to check whether a key has been persisted without
+consuming the fallback value:
+
+```jsx
+import { StorageProvider, useStorage } from '@guidogerb/components-storage'
+
+function AuthGate() {
+  const storage = useStorage()
+  return storage.hasValue('auth.token') ? <Dashboard /> : <SignIn />
+}
+
+export function App() {
+  return (
+    <StorageProvider namespace="guidogerb.app">
+      <AuthGate />
+    </StorageProvider>
+  )
+}
+```
+
 ## Responsibilities
 
 - Expose a storage controller that abstracts serialization, schema validation, and feature detection for Web Storage APIs.
@@ -55,7 +76,7 @@ export function App() {
 
 | Area               | Goals |
 | ------------------ | ----- |
-| Storage controller | ✅ Available via `createStorageController`. Returns scoped accessors (`get`, `set`, `remove`, `list`) and gracefully falls back when `window` is unavailable. |
+| Storage controller | ✅ Available via `createStorageController`. Returns scoped accessors (`get`, `set`, `remove`, `list`, `has`) and gracefully falls back when `window` is unavailable. |
 | Cookie utilities   | ✅ Cookie parsing and mutation helpers covering domain/path/same-site attributes. |
 | Cache governance   | ✅ Cache preference channel that persists toggles and multicasts them to service worker helpers via `BroadcastChannel`. |
 | Diagnostics        | ✅ Diagnostics hooks so apps can trace storage mutations during development. |

@@ -115,6 +115,45 @@ describe('Storage provider', () => {
     expect(value).toHaveTextContent('light')
   })
 
+  it('exposes hasValue helpers to check storage state without reading fallbacks', async () => {
+    const user = userEvent.setup()
+
+    function Example() {
+      const storage = useStorage()
+      const [, setFlag, clearFlag] = useStoredValue('flag', { defaultValue: 'absent' })
+
+      return (
+        <div>
+          <span data-testid="has-flag">{storage.hasValue('flag') ? 'yes' : 'no'}</span>
+          <button type="button" onClick={() => setFlag('present')}>
+            store
+          </button>
+          <button type="button" onClick={() => clearFlag()}>
+            remove
+          </button>
+        </div>
+      )
+    }
+
+    render(
+      <Storage namespace="has-demo">
+        <Example />
+      </Storage>,
+    )
+
+    expect(screen.getByTestId('has-flag')).toHaveTextContent('no')
+
+    await user.click(screen.getByRole('button', { name: 'store' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('has-flag')).toHaveTextContent('yes')
+    })
+
+    await user.click(screen.getByRole('button', { name: 'remove' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('has-flag')).toHaveTextContent('no')
+    })
+  })
+
   it('always provisions default and fallback areas even when omitted', async () => {
     const user = userEvent.setup()
 

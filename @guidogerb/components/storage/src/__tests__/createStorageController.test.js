@@ -22,6 +22,54 @@ const createMemoryStorage = () => {
   }
 }
 
+describe('createStorageController', () => {
+  it('reports key presence without invoking the deserializer', () => {
+    const storage = createMemoryStorage()
+    const deserializer = vi.fn(() => {
+      throw new Error('should not deserialize during has check')
+    })
+
+    const controller = createStorageController({
+      namespace: 'has-check',
+      area: 'memory',
+      storage,
+      deserializer,
+      logger: { warn: vi.fn(), error: vi.fn() },
+    })
+
+    storage.setItem('has-check::raw', '{invalid-json')
+
+    expect(controller.has('raw')).toBe(true)
+    expect(controller.has('missing')).toBe(false)
+    expect(deserializer).not.toHaveBeenCalled()
+  })
+
+  it('tracks key presence when values are mutated', () => {
+    const controller = createStorageController({
+      namespace: 'presence',
+      area: 'memory',
+      storage: createMemoryStorage(),
+    })
+
+    expect(controller.has('feature')).toBe(false)
+
+    controller.set('feature', { enabled: true })
+    expect(controller.has('feature')).toBe(true)
+
+    controller.set('feature', undefined)
+    expect(controller.has('feature')).toBe(false)
+
+    controller.set('alpha', 'a')
+    controller.set('beta', 'b')
+    expect(controller.has('alpha')).toBe(true)
+    expect(controller.has('beta')).toBe(true)
+
+    controller.clear()
+    expect(controller.has('alpha')).toBe(false)
+    expect(controller.has('beta')).toBe(false)
+  })
+})
+
 describe('createStorageController diagnostics', () => {
   it('emits diagnostic events for mutations when provided a function', () => {
     const diagnostics = vi.fn()
