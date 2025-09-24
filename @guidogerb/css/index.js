@@ -1,6 +1,7 @@
 export { ThemeProvider } from './src/ThemeProvider.jsx'
 export { ThemeContext } from './src/ThemeContext.js'
 export { ThemeSelect } from './src/ThemeSelect.jsx'
+export { ThemeEditor } from './src/ThemeEditor.jsx'
 export { useTheme } from './src/useTheme.js'
 export {
   DEFAULT_THEME_ID,

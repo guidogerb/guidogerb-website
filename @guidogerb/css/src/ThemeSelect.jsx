@@ -1,25 +1,14 @@
 import { useEffect, useId, useMemo, useState } from 'react'
 import { DEFAULT_THEMES } from './themes.js'
 import { useTheme } from './useTheme.js'
+import {
+  THEME_COLOR_FIELDS,
+  buildColorFormState,
+  extractTokensFromState,
+  sanitizeColorValue,
+} from './themeForm.js'
 
 const BASE_CLASS = 'gg-theme-select'
-
-const CUSTOM_THEME_FIELDS = [
-  { key: '--color-bg', name: 'colorBg', label: 'Background color', default: '#0b0c0f' },
-  { key: '--color-surface', name: 'colorSurface', label: 'Surface color', default: '#111318' },
-  { key: '--color-text', name: 'colorText', label: 'Text color', default: '#e6e8ec' },
-  { key: '--color-muted', name: 'colorMuted', label: 'Muted text color', default: '#a1a7b3' },
-  { key: '--color-primary', name: 'colorPrimary', label: 'Primary color', default: '#3b82f6' },
-  {
-    key: '--color-primary-600',
-    name: 'colorPrimaryStrong',
-    label: 'Primary (emphasis) color',
-    default: '#2563eb',
-  },
-  { key: '--color-success', name: 'colorSuccess', label: 'Success color', default: '#22c55e' },
-  { key: '--color-warning', name: 'colorWarning', label: 'Warning color', default: '#f59e0b' },
-  { key: '--color-danger', name: 'colorDanger', label: 'Danger color', default: '#ef4444' },
-]
 
 const buildClassName = (...values) => values.filter(Boolean).join(' ')
 
@@ -54,14 +43,7 @@ export function ThemeSelect({
     getThemeTokens(availableThemes[0]) ??
     getThemeTokens(DEFAULT_THEMES[0])
 
-  const colorDefaults = useMemo(() => {
-    const defaults = {}
-    CUSTOM_THEME_FIELDS.forEach((field) => {
-      const tokenValue = sanitizeString(baseTokens?.[field.key])
-      defaults[field.name] = tokenValue.length > 0 ? tokenValue : field.default
-    })
-    return defaults
-  }, [baseTokens])
+  const colorDefaults = useMemo(() => buildColorFormState(baseTokens), [baseTokens])
 
   const [isCreating, setIsCreating] = useState(false)
   const [formState, setFormState] = useState(() => ({ name: '', ...colorDefaults }))
@@ -110,13 +92,7 @@ export function ThemeSelect({
     if (!trimmedName) return
     if (!canCreateCustom) return
 
-    const tokens = {}
-    CUSTOM_THEME_FIELDS.forEach((field) => {
-      const value = sanitizeString(formState[field.name]).trim()
-      if (value.length > 0) {
-        tokens[field.key] = value
-      }
-    })
+    const tokens = extractTokensFromState(formState)
 
     const createdTheme = createCustomTheme(
       {
@@ -193,7 +169,7 @@ export function ThemeSelect({
           </div>
 
           <div className={`${BASE_CLASS}__grid`} role="group" aria-label="Theme colors">
-            {CUSTOM_THEME_FIELDS.map((field) => (
+            {THEME_COLOR_FIELDS.map((field) => (
               <label
                 key={field.key}
                 className={`${BASE_CLASS}__field`}
@@ -205,7 +181,7 @@ export function ThemeSelect({
                   className={`${BASE_CLASS}__input ${BASE_CLASS}__input--color`}
                   type="color"
                   name={field.name}
-                  value={sanitizeString(formState[field.name])}
+                  value={sanitizeColorValue(formState[field.name]) ?? field.default}
                   onChange={handleInputChange}
                 />
               </label>
