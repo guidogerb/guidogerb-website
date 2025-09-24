@@ -17,3 +17,10 @@ export {
   CACHE_PREFERENCE_VERSION,
   DEFAULT_CACHE_PREFERENCES,
 } from './src/cachePreferencesChannel.js'
+export {
+  serializeCookie,
+  parseCookies,
+  getCookie,
+  setCookie,
+  removeCookie,
+} from './src/cookies.js'

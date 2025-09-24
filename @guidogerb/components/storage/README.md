@@ -49,16 +49,16 @@ export function App() {
 - Offer opt-in caching preferences that the service worker can subscribe to in order to adjust offline and runtime cache
   strategies.
 - Supply mocks and adapters that consumers can use in tests without coupling to browser globals.
+- Surface optional diagnostics hooks so applications can trace storage mutations during development.
 
 ## Planned surface
 
-| Area               | Goals                                                                                                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Area               | Goals |
+| ------------------ | ----- |
 | Storage controller | ✅ Available via `createStorageController`. Returns scoped accessors (`get`, `set`, `remove`, `list`) and gracefully falls back when `window` is unavailable. |
-| Cookie utilities   | ⏳ Lightweight encoder/decoder helpers plus batched update support for multi-cookie workflows.                                                                |
-| Cache governance   | ✅ Cache preference channel that persists toggles and multicasts them to service worker helpers via `BroadcastChannel`.                                       |
-| Diagnostics        | ⏳ Optional logging hooks so apps can trace cache/storage mutations during development.                                                                       |
-
+| Cookie utilities   | ✅ Cookie parsing and mutation helpers covering domain/path/same-site attributes. |
+| Cache governance   | ✅ Cache preference channel that persists toggles and multicasts them to service worker helpers via `BroadcastChannel`. |
+| Diagnostics        | ✅ Diagnostics hooks so apps can trace storage mutations during development. |
 ## Integration with `@guidogerb/components/sw`
 
 The storage package now exposes `createCachePreferenceChannel`, a lightweight store that persists cache policy updates under a
@@ -91,6 +91,61 @@ cacheChannel.subscribe(({ origin, preferences }) => {
   console.info('Cache preferences changed by', origin, preferences)
 })
 ```
+
+## Cookie helpers
+
+```js
+import {
+  setCookie,
+  getCookie,
+  removeCookie,
+  serializeCookie,
+} from '@guidogerb/components-storage'
+
+// Persist a cookie with explicit attributes
+setCookie('theme', 'dark', { path: '/', sameSite: 'Lax', secure: true })
+
+// Read the merged cookie jar (uses document.cookie by default)
+const activeTheme = getCookie('theme') ?? 'light'
+
+// Generate a raw Set-Cookie string for server-side rendering scenarios
+const serialized = serializeCookie('session', 'abc123', {
+  path: '/',
+  sameSite: 'Strict',
+  secure: true,
+})
+
+// Remove the cookie by setting an expired value
+removeCookie('theme', { path: '/' })
+```
+
+The helpers handle URL encoding, domain/path overrides, `SameSite` normalisation, and secure attributes so consumer code can
+operate on cookies without manipulating `document.cookie` manually.
+
+## Diagnostics
+
+`createStorageController` accepts an optional `diagnostics` callback (or object map) that receives structured events whenever the
+controller mutates storage or notifies subscribers. This is useful for instrumentation and debugging during development.
+
+```js
+import { createStorageController } from '@guidogerb/components-storage'
+
+const events = []
+
+const controller = createStorageController({
+  namespace: 'demo',
+  diagnostics: (event) => events.push(event),
+})
+
+controller.set('feature', 'enabled')
+controller.remove('feature')
+
+// events now include objects such as:
+// { type: 'set', key: 'feature', value: 'enabled', previousValue: undefined, timestamp: 1730000000000 }
+```
+
+Instead of a single function you can provide an object with `onSet`, `onRemove`, `onClear`, `onNotify`, or `onFallback` handlers
+to subscribe to specific event types.
 
 ## Testing roadmap
 
