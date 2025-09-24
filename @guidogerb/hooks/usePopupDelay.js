@@ -10,16 +10,31 @@ class PopupDelay {
   // should popping occur immediately because the wait time has lapsed?
   #isImmediatePopup = false
 
-  /** wait a little while after a popup closes before turning off immediate popup flag */
-  startNoPopupTimer = () => {
+  /**
+   * Wait a little while after a popup closes before turning off the immediate popup flag.
+   *
+   * @param {object} [options]
+   * @param {number} [options.cooldownMs]
+   */
+  startNoPopupTimer = (options = {}) => {
     clearTimeout(this.#noPopupTimeoutId)
     clearTimeout(this.#popupTimeoutId)
 
-    if (this.#isImmediatePopup) {
-      this.#noPopupTimeoutId = window.setTimeout(() => {
-        this.#isImmediatePopup = false
-      }, NO_POP_UP_TIMEOUT_MS)
+    if (!this.#isImmediatePopup) {
+      return
     }
+
+    const cooldown =
+      typeof options.cooldownMs === 'number' ? options.cooldownMs : NO_POP_UP_TIMEOUT_MS
+
+    if (cooldown <= 0) {
+      this.#isImmediatePopup = false
+      return
+    }
+
+    this.#noPopupTimeoutId = window.setTimeout(() => {
+      this.#isImmediatePopup = false
+    }, cooldown)
   }
 
   /**
@@ -27,20 +42,26 @@ class PopupDelay {
    * Make sure to call startNoPopupTimer when the popup goes away
    * @param {() => void} callback function to call when waiting is done
    */
-  startPopupTimer = (callback) => {
+  startPopupTimer = (callback, options = {}) => {
+    if (typeof callback !== 'function') {
+      return
+    }
+
     clearTimeout(this.#noPopupTimeoutId)
     clearTimeout(this.#popupTimeoutId)
 
-    if (this.#isImmediatePopup) {
-      // if doing immediate popups, fire callback immediately
+    const delay = typeof options.delayMs === 'number' ? options.delayMs : POP_UP_TIMEOUT_MS
+
+    if (this.#isImmediatePopup || delay <= 0) {
+      this.#isImmediatePopup = true
       callback()
-    } else {
-      // start timeout to pop
-      this.#popupTimeoutId = window.setTimeout(() => {
-        this.#isImmediatePopup = true
-        callback()
-      }, POP_UP_TIMEOUT_MS)
+      return
     }
+
+    this.#popupTimeoutId = window.setTimeout(() => {
+      this.#isImmediatePopup = true
+      callback()
+    }, delay)
   }
 }
 
@@ -49,7 +70,10 @@ const POPUP_DELAY = new PopupDelay()
 /**
  * This could easily have been a context, BUT trying to avoid requiring global contexts for the Design System library
  * plus this doesn't have to be a context because changing the isImmediatePopup state doesn't need to trigger a rerender (locally nor globally)
- * @returns {{startNoPopupTimer: () => void, startPopupTimer: (callback: () => void) => void}}
+ * @returns {{
+ *   startNoPopupTimer: (options?: { cooldownMs?: number }) => void,
+ *   startPopupTimer: (callback: () => void, options?: { delayMs?: number }) => void,
+ * }}
  */
 export function usePopupDelay() {
   // even using useMemo would have created a new object for each usage of this hook.

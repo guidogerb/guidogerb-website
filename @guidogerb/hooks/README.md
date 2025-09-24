@@ -109,7 +109,8 @@ export function CommandPalette() {
 - `useTimeout(delay, isDebounced)` &mdash; schedules debounced or parallel timeouts and clears
   pending timers on unmount.【F:@guidogerb/hooks/useTimeout.js†L1-L26】
 - `usePopupDelay()` &mdash; shared timer controller that throttles rapid open/close cycles so
-  hover popovers feel responsive without flicker.【F:@guidogerb/hooks/usePopupDelay.js†L1-L52】
+  hover popovers feel responsive without flicker. Supports optional `delayMs` and
+  `cooldownMs` overrides for finely tuned hover behavior.【F:@guidogerb/hooks/usePopupDelay.js†L1-L78】
 
 ### State & ref helpers
 
