@@ -42,8 +42,22 @@ export interface SlotDefinition {
 export type RegistryEntry = SlotDefinition | SlotSizeOverrides
 export type Registry = Record<string, RegistryEntry>
 
+export interface ResponsiveSlotBreakpoint {
+  key: BreakpointKey
+  query: string
+}
+
+export interface ResponsiveSlotBreakpointInput {
+  key: BreakpointKey
+  query?: string
+  media?: string
+  minWidth?: number
+  maxWidth?: number
+}
+
 export interface ResponsiveSlotProviderProps {
   registry?: Registry
+  breakpoints?: ReadonlyArray<ResponsiveSlotBreakpointInput>
   defaultBreakpoint?: BreakpointKey
   tokens?: Record<string, string | number>
   resolveToken?: (tokenName: string) => string | number | undefined | null
@@ -132,6 +146,8 @@ export type GuidoGerbUI_ContainerProps<E extends React.ElementType = 'div'> = Gu
 
 export function ResponsiveSlotProvider(props: ResponsiveSlotProviderProps): JSX.Element
 
+export function useBreakpointKey(): BreakpointKey
+
 export function useResponsiveSlotSize(
   slot: string,
   overrides?: SlotSizeOverrides | 'content',
@@ -147,7 +163,7 @@ export function GuidoGerbUI_Container<E extends React.ElementType = 'div'>(
 
 export { GuidoGerbUI_Container as ResponsiveSlot }
 
-export const responsiveSlotBreakpoints: ReadonlyArray<{ key: BreakpointKey; query: string }>
+export const responsiveSlotBreakpoints: ReadonlyArray<ResponsiveSlotBreakpoint>
 
 export const baseResponsiveSlots: Registry
 
@@ -203,7 +219,7 @@ export interface SlotEditorOverlayProps {
   variant: string
   variantOptions: Record<string, SlotVariantMeta>
   onVariantChange: (variant: string) => void
-  breakpoints: ReadonlyArray<{ key: BreakpointKey; query: string }>
+  breakpoints: ReadonlyArray<ResponsiveSlotBreakpoint>
   activeBreakpoint: BreakpointKey
   sizes: SlotSizeOverrides
   draftSizes: SlotSizeOverrides

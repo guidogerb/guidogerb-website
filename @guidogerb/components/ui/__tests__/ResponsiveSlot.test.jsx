@@ -4,6 +4,7 @@ import { renderToString } from 'react-dom/server'
 import {
   ResponsiveSlot,
   ResponsiveSlotProvider,
+  useBreakpointKey,
   useResponsiveSlotInstance,
   useResponsiveSlotMeta,
   useResponsiveSlotSize,
@@ -128,6 +129,10 @@ describe('ResponsiveSlot', () => {
     expect(markup).toContain('--slot-inline-size-A:24rem')
     expect(markup).toContain('--slot-inline-size-B:24rem')
     expect(markup).toContain('--slot-inline:24rem')
+    expect(markup).toContain('--slot-max-inline-size-A:28rem')
+    expect(markup).toContain('--slot-min-inline-size-A:20rem')
+    expect(markup).toContain('--slot-max-block-size-A:30rem')
+    expect(markup).toContain('--slot-min-block-size-A:22rem')
     expect(markup).toContain('inline-size:var(--slot-inline)')
     expect(markup).toContain('role="presentation"')
     expect(markup).toContain('data-slot-key="catalog.card"')
@@ -160,6 +165,14 @@ describe('ResponsiveSlot', () => {
         expect(slot.style.getPropertyValue('--slot-inline-size-B')).toBe('min(100%, 20rem)')
         expect(slot.style.getPropertyValue('--slot-inline')).toBe('min(100%, 20rem)')
         expect(slot.style.getPropertyValue('--slot-block')).toBe('24rem')
+        expect(slot.style.getPropertyValue('--slot-max-inline-size-A')).toBe('26rem')
+        expect(slot.style.getPropertyValue('--slot-min-inline-size-A')).toBe('18rem')
+        expect(slot.style.getPropertyValue('--slot-max-inline-size-B')).toBe('24rem')
+        expect(slot.style.getPropertyValue('--slot-min-inline-size-B')).toBe('16rem')
+        expect(slot.style.getPropertyValue('--slot-max-block-size-A')).toBe('30rem')
+        expect(slot.style.getPropertyValue('--slot-min-block-size-A')).toBe('22rem')
+        expect(slot.style.getPropertyValue('--slot-max-block-size-B')).toBe('26rem')
+        expect(slot.style.getPropertyValue('--slot-min-block-size-B')).toBe('20rem')
         expect(slot.dataset.slotDefaultVariant).toBe('default')
         expect(slot.dataset.slotVariantLabel).toBe('Default')
       })
@@ -170,10 +183,99 @@ describe('ResponsiveSlot', () => {
 
       await waitFor(() => {
         expect(slot.dataset.slotBuffer).toBe('A')
-        expect(slot.style.getPropertyValue('--slot-inline-size-A')).toBe('24rem')
+        expect(slot.style.getPropertyValue('--slot-inline-size-A')).toBe('26rem')
         expect(slot.style.getPropertyValue('--slot-inline-size-B')).toBe('min(100%, 20rem)')
-        expect(slot.style.getPropertyValue('--slot-inline')).toBe('24rem')
-        expect(slot.style.getPropertyValue('--slot-block')).toBe('26rem')
+        expect(slot.style.getPropertyValue('--slot-inline')).toBe('26rem')
+        expect(slot.style.getPropertyValue('--slot-block')).toBe('28rem')
+        expect(slot.style.getPropertyValue('--slot-max-inline-size-A')).toBe('30rem')
+        expect(slot.style.getPropertyValue('--slot-min-inline-size-A')).toBe('20rem')
+        expect(slot.style.getPropertyValue('--slot-max-block-size-A')).toBe('32rem')
+        expect(slot.style.getPropertyValue('--slot-min-block-size-A')).toBe('24rem')
+        expect(slot.style.getPropertyValue('--slot-max-inline-size-B')).toBe('24rem')
+        expect(slot.style.getPropertyValue('--slot-min-inline-size-B')).toBe('16rem')
+        expect(slot.style.getPropertyValue('--slot-max-block-size-B')).toBe('26rem')
+        expect(slot.style.getPropertyValue('--slot-min-block-size-B')).toBe('20rem')
+      })
+    } finally {
+      window.matchMedia = originalMatchMedia
+    }
+  })
+
+  it('returns the default breakpoint when matchMedia is unavailable', () => {
+    const originalMatchMedia = window.matchMedia
+    window.matchMedia = undefined
+
+    function BreakpointProbe() {
+      const key = useBreakpointKey()
+      return <div data-testid="breakpoint" data-key={key} />
+    }
+
+    try {
+      render(
+        <ResponsiveSlotProvider defaultBreakpoint="lg">
+          <BreakpointProbe />
+        </ResponsiveSlotProvider>,
+      )
+
+      const probe = screen.getByTestId('breakpoint')
+      expect(probe.dataset.key).toBe('lg')
+    } finally {
+      window.matchMedia = originalMatchMedia
+    }
+  })
+
+  it('allows overriding breakpoint descriptors through the provider', async () => {
+    const originalMatchMedia = window.matchMedia
+    const mockMatchMedia = createMatchMedia(450)
+    window.matchMedia = mockMatchMedia
+
+    function BreakpointProbe() {
+      const key = useBreakpointKey()
+      return <div data-testid="breakpoint" data-key={key} />
+    }
+
+    try {
+      render(
+        <ResponsiveSlotProvider
+          defaultBreakpoint="sm"
+          breakpoints={[
+            { key: 'sm', minWidth: 600 },
+            { key: 'lg', minWidth: 900 },
+          ]}
+        >
+          <BreakpointProbe />
+        </ResponsiveSlotProvider>,
+      )
+
+      const probe = await screen.findByTestId('breakpoint')
+      expect(probe.dataset.key).toBe('xs')
+
+      act(() => {
+        mockMatchMedia.setWidth(650)
+      })
+      await waitFor(() => {
+        expect(probe.dataset.key).toBe('sm')
+      })
+
+      act(() => {
+        mockMatchMedia.setWidth(820)
+      })
+      await waitFor(() => {
+        expect(probe.dataset.key).toBe('md')
+      })
+
+      act(() => {
+        mockMatchMedia.setWidth(940)
+      })
+      await waitFor(() => {
+        expect(probe.dataset.key).toBe('lg')
+      })
+
+      act(() => {
+        mockMatchMedia.setWidth(1320)
+      })
+      await waitFor(() => {
+        expect(probe.dataset.key).toBe('xl')
       })
     } finally {
       window.matchMedia = originalMatchMedia

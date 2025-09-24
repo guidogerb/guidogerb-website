@@ -1,5 +1,6 @@
 export {
   ResponsiveSlotProvider,
+  useBreakpointKey,
   useResponsiveSlotSize,
   useResponsiveSlotMeta,
   useResponsiveSlotInstance,

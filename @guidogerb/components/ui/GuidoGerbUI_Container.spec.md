@@ -454,11 +454,11 @@ src/
 
 - [x] Create `responsive-slot` module and exports from `@guidogerb/components/ui`.
 - [x] Implement `SlotSizeMap`, `BreakpointKey`, `Registry` types with strict TS.
-- [ ] Implement base presets (`catalog.card`, `dashboard.panel`, `hero.banner`, `list.row`).
+- [x] Implement base presets (`catalog.card`, `dashboard.panel`, `hero.banner`, `list.row`).
 
 #### 2) Breakpoints & Sizing
 
-- [ ] Build `useBreakpointKey()` with `matchMedia` subscriptions and cleanup.
+- [x] Build `useBreakpointKey()` with `matchMedia` subscriptions and cleanup.
 - [ ] Add SSR/SSG default fallback support via provider prop.
 - [ ] Build `resolveSizes(slotKey, bp, overrides)` with deep merge + fallbacks.
 - [x] Implement double‑buffered CSS variable algorithm and atomic flip.

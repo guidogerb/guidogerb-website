@@ -13,18 +13,58 @@ const BREAKPOINT_QUERIES = {
   xl: '(min-width: 1280px)',
 }
 
-export const responsiveSlotBreakpoints = BREAKPOINT_ORDER.map((key) => ({
-  key,
-  query: BREAKPOINT_QUERIES[key],
-}))
+function createDefaultBreakpoints() {
+  return BREAKPOINT_ORDER.map((key) => ({
+    key,
+    query: BREAKPOINT_QUERIES[key],
+  }))
+}
+
+export const responsiveSlotBreakpoints = createDefaultBreakpoints()
 
 export const baseResponsiveSlots = {
   'catalog.card': {
     sizes: {
-      xs: { inline: 'min(100%, 20rem)', block: '24rem' },
-      sm: { inline: '20rem', block: '24rem' },
-      md: { inline: '22rem', block: '26rem' },
-      lg: { inline: '24rem', block: '26rem' },
+      xs: {
+        inline: 'min(100%, 20rem)',
+        block: '24rem',
+        maxInline: '24rem',
+        maxBlock: '26rem',
+        minInline: '16rem',
+        minBlock: '20rem',
+      },
+      sm: {
+        inline: '20rem',
+        block: '24rem',
+        maxInline: '24rem',
+        maxBlock: '26rem',
+        minInline: '18rem',
+        minBlock: '20rem',
+      },
+      md: {
+        inline: '22rem',
+        block: '26rem',
+        maxInline: '26rem',
+        maxBlock: '30rem',
+        minInline: '18rem',
+        minBlock: '22rem',
+      },
+      lg: {
+        inline: '24rem',
+        block: '26rem',
+        maxInline: '28rem',
+        maxBlock: '30rem',
+        minInline: '20rem',
+        minBlock: '22rem',
+      },
+      xl: {
+        inline: '26rem',
+        block: '28rem',
+        maxInline: '30rem',
+        maxBlock: '32rem',
+        minInline: '20rem',
+        minBlock: '24rem',
+      },
     },
     meta: {
       label: 'Catalog Card',
@@ -43,9 +83,46 @@ export const baseResponsiveSlots = {
   },
   'dashboard.panel': {
     sizes: {
-      xs: { inline: 'min(100%, 100vw)', block: '18rem' },
-      md: { inline: '32rem', block: '20rem' },
-      lg: { inline: '36rem', block: '22rem' },
+      xs: {
+        inline: 'min(100%, 100vw)',
+        block: '18rem',
+        maxInline: '100%',
+        maxBlock: '22rem',
+        minInline: '18rem',
+        minBlock: '16rem',
+      },
+      sm: {
+        inline: '24rem',
+        block: '19rem',
+        maxInline: '28rem',
+        maxBlock: '23rem',
+        minInline: '20rem',
+        minBlock: '17rem',
+      },
+      md: {
+        inline: '32rem',
+        block: '20rem',
+        maxInline: '36rem',
+        maxBlock: '24rem',
+        minInline: '24rem',
+        minBlock: '18rem',
+      },
+      lg: {
+        inline: '36rem',
+        block: '22rem',
+        maxInline: '40rem',
+        maxBlock: '26rem',
+        minInline: '28rem',
+        minBlock: '20rem',
+      },
+      xl: {
+        inline: '40rem',
+        block: '24rem',
+        maxInline: '44rem',
+        maxBlock: '28rem',
+        minInline: '30rem',
+        minBlock: '22rem',
+      },
     },
     meta: {
       label: 'Dashboard Panel',
@@ -63,9 +140,36 @@ export const baseResponsiveSlots = {
   },
   'hero.banner': {
     sizes: {
-      xs: { inline: '100%', block: '28rem' },
-      md: { inline: '100%', block: '32rem' },
-      xl: { inline: '100%', block: '36rem' },
+      xs: {
+        inline: '100%',
+        block: '28rem',
+        maxBlock: '32rem',
+        minBlock: '24rem',
+      },
+      sm: {
+        inline: '100%',
+        block: '30rem',
+        maxBlock: '34rem',
+        minBlock: '26rem',
+      },
+      md: {
+        inline: '100%',
+        block: '32rem',
+        maxBlock: '36rem',
+        minBlock: '28rem',
+      },
+      lg: {
+        inline: '100%',
+        block: '34rem',
+        maxBlock: '38rem',
+        minBlock: '30rem',
+      },
+      xl: {
+        inline: '100%',
+        block: '36rem',
+        maxBlock: '40rem',
+        minBlock: '32rem',
+      },
     },
     meta: {
       label: 'Hero Banner',
@@ -79,8 +183,35 @@ export const baseResponsiveSlots = {
   },
   'list.row': {
     sizes: {
-      xs: { inline: '100%', block: 'auto' },
-      md: { inline: '100%', block: '5rem' },
+      xs: {
+        inline: '100%',
+        block: 'auto',
+        minBlock: '3rem',
+      },
+      sm: {
+        inline: '100%',
+        block: '4.5rem',
+        maxBlock: '5.5rem',
+        minBlock: '3rem',
+      },
+      md: {
+        inline: '100%',
+        block: '5rem',
+        maxBlock: '6rem',
+        minBlock: '3rem',
+      },
+      lg: {
+        inline: '100%',
+        block: '5.5rem',
+        maxBlock: '6.5rem',
+        minBlock: '3rem',
+      },
+      xl: {
+        inline: '100%',
+        block: '6rem',
+        maxBlock: '7rem',
+        minBlock: '3rem',
+      },
     },
     meta: {
       label: 'List Row',
@@ -92,6 +223,52 @@ export const baseResponsiveSlots = {
       defaultVariant: 'default',
     },
   },
+}
+
+function normalizeCustomBreakpointDescriptor(entry) {
+  if (!entry || typeof entry !== 'object') {
+    return null
+  }
+
+  const { key } = entry
+  if (typeof key !== 'string' || !ALLOWED_BREAKPOINTS.has(key)) {
+    return null
+  }
+
+  const queryCandidates = [entry.query, entry.media]
+  for (const candidate of queryCandidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return { key, query: candidate.trim() }
+    }
+  }
+
+  if (typeof entry.minWidth === 'number' && Number.isFinite(entry.minWidth)) {
+    return { key, query: `(min-width: ${entry.minWidth}px)` }
+  }
+
+  if (typeof entry.maxWidth === 'number' && Number.isFinite(entry.maxWidth)) {
+    return { key, query: `(max-width: ${entry.maxWidth}px)` }
+  }
+
+  return null
+}
+
+function normalizeBreakpoints(customBreakpoints) {
+  const baseline = {}
+  for (const descriptor of createDefaultBreakpoints()) {
+    baseline[descriptor.key] = { ...descriptor }
+  }
+
+  if (Array.isArray(customBreakpoints)) {
+    for (const entry of customBreakpoints) {
+      const normalized = normalizeCustomBreakpointDescriptor(entry)
+      if (normalized) {
+        baseline[normalized.key] = normalized
+      }
+    }
+  }
+
+  return BREAKPOINT_ORDER.map((key) => baseline[key]).filter(Boolean)
 }
 
 const ResponsiveSlotContext = createContext(null)
@@ -445,23 +622,37 @@ function resolveBreakpointSize(breakpoint, map) {
   return DEFAULT_FALLBACK_SIZE
 }
 
-function useActiveBreakpoint(defaultBreakpoint) {
-  const [active, setActive] = useState(defaultBreakpoint)
+function useActiveBreakpoint(defaultBreakpoint, descriptors) {
+  const fallback = normalizeBreakpointKey(defaultBreakpoint)
+  const [active, setActive] = useState(fallback)
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-      return
+      setActive(fallback)
+      return undefined
     }
 
-    const mqls = responsiveSlotBreakpoints.map(({ key, query }) => ({
-      key,
-      mql: window.matchMedia(query),
-    }))
+    const resolvedDescriptors =
+      Array.isArray(descriptors) && descriptors.length > 0
+        ? descriptors
+        : responsiveSlotBreakpoints
 
-    function update() {
+    const entries = resolvedDescriptors
+      .map(({ key, query }) => {
+        if (typeof query !== 'string' || !query) return null
+        return { key, mql: window.matchMedia(query) }
+      })
+      .filter(Boolean)
+
+    if (entries.length === 0) {
+      setActive(fallback)
+      return undefined
+    }
+
+    const update = () => {
       setActive((current) => {
-        let next = defaultBreakpoint
-        for (const { key, mql } of mqls) {
+        let next = fallback
+        for (const { key, mql } of entries) {
           if (mql.matches) {
             next = key
           }
@@ -472,7 +663,7 @@ function useActiveBreakpoint(defaultBreakpoint) {
 
     update()
 
-    for (const { mql } of mqls) {
+    for (const { mql } of entries) {
       const handler = () => update()
       if (typeof mql.addEventListener === 'function') {
         mql.addEventListener('change', handler)
@@ -486,7 +677,7 @@ function useActiveBreakpoint(defaultBreakpoint) {
     }
 
     return () => {
-      for (const { mql } of mqls) {
+      for (const { mql } of entries) {
         const handlers = mql.__responsiveSlotCleanupHandlers || []
         for (const handler of handlers) {
           if (typeof mql.removeEventListener === 'function') {
@@ -498,19 +689,32 @@ function useActiveBreakpoint(defaultBreakpoint) {
         mql.__responsiveSlotCleanupHandlers = []
       }
     }
-  }, [defaultBreakpoint])
+  }, [descriptors, fallback])
+
+  useEffect(() => {
+    setActive((current) => normalizeBreakpointKey(current, fallback))
+  }, [fallback])
 
   return active
 }
 
 export function ResponsiveSlotProvider({
   registry,
+  breakpoints,
   defaultBreakpoint = 'md',
   children,
   tokens,
   resolveToken,
 }) {
   const fallbackBreakpoint = normalizeBreakpointKey(defaultBreakpoint)
+  const breakpointsSignature = useMemo(
+    () => JSON.stringify(breakpoints ?? []),
+    [breakpoints],
+  )
+  const normalizedBreakpoints = useMemo(
+    () => normalizeBreakpoints(breakpoints),
+    [breakpointsSignature],
+  )
 
   const [tokenSnapshot, setTokenSnapshot] = useState(() => (tokens ? { ...tokens } : null))
 
@@ -540,17 +744,23 @@ export function ResponsiveSlotProvider({
 
   const mergedRegistry = useMemo(() => mergeSlotRegistry(baseResponsiveSlots, registry), [registry])
 
-  const activeBreakpoint = useActiveBreakpoint(fallbackBreakpoint)
+  const activeBreakpoint = useActiveBreakpoint(fallbackBreakpoint, normalizedBreakpoints)
 
   const value = useMemo(
     () => ({
       registry: mergedRegistry,
-      breakpoints: responsiveSlotBreakpoints,
+      breakpoints: normalizedBreakpoints,
       activeBreakpoint,
       defaultBreakpoint: fallbackBreakpoint,
       resolveToken: tokenResolver,
     }),
-    [mergedRegistry, activeBreakpoint, fallbackBreakpoint, tokenResolver],
+    [
+      mergedRegistry,
+      normalizedBreakpoints,
+      activeBreakpoint,
+      fallbackBreakpoint,
+      tokenResolver,
+    ],
   )
 
   return <ResponsiveSlotContext.Provider value={value}>{children}</ResponsiveSlotContext.Provider>
@@ -562,6 +772,11 @@ function useResponsiveSlotContext() {
     throw new Error('ResponsiveSlot components must be used within a ResponsiveSlotProvider')
   }
   return context
+}
+
+export function useBreakpointKey() {
+  const { activeBreakpoint, defaultBreakpoint } = useResponsiveSlotContext()
+  return normalizeBreakpointKey(activeBreakpoint, defaultBreakpoint)
 }
 
 export function useResponsiveSlotSize(slot, overrides) {
