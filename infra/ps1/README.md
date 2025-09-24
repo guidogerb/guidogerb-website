@@ -74,7 +74,7 @@ The current automation covers end-to-end scaffolding. Upcoming work will:
 - Generalise GitHub Actions so build/deploy matrices discover tenants generated
   by the script and pull their secrets from a shared contract.
 - Add regression tests that invoke `AddCF-Tenant.ps1` in CI, run `pnpm
-  clean/install/build/lint/format`, and boot a preview to verify the welcome
+clean/install/build/lint/format`, and boot a preview to verify the welcome
   experience renders.
 - Publish operator runbooks that document IAM requirements, cleanup steps, and
   post-scaffold verification.

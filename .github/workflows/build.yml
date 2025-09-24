@@ -12,8 +12,23 @@ env:
   NODE_VERSION: '20.19.0'
 
 jobs:
-  build:
-    name: Build and Test All Websites
+  resolve-metadata:
+    name: Resolve tenant metadata
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.derive.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Discover tenants
+        id: derive
+        run: |
+          node infra/scripts/resolve-tenants.mjs --format matrix --github-output matrix
+
+  repository-checks:
+    name: Monorepo checks
+    needs: resolve-metadata
     runs-on: ubuntu-latest
     env:
       NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
@@ -27,9 +42,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Configure npm auth for GitHub Packages
-        run: echo "//npm.pkg.github.com/:_authToken=${NPMRC_TOKEN}" >> ~/.npmrc
-        env:
-          NPMRC_TOKEN: ${{ env.NPMRC_TOKEN }}
+        if: env.NPMRC_TOKEN != ''
+        run: |
+          printf '%s\n' "//npm.pkg.github.com/:_authToken=${NPMRC_TOKEN}" >> ~/.npmrc
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -39,82 +54,79 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      #      - name: Lint all packages
-      #        run: npm run lint
-      #        continue-on-error: true
-
       - name: Format check
         run: pnpm format:check
 
-      - name: Write .env files
-        run: |
-          echo "${{ secrets.GARYGERBER_VITE_ENV }}" > websites/garygerber.com/.env
-          echo "${{ secrets.GUIDOGERBPUBLISHING_VITE_ENV }}" > websites/guidogerbpublishing.com/.env
-          echo "${{ secrets.PICKLECHEEZE_VITE_ENV }}" > websites/picklecheeze.com/.env
-          echo "${{ secrets.STREAM4CLOUD_VITE_ENV }}" > websites/stream4cloud.com/.env
-          echo "${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}" > websites/this-is-my-story.org/.env
-          echo "${{ secrets.GGP_LLC_VITE_ENV }}" > websites/ggp.llc/.env
+  build-site:
+    name: Build ${{ matrix.domain }}
+    needs: [resolve-metadata, repository-checks]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.resolve-metadata.outputs.matrix) }}
+    env:
+      NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Build components
-        run: pnpm -r build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
 
-      - name: Check a dist folder for existence after builds
+      - name: Configure npm auth for GitHub Packages
+        if: env.NPMRC_TOKEN != ''
         run: |
-          ls -l websites/guidogerbpublishing.com
-          ls -l websites/guidogerbpublishing.com/dist || echo "dist folder missing"
+          printf '%s\n' "//npm.pkg.github.com/:_authToken=${NPMRC_TOKEN}" >> ~/.npmrc
 
-      - name: Test branch-specific build (guidogerbpublishing.com)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          standalone: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Write tenant .env file
+        shell: bash
+        env:
+          TENANT_ENV: ${{ secrets[matrix.secretName] }}
+          SITE_DIR: ${{ matrix.workspaceDirectory }}
+          SECRET_NAME: ${{ matrix.secretName }}
+          DOMAIN: ${{ matrix.domain }}
         run: |
-          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites-guidogerbpublishing build:prod-bundle
+          set -euo pipefail
+          if [[ -z "${TENANT_ENV}" ]]; then
+            echo "Missing secret ${SECRET_NAME} for ${DOMAIN}" >&2
+            exit 1
+          fi
+          printf '%s\n' "${TENANT_ENV}" > "${SITE_DIR}/.env"
+
+      - name: Build tenant workspace
+        shell: bash
+        env:
+          WORKSPACE_PACKAGE: ${{ matrix.workspacePackage }}
+          BRANCH: ${{ github.base_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [[ "${BRANCH}" == 'prod' ]]; then
+            pnpm --filter "${WORKSPACE_PACKAGE}" build:prod-bundle
           else
-            pnpm --filter websites-guidogerbpublishing build:staging
+            pnpm --filter "${WORKSPACE_PACKAGE}" build:staging
           fi
 
-      - name: Test branch-specific build (garygerber.com)
+      - name: Verify dist output exists
         run: |
-          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites-garygerber build:prod-bundle
-          else
-            pnpm --filter websites-garygerber build:staging
-          fi
+          ls -l ${{ matrix.workspaceDirectory }}
+          ls -l ${{ matrix.workspaceDirectory }}/dist
 
-      - name: Test branch-specific build (picklecheeze.com)
-        run: |
-          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites-picklecheeze build:prod-bundle
-          else
-            pnpm --filter websites-picklecheeze build:staging
-          fi
-
-      - name: Test branch-specific build (this-is-my-story.org)
-        run: |
-          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites-this-is-my-story build:prod-bundle
-          else
-            pnpm --filter websites-this-is-my-story build:staging
-          fi
-
-      - name: Test branch-specific build (stream4cloud.com)
-        run: |
-          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites-stream4cloud build:prod-bundle
-          else
-            pnpm --filter websites-stream4cloud build:staging
-          fi
-
-      - name: Test branch-specific build (ggp.llc)
-        run: |
-          if [ "${{ github.base_ref || github.ref_name }}" = "prod" ]; then
-            pnpm --filter websites-ggp-llc build:prod-bundle
-          else
-            pnpm --filter websites-ggp-llc build:staging
-          fi
-
-      - name: Save build artifacts
-        if: success()
+      - name: Upload tenant dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: all-websites-dist-${{ github.head_ref || github.ref_name }}
-          path: websites/*/dist
+          name: ${{ matrix.domain }}-dist-${{ github.head_ref || github.ref_name }}
+          path: ${{ matrix.workspaceDirectory }}/dist
+          if-no-files-found: error
           retention-days: 7

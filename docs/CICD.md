@@ -81,7 +81,18 @@ Configure these in your GitHub repository settings:
 
 ### Site Configuration
 
-- `VITE_ENV` - Environment variables for Vite builds (optional)
+- `AWS_REGION` - Region for CloudFront deployments (shared across tenants)
+- **Per-tenant `VITE_ENV` secrets** — Each website must expose a secret that
+  contains its multi-line `.env` contents. Secrets follow the pattern
+  `<SANITIZED_DOMAIN>_VITE_ENV`, where `SANITIZED_DOMAIN` uppercases the domain
+  and replaces non-alphanumeric characters with underscores. Examples:
+  - `garygerber.com` → `GARYGERBER_COM_VITE_ENV`
+  - `this-is-my-story.org` → `THIS_IS_MY_STORY_ORG_VITE_ENV`
+  - `ggp.llc` → `GGP_LLC_VITE_ENV`
+
+  The CI/CD workflows automatically discover tenants via
+  `infra/scripts/resolve-tenants.mjs` and inject the corresponding secrets when
+  building and deploying each site.
 
 ## CloudFormation Integration
 
