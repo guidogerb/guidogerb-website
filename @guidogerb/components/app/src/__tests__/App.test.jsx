@@ -426,9 +426,7 @@ describe('AppBasic', () => {
 describe('App shell blueprint', () => {
   it('documents provider order and layout regions', () => {
     expect(APP_SHELL_PROVIDER_BLUEPRINT.order).toEqual(['storage', 'auth', 'header', 'ui'])
-    expect(APP_SHELL_PROVIDER_BLUEPRINT.definitions.auth.package).toBe(
-      '@guidogerb/components-auth',
-    )
+    expect(APP_SHELL_PROVIDER_BLUEPRINT.definitions.auth.package).toBe('@guidogerb/components-auth')
     expect(APP_SHELL_LAYOUT_BLUEPRINT.regions.map((region) => region.id)).toEqual([
       'header',
       'main',

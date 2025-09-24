@@ -93,8 +93,8 @@ function PublishingFooter({ onNavigate }) {
       <div className="footer-contact">
         <h2>Work with GuidoGerb Publishing</h2>
         <p>
-          Email <a href="mailto:hello@guidogerbpublishing.com">hello@guidogerbpublishing.com</a>{' '}
-          or call <a href="tel:+12125559876">+1 (212) 555-9876</a> to discuss catalog development,
+          Email <a href="mailto:hello@guidogerbpublishing.com">hello@guidogerbpublishing.com</a> or
+          call <a href="tel:+12125559876">+1 (212) 555-9876</a> to discuss catalog development,
           distribution, or rights management partnerships.
         </p>
         <p>Headquarters in New York with a distributed production and licensing team.</p>
@@ -339,7 +339,8 @@ function NotFoundPage({ activePath, onNavigate, onNavigateHome }) {
       <p>
         Double-check the link or head back to the publishing overview to browse services, partner
         resources, and submission details. Our team can help route you to the right catalog contact
-        if you email <a href="mailto:partners@guidogerbpublishing.com">partners@guidogerbpublishing.com</a>.
+        if you email{' '}
+        <a href="mailto:partners@guidogerbpublishing.com">partners@guidogerbpublishing.com</a>.
       </p>
     </StatusPage>
   )

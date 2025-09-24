@@ -51,7 +51,9 @@ export function deployReferenceTenant({
 } = {}) {
   const bucket = env.DEPLOY_S3_BUCKET
   if (!bucket) {
-    throw new Error('DEPLOY_S3_BUCKET environment variable is required to deploy the reference tenant.')
+    throw new Error(
+      'DEPLOY_S3_BUCKET environment variable is required to deploy the reference tenant.',
+    )
   }
 
   const distributionId = env.DEPLOY_CLOUDFRONT_DISTRIBUTION_ID
@@ -71,7 +73,10 @@ export function deployReferenceTenant({
   }
 
   log(logger, `[deploy] Syncing build artifacts to s3://${bucket}/`)
-  runCommand('aws', ['s3', 'sync', resolvedDistDir, `s3://${bucket}/`, '--delete'], spawn, { cwd, stdio })
+  runCommand('aws', ['s3', 'sync', resolvedDistDir, `s3://${bucket}/`, '--delete'], spawn, {
+    cwd,
+    stdio,
+  })
 
   log(logger, `[deploy] Invalidating CloudFront distribution ${distributionId}`)
   runCommand(

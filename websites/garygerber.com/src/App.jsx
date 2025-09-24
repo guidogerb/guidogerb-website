@@ -236,9 +236,7 @@ function App() {
       <div className="app-shell" id="top">
         <Header activePath={route.path} onNavigate={handleNavigate} />
 
-        <main className="app-main">
-          {mainContent}
-        </main>
+        <main className="app-main">{mainContent}</main>
 
         <Footer {...footerSettings} onNavigate={handleNavigate} id="contact">
           <div className="footer-contact">

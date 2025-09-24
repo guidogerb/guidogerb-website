@@ -244,6 +244,8 @@ describe('GuidoGerb Publishing website App', () => {
       'href',
       '/',
     )
-    expect(screen.getByText(/applying production updates to the partner portal/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/applying production updates to the partner portal/i),
+    ).toBeInTheDocument()
   })
 })

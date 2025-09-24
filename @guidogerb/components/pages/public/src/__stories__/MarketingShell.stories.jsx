@@ -60,10 +60,7 @@ export const DefaultHero = {
       eyebrow="Broadcast toolkit"
       title="Amplify your reach with Stream4Cloud"
       description="Launch simulcasts, backstage interviews, and watch parties from a single workspace."
-      actions={[
-        { label: 'Start free trial' },
-        { label: 'Book a demo', variant: 'secondary' },
-      ]}
+      actions={[{ label: 'Start free trial' }, { label: 'Book a demo', variant: 'secondary' }]}
     >
       <p>
         See how studios orchestrate multi-channel launches with shareable runbooks, guest portals,
@@ -160,7 +157,9 @@ export const LongFormNarrative = {
         Use fine-grained analytics to highlight where audiences rewatch segments, request
         transcripts, or share spotlight tracks.
       </p>
-      <blockquote style={{ marginInlineStart: 0, borderLeft: '4px solid #0ea5e9', paddingLeft: '1rem' }}>
+      <blockquote
+        style={{ marginInlineStart: 0, borderLeft: '4px solid #0ea5e9', paddingLeft: '1rem' }}
+      >
         “The marketing shell let us preview season arcs with key art, embedded audio, and regional
         dates in a single shareable link.”
       </blockquote>

@@ -152,15 +152,7 @@ export const NavigationMenu = forwardRef(function NavigationMenu(
   const handleItemKeyDown = useCallback((event) => {
     const key = event.key
     if (
-      ![
-        'ArrowUp',
-        'ArrowDown',
-        'ArrowLeft',
-        'ArrowRight',
-        'Home',
-        'End',
-        'Escape',
-      ].includes(key)
+      !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Escape'].includes(key)
     ) {
       return
     }

@@ -226,7 +226,11 @@ export function ThemeEditor({
                       <p className={`${BASE_CLASS}__preview-copy`}>
                         Adjust the palette to see real-time changes reflected in this preview card.
                       </p>
-                      <button type="button" className={`${BASE_CLASS}__preview-action`} style={accentStyles}>
+                      <button
+                        type="button"
+                        className={`${BASE_CLASS}__preview-action`}
+                        style={accentStyles}
+                      >
                         Primary action
                       </button>
                     </div>
@@ -237,7 +241,10 @@ export function ThemeEditor({
                   <button type="button" className={`${BASE_CLASS}__button`} onClick={handleClose}>
                     {cancelLabel}
                   </button>
-                  <button type="submit" className={`${BASE_CLASS}__button ${BASE_CLASS}__button--primary`}>
+                  <button
+                    type="submit"
+                    className={`${BASE_CLASS}__button ${BASE_CLASS}__button--primary`}
+                  >
                     {saveLabel}
                   </button>
                 </footer>

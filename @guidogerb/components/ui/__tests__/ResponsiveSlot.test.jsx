@@ -290,9 +290,7 @@ describe('ResponsiveSlot', () => {
 
     const performance = window.performance
     const markSpy =
-      performance && typeof performance.mark === 'function'
-        ? vi.spyOn(performance, 'mark')
-        : null
+      performance && typeof performance.mark === 'function' ? vi.spyOn(performance, 'mark') : null
     const measureSpy =
       performance && typeof performance.measure === 'function'
         ? vi.spyOn(performance, 'measure')

@@ -79,7 +79,9 @@ export default function RehearsalPortalNavigation({ onNavigate, resources = {} }
           <p className="rehearsal-portal-nav__eyebrow">Next call time</p>
           <h5 id="rehearsal-next-event">{nextEvent.title}</h5>
           <p className="rehearsal-portal-nav__meta">{nextEvent.date}</p>
-          {nextEvent.location ? <p className="rehearsal-portal-nav__meta">{nextEvent.location}</p> : null}
+          {nextEvent.location ? (
+            <p className="rehearsal-portal-nav__meta">{nextEvent.location}</p>
+          ) : null}
           {Array.isArray(nextEvent.callTimes) && nextEvent.callTimes.length > 0 ? (
             <ul className="rehearsal-portal-nav__call-times">
               {nextEvent.callTimes.map((entry, index) => (
@@ -94,7 +96,10 @@ export default function RehearsalPortalNavigation({ onNavigate, resources = {} }
       ) : null}
 
       {productionContact ? (
-        <section className="rehearsal-portal-nav__summary" aria-labelledby="rehearsal-portal-contact">
+        <section
+          className="rehearsal-portal-nav__summary"
+          aria-labelledby="rehearsal-portal-contact"
+        >
           <p className="rehearsal-portal-nav__eyebrow">Production contact</p>
           <h5 id="rehearsal-portal-contact">{productionContact.name}</h5>
           {productionContact.role ? (

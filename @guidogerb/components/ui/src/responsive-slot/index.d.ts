@@ -100,10 +100,18 @@ export interface ResponsiveSlotEditingState {
   isActive: boolean
   shouldShowOverlay: boolean
   setActive: () => void
-  recordOverflow: (event: { inlineBudget: string; blockBudget: string; breakpoint: BreakpointKey }) => void
+  recordOverflow: (event: {
+    inlineBudget: string
+    blockBudget: string
+    breakpoint: BreakpointKey
+  }) => void
   publishDraft: () => Promise<SlotDraft | null>
   discardDraft: () => void
-  updateSize: (breakpoint: BreakpointKey, dimension: keyof SlotSizeMap, value: string | number | null | undefined) => void
+  updateSize: (
+    breakpoint: BreakpointKey,
+    dimension: keyof SlotSizeMap,
+    value: string | number | null | undefined,
+  ) => void
   updateVariant: (variant?: string | null) => void
   updateProps: (props: Record<string, unknown> | undefined) => void
   clearBreakpoint: (breakpoint: BreakpointKey) => void
@@ -127,7 +135,10 @@ export interface ResponsiveSlotInstance {
   editing?: ResponsiveSlotEditingState
 }
 
-type ElementProps<E extends React.ElementType> = Omit<React.ComponentPropsWithRef<E>, keyof GuidoGerbUI_ContainerBaseProps>
+type ElementProps<E extends React.ElementType> = Omit<
+  React.ComponentPropsWithRef<E>,
+  keyof GuidoGerbUI_ContainerBaseProps
+>
 
 export interface GuidoGerbUI_ContainerBaseProps {
   slot: string
@@ -140,9 +151,10 @@ export interface GuidoGerbUI_ContainerBaseProps {
   children?: React.ReactNode
 }
 
-export type GuidoGerbUI_ContainerProps<E extends React.ElementType = 'div'> = GuidoGerbUI_ContainerBaseProps & {
-  as?: E
-} & ElementProps<E>
+export type GuidoGerbUI_ContainerProps<E extends React.ElementType = 'div'> =
+  GuidoGerbUI_ContainerBaseProps & {
+    as?: E
+  } & ElementProps<E>
 
 export function ResponsiveSlotProvider(props: ResponsiveSlotProviderProps): JSX.Element
 
@@ -185,10 +197,7 @@ export interface EditModeProviderProps {
   children?: React.ReactNode
   initialMode?: boolean
   graphqlEndpoint?: string | null
-  graphqlHeaders?:
-    | Record<string, string>
-    | null
-    | (() => Record<string, string> | undefined)
+  graphqlHeaders?: Record<string, string> | null | (() => Record<string, string> | undefined)
   fetcher?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
 }
 
@@ -200,10 +209,7 @@ export interface EditModeContextValue {
   enterEditMode: () => void
   exitEditMode: () => void
   graphqlEndpoint: string | null
-  graphqlHeaders:
-    | Record<string, string>
-    | null
-    | (() => Record<string, string> | undefined)
+  graphqlHeaders: Record<string, string> | null | (() => Record<string, string> | undefined)
   fetcher: ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>) | null
 }
 
@@ -237,7 +243,11 @@ export interface SlotEditorOverlayProps {
   activeBreakpoint: BreakpointKey
   sizes: SlotSizeOverrides
   draftSizes: SlotSizeOverrides
-  onSizeChange: (breakpoint: BreakpointKey, dimension: keyof SlotSizeMap, value: string | number | null | undefined) => void
+  onSizeChange: (
+    breakpoint: BreakpointKey,
+    dimension: keyof SlotSizeMap,
+    value: string | number | null | undefined,
+  ) => void
   onClearBreakpoint: (breakpoint: BreakpointKey) => void
   propsJSON?: Record<string, unknown> | null
   onPropsChange: (props: Record<string, unknown> | undefined) => void

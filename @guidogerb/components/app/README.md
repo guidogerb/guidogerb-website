@@ -73,7 +73,15 @@ console.log(plan.providerBlueprint.order) // ['storage', 'auth', 'header', 'ui']
 
 function DebugPanel() {
   const runtimePlan = useAppBasicPlan()
-  return <pre>{JSON.stringify(runtimePlan?.router.routes.map((route) => route.path), null, 2)}</pre>
+  return (
+    <pre>
+      {JSON.stringify(
+        runtimePlan?.router.routes.map((route) => route.path),
+        null,
+        2,
+      )}
+    </pre>
+  )
 }
 
 function App() {

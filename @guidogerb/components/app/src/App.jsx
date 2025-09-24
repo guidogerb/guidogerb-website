@@ -123,7 +123,8 @@ export const APP_SHELL_LAYOUT_BLUEPRINT = Object.freeze({
       id: 'main',
       component: '@guidogerb/components-router-protected',
       role: 'main',
-      description: 'Marketing routes and the protected dashboard rendered through a guarded router.',
+      description:
+        'Marketing routes and the protected dashboard rendered through a guarded router.',
       dependsOn: Object.freeze(['routes', 'auth']),
     }),
     Object.freeze({
@@ -190,7 +191,14 @@ export const APP_BASIC_TENANT_CONTROLS = Object.freeze({
     'protectFallback',
   ]),
   storage: Object.freeze(['namespace', 'mode', 'persist', 'adapter']),
-  serviceWorker: Object.freeze(['enabled', 'url', 'scope', 'immediate', 'onOfflineReady', 'onNeedRefresh']),
+  serviceWorker: Object.freeze([
+    'enabled',
+    'url',
+    'scope',
+    'immediate',
+    'onOfflineReady',
+    'onNeedRefresh',
+  ]),
   theme: Object.freeze(['registry', 'tokens', 'defaultBreakpoint', 'resolveToken']),
   main: Object.freeze(['className', 'id', 'style', 'role']),
 })
@@ -833,7 +841,10 @@ export const AppBasic = ({
   const themeOptions = providers.ui.props ?? {}
   const guardProps = router.guardProps ?? { logoutUri }
   const protectedRouterProps = router.passthroughProps ?? {}
-  const rootAttributes = layoutPlan.root ?? { className: 'gg-app gg-app--basic', dataAttributes: {} }
+  const rootAttributes = layoutPlan.root ?? {
+    className: 'gg-app gg-app--basic',
+    dataAttributes: {},
+  }
   const mainAttributes = layoutPlan.main?.props ?? { className: 'gg-app-basic__main' }
   const footerConfig = layoutPlan.footer?.props ?? DEFAULT_FOOTER_PROPS
 

@@ -166,7 +166,9 @@ describe('Gary Gerber welcome component', () => {
 
     await renderWelcome()
 
-    expect(screen.getByRole('heading', { level: 3, name: 'Welcome back, userNotAvailable!' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Welcome back, userNotAvailable!' }),
+    ).toBeInTheDocument()
     expect(screen.queryByText(/Signed in as/i)).not.toBeInTheDocument()
     expect(
       screen.getByText(

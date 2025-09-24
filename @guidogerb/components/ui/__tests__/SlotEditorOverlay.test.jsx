@@ -65,9 +65,9 @@ describe('SlotEditorOverlay', () => {
   })
 
   it('renders a formatted last updated timestamp when available', () => {
-    const toLocaleSpy = vi.spyOn(Date.prototype, 'toLocaleString').mockReturnValue(
-      '09/19/2025, 12:00:00 AM',
-    )
+    const toLocaleSpy = vi
+      .spyOn(Date.prototype, 'toLocaleString')
+      .mockReturnValue('09/19/2025, 12:00:00 AM')
 
     try {
       render(
@@ -98,11 +98,9 @@ describe('SlotEditorOverlay', () => {
   })
 
   it('falls back to the raw lastUpdatedAt value when formatting fails', () => {
-    const toLocaleSpy = vi
-      .spyOn(Date.prototype, 'toLocaleString')
-      .mockImplementation(() => {
-        throw new Error('locale failure')
-      })
+    const toLocaleSpy = vi.spyOn(Date.prototype, 'toLocaleString').mockImplementation(() => {
+      throw new Error('locale failure')
+    })
 
     try {
       render(
@@ -126,9 +124,7 @@ describe('SlotEditorOverlay', () => {
         />,
       )
 
-      expect(
-        screen.getByText('Updated 2025-09-19T00:00:00.000Z'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('Updated 2025-09-19T00:00:00.000Z')).toBeInTheDocument()
     } finally {
       toLocaleSpy.mockRestore()
     }

@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  APP_VARIANT_SPECS,
-  getAppVariantSpec,
-  listAppVariantSpecs,
-} from '../variantSpecs.js'
-import {
-  APP_SHELL_LAYOUT_BLUEPRINT,
-  APP_SHELL_PROVIDER_BLUEPRINT,
-} from '../App.jsx'
+import { APP_VARIANT_SPECS, getAppVariantSpec, listAppVariantSpecs } from '../variantSpecs.js'
+import { APP_SHELL_LAYOUT_BLUEPRINT, APP_SHELL_PROVIDER_BLUEPRINT } from '../App.jsx'
 
 describe('APP_VARIANT_SPECS', () => {
   it('exposes base, analytics, and commerce variants', () => {

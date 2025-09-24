@@ -44,19 +44,20 @@ describe('deployReferenceTenant', () => {
     expect(spawnMock).toHaveBeenNthCalledWith(
       2,
       'aws',
-      [
-        's3',
-        'sync',
-        resolve(distDir),
-        's3://guidogerb-reference-bucket/',
-        '--delete',
-      ],
+      ['s3', 'sync', resolve(distDir), 's3://guidogerb-reference-bucket/', '--delete'],
       expect.objectContaining({ cwd: '/repo/root', stdio: 'pipe' }),
     )
     expect(spawnMock).toHaveBeenNthCalledWith(
       3,
       'aws',
-      ['cloudfront', 'create-invalidation', '--distribution-id', 'EDISTRIBUTION123', '--paths', '/*'],
+      [
+        'cloudfront',
+        'create-invalidation',
+        '--distribution-id',
+        'EDISTRIBUTION123',
+        '--paths',
+        '/*',
+      ],
       expect.objectContaining({ cwd: '/repo/root', stdio: 'pipe' }),
     )
   })

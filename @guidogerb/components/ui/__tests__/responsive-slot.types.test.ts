@@ -1,6 +1,10 @@
 import { describe, it, expectTypeOf, expect } from 'vitest'
 
-import { useBreakpointKey, responsiveSlotBreakpoints, baseResponsiveSlots } from '../src/responsive-slot/index.js'
+import {
+  useBreakpointKey,
+  responsiveSlotBreakpoints,
+  baseResponsiveSlots,
+} from '../src/responsive-slot/index.js'
 import type {
   BreakpointKey,
   SlotSizeMap,

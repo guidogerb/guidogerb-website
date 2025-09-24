@@ -335,11 +335,10 @@ function recordBufferFlip(slotKey, fromPhase, toPhase) {
 
   const global = window
   const namespace = (global.__GG__ = global.__GG__ || {})
-  const metrics =
-    (namespace.responsiveSlot = namespace.responsiveSlot || {
-      bufferFlips: 0,
-      lastFlip: null,
-    })
+  const metrics = (namespace.responsiveSlot = namespace.responsiveSlot || {
+    bufferFlips: 0,
+    lastFlip: null,
+  })
 
   metrics.bufferFlips += 1
   metrics.lastFlip = {
@@ -646,9 +645,7 @@ function useActiveBreakpoint(defaultBreakpoint, descriptors) {
     }
 
     const resolvedDescriptors =
-      Array.isArray(descriptors) && descriptors.length > 0
-        ? descriptors
-        : responsiveSlotBreakpoints
+      Array.isArray(descriptors) && descriptors.length > 0 ? descriptors : responsiveSlotBreakpoints
 
     const entries = resolvedDescriptors
       .map(({ key, query }) => {
@@ -720,10 +717,7 @@ export function ResponsiveSlotProvider({
   resolveToken,
 }) {
   const fallbackBreakpoint = normalizeBreakpointKey(defaultBreakpoint)
-  const breakpointsSignature = useMemo(
-    () => JSON.stringify(breakpoints ?? []),
-    [breakpoints],
-  )
+  const breakpointsSignature = useMemo(() => JSON.stringify(breakpoints ?? []), [breakpoints])
   const normalizedBreakpoints = useMemo(
     () => normalizeBreakpoints(breakpoints),
     [breakpointsSignature],
@@ -767,13 +761,7 @@ export function ResponsiveSlotProvider({
       defaultBreakpoint: fallbackBreakpoint,
       resolveToken: tokenResolver,
     }),
-    [
-      mergedRegistry,
-      normalizedBreakpoints,
-      activeBreakpoint,
-      fallbackBreakpoint,
-      tokenResolver,
-    ],
+    [mergedRegistry, normalizedBreakpoints, activeBreakpoint, fallbackBreakpoint, tokenResolver],
   )
 
   return <ResponsiveSlotContext.Provider value={value}>{children}</ResponsiveSlotContext.Provider>
@@ -807,7 +795,9 @@ export function resolveResponsiveSlotSize({
 
   const definition = registry?.[slot]
   const baseSizes =
-    inheritedSizes ?? definition?.sizes ?? (definition && !definition.sizes ? definition : undefined)
+    inheritedSizes ??
+    definition?.sizes ??
+    (definition && !definition.sizes ? definition : undefined)
   const mergedOverrides = overrides || undefined
 
   const merged = mergeSlotSizes(baseSizes || {}, mergedOverrides || {}, tokenResolver)
@@ -816,7 +806,10 @@ export function resolveResponsiveSlotSize({
     return cloneSizeMap(DEFAULT_FALLBACK_SIZE)
   }
 
-  const resolved = resolveBreakpointSize(normalizeBreakpointKey(breakpoint, fallbackBreakpoint), merged)
+  const resolved = resolveBreakpointSize(
+    normalizeBreakpointKey(breakpoint, fallbackBreakpoint),
+    merged,
+  )
   return cloneSizeMap(resolved)
 }
 

@@ -47,8 +47,6 @@ describe('MarketingShell stories', () => {
       screen.getByRole('heading', { name: 'Your catalog, curated for every platform' }),
     ).toBeInTheDocument()
     expect(screen.getByText(/Bundle episodic releases/)).toBeInTheDocument()
-    expect(
-      screen.getByRole('group', { name: 'Narrative calls to action' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Narrative calls to action' })).toBeInTheDocument()
   })
 })

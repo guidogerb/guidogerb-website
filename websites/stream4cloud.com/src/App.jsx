@@ -85,7 +85,10 @@ const broadcasterOutcomes = [
     title: 'Protect show-day confidence',
     description:
       'Integrated rehearsal sandboxes, telemetry alerts, and escalation protocols keep every broadcast calm and measurable.',
-    cta: { label: 'Schedule a readiness review', href: 'https://calendly.com/stream4cloud/readiness' },
+    cta: {
+      label: 'Schedule a readiness review',
+      href: 'https://calendly.com/stream4cloud/readiness',
+    },
   },
 ]
 

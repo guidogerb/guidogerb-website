@@ -305,4 +305,3 @@ export const APP_VARIANT_SPECS = deepFreeze({
 export const getAppVariantSpec = (variantId) => APP_VARIANT_SPECS[variantId] ?? null
 
 export const listAppVariantSpecs = () => Object.values(APP_VARIANT_SPECS)
-

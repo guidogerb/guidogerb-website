@@ -156,11 +156,7 @@ describe('App', () => {
     const user = userEvent.setup()
 
     render(
-      <NavigationMenu
-        items={buildItems()}
-        orientation="vertical"
-        label="Sidebar navigation"
-      />,
+      <NavigationMenu items={buildItems()} orientation="vertical" label="Sidebar navigation" />,
     )
 
     const home = screen.getByRole('link', { name: 'Home' })

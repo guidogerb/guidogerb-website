@@ -242,8 +242,6 @@ describe('Gary Gerber website App', () => {
       screen.getByRole('heading', { level: 2, name: 'Client rehearsal room' }),
     ).toBeInTheDocument()
     expect(screen.queryByRole('heading', { level: 4, name: 'Rehearsal quick access' })).toBeNull()
-    expect(
-      screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' })).toBeInTheDocument()
   })
 })
