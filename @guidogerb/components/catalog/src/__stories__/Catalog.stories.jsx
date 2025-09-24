@@ -8,11 +8,25 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
   },
+  argTypes: {
+    initialView: {
+      control: 'inline-radio',
+      options: ['grid', 'list'],
+    },
+    pageSize: {
+      control: { type: 'number', min: 1, max: 10 },
+    },
+  },
+  args: {
+    initialView: 'grid',
+    pageSize: 3,
+    searchPlaceholder: 'Search catalog',
+  },
 }
 
 export default meta
 
-const MOCK_PRODUCTS = [
+export const MOCK_PRODUCTS = [
   {
     id: 'digital-mastering',
     sku: 'DIGI-001',
@@ -100,24 +114,13 @@ const MOCK_PRODUCTS = [
   },
 ]
 
-const INITIAL_PAGES = [
-  {
-    cursor: null,
-    items: MOCK_PRODUCTS.slice(0, 3),
-    pageInfo: { total: MOCK_PRODUCTS.length, hasNextPage: true, endCursor: 'page-2' },
-  },
-  {
-    cursor: 'page-2',
-    items: MOCK_PRODUCTS.slice(3),
-    pageInfo: { total: MOCK_PRODUCTS.length, hasNextPage: false, endCursor: null },
-  },
-]
-
 const filterProducts = (products, variables = {}) => {
   let filtered = [...products]
 
   const requestedTypes = variables.filters?.productTypes ?? []
   const requestedFulfillment = variables.filters?.fulfillment ?? []
+  const requestedTags = variables.filters?.tags ?? []
+  const requestedAvailability = variables.filters?.availabilityStatuses ?? []
   const searchTerm = variables.search?.toLowerCase?.()
 
   if (requestedTypes.length) {
@@ -130,9 +133,21 @@ const filterProducts = (products, variables = {}) => {
     )
   }
 
+  if (requestedTags.length) {
+    filtered = filtered.filter((product) =>
+      product.tags?.some?.((tag) => requestedTags.includes(tag)),
+    )
+  }
+
+  if (requestedAvailability.length) {
+    filtered = filtered.filter((product) =>
+      requestedAvailability.includes(product.availability.status),
+    )
+  }
+
   if (searchTerm) {
     filtered = filtered.filter((product) =>
-      [product.title, product.subtitle, product.description]
+      [product.title, product.subtitle, product.description, product.sku]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(searchTerm)),
     )
@@ -141,56 +156,61 @@ const filterProducts = (products, variables = {}) => {
   return filtered
 }
 
-const createMockClient = () => ({
+const parsePageNumber = (cursor) => {
+  if (typeof cursor !== 'string') return 1
+  const match = cursor.match(/page-(\d+)/)
+  const parsed = match ? Number.parseInt(match[1], 10) : NaN
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
+}
+
+export const createMockCatalogClient = (products = MOCK_PRODUCTS) => ({
   async post(_path, { json }) {
     const variables = json?.variables ?? {}
-    const hasFilters = Boolean(
-      variables.search ||
-        variables.filters?.productTypes?.length ||
-        variables.filters?.fulfillment?.length,
-    )
-
-    const requestedPage = variables.pagination?.after ?? null
-
-    let items = MOCK_PRODUCTS
-    let pageInfo = { total: MOCK_PRODUCTS.length, hasNextPage: false, endCursor: null }
-
-    if (hasFilters) {
-      items = filterProducts(MOCK_PRODUCTS, variables)
-      pageInfo = { total: items.length, hasNextPage: false, endCursor: null }
-    } else {
-      const page = INITIAL_PAGES.find((entry) => entry.cursor === requestedPage) ?? INITIAL_PAGES[0]
-      items = page.items
-      pageInfo = page.pageInfo
-    }
+    const filtered = filterProducts(products, variables)
+    const requestedPageSize = Number(variables.pagination?.first) || filtered.length
+    const pageSize = requestedPageSize > 0 ? requestedPageSize : filtered.length
+    const requestedCursor = variables.pagination?.after ?? null
+    const pageNumber = parsePageNumber(requestedCursor)
+    const startIndex = (pageNumber - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    const items = filtered.slice(startIndex, endIndex)
+    const hasNextPage = endIndex < filtered.length
 
     return {
       data: {
         catalog: {
           items,
-          pageInfo,
+          pageInfo: {
+            total: filtered.length,
+            hasNextPage,
+            endCursor: hasNextPage ? `page-${pageNumber + 1}` : null,
+          },
         },
       },
     }
   },
 })
 
-function CatalogPlayground(props) {
-  const client = useMemo(() => createMockClient(), [])
+export function CatalogPlayground({
+  mockProducts = MOCK_PRODUCTS,
+  storageNamespace = 'story.catalog',
+  storageArea = 'memory',
+  ...props
+}) {
+  const client = useMemo(() => createMockCatalogClient(mockProducts), [mockProducts])
   const storage = useMemo(
     () =>
       createStorageController({
-        namespace: 'story.catalog',
-        area: 'memory',
+        namespace: storageNamespace,
+        area: storageArea,
       }),
-    [],
+    [storageNamespace, storageArea],
   )
 
   return (
     <Catalog
       client={client}
       storage={storage}
-      pageSize={3}
       graphQLEndpoint="/graphql/catalog"
       onProductSelect={() => {}}
       {...props}
@@ -198,21 +218,54 @@ function CatalogPlayground(props) {
   )
 }
 
-export { CatalogPlayground }
-
 export const Default = {
-  render: () => <CatalogPlayground />,
+  render: (args) => <CatalogPlayground {...args} />,
 }
 
 export const ListView = {
-  render: () => <CatalogPlayground initialView="list" />,
+  args: {
+    initialView: 'list',
+  },
+  render: (args) => <CatalogPlayground {...args} />,
 }
 
 export const PhysicalFocus = {
-  render: () => (
+  args: {
+    initialFilters: { fulfillment: ['PHYSICAL'] },
+    searchPlaceholder: 'Search catalog for merch',
+  },
+  render: (args) => <CatalogPlayground {...args} />,
+}
+
+export const CustomRenderer = {
+  render: (args) => (
     <CatalogPlayground
-      initialFilters={{ fulfillment: ['PHYSICAL'] }}
-      searchPlaceholder="Search catalog for merch"
+      {...args}
+      renderProduct={({ product, viewMode, onSelect }) => (
+        <article data-testid="custom-product" className="catalog-story-custom-card">
+          <header>
+            <h3>{product.title}</h3>
+            <p>{product.subtitle}</p>
+          </header>
+          <p>{product.description}</p>
+          <dl>
+            <div>
+              <dt>Format</dt>
+              <dd>{product.format}</dd>
+            </div>
+            <div>
+              <dt>Fulfillment</dt>
+              <dd>{product.availability.fulfillment}</dd>
+            </div>
+          </dl>
+          <footer>
+            <button type="button" onClick={() => onSelect?.(product)}>
+              Add to crate
+            </button>
+            <span aria-label="View mode">{viewMode}</span>
+          </footer>
+        </article>
+      )}
     />
   ),
 }

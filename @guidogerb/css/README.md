@@ -10,6 +10,8 @@ web applications.
   notification for offline support)
 - `ThemeSelect` — ready-made selector that can be embedded in
   `@guidogerb/header` to switch between themes and create new ones
+- `ThemeEditor` — modal workflow for editing the active palette and saving it
+  as a reusable custom theme
 
 ## Usage
 
@@ -59,6 +61,30 @@ Custom themes inherit the rest of the design tokens from the currently active
 base theme and are stored alongside the active selection. Newly created themes
 become active immediately, making it easy to wire into the header via the
 `renderThemeToggle` slot.
+
+### ThemeEditor
+
+`ThemeEditor` surfaces the full color token set for the active theme inside a
+lightweight modal. It clones the current palette, lets the user tweak any of
+the core CSS variables, and persists the result via the shared storage helpers
+that `ThemeProvider` already monitors.
+
+```tsx
+import { ThemeProvider, ThemeEditor } from '@guidogerb/css'
+
+export function HeaderThemeControls() {
+  return (
+    <ThemeProvider>
+      <ThemeEditor triggerLabel="Customize" />
+    </ThemeProvider>
+  )
+}
+```
+
+When the editor form is submitted, a new custom theme is created (or the
+existing custom theme is updated) and automatically activated. Persisted
+payloads are broadcast to any subscribed service worker so offline caches can
+react immediately.
 
 Additional exports include:
 

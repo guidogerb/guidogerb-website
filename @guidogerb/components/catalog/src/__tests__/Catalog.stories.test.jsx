@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 
 import {
+  CustomRenderer as CatalogCustomRenderer,
   Default as CatalogDefault,
   ListView as CatalogListView,
   PhysicalFocus as CatalogPhysicalFocus,
@@ -13,7 +14,7 @@ const renderStory = (story) => {
   }
 
   if (story && typeof story.render === 'function') {
-    return render(story.render())
+    return render(story.render(story.args ?? {}))
   }
 
   throw new Error('Unsupported story shape')
@@ -41,6 +42,15 @@ describe('Catalog stories', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /physical shipment/i })).toBeInTheDocument()
+    })
+  })
+
+  it('renders the custom renderer story with bespoke markup', async () => {
+    renderStory(CatalogCustomRenderer)
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('custom-product').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Add to crate').length).toBeGreaterThan(0)
     })
   })
 })
