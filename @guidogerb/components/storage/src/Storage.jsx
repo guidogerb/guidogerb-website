@@ -79,6 +79,18 @@ const buildContextValue = ({ namespace, defaultArea, fallbackArea, controllers }
       : fallbackValue
   }
 
+  const hasValue = (key, area = defaultArea) => {
+    const controller = getController(area)
+    if (typeof controller?.has === 'function') {
+      return controller.has(key)
+    }
+    if (typeof controller?.get === 'function') {
+      const sentinel = Symbol('storage-missing')
+      return controller.get(key, sentinel) !== sentinel
+    }
+    return false
+  }
+
   const setValue = (key, value, area = defaultArea) => {
     const controller = getController(area)
     if (typeof controller?.set === 'function') {
@@ -135,6 +147,7 @@ const buildContextValue = ({ namespace, defaultArea, fallbackArea, controllers }
     hasController,
     getController,
     getValue,
+    hasValue,
     setValue,
     removeValue,
     clearArea,

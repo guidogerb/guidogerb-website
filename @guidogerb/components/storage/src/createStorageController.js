@@ -159,6 +159,8 @@ export const createStorageController = ({
     return safeDeserialize(raw, deserializer, logger)
   }
 
+  const has = (key) => areaRef.getItem(buildKey(key)) !== null
+
   const set = (key, value) => {
     if (value === undefined) {
       remove(key)
@@ -227,6 +229,7 @@ export const createStorageController = ({
   return Object.freeze({
     namespace,
     area,
+    has,
     get: (key, fallback) => {
       const value = read(key)
       return value === undefined ? fallback : value
