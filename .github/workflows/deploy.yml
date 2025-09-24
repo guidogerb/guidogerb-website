@@ -15,27 +15,32 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
+  resolve-metadata:
+    name: Resolve tenant metadata
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    outputs:
+      matrix: ${{ steps.derive.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Discover tenants
+        id: derive
+        run: |
+          node infra/scripts/resolve-tenants.mjs --format matrix --github-output matrix
+
   deploy:
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
-    name: Deploy ${{ matrix.site }}
+    name: Deploy ${{ matrix.domain }}
+    needs: resolve-metadata
     runs-on: ubuntu-latest
-    concurrency: deploy-${{ matrix.site }}
+    concurrency: deploy-${{ matrix.domain }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - site: garygerber.com
-            distId: dt_32sgGiqYklJBVctStUNgG7Yr5C0
-          - site: guidogerbpublishing.com
-            distId: dt_32sg7ajzut8PQfojAV9nIyZSxUX
-          - site: picklecheeze.com
-            distId: dt_32sgNs4ZTHZ6Q5yQtBTZa0AFzfC
-          - site: stream4cloud.com
-            distId: dt_32sgTjXmvRixVhwcvqFpN5YdWSi
-          - site: this-is-my-story.org
-            distId: dt_32sgZgqtD6aKSFyNGcbnPabA9U0
-          - site: ggp.llc
-            distId: dt_32t4XvXr82ATjst1gWnCBS2MlqL
+      matrix: ${{ fromJson(needs.resolve-metadata.outputs.matrix) }}
     env:
       NPMRC_TOKEN: ${{ secrets.NPMRC_TOKEN }}
     steps:
@@ -66,84 +71,39 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build shared packages
-        run: pnpm -r build
-
-      - name: Derive workspace filter from domain
+      - name: Write tenant .env file
         shell: bash
         env:
-          MATRIX_SITE: ${{ matrix.site }}
+          TENANT_ENV: ${{ secrets[matrix.secretName] }}
+          SITE_DIR: ${{ matrix.workspaceDirectory }}
+          SECRET_NAME: ${{ matrix.secretName }}
+          DOMAIN: ${{ matrix.domain }}
         run: |
           set -euo pipefail
-          if [[ "$MATRIX_SITE" == *.llc ]]; then
-            SITE_NO_EXT="${MATRIX_SITE//./-}"   # ggp.llc -> ggp-llc
-          else
-            SITE_NO_EXT="${MATRIX_SITE%.*}"     # example.com -> example
-          fi
-          echo "SITE_NO_EXT=$SITE_NO_EXT" >> "$GITHUB_ENV"
-          echo "Resolved filter: websites-$SITE_NO_EXT"
-
-      - name: Write .env for selected site
-        shell: bash
-        run: |
-          set -euo pipefail
-          case "${{ matrix.site }}" in
-            garygerber.com)
-              ENV_VALUE='${{ secrets.GARYGERBER_VITE_ENV }}'
-              TARGET='websites/garygerber.com/.env'
-              ;;
-            guidogerbpublishing.com)
-              ENV_VALUE='${{ secrets.GUIDOGERBPUBLISHING_VITE_ENV }}'
-              TARGET='websites/guidogerbpublishing.com/.env'
-              ;;
-            picklecheeze.com)
-              ENV_VALUE='${{ secrets.PICKLECHEEZE_VITE_ENV }}'
-              TARGET='websites/picklecheeze.com/.env'
-              ;;
-            stream4cloud.com)
-              ENV_VALUE='${{ secrets.STREAM4CLOUD_VITE_ENV }}'
-              TARGET='websites/stream4cloud.com/.env'
-              ;;
-            this-is-my-story.org)
-              ENV_VALUE='${{ secrets.THIS_IS_MY_STORY_VITE_ENV }}'
-              TARGET='websites/this-is-my-story.org/.env'
-              ;;
-            ggp.llc)
-              ENV_VALUE='${{ secrets.GGP_LLC_VITE_ENV }}'
-              TARGET='websites/ggp.llc/.env'
-              ;;
-            *)
-              echo "Unknown site: ${{ matrix.site }}" >&2
-              exit 1
-              ;;
-          esac
-
-          if [[ -z "${ENV_VALUE}" ]]; then
-            echo "Missing VITE env secret for ${{ matrix.site }}" >&2
+          if [[ -z "${TENANT_ENV}" ]]; then
+            echo "Missing secret ${SECRET_NAME} for ${DOMAIN}" >&2
             exit 1
           fi
+          printf '%s\n' "${TENANT_ENV}" > "${SITE_DIR}/.env"
 
-          mkdir -p "$(dirname "$TARGET")"
-          printf '%s\n' "${ENV_VALUE}" > "$TARGET"
-          echo "Wrote .env to $TARGET"
-
-      - name: Build site (branch-aware)
+      - name: Build tenant workspace
         shell: bash
+        env:
+          WORKSPACE_PACKAGE: ${{ matrix.workspacePackage }}
+          BRANCH: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || (github.base_ref || github.ref_name) }}
         run: |
           set -euo pipefail
-          # Resolve branch for workflow_run vs manual dispatch
-          BRANCH="${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || (github.base_ref || github.ref_name) }}"
-          if [[ "$BRANCH" == "prod" ]]; then
-            pnpm --filter "websites-${SITE_NO_EXT}" build:prod-bundle
+          if [[ "${BRANCH}" == 'prod' ]]; then
+            pnpm --filter "${WORKSPACE_PACKAGE}" build:prod-bundle
           else
-            pnpm --filter "websites-${SITE_NO_EXT}" build:staging
+            pnpm --filter "${WORKSPACE_PACKAGE}" build:staging
           fi
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.site }}-dist-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || (github.head_ref || github.ref_name) }}
-          path: websites/${{ matrix.site }}/dist
+          name: ${{ matrix.domain }}-dist-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || (github.head_ref || github.ref_name) }}
+          path: ${{ matrix.workspaceDirectory }}/dist
           if-no-files-found: error
           retention-days: 7
 
@@ -157,7 +117,7 @@ jobs:
       - name: Create CloudFront Distribution Tenant invalidation
         shell: bash
         env:
-          DISTRIBUTION_TENANT_ID: ${{ matrix.distId }}
+          DISTRIBUTION_TENANT_ID: ${{ matrix.distributionId }}
         run: |
           set -euo pipefail
           JSON='{"Paths":{"Quantity":1,"Items":["/*"]},"CallerReference":"invalidation-test"}'
