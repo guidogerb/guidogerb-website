@@ -10,12 +10,14 @@ It also owns the configuration switches that let applications enable, disable, o
 ## Exports
 
 - `Storage` / `StorageProvider` — React context provider that provisions scoped storage controllers for the requested areas
-  (local, session, or memory), exposes helpers such as `hasValue`/`setValue`, and notifies listeners when values change.
+  (local, session, or memory), exposes helpers such as `hasValue`/`setValue`, and notifies listeners when values change with
+  metadata describing whether updates originated locally or from another browser context.
 - `useStorage` — hook for reading the underlying controllers, listing configured areas, and issuing imperative reads/writes.
 - `useStoredValue` — stateful helper that keeps component state in sync with a key in the selected storage area and exposes
   setters/removers similar to `useState`.
 - `createStorageController` — factory for constructing standalone controllers when direct access is needed outside React,
-  now including a lightweight `has(key)` helper for existence checks without triggering deserialization.
+  now including a lightweight `has(key)` helper for existence checks without triggering deserialization and automatic
+  cross-tab `storage` event propagation so subscribers hear about remote mutations.
 - `createCachePreferenceChannel` / `DEFAULT_CACHE_PREFERENCES` — observable cache governance helpers that persist toggles,
   broadcast updates via `BroadcastChannel`, and keep service worker subscribers in sync.
 
@@ -102,7 +104,16 @@ export function App() {
 - Offer opt-in caching preferences that the service worker can subscribe to in order to adjust offline and runtime cache
   strategies.
 - Supply mocks and adapters that consumers can use in tests without coupling to browser globals.
-- Surface optional diagnostics hooks so applications can trace storage mutations during development.
+- Surface optional diagnostics hooks so applications can trace storage mutations during development, including the source of
+  every change (local interaction, cross-tab sync, or internal fallback).
+
+## Cross-tab synchronisation
+
+`createStorageController` listens for the browser's [`storage` event](https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event)
+when the underlying area is `localStorage` or `sessionStorage`. Updates made in another tab (for example an authenticated session
+being cleared) trigger controller notifications with `source: 'external'`. Consumers can distinguish remote events from local
+mutations via the `source` field included on subscription callbacks, diagnostics payloads, and `Storage.subscribeToValue`
+helpers.
 
 ## Planned surface
 

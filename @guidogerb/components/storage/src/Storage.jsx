@@ -167,7 +167,7 @@ const buildContextValue = ({
       }
     }
 
-    const emitEvent = (type, value) => {
+    const emitEvent = (type, value, source = 'local') => {
       invokeListener({
         type,
         key,
@@ -175,22 +175,23 @@ const buildContextValue = ({
         namespace,
         value,
         present: hasValue(key, area),
+        source,
       })
     }
 
-    emitEvent('init', getValue(key, undefined, area))
+    emitEvent('init', getValue(key, undefined, area), 'snapshot')
 
     const unsubscribe = controller.subscribe((event) => {
       if (!event) return
 
       if (event.type === 'clear') {
-        emitEvent('clear')
+        emitEvent('clear', undefined, event.source ?? 'local')
         return
       }
 
       if (event.key !== key) return
 
-      emitEvent(event.type, event.value)
+      emitEvent(event.type, event.value, event.source ?? 'local')
     })
 
     return () => {

@@ -87,7 +87,9 @@ describe('createStorageController diagnostics', () => {
     controller.clear()
 
     const eventTypes = diagnostics.mock.calls.map(([event]) => event.type)
-    expect(eventTypes).toEqual(expect.arrayContaining(['set', 'remove', 'clear']))
+    expect(eventTypes).toEqual(
+      expect.arrayContaining(['set', 'remove', 'clear']),
+    )
 
     const setEvent = diagnostics.mock.calls.find(([event]) => event.type === 'set')?.[0]
     expect(setEvent).toMatchObject({
@@ -97,6 +99,7 @@ describe('createStorageController diagnostics', () => {
       key: 'feature',
       value: 'enabled',
       previousValue: undefined,
+      source: 'local',
     })
     expect(typeof setEvent.timestamp).toBe('number')
   })
@@ -125,11 +128,9 @@ describe('createStorageController diagnostics', () => {
 
     expect(onSet).toHaveBeenCalledWith(expect.objectContaining({ type: 'set', key: 'token' }))
     expect(onRemove).toHaveBeenCalledWith(expect.objectContaining({ type: 'remove', key: 'token' }))
-    expect(onClear).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'clear', keys: expect.arrayContaining(['other']) }),
-    )
+    expect(onClear).toHaveBeenCalledWith(expect.objectContaining({ type: 'clear', keys: expect.arrayContaining(['other']) }))
     expect(onNotify).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'notify', eventType: 'set' }),
+      expect.objectContaining({ type: 'notify', eventType: 'set', source: 'local' }),
     )
   })
 
@@ -171,6 +172,7 @@ describe('createStorageController diagnostics', () => {
           reason: 'unavailable',
           area: 'local',
           storageArea: 'memory',
+          source: 'system',
         }),
       )
 
@@ -183,5 +185,76 @@ describe('createStorageController diagnostics', () => {
         delete window.localStorage
       }
     }
+  })
+
+  it('propagates browser storage events to subscribers with source metadata', () => {
+    window.localStorage.clear()
+    const controller = createStorageController({
+      namespace: 'sync',
+      area: 'local',
+      logger: { warn: vi.fn(), error: vi.fn() },
+    })
+
+    const listener = vi.fn()
+    const unsubscribe = controller.subscribe(listener)
+
+    const dispatchStorageEvent = (init) =>
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          url: 'https://example.test',
+          storageArea: window.localStorage,
+          ...init,
+        }),
+      )
+
+    window.localStorage.setItem('sync::token', JSON.stringify('remote-token'))
+    dispatchStorageEvent({
+      key: 'sync::token',
+      oldValue: null,
+      newValue: JSON.stringify('remote-token'),
+    })
+
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'set',
+        key: 'token',
+        value: 'remote-token',
+        source: 'external',
+      }),
+    )
+
+    listener.mockClear()
+
+    window.localStorage.removeItem('sync::token')
+    dispatchStorageEvent({
+      key: 'sync::token',
+      oldValue: JSON.stringify('remote-token'),
+      newValue: null,
+    })
+
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'remove', key: 'token', source: 'external' }),
+    )
+
+    listener.mockClear()
+
+    window.localStorage.setItem('sync::other', JSON.stringify('value'))
+    dispatchStorageEvent({ key: null, oldValue: null, newValue: null })
+
+    expect(listener).toHaveBeenCalledWith(expect.objectContaining({ type: 'clear', source: 'external' }))
+
+    listener.mockClear()
+
+    window.localStorage.setItem('other::token', JSON.stringify('ignore-me'))
+    dispatchStorageEvent({
+      key: 'other::token',
+      oldValue: null,
+      newValue: JSON.stringify('ignore-me'),
+    })
+
+    expect(listener).not.toHaveBeenCalled()
+
+    unsubscribe()
+    window.localStorage.clear()
   })
 })
