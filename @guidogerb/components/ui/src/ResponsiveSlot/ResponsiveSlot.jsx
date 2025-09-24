@@ -898,6 +898,7 @@ export function ResponsiveSlot({
   } = useResponsiveSlotContext()
   const parentContext = useContext(SlotInstanceContext)
   const slotRef = useRef(null)
+  const [isResizing, setIsResizing] = useState(false)
 
   const isContentOnly = sizes === 'content'
 
@@ -1075,6 +1076,7 @@ export function ResponsiveSlot({
         placeItems: 'stretch',
         overflow,
         position: 'relative',
+        transition: 'box-shadow 120ms ease',
       }
     : { display: 'contents' }
 
@@ -1123,6 +1125,30 @@ export function ResponsiveSlot({
   if (variantMeta?.label) {
     datasetProps['data-slot-variant-label'] = variantMeta.label
   }
+
+  if (isActiveEditable) {
+    datasetProps['data-slot-editing-active'] = 'true'
+  }
+
+  if (isResizing) {
+    datasetProps['data-slot-resizing'] = 'true'
+  }
+
+  const shouldHighlight =
+    !isContentOnly && isSlotEditable && (isActiveEditable || shouldShowOverlay || isResizing)
+
+  if (shouldHighlight) {
+    datasetProps['data-slot-highlight'] = 'true'
+  }
+
+  const highlightStyle = shouldHighlight
+    ? {
+        boxShadow: isResizing
+          ? '0 0 0 2px rgba(59, 130, 246, 0.95), 0 0 0 6px rgba(59, 130, 246, 0.35)'
+          : '0 0 0 2px rgba(59, 130, 246, 0.8), 0 0 0 6px rgba(59, 130, 246, 0.25)',
+        borderRadius: '0.75rem',
+      }
+    : null
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') return undefined
@@ -1227,6 +1253,23 @@ export function ResponsiveSlot({
   const componentOnClick = isContentOnly ? onClick : handleClick
   const componentRef = isContentOnly ? undefined : slotRef
 
+  const showResizeHandles =
+    !isContentOnly &&
+    isSlotEditable &&
+    (isActiveEditable || shouldShowOverlay || isResizing) &&
+    mergedSizes
+
+  const resizeHandles = showResizeHandles ? (
+    <SlotResizeHandles
+      elementRef={slotRef}
+      breakpoint={normalizedActiveBreakpoint}
+      onResize={updateSize}
+      onResizeStart={() => setIsResizing(true)}
+      onResizeEnd={() => setIsResizing(false)}
+      onActivate={setActive}
+    />
+  ) : null
+
   const element = (
     <Component
       {...rest}
@@ -1237,9 +1280,11 @@ export function ResponsiveSlot({
       style={{
         ...cssVariables,
         ...slotStyle,
+        ...(highlightStyle || {}),
         ...(style || {}),
       }}
     >
+      {resizeHandles}
       {!isContentOnly ? overlayElement : null}
       {children}
     </Component>
@@ -1333,4 +1378,184 @@ function mergeBreakpointOverrides(baseOverrides, editingOverrides) {
   }
 
   return Object.keys(merged).length > 0 ? merged : undefined
+}
+
+const MIN_RESIZE_SIZE = 48
+
+function clampDimension(value) {
+  if (!Number.isFinite(value)) return MIN_RESIZE_SIZE
+  return Math.max(MIN_RESIZE_SIZE, value)
+}
+
+function formatDimension(value) {
+  return `${Math.round(value)}px`
+}
+
+function removePointerListeners(state) {
+  if (!state || !state.target) return
+  state.target.removeEventListener('pointermove', state.handleMove)
+  state.target.removeEventListener('pointerup', state.handleEnd)
+  state.target.removeEventListener('pointercancel', state.handleEnd)
+}
+
+function SlotResizeHandles({
+  elementRef,
+  breakpoint,
+  onResize,
+  onResizeStart,
+  onResizeEnd,
+  onActivate,
+}) {
+  const pointerState = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (pointerState.current) {
+        removePointerListeners(pointerState.current)
+        pointerState.current = null
+      }
+    }
+  }, [])
+
+  const startResize = useCallback(
+    (mode) => (event) => {
+      if (!elementRef?.current) return
+      if (!breakpoint) return
+      if (typeof event.button === 'number' && event.button !== 0) return
+
+      onActivate?.()
+      onResizeStart?.()
+
+      event.preventDefault()
+      event.stopPropagation()
+
+      const rect = elementRef.current.getBoundingClientRect()
+      const target = event.currentTarget?.ownerDocument?.defaultView || window
+      if (!target) {
+        onResizeEnd?.()
+        return
+      }
+
+      const state = {
+        pointerId: event.pointerId ?? Math.random(),
+        mode,
+        rect,
+        startX: event.clientX,
+        startY: event.clientY,
+        target,
+        breakpoint,
+      }
+
+      const handleMove = (moveEvent) => {
+        if (pointerState.current?.pointerId !== state.pointerId) return
+        moveEvent.preventDefault()
+
+        const deltaX = moveEvent.clientX - state.startX
+        const deltaY = moveEvent.clientY - state.startY
+
+        if (mode === 'inline' || mode === 'corner') {
+          const width = clampDimension(state.rect.width + deltaX)
+          const formatted = formatDimension(width)
+          onResize(state.breakpoint, 'inline', formatted)
+          onResize(state.breakpoint, 'maxInline', formatted)
+          onResize(state.breakpoint, 'minInline', formatted)
+        }
+
+        if (mode === 'block' || mode === 'corner') {
+          const height = clampDimension(state.rect.height + deltaY)
+          const formatted = formatDimension(height)
+          onResize(state.breakpoint, 'block', formatted)
+          onResize(state.breakpoint, 'maxBlock', formatted)
+          onResize(state.breakpoint, 'minBlock', formatted)
+        }
+      }
+
+      const handleEnd = (endEvent) => {
+        if (pointerState.current?.pointerId !== state.pointerId) return
+        endEvent.preventDefault?.()
+        removePointerListeners(state)
+        pointerState.current = null
+        onResizeEnd?.()
+      }
+
+      state.handleMove = handleMove
+      state.handleEnd = handleEnd
+      pointerState.current = state
+
+      target.addEventListener('pointermove', handleMove)
+      target.addEventListener('pointerup', handleEnd)
+      target.addEventListener('pointercancel', handleEnd)
+    },
+    [breakpoint, elementRef, onActivate, onResize, onResizeEnd, onResizeStart],
+  )
+
+  const containerStyle = {
+    position: 'absolute',
+    inset: 0,
+    pointerEvents: 'none',
+    zIndex: 45,
+  }
+
+  const baseHandleStyle = {
+    position: 'absolute',
+    width: '0.85rem',
+    height: '0.85rem',
+    borderRadius: '999px',
+    background: 'rgba(59, 130, 246, 0.95)',
+    border: '1px solid rgba(15, 23, 42, 0.4)',
+    boxShadow: '0 4px 12px rgba(15, 23, 42, 0.25)',
+    pointerEvents: 'auto',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
+  const inlineHandleStyle = {
+    ...baseHandleStyle,
+    top: '50%',
+    right: '0.35rem',
+    transform: 'translateY(-50%)',
+    cursor: 'ew-resize',
+  }
+
+  const blockHandleStyle = {
+    ...baseHandleStyle,
+    left: '50%',
+    bottom: '0.35rem',
+    transform: 'translateX(-50%)',
+    cursor: 'ns-resize',
+  }
+
+  const cornerHandleStyle = {
+    ...baseHandleStyle,
+    bottom: '0.35rem',
+    right: '0.35rem',
+    cursor: 'nwse-resize',
+  }
+
+  return (
+    <div style={containerStyle} aria-hidden="true">
+      <button
+        type="button"
+        data-testid="slot-resize-handle-inline"
+        style={inlineHandleStyle}
+        aria-label="Resize width"
+        onPointerDown={startResize('inline')}
+      />
+      <button
+        type="button"
+        data-testid="slot-resize-handle-block"
+        style={blockHandleStyle}
+        aria-label="Resize height"
+        onPointerDown={startResize('block')}
+      />
+      <button
+        type="button"
+        data-testid="slot-resize-handle-corner"
+        style={cornerHandleStyle}
+        aria-label="Resize width and height"
+        onPointerDown={startResize('corner')}
+      />
+    </div>
+  )
 }

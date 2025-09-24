@@ -193,12 +193,28 @@ export const responsiveSlotBreakpoints: ReadonlyArray<ResponsiveSlotBreakpoint>
 
 export const baseResponsiveSlots: Registry
 
+export type EditModeKeyboardShortcut = {
+  key: string
+  altKey?: boolean
+  ctrlKey?: boolean
+  metaKey?: boolean
+  shiftKey?: boolean
+}
+
 export interface EditModeProviderProps {
   children?: React.ReactNode
   initialMode?: boolean
   graphqlEndpoint?: string | null
   graphqlHeaders?: Record<string, string> | null | (() => Record<string, string> | undefined)
   fetcher?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+  enableKeyboardShortcut?: boolean
+  keyboardShortcut?: EditModeKeyboardShortcut
+  enableToolbar?: boolean
+  toolbarLabel?: string
+  toolbarShortcutHint?: string
+  toolbarPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  persistState?: boolean
+  stateStorageKey?: string
 }
 
 export interface EditModeContextValue {
