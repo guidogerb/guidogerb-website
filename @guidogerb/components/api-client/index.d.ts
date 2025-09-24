@@ -29,6 +29,60 @@ export interface Logger {
   warn?: (...args: unknown[]) => void
 }
 
+export type PaginateStopReason = 'exhausted' | 'max-pages' | 'duplicate-cursor'
+
+export interface PaginatedPageContext<TParams extends Record<string, any> = Record<string, any>> {
+  page: number
+  cursor: unknown
+  params: Readonly<TParams>
+}
+
+export interface CollectPaginatedOptions<
+  TResult = unknown,
+  TParams extends Record<string, any> = Record<string, any>,
+> {
+  fetchPage: (
+    params: Readonly<TParams>,
+    context: { page: number; cursor: unknown },
+  ) => Promise<TResult> | TResult
+  initialParams?: TParams
+  cursorParam?: string
+  maxPages?: number
+  getCursor?: (
+    result: TResult,
+    context: { page: number; previousCursor: unknown; params: Readonly<TParams> },
+  ) => unknown
+  hasNext?: (
+    result: TResult,
+    context: { page: number; cursor: unknown; params: Readonly<TParams> },
+  ) => boolean
+  extractItems?: (
+    result: TResult,
+    context: { page: number; cursor: unknown },
+  ) => unknown[] | null | undefined
+  onPage?: (result: TResult, context: PaginatedPageContext<TParams>) => void | Promise<void>
+  accumulateItems?: boolean
+  stopOnDuplicateCursor?: boolean
+}
+
+export interface CollectPaginatedResult<
+  TResult = unknown,
+  TParams extends Record<string, any> = Record<string, any>,
+> {
+  pages: TResult[]
+  items?: unknown[]
+  cursor: unknown
+  nextParams?: TParams
+  pageCount: number
+  stopReason: PaginateStopReason
+  hasMore: boolean
+}
+
+export declare function collectPaginatedResults<
+  TResult = unknown,
+  TParams extends Record<string, any> = Record<string, any>,
+>(options: CollectPaginatedOptions<TResult, TParams>): Promise<CollectPaginatedResult<TResult, TParams>>
+
 export interface CreateClientOptions {
   baseUrl: string
   getAccessToken?: () => string | Promise<string>
@@ -68,6 +122,29 @@ export declare class ApiError extends Error {
 
 export declare function createClient(options: CreateClientOptions): HttpClient
 export { createClient as default }
+
+export interface NormalizedApiErrorDetail {
+  message: string
+  code: string | null
+  field: string | null
+  path: string | null
+}
+
+export interface NormalizedApiError {
+  message: string
+  status?: number
+  statusText?: string
+  code: string | null
+  details: NormalizedApiErrorDetail[]
+  fieldErrors: Record<string, string[]>
+  hasFieldErrors: boolean
+  data?: unknown
+  cause?: unknown
+  isApiError: boolean
+  original: unknown
+}
+
+export declare function normalizeApiError(error: unknown): NormalizedApiError
 
 export interface HealthResponse {
   status: string
