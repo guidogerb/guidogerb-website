@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useAnalytics } from '@guidogerb/components-analytics'
 import { useAuth } from '@guidogerb/components-auth'
 
@@ -63,12 +63,37 @@ const SUPPORT_CONTACTS = [
 
 const isExternalHref = (href) => /^https?:/i.test(href)
 
+const UPCOMING_PRODUCTION_KEY = 'stream4cloud:upcoming_production'
+const UPCOMING_WINDOW_KEY = 'stream4cloud:upcoming_window'
+const UPCOMING_CHANNEL_KEY = 'stream4cloud:upcoming_channel'
+const READINESS_TIMELINE_URL =
+  BROADCAST_DOCS[0]?.href ?? 'https://support.stream4cloud.com/docs/control-room-readiness'
+
+const extractUpcomingProduction = (profile) => {
+  if (!profile || typeof profile !== 'object') return null
+
+  const name = profile[UPCOMING_PRODUCTION_KEY]
+  if (!name || typeof name !== 'string' || name.trim() === '') {
+    return null
+  }
+
+  const window = profile[UPCOMING_WINDOW_KEY]
+  const channel = profile[UPCOMING_CHANNEL_KEY]
+
+  return {
+    name,
+    window: typeof window === 'string' && window.trim() ? window : null,
+    channel: typeof channel === 'string' && channel.trim() ? channel : null,
+  }
+}
+
 export default function Welcome({ children }) {
   const auth = useAuth()
   const analytics = useAnalytics()
   const isAuthenticated = Boolean(auth?.isAuthenticated)
   const profile = auth?.user?.profile ?? {}
   const collaboratorName = profile?.['cognito:username'] ?? profile?.name ?? 'userNotAvailable'
+  const upcomingProduction = useMemo(() => extractUpcomingProduction(profile), [profile])
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -78,6 +103,18 @@ export default function Welcome({ children }) {
       collaborator: collaboratorName,
     })
   }, [analytics, collaboratorName, isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    if (!upcomingProduction) return
+    if (typeof analytics?.trackEvent !== 'function') return
+
+    analytics.trackEvent('stream4cloud.portal.upcoming_production_viewed', {
+      production: upcomingProduction.name,
+      window: upcomingProduction.window,
+      channel: upcomingProduction.channel,
+    })
+  }, [analytics, isAuthenticated, upcomingProduction])
 
   if (auth?.error) return <div>Sign-in failed: {auth.error.message}</div>
   if (!isAuthenticated) return <div>Welcome Loading...</div>
@@ -144,6 +181,30 @@ export default function Welcome({ children }) {
           ))}
         </ul>
       </section>
+
+      {upcomingProduction ? (
+        <section
+          aria-labelledby="stream4cloud-upcoming-production"
+          className="upcoming-production"
+        >
+          <h4 id="stream4cloud-upcoming-production">Next rehearsal checkpoint</h4>
+          <p>
+            <strong>{upcomingProduction.name}</strong>
+            {upcomingProduction.window ? ` • ${upcomingProduction.window}` : null}
+          </p>
+          {upcomingProduction.channel ? (
+            <p>Control room: {upcomingProduction.channel}</p>
+          ) : null}
+          <a
+            href={READINESS_TIMELINE_URL}
+            {...(isExternalHref(READINESS_TIMELINE_URL)
+              ? { target: '_blank', rel: 'noreferrer' }
+              : {})}
+          >
+            View readiness timeline
+          </a>
+        </section>
+      ) : null}
 
       {children}
     </section>

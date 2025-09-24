@@ -135,4 +135,48 @@ describe('Stream4Cloud welcome component', () => {
       'https://calendly.com/stream4cloud/broadcaster-onboarding',
     )
   })
+
+  it('highlights the next rehearsal when profile metadata is present', async () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: {
+        profile: {
+          name: 'Ops Lead',
+          'stream4cloud:upcoming_production': 'World Tour Premiere',
+          'stream4cloud:upcoming_window': 'April 12 • 18:00 GMT',
+          'stream4cloud:upcoming_channel': 'Control Room B',
+        },
+      },
+    })
+
+    await renderWelcome()
+
+    const rehearsalHeading = screen.getByRole('heading', {
+      level: 4,
+      name: 'Next rehearsal checkpoint',
+    })
+    expect(rehearsalHeading).toBeInTheDocument()
+    expect(screen.getByText(/World Tour Premiere/)).toBeInTheDocument()
+    expect(screen.getByText(/Control room: Control Room B/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /View readiness timeline/i })).toHaveAttribute(
+      'href',
+      'https://support.stream4cloud.com/docs/control-room-readiness',
+    )
+
+    await waitFor(() => {
+      expect(analyticsTrackEvent).toHaveBeenCalledWith(
+        'stream4cloud.portal.upcoming_production_viewed',
+        expect.objectContaining({
+          production: 'World Tour Premiere',
+          window: 'April 12 • 18:00 GMT',
+          channel: 'Control Room B',
+        }),
+      )
+    })
+
+    expect(analyticsTrackEvent).toHaveBeenCalledWith(
+      'stream4cloud.auth.sign_in_complete',
+      expect.objectContaining({ collaborator: 'Ops Lead' }),
+    )
+  })
 })

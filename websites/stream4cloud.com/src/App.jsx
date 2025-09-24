@@ -119,6 +119,49 @@ const operationsPillars = [
   },
 ]
 
+const broadcastTimeline = [
+  {
+    title: 'Align the launch blueprint',
+    description:
+      'Kick off production, marketing, and sponsor workflows with one shared source of truth and automated reminders.',
+    milestones: [
+      'Scope talent, entitlement tiers, and blackout windows using templated control-room checklists.',
+      'Distribute approval deadlines and review assignments with Slack or Teams sync to keep crews aligned.',
+      'Confirm signal paths, redundancy tiers, and venue connectivity requirements with partners and vendors.',
+    ],
+  },
+  {
+    title: 'Rehearse with automation',
+    description:
+      'Provision rehearsal sandboxes that mirror production so every encoder, marker, and alert is validated before go-live.',
+    milestones: [
+      'Spin up encoder presets, captions, and SSAI markers from the playbook in minutes instead of days.',
+      'Trigger rehearsal reminders and run-of-show updates for talent, ad operations, and partner success.',
+      'Capture rehearsal metrics and incident notes that roll directly into the live broadcast dashboard.',
+    ],
+  },
+  {
+    title: 'Go live with shared telemetry',
+    description:
+      'Operate from one command center where ingest, monetization, and support see the same live health signals.',
+    milestones: [
+      'Monitor glass-to-glass latency, ad decisioning, and audience growth from unified dashboards.',
+      'Escalate incidents instantly with pre-routed paging, playbooks, and partner communication templates.',
+      'Streamline sponsor takeovers and merchandising pivots with consent-aware analytics instrumentation.',
+    ],
+  },
+  {
+    title: 'Measure and optimise the next season',
+    description:
+      'Close the loop with exports, benchmarking, and experiment planning that accelerate the following broadcast window.',
+    milestones: [
+      'Schedule KPI digests, incident summaries, and sponsor conversion reports to land in stakeholder inboxes.',
+      'Feed post-event learnings into catalog, monetisation, and partner success workstreams automatically.',
+      'Archive timelines and approvals so procurement, compliance, and legal reviews are audit-ready.',
+    ],
+  },
+]
+
 const routes = [
   { path: '/', element: <LandingRoute /> },
   { path: '/offline', element: <OfflineRoute /> },
@@ -168,6 +211,7 @@ function LandingRoute() {
         <a href="#control-room-orchestration">Control room</a>
         <a href="#monetization-and-insights">Monetization</a>
         <a href="#audience-first-viewing">Audience experience</a>
+        <a href="#broadcast-timeline">Timeline</a>
         <a href="#partner">Partner hub</a>
       </nav>
 
@@ -241,6 +285,39 @@ function LandingRoute() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section
+        className="timeline"
+        aria-labelledby="stream4cloud-timeline"
+        id="broadcast-timeline"
+      >
+        <div className="timeline__intro">
+          <h2 id="stream4cloud-timeline">Broadcast readiness timeline</h2>
+          <p>
+            Follow the runbook our partner success team uses to take every premiere from first brief
+            to wrap-up reporting. Each phase keeps production, monetization, and analytics crews on
+            the same cadence.
+          </p>
+        </div>
+        <ol className="timeline__list" aria-label="Broadcast readiness steps">
+          {broadcastTimeline.map(({ title, description, milestones }, index) => (
+            <li key={title} className="timeline__item">
+              <span className="timeline__marker" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <div className="timeline__content">
+                <h3>{title}</h3>
+                <p>{description}</p>
+                <ul className="timeline__milestones">
+                  {milestones.map((milestone) => (
+                    <li key={milestone}>{milestone}</li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))}
+        </ol>
       </section>
 
       <section className="cta" aria-labelledby="stream4cloud-cta">
