@@ -142,6 +142,8 @@ describe('ResponsiveSlot', () => {
     expect(markup).toContain('data-slot-variant-label="Default"')
     expect(markup).toContain('data-slot-tags="commerce,grid"')
     expect(markup).toContain('data-slot-buffer="A"')
+    expect(markup).toContain('data-slot-default-breakpoint="lg"')
+    expect(markup).toContain('data-slot-breakpoint="lg"')
   })
 
   it('updates CSS variables when the active breakpoint changes', async () => {
@@ -176,6 +178,8 @@ describe('ResponsiveSlot', () => {
         expect(slot.style.getPropertyValue('--slot-min-block-size-B')).toBe('20rem')
         expect(slot.dataset.slotDefaultVariant).toBe('default')
         expect(slot.dataset.slotVariantLabel).toBe('Default')
+        expect(slot.dataset.slotDefaultBreakpoint).toBe('md')
+        expect(slot.dataset.slotBreakpoint).toBe('xs')
       })
 
       act(() => {
@@ -196,6 +200,7 @@ describe('ResponsiveSlot', () => {
         expect(slot.style.getPropertyValue('--slot-min-inline-size-B')).toBe('16rem')
         expect(slot.style.getPropertyValue('--slot-max-block-size-B')).toBe('26rem')
         expect(slot.style.getPropertyValue('--slot-min-block-size-B')).toBe('20rem')
+        expect(slot.dataset.slotBreakpoint).toBe('xl')
       })
     } finally {
       window.matchMedia = originalMatchMedia
@@ -382,6 +387,38 @@ describe('ResponsiveSlot', () => {
     expect(probe.dataset.block).toBe('28px')
     expect(probe.dataset.maxInline).toBe('30rem')
     expect(probe.dataset.breakpoint).toBe('xl')
+  })
+
+  it('prefers instance sizing when the hook is used within a rendered slot', async () => {
+    const originalMatchMedia = window.matchMedia
+    window.matchMedia = createMatchMedia(820)
+
+    function SizeProbe() {
+      const size = useResponsiveSlotSize('catalog.card')
+      return (
+        <div data-testid="size" data-inline={size.inline} data-breakpoint={size.breakpoint} />
+      )
+    }
+
+    try {
+      render(
+        <ResponsiveSlotProvider defaultBreakpoint="md">
+          <ResponsiveSlot
+            slot="catalog.card"
+            sizes={{ md: { inline: '32rem', block: '30rem' } }}
+            data-testid="slot-instance"
+          >
+            <SizeProbe />
+          </ResponsiveSlot>
+        </ResponsiveSlotProvider>,
+      )
+
+      const probe = await screen.findByTestId('size')
+      expect(probe.dataset.inline).toBe('32rem')
+      expect(probe.dataset.breakpoint).toBe('md')
+    } finally {
+      window.matchMedia = originalMatchMedia
+    }
   })
 
   it('inherits parent slot sizing when inherit is enabled', () => {

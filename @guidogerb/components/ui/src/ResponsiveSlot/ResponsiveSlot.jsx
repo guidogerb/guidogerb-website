@@ -820,6 +820,14 @@ export function useResponsiveSlotSize(slot, overrides) {
     resolveToken: tokenResolver,
     defaultBreakpoint,
   } = useResponsiveSlotContext()
+  const instance = useContext(SlotInstanceContext)
+
+  const inheritedSizes = useMemo(() => {
+    if (!instance || instance.slot !== slot) {
+      return undefined
+    }
+    return instance.byBreakpoint
+  }, [instance, slot])
 
   const size = useMemo(
     () =>
@@ -829,9 +837,18 @@ export function useResponsiveSlotSize(slot, overrides) {
         registry,
         overrides,
         tokenResolver,
+        inheritedSizes,
         fallbackBreakpoint: defaultBreakpoint,
       }),
-    [activeBreakpoint, defaultBreakpoint, overrides, registry, slot, tokenResolver],
+    [
+      activeBreakpoint,
+      defaultBreakpoint,
+      inheritedSizes,
+      overrides,
+      registry,
+      slot,
+      tokenResolver,
+    ],
   )
 
   return useMemo(
@@ -877,6 +894,7 @@ export function ResponsiveSlot({
     activeBreakpoint,
     breakpoints,
     resolveToken: tokenResolver,
+    defaultBreakpoint,
   } = useResponsiveSlotContext()
   const parentContext = useContext(SlotInstanceContext)
   const slotRef = useRef(null)
@@ -1063,10 +1081,18 @@ export function ResponsiveSlot({
   const variantName = variantFromEditing ?? defaultVariant
   const propsPayload = editingProps
 
+  const normalizedDefaultBreakpoint = normalizeBreakpointKey(defaultBreakpoint)
+  const normalizedActiveBreakpoint = normalizeBreakpointKey(
+    activeBreakpoint,
+    normalizedDefaultBreakpoint,
+  )
+
   const datasetProps = {
     'data-slot-key': slot,
     'data-slot-variant': variantName,
     'data-slot-default-variant': defaultVariant,
+    'data-slot-default-breakpoint': normalizedDefaultBreakpoint,
+    'data-slot-breakpoint': normalizedActiveBreakpoint,
   }
   if (meta?.label) datasetProps['data-slot-label'] = meta.label
   if (meta?.description) datasetProps['data-slot-description'] = meta.description
