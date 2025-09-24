@@ -25,12 +25,21 @@ const createMemoryArea = () => {
 }
 
 const resolveArea = ({ area, storage, logger }) => {
-  if (storage) return storage
-  if (area === 'memory') return createMemoryArea()
+  if (storage) {
+    return { areaRef: storage, actualArea: area, fallbackReason: null }
+  }
+
+  if (area === 'memory') {
+    return { areaRef: createMemoryArea(), actualArea: 'memory', fallbackReason: null }
+  }
 
   const globalObject = typeof window !== 'undefined' ? window : undefined
   if (!globalObject) {
-    return createMemoryArea()
+    return {
+      areaRef: createMemoryArea(),
+      actualArea: 'memory',
+      fallbackReason: 'window-unavailable',
+    }
   }
 
   const lookup = area === 'session' ? globalObject.sessionStorage : globalObject.localStorage
@@ -38,12 +47,16 @@ const resolveArea = ({ area, storage, logger }) => {
     const probeKey = `__gg_storage_probe__${Math.random().toString(16).slice(2)}`
     lookup.setItem(probeKey, '1')
     lookup.removeItem(probeKey)
-    return lookup
+    return { areaRef: lookup, actualArea: area, fallbackReason: null }
   } catch (error) {
     if (logger?.warn) {
       logger.warn('[storage] Falling back to in-memory storage', error)
     }
-    return createMemoryArea()
+    return {
+      areaRef: createMemoryArea(),
+      actualArea: 'memory',
+      fallbackReason: 'unavailable',
+    }
   }
 }
 
@@ -66,14 +79,70 @@ export const createStorageController = ({
   serializer = JSON.stringify,
   deserializer = JSON.parse,
   logger = console,
+  diagnostics,
 } = {}) => {
-  const areaRef = resolveArea({ area, storage, logger })
+  const { areaRef, actualArea, fallbackReason } = resolveArea({ area, storage, logger })
   const listeners = new Set()
   const prefix = `${namespace}::`
+
+  const emitDiagnostic = (() => {
+    if (!diagnostics) return () => {}
+
+    const context = Object.freeze({
+      namespace,
+      area,
+      storageArea: actualArea,
+    })
+
+    const invoke = (handler, event) => {
+      if (typeof handler !== 'function') return
+
+      try {
+        handler({ timestamp: Date.now(), ...context, ...event })
+      } catch (error) {
+        if (logger?.warn) {
+          logger.warn('[storage] Diagnostics listener threw an error', error)
+        }
+      }
+    }
+
+    if (typeof diagnostics === 'function') {
+      return (event) => invoke(diagnostics, event)
+    }
+
+    if (typeof diagnostics === 'object' && diagnostics !== null) {
+      const { emit, onEvent, onSet, onRemove, onClear, onNotify, onFallback } = diagnostics
+
+      if (typeof emit === 'function') {
+        return (event) => invoke(emit, event)
+      }
+
+      return (event) => {
+        const handler =
+          (event.type === 'set' && typeof onSet === 'function' && onSet) ||
+          (event.type === 'remove' && typeof onRemove === 'function' && onRemove) ||
+          (event.type === 'clear' && typeof onClear === 'function' && onClear) ||
+          (event.type === 'notify' && typeof onNotify === 'function' && onNotify) ||
+          (event.type === 'fallback' && typeof onFallback === 'function' && onFallback) ||
+          onEvent
+
+        if (handler) {
+          invoke(handler, event)
+        }
+      }
+    }
+
+    return () => {}
+  })()
+
+  if (fallbackReason) {
+    emitDiagnostic({ type: 'fallback', reason: fallbackReason })
+  }
 
   const buildKey = (key) => `${prefix}${key}`
 
   const notify = (type, key, value) => {
+    emitDiagnostic({ type: 'notify', eventType: type, key, value, listenerCount: listeners.size })
     listeners.forEach((listener) => {
       try {
         listener({ type, key, value, namespace })
@@ -96,10 +165,13 @@ export const createStorageController = ({
       return undefined
     }
 
+    const previousValue = read(key)
+
     try {
       const payload = serializer(value)
       areaRef.setItem(buildKey(key), payload)
       notify('set', key, value)
+      emitDiagnostic({ type: 'set', key, value, previousValue })
       return value
     } catch (error) {
       if (logger?.error) {
@@ -110,8 +182,10 @@ export const createStorageController = ({
   }
 
   const remove = (key) => {
+    const previousValue = read(key)
     areaRef.removeItem(buildKey(key))
     notify('remove', key)
+    emitDiagnostic({ type: 'remove', key, previousValue })
   }
 
   const clear = () => {
@@ -125,6 +199,7 @@ export const createStorageController = ({
     }
     keys.forEach((key) => areaRef.removeItem(buildKey(key)))
     notify('clear')
+    emitDiagnostic({ type: 'clear', keys })
   }
 
   const list = () => {
