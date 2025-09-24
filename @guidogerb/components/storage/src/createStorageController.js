@@ -82,6 +82,7 @@ export const createStorageController = ({
   diagnostics,
 } = {}) => {
   const { areaRef, actualArea, fallbackReason } = resolveArea({ area, storage, logger })
+  const globalObject = typeof window !== 'undefined' ? window : undefined
   const listeners = new Set()
   const prefix = `${namespace}::`
 
@@ -136,16 +137,23 @@ export const createStorageController = ({
   })()
 
   if (fallbackReason) {
-    emitDiagnostic({ type: 'fallback', reason: fallbackReason })
+    emitDiagnostic({ type: 'fallback', reason: fallbackReason, source: 'system' })
   }
 
   const buildKey = (key) => `${prefix}${key}`
 
-  const notify = (type, key, value) => {
-    emitDiagnostic({ type: 'notify', eventType: type, key, value, listenerCount: listeners.size })
+  const notify = (type, key, value, source = 'local') => {
+    emitDiagnostic({
+      type: 'notify',
+      eventType: type,
+      key,
+      value,
+      source,
+      listenerCount: listeners.size,
+    })
     listeners.forEach((listener) => {
       try {
-        listener({ type, key, value, namespace })
+        listener({ type, key, value, namespace, source })
       } catch (error) {
         if (logger?.warn) {
           logger.warn('[storage] Listener threw an error', error)
@@ -172,8 +180,8 @@ export const createStorageController = ({
     try {
       const payload = serializer(value)
       areaRef.setItem(buildKey(key), payload)
-      notify('set', key, value)
-      emitDiagnostic({ type: 'set', key, value, previousValue })
+      notify('set', key, value, 'local')
+      emitDiagnostic({ type: 'set', key, value, previousValue, source: 'local' })
       return value
     } catch (error) {
       if (logger?.error) {
@@ -186,8 +194,8 @@ export const createStorageController = ({
   const remove = (key) => {
     const previousValue = read(key)
     areaRef.removeItem(buildKey(key))
-    notify('remove', key)
-    emitDiagnostic({ type: 'remove', key, previousValue })
+    notify('remove', key, undefined, 'local')
+    emitDiagnostic({ type: 'remove', key, previousValue, source: 'local' })
   }
 
   const clear = () => {
@@ -200,8 +208,8 @@ export const createStorageController = ({
       }
     }
     keys.forEach((key) => areaRef.removeItem(buildKey(key)))
-    notify('clear')
-    emitDiagnostic({ type: 'clear', keys })
+    notify('clear', undefined, undefined, 'local')
+    emitDiagnostic({ type: 'clear', keys, source: 'local' })
   }
 
   const list = () => {
@@ -223,6 +231,63 @@ export const createStorageController = ({
     listeners.add(listener)
     return () => {
       listeners.delete(listener)
+    }
+  }
+
+  const handleExternalStorageEvent = (event) => {
+    if (!event) return
+
+    if (event.storageArea && event.storageArea !== areaRef) {
+      return
+    }
+
+    if (event.key === null) {
+      notify('clear', undefined, undefined, 'external')
+      emitDiagnostic({ type: 'clear', keys: undefined, source: 'external' })
+      return
+    }
+
+    if (typeof event.key !== 'string') {
+      return
+    }
+
+    if (!event.key.startsWith(prefix)) {
+      return
+    }
+
+    const key = event.key.slice(prefix.length)
+    if (!key) {
+      return
+    }
+
+    if (event.newValue === null || event.newValue === undefined) {
+      const previousValue = safeDeserialize(event.oldValue, deserializer, logger)
+      notify('remove', key, undefined, 'external')
+      emitDiagnostic({ type: 'remove', key, previousValue, source: 'external' })
+      return
+    }
+
+    const value = safeDeserialize(event.newValue, deserializer, logger)
+    const previousValue = safeDeserialize(event.oldValue, deserializer, logger)
+    notify('set', key, value, 'external')
+    emitDiagnostic({ type: 'set', key, value, previousValue, source: 'external' })
+  }
+
+  const shouldListenForExternalEvents =
+    !!globalObject &&
+    typeof globalObject.addEventListener === 'function' &&
+    typeof globalObject.removeEventListener === 'function' &&
+    (actualArea === 'local' || actualArea === 'session') &&
+    areaRef &&
+    typeof areaRef.getItem === 'function'
+
+  if (shouldListenForExternalEvents) {
+    try {
+      globalObject.addEventListener('storage', handleExternalStorageEvent)
+    } catch (error) {
+      if (logger?.warn) {
+        logger.warn('[storage] Failed to subscribe to storage events', error)
+      }
     }
   }
 

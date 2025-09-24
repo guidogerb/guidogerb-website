@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -65,12 +65,21 @@ describe('Storage provider', () => {
 
     await waitFor(() => {
       expect(handleChange).toHaveBeenCalledWith(
-        expect.objectContaining({ area: 'local', type: 'set', key: 'feature', value: 'enabled' }),
+        expect.objectContaining({
+          area: 'local',
+          type: 'set',
+          key: 'feature',
+          value: 'enabled',
+          source: 'local',
+        }),
       )
     })
 
     expect(handleChange).toHaveBeenCalledWith(
-      expect.objectContaining({ area: 'local', type: 'remove', key: 'feature' }),
+      expect.objectContaining({ area: 'local', type: 'remove', key: 'feature', source: 'local' }),
+    )
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.objectContaining({ area: 'local', type: 'set', key: 'feature', source: 'local' }),
     )
   })
 
@@ -267,34 +276,34 @@ describe('Storage provider', () => {
     )
 
     expect(handleEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'init', present: false }),
+      expect.objectContaining({ type: 'init', present: false, source: 'snapshot' }),
     )
 
     await user.click(screen.getByRole('button', { name: 'enable' }))
     await waitFor(() => {
       expect(handleEvent).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'set', value: 'enabled', present: true }),
+        expect.objectContaining({ type: 'set', value: 'enabled', present: true, source: 'local' }),
       )
     })
 
     await user.click(screen.getByRole('button', { name: 'remove' }))
     await waitFor(() => {
       expect(handleEvent).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'remove', present: false }),
+        expect.objectContaining({ type: 'remove', present: false, source: 'local' }),
       )
     })
 
     await user.click(screen.getByRole('button', { name: 'enable' }))
     await waitFor(() => {
       expect(handleEvent).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'set', present: true }),
+        expect.objectContaining({ type: 'set', present: true, source: 'local' }),
       )
     })
 
     await user.click(screen.getByRole('button', { name: 'clear' }))
     await waitFor(() => {
       expect(handleEvent).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'clear', present: false }),
+        expect.objectContaining({ type: 'clear', present: false, source: 'local' }),
       )
     })
 
@@ -358,5 +367,80 @@ describe('Storage provider', () => {
     await waitFor(() => {
       expect(presence).toHaveTextContent('no')
     })
+  })
+
+  it('reacts to external storage events across browser tabs', async () => {
+    window.localStorage.clear()
+    const events = []
+
+    function Example() {
+      const storage = useStorage()
+      const presence = useHasStoredValue('token')
+
+      useEffect(() => storage.subscribeToValue('token', (event) => events.push(event)), [storage])
+
+      return <span data-testid="presence">{presence ? 'yes' : 'no'}</span>
+    }
+
+    render(
+      <Storage namespace="external-sync" areas={['local']} defaultArea="local">
+        <Example />
+      </Storage>,
+    )
+
+    expect(screen.getByTestId('presence')).toHaveTextContent('no')
+    expect(events[0]).toMatchObject({ type: 'init', present: false, source: 'snapshot' })
+
+    const dispatch = (init) =>
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          url: 'https://example.test',
+          storageArea: window.localStorage,
+          ...init,
+        }),
+      )
+
+    await act(async () => {
+      window.localStorage.setItem('external-sync::token', JSON.stringify('remote'))
+      dispatch({ key: 'external-sync::token', oldValue: null, newValue: JSON.stringify('remote') })
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('presence')).toHaveTextContent('yes')
+      expect(events).toContainEqual(
+        expect.objectContaining({ type: 'set', value: 'remote', source: 'external', present: true }),
+      )
+    })
+
+    await act(async () => {
+      window.localStorage.removeItem('external-sync::token')
+      dispatch({
+        key: 'external-sync::token',
+        oldValue: JSON.stringify('remote'),
+        newValue: null,
+      })
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('presence')).toHaveTextContent('no')
+      expect(events).toContainEqual(
+        expect.objectContaining({ type: 'remove', source: 'external', present: false }),
+      )
+    })
+
+    await act(async () => {
+      window.localStorage.setItem('external-sync::token', JSON.stringify('reset'))
+      window.localStorage.clear()
+      dispatch({ key: null, oldValue: null, newValue: null })
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('presence')).toHaveTextContent('no')
+      expect(events).toContainEqual(
+        expect.objectContaining({ type: 'clear', source: 'external', present: false }),
+      )
+    })
+
+    window.localStorage.clear()
   })
 })
