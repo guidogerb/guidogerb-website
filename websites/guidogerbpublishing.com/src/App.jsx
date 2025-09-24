@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-ro
 import { Footer } from '@guidogerb/footer'
 import { Header, HeaderContextProvider } from '@guidogerb/header'
 import { useAuth } from '@guidogerb/components-auth'
+import { ErrorShell } from '@guidogerb/components-pages-public'
 import {
   DistributionSection,
   HeroSection,
@@ -27,6 +28,10 @@ const SECTION_MAP = {
   '/partner-portal': 'partner-portal',
   '/contact': 'contact',
 }
+
+const MARKETING_PATHS = Object.keys(SECTION_MAP).filter((path) => path !== '/partner-portal')
+const AUXILIARY_ROUTES = ['/auth/callback']
+const MARKETING_ROUTE_PATHS = Array.from(new Set([...MARKETING_PATHS, ...AUXILIARY_ROUTES]))
 
 const normalizePathname = (pathname) => {
   if (!pathname) return '/'
@@ -82,6 +87,22 @@ function useMarketingContentState() {
   return { content, status }
 }
 
+function PublishingFooter({ onNavigate }) {
+  return (
+    <Footer {...footerSettings} onNavigate={onNavigate} id="contact">
+      <div className="footer-contact">
+        <h2>Work with GuidoGerb Publishing</h2>
+        <p>
+          Email <a href="mailto:hello@guidogerbpublishing.com">hello@guidogerbpublishing.com</a>{' '}
+          or call <a href="tel:+12125559876">+1 (212) 555-9876</a> to discuss catalog development,
+          distribution, or rights management partnerships.
+        </p>
+        <p>Headquarters in New York with a distributed production and licensing team.</p>
+      </div>
+    </Footer>
+  )
+}
+
 function SiteLayout({ activePath, onNavigate, children }) {
   return (
     <div className="app-shell" id="top">
@@ -89,17 +110,7 @@ function SiteLayout({ activePath, onNavigate, children }) {
 
       <main className="app-main">{children}</main>
 
-      <Footer {...footerSettings} onNavigate={onNavigate} id="contact">
-        <div className="footer-contact">
-          <h2>Work with GuidoGerb Publishing</h2>
-          <p>
-            Email <a href="mailto:hello@guidogerbpublishing.com">hello@guidogerbpublishing.com</a>{' '}
-            or call <a href="tel:+12125559876">+1 (212) 555-9876</a> to discuss catalog development,
-            distribution, or rights management partnerships.
-          </p>
-          <p>Headquarters in New York with a distributed production and licensing team.</p>
-        </div>
-      </Footer>
+      <PublishingFooter onNavigate={onNavigate} />
     </div>
   )
 }
@@ -144,7 +155,11 @@ function AppRouter() {
   const logoutUri = import.meta.env.VITE_LOGOUT_URI
 
   useEffect(() => {
-    setActivePath(normalizedPath)
+    if (SECTION_MAP[normalizedPath]) {
+      setActivePath(normalizedPath)
+    } else {
+      setActivePath('/')
+    }
   }, [normalizedPath])
 
   useEffect(() => {
@@ -158,6 +173,16 @@ function AppRouter() {
       scrollToSection(sectionId)
     }
   }, [normalizedPath, location.hash])
+
+  const navigateHome = useCallback(
+    (event) => {
+      if (event?.preventDefault) {
+        event.preventDefault()
+      }
+      navigate('/')
+    },
+    [navigate],
+  )
 
   const handleNavigate = useCallback(
     ({ item }) => {
@@ -209,6 +234,20 @@ function AppRouter() {
 
   return (
     <Routes>
+      {MARKETING_ROUTE_PATHS.map((path) => (
+        <Route
+          key={path}
+          path={path}
+          element={
+            <MarketingPage
+              activePath={activePath}
+              onNavigate={handleNavigate}
+              marketingContent={marketing.content}
+              logoutUri={logoutUri}
+            />
+          }
+        />
+      ))}
       <Route
         path="/partner-portal"
         element={
@@ -220,17 +259,122 @@ function AppRouter() {
         }
       />
       <Route
-        path="/*"
+        path="/maintenance"
         element={
-          <MarketingPage
+          <MaintenancePage
             activePath={activePath}
             onNavigate={handleNavigate}
-            marketingContent={marketing.content}
-            logoutUri={logoutUri}
+            onNavigateHome={navigateHome}
+          />
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <NotFoundPage
+            activePath={activePath}
+            onNavigate={handleNavigate}
+            onNavigateHome={navigateHome}
           />
         }
       />
     </Routes>
+  )
+}
+
+function StatusPage({
+  activePath,
+  onNavigate,
+  statusCode,
+  statusLabel,
+  title,
+  description,
+  actions,
+  actionsLabel,
+  children,
+}) {
+  const footer = <PublishingFooter onNavigate={onNavigate} />
+  const header = <Header activePath={activePath} onNavigate={onNavigate} />
+
+  return (
+    <ErrorShell
+      className="publishing-error-shell"
+      statusCode={statusCode}
+      statusLabel={statusLabel}
+      title={title}
+      description={description}
+      actionsLabel={actionsLabel}
+      actions={actions}
+      header={header}
+      footer={footer}
+    >
+      {children}
+    </ErrorShell>
+  )
+}
+
+function NotFoundPage({ activePath, onNavigate, onNavigateHome }) {
+  return (
+    <StatusPage
+      activePath={activePath}
+      onNavigate={onNavigate}
+      statusCode={404}
+      statusLabel="HTTP status code"
+      title="Catalog page not found"
+      description="We couldn’t locate the requested publishing page."
+      actionsLabel="Explore other options"
+      actions={[
+        {
+          label: 'Return to publishing home',
+          href: '/',
+          variant: 'primary',
+          onClick: onNavigateHome,
+        },
+        {
+          label: 'Email catalog support',
+          href: 'mailto:partners@guidogerbpublishing.com?subject=Publishing%20portal%20support',
+        },
+      ]}
+    >
+      <p>
+        Double-check the link or head back to the publishing overview to browse services, partner
+        resources, and submission details. Our team can help route you to the right catalog contact
+        if you email <a href="mailto:partners@guidogerbpublishing.com">partners@guidogerbpublishing.com</a>.
+      </p>
+    </StatusPage>
+  )
+}
+
+function MaintenancePage({ activePath, onNavigate, onNavigateHome }) {
+  return (
+    <StatusPage
+      activePath={activePath}
+      onNavigate={onNavigate}
+      statusCode={503}
+      statusLabel="Service status"
+      title="Partner portal undergoing updates"
+      description="We’re refreshing catalog resources and will be back online shortly."
+      actionsLabel="Stay connected"
+      actions={[
+        {
+          label: 'Check publishing overview',
+          href: '/',
+          variant: 'primary',
+          onClick: onNavigateHome,
+        },
+        {
+          label: 'Request status update',
+          href: 'mailto:partners@guidogerbpublishing.com?subject=Publishing%20status%20request',
+        },
+      ]}
+    >
+      <p>
+        We’re applying production updates to the partner portal. Reach out to{' '}
+        <a href="mailto:partners@guidogerbpublishing.com">partners@guidogerbpublishing.com</a> if
+        you need catalog assets, submission timelines, or distribution reports while the refresh is
+        in progress.
+      </p>
+    </StatusPage>
   )
 }
 
