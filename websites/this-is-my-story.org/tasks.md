@@ -1,8 +1,8 @@
 # This-Is-My-Story.org — Tasks
 
-| name                                   | createdDate | lastUpdatedDate | completedDate | status   | description                                                                                |
-| -------------------------------------- | ----------- | --------------- | ------------- | -------- | ------------------------------------------------------------------------------------------ |
-| Update tenant README with dev commands | 2025-09-19  | 2025-09-19      | 2025-09-19    | complete | Clarified environment variables and pnpm filters for the storytelling microsite.           |
-| Flesh out public storytelling content  | 2025-09-19  | 2025-09-24      | 2025-09-24    | complete | Replace placeholder copy with author bios, program descriptions, and call-to-action links. |
-| Implement branded error boundaries     | 2025-09-19  | 2025-09-25      | 2025-09-25    | complete | Add React Router fallback pages that keep the tone aligned with the storytelling brand.    |
+| name                                   | createdDate | lastUpdatedDate | completedDate | status   | description                                                                                                |
+| -------------------------------------- | ----------- | --------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| Update tenant README with dev commands | 2025-09-19  | 2025-09-19      | 2025-09-19    | complete | Clarified environment variables and pnpm filters for the storytelling microsite.                           |
+| Flesh out public storytelling content  | 2025-09-19  | 2025-09-24      | 2025-09-24    | complete | Replace placeholder copy with author bios, program descriptions, and call-to-action links.                 |
+| Implement branded error boundaries     | 2025-09-19  | 2025-09-25      | 2025-09-25    | complete | Add React Router fallback pages that keep the tone aligned with the storytelling brand.                    |
 | Map automation-sensitive resources     | 2025-09-30  | 2025-09-30      | -             | planned  | Identify story-specific assets (RSS feeds, sitemap base URL, env keys) the tenant generator must template. |
