@@ -27,8 +27,10 @@ This backlog enumerates every application-facing workspace in the monorepo and c
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `websites/garygerber.com`          | ✅ App-level tests cover hero content, rehearsal room wiring, and header navigation scroll handling.                 | Follow up with router-based smoke tests (newsletter form, error states) once public/protected routes are implemented. |
 | `websites/guidogerbpublishing.com` | ✅ App-level tests validate the publishing hero content, portal guard wiring, and header navigation scroll handling. | Plan follow-up coverage for catalog submission flows once routes are introduced.                                      |
-| `websites/picklecheeze.com`        | _None_                                                                                                               | Add snapshot/interaction tests for unique theming once components exist.                                              |
-| `websites/this-is-my-story.org`    | _None_                                                                                                               | Add tests for story navigation flows and ensure 404 handling works.                                                   |
+| `websites/picklecheeze.com`        | ✅ Landing section tests cover fermentation hero copy, newsletter interactions, and partner hub wiring.
+                            | Expand coverage to include portal analytics events once auth-driven dashboards go live.
+| `websites/this-is-my-story.org`    | ✅ App and component tests exercise navigation flows, maintenance notices, and storyteller portal wiring.
+                            | Add regression coverage for future story submission flows and content feeds.
 | `websites/stream4cloud.com`        | _None_                                                                                                               | Cover the landing page hero, CTA wiring, and route guards once the app shell exists.                                  |
 
 ## Cross-cutting infrastructure
