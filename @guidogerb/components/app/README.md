@@ -43,8 +43,10 @@ that truly differ per tenant:
 
 `<AppBasic />` now composes the provider stack, shared marketing landing, protected router, and
 chrome so tenant projects can render both public and authenticated routes without manual wiring.
-Override navigation, header, footer, authentication, API client, storage, service worker, theming,
-and page collections through the component props.
+The upcoming `AddCF-Tenant` automation will scaffold new sites against this variant, so keeping the
+defaults representative ensures fresh tenants boot with a working shell. Override navigation,
+header, footer, authentication, API client, storage, service worker, theming, and page collections
+through the component props.
 
 #### Blueprint & planning helpers
 
