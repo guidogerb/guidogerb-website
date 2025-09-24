@@ -1,6 +1,6 @@
 import { describe, it, expectTypeOf, expect } from 'vitest'
 
-import { responsiveSlotBreakpoints, baseResponsiveSlots } from '../src/responsive-slot/index.js'
+import { useBreakpointKey, responsiveSlotBreakpoints, baseResponsiveSlots } from '../src/responsive-slot/index.js'
 import type {
   BreakpointKey,
   SlotSizeMap,
@@ -8,6 +8,7 @@ import type {
   Registry,
   GuidoGerbUI_ContainerProps,
   ResponsiveSlotSize,
+  ResponsiveSlotProviderProps,
 } from '../src/responsive-slot'
 
 describe('responsive-slot type definitions', () => {
@@ -20,6 +21,8 @@ describe('responsive-slot type definitions', () => {
       block: string
       breakpoint: BreakpointKey
     }>()
+
+    expectTypeOf<ReturnType<typeof useBreakpointKey>>().toMatchTypeOf<BreakpointKey>()
   })
 
   it('allows authoring registries with typed slot size maps', () => {
@@ -37,6 +40,18 @@ describe('responsive-slot type definitions', () => {
 
     expect(baseResponsiveSlots['catalog.card']).toBeDefined()
     expect(registry['custom.slot']).toBeDefined()
+  })
+
+  it('permits configuring provider breakpoint descriptors', () => {
+    const props: ResponsiveSlotProviderProps = {
+      breakpoints: [
+        { key: 'sm', minWidth: 640 },
+        { key: 'xs', maxWidth: 420 },
+        { key: 'lg', query: '(min-width: 980px)' },
+      ],
+    }
+
+    expect(props.breakpoints?.length).toBe(3)
   })
 
   it('supports polymorphic container props with required slot key', () => {

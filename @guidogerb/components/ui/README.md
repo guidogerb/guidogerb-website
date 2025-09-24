@@ -88,6 +88,7 @@ The `ResponsiveSlot` component already:
 
 - Provides deterministic inline/block sizing across the default breakpoint set (`xs | sm | md | lg | xl`).
 - Supplies base registry presets (`catalog.card`, `dashboard.panel`, `hero.banner`, `list.row`).
+- Exposes `useBreakpointKey()` and lets consumers override breakpoint descriptors via `ResponsiveSlotProvider`.
 - Emits CSS custom properties so nested content can opt into the sizing values.
 - Includes a development-only overflow warning powered by `ResizeObserver`.
 
