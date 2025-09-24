@@ -150,4 +150,46 @@ describe('Storage provider', () => {
       expect(screen.getByTestId('value')).toHaveTextContent('value')
     })
   })
+
+  it('logs warnings when controller cleanup fails during unmount', async () => {
+    const subscribe = vi.fn(() => () => {
+      throw new Error('cleanup failure')
+    })
+    const controllerFactory = vi.fn(() => ({
+      get: vi.fn(),
+      set: vi.fn(),
+      remove: vi.fn(),
+      clear: vi.fn(),
+      list: vi.fn(() => []),
+      snapshot: vi.fn(() => ({})),
+      subscribe,
+    }))
+    const warn = vi.fn()
+
+    const { unmount } = render(
+      <Storage
+        namespace="logs"
+        areas={['custom']}
+        defaultArea="custom"
+        controllerFactory={controllerFactory}
+        logger={{ warn }}
+        onChange={() => {}}
+      >
+        <div>child</div>
+      </Storage>,
+    )
+
+    await waitFor(() => {
+      expect(subscribe).toHaveBeenCalled()
+    })
+
+    unmount()
+
+    await waitFor(() => {
+      expect(warn).toHaveBeenCalledWith(
+        '[storage] Listener cleanup failed',
+        expect.any(Error),
+      )
+    })
+  })
 })
