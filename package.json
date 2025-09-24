@@ -51,6 +51,7 @@
     "dev:site:picklecheeze": "pnpm --filter websites-picklecheeze dev",
     "dev:site:this-is-my-story": "pnpm --filter websites-this-is-my-story dev",
     "dev:site:ggp-llc": "pnpm --filter websites-ggp-llc dev",
+    "deploy:reference": "node websites/guidogerbpublishing.com/scripts/deploy-reference.mjs",
     "ci:deploy:main": "pnpm -r build",
     "ci:deploy:prod": "pnpm -r build && pnpm -r lint",
     "ai:check": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json",

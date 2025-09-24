@@ -130,6 +130,10 @@ pnpm --filter websites/stream4cloud.com build
 aws s3 sync websites/stream4cloud.com/dist s3://<SiteBucketName>/ --delete
 ```
 
+> **Shortcut:** `pnpm deploy:reference` builds the `websites/guidogerbpublishing.com` tenant and
+> runs the `aws s3 sync` + CloudFront invalidation using `DEPLOY_S3_BUCKET` and
+> `DEPLOY_CLOUDFRONT_DISTRIBUTION_ID` environment variables.
+
 ### 4.3 Invalidate CloudFront
 
 ```bash

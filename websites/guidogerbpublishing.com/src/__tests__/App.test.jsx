@@ -205,4 +205,45 @@ describe('GuidoGerb Publishing website App', () => {
       global.fetch = originalFetch
     }
   })
+
+  it('renders a branded not-found route for unknown paths', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+    window.history.replaceState({}, '', '/missing-chapter')
+
+    await renderApp()
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Catalog page not found' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Return to publishing home' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+    expect(screen.getByRole('link', { name: 'Email catalog support' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('mailto:partners@guidogerbpublishing.com'),
+    )
+    expect(
+      screen.getByText(/Double-check the link or head back to the publishing overview/i),
+    ).toBeInTheDocument()
+  })
+
+  it('routes /maintenance to the partner portal maintenance messaging', async () => {
+    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
+    window.history.replaceState({}, '', '/maintenance')
+
+    await renderApp()
+
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Partner portal undergoing updates',
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Check publishing overview' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+    expect(screen.getByText(/applying production updates to the partner portal/i)).toBeInTheDocument()
+  })
 })
