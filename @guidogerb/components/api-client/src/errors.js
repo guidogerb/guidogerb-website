@@ -19,6 +19,56 @@ const coerceString = (value) => {
   return null
 }
 
+const REQUEST_ID_HEADER_CANDIDATES = [
+  'x-request-id',
+  'x-correlation-id',
+  'x-amzn-requestid',
+  'x-amzn-trace-id',
+  'x-b3-traceid',
+]
+
+const getHeaderValue = (headers, candidate) => {
+  if (!headers) return null
+
+  try {
+    if (typeof headers.get === 'function') {
+      return coerceString(headers.get(candidate))
+    }
+  } catch (error) {
+    // Ignore environments where `headers.get` throws (e.g., plain objects masquerading as headers).
+  }
+
+  if (typeof headers === 'object') {
+    const lowerCandidate = candidate.toLowerCase()
+    for (const [key, value] of Object.entries(headers)) {
+      if (typeof key !== 'string') continue
+      if (key.toLowerCase() !== lowerCandidate) continue
+
+      if (Array.isArray(value)) {
+        for (const entry of value) {
+          const normalized = coerceString(entry)
+          if (normalized) return normalized
+        }
+      }
+
+      const normalized = coerceString(value)
+      if (normalized) return normalized
+    }
+  }
+
+  return null
+}
+
+const extractRequestIdFromHeaders = (headers) => {
+  for (const candidate of REQUEST_ID_HEADER_CANDIDATES) {
+    const value = getHeaderValue(headers, candidate)
+    if (value) {
+      return value
+    }
+  }
+  return null
+}
+
 const normalizeDetail = (detail) => {
   if (!detail) return null
 
@@ -153,6 +203,7 @@ export const normalizeApiError = (error) => {
       cause: undefined,
       isApiError: false,
       original: error,
+      requestId: null,
     }
   }
 
@@ -199,6 +250,21 @@ export const normalizeApiError = (error) => {
         : null)
   }
 
+  let requestId =
+    extractRequestIdFromHeaders(error.response?.headers ?? error.headers) ??
+    coerceString(error.requestId ?? error.requestID ?? error.correlationId ?? error.correlationID)
+
+  if (!requestId && isPlainObject(data)) {
+    requestId =
+      coerceString(data.requestId) ??
+      coerceString(data.request_id) ??
+      coerceString(data.requestID) ??
+      coerceString(data.traceId) ??
+      coerceString(data.trace_id) ??
+      coerceString(data.correlationId) ??
+      coerceString(data.correlation_id)
+  }
+
   return {
     message,
     status,
@@ -211,6 +277,7 @@ export const normalizeApiError = (error) => {
     cause: error.cause,
     isApiError: isApiErrorInstance,
     original: error,
+    requestId: requestId ?? null,
   }
 }
 

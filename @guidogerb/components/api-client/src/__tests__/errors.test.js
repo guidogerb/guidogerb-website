@@ -8,6 +8,7 @@ describe('normalizeApiError', () => {
     expect(normalized.details).toEqual([])
     expect(normalized.fieldErrors).toEqual({})
     expect(normalized.hasFieldErrors).toBe(false)
+    expect(normalized.requestId).toBeNull()
   })
 
   it('prefers structured payload messaging over the base error message', () => {
@@ -75,5 +76,35 @@ describe('normalizeApiError', () => {
     expect(normalized.status).toBe(504)
     expect(normalized.statusText).toBe('Gateway Timeout')
     expect(normalized.isApiError).toBe(false)
+    expect(normalized.requestId).toBeNull()
+  })
+
+  it('captures request identifiers from headers and payload fallbacks', () => {
+    const response = new Response(JSON.stringify({ message: 'Something broke' }), {
+      status: 500,
+      headers: { 'X-Request-Id': 'req-123', 'X-Amzn-Trace-Id': 'trace-abc' },
+    })
+
+    const errorWithHeaders = new ApiError('Internal error', {
+      response,
+      data: { message: 'Internal error', request_id: 'payload-ignored' },
+    })
+
+    const normalizedWithHeaders = normalizeApiError(errorWithHeaders)
+    expect(normalizedWithHeaders.requestId).toBe('req-123')
+
+    const errorWithoutHeaders = new ApiError('Bad request', {
+      status: 400,
+      data: { message: 'Bad request', requestId: 'payload-id' },
+    })
+
+    const normalizedFallback = normalizeApiError(errorWithoutHeaders)
+    expect(normalizedFallback.requestId).toBe('payload-id')
+
+    const generic = normalizeApiError({
+      message: 'Generic error',
+      headers: { 'x-correlation-id': 'corr-321' },
+    })
+    expect(generic.requestId).toBe('corr-321')
   })
 })
