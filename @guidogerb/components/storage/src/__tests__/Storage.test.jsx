@@ -225,10 +225,7 @@ describe('Storage provider', () => {
     unmount()
 
     await waitFor(() => {
-      expect(warn).toHaveBeenCalledWith(
-        '[storage] Listener cleanup failed',
-        expect.any(Error),
-      )
+      expect(warn).toHaveBeenCalledWith('[storage] Listener cleanup failed', expect.any(Error))
     })
   })
 

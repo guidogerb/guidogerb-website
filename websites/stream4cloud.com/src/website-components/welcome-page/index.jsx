@@ -183,18 +183,13 @@ export default function Welcome({ children }) {
       </section>
 
       {upcomingProduction ? (
-        <section
-          aria-labelledby="stream4cloud-upcoming-production"
-          className="upcoming-production"
-        >
+        <section aria-labelledby="stream4cloud-upcoming-production" className="upcoming-production">
           <h4 id="stream4cloud-upcoming-production">Next rehearsal checkpoint</h4>
           <p>
             <strong>{upcomingProduction.name}</strong>
             {upcomingProduction.window ? ` • ${upcomingProduction.window}` : null}
           </p>
-          {upcomingProduction.channel ? (
-            <p>Control room: {upcomingProduction.channel}</p>
-          ) : null}
+          {upcomingProduction.channel ? <p>Control room: {upcomingProduction.channel}</p> : null}
           <a
             href={READINESS_TIMELINE_URL}
             {...(isExternalHref(READINESS_TIMELINE_URL)

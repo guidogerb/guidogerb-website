@@ -395,9 +395,7 @@ describe('ResponsiveSlot', () => {
 
     function SizeProbe() {
       const size = useResponsiveSlotSize('catalog.card')
-      return (
-        <div data-testid="size" data-inline={size.inline} data-breakpoint={size.breakpoint} />
-      )
+      return <div data-testid="size" data-inline={size.inline} data-breakpoint={size.breakpoint} />
     }
 
     try {

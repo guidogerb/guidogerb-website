@@ -1,9 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 
-import {
-  GuidoGerbUI_Container,
-  ResponsiveSlotProvider,
-} from '../src/responsive-slot/index.js'
+import { GuidoGerbUI_Container, ResponsiveSlotProvider } from '../src/responsive-slot/index.js'
 
 describe('GuidoGerbUI_Container', () => {
   it('respects custom element rendering and default role', () => {
@@ -82,4 +79,3 @@ describe('GuidoGerbUI_Container', () => {
     })
   })
 })
-

@@ -82,7 +82,9 @@ export interface CollectPaginatedResult<
 export declare function collectPaginatedResults<
   TResult = unknown,
   TParams extends Record<string, any> = Record<string, any>,
->(options: CollectPaginatedOptions<TResult, TParams>): Promise<CollectPaginatedResult<TResult, TParams>>
+>(
+  options: CollectPaginatedOptions<TResult, TParams>,
+): Promise<CollectPaginatedResult<TResult, TParams>>
 
 export interface CreateClientOptions {
   baseUrl: string

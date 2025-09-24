@@ -1,12 +1,6 @@
 import { describe, expect, beforeEach, afterEach, it } from 'vitest'
 
-import {
-  serializeCookie,
-  parseCookies,
-  getCookie,
-  setCookie,
-  removeCookie,
-} from '../cookies.js'
+import { serializeCookie, parseCookies, getCookie, setCookie, removeCookie } from '../cookies.js'
 
 const clearCookies = () => {
   const jar = document.cookie ? document.cookie.split(';') : []

@@ -106,12 +106,13 @@ export function App() {
 
 ## Planned surface
 
-| Area               | Goals |
-| ------------------ | ----- |
+| Area               | Goals                                                                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Storage controller | ✅ Available via `createStorageController`. Returns scoped accessors (`get`, `set`, `remove`, `list`, `has`) and gracefully falls back when `window` is unavailable. |
-| Cookie utilities   | ✅ Cookie parsing and mutation helpers covering domain/path/same-site attributes. |
-| Cache governance   | ✅ Cache preference channel that persists toggles and multicasts them to service worker helpers via `BroadcastChannel`. |
-| Diagnostics        | ✅ Diagnostics hooks so apps can trace storage mutations during development. |
+| Cookie utilities   | ✅ Cookie parsing and mutation helpers covering domain/path/same-site attributes.                                                                                    |
+| Cache governance   | ✅ Cache preference channel that persists toggles and multicasts them to service worker helpers via `BroadcastChannel`.                                              |
+| Diagnostics        | ✅ Diagnostics hooks so apps can trace storage mutations during development.                                                                                         |
+
 ## Integration with `@guidogerb/components/sw`
 
 The storage package now exposes `createCachePreferenceChannel`, a lightweight store that persists cache policy updates under a
@@ -148,12 +149,7 @@ cacheChannel.subscribe(({ origin, preferences }) => {
 ## Cookie helpers
 
 ```js
-import {
-  setCookie,
-  getCookie,
-  removeCookie,
-  serializeCookie,
-} from '@guidogerb/components-storage'
+import { setCookie, getCookie, removeCookie, serializeCookie } from '@guidogerb/components-storage'
 
 // Persist a cookie with explicit attributes
 setCookie('theme', 'dark', { path: '/', sameSite: 'Lax', secure: true })

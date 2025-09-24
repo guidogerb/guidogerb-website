@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 const defaultFetch =
   typeof fetch === 'function'
@@ -51,8 +43,7 @@ function readStoredEditModeState(key) {
       return null
     }
 
-    const storedIsEditing =
-      typeof parsed.isEditing === 'boolean' ? parsed.isEditing : undefined
+    const storedIsEditing = typeof parsed.isEditing === 'boolean' ? parsed.isEditing : undefined
     const storedActiveEditableId =
       typeof parsed.activeEditableId === 'string' && parsed.activeEditableId
         ? parsed.activeEditableId
@@ -182,10 +173,7 @@ export function EditModeProvider({
 
   const fetchImpl = fetcher ?? defaultFetch
 
-  const normalizedShortcut = useMemo(
-    () => normalizeShortcut(keyboardShortcut),
-    [keyboardShortcut],
-  )
+  const normalizedShortcut = useMemo(() => normalizeShortcut(keyboardShortcut), [keyboardShortcut])
 
   useEffect(() => {
     if (!enableKeyboardShortcut) return undefined
@@ -267,7 +255,8 @@ function normalizeShortcut(shortcut) {
     return { ...DEFAULT_KEYBOARD_SHORTCUT }
   }
 
-  const key = typeof shortcut.key === 'string' && shortcut.key ? shortcut.key : DEFAULT_KEYBOARD_SHORTCUT.key
+  const key =
+    typeof shortcut.key === 'string' && shortcut.key ? shortcut.key : DEFAULT_KEYBOARD_SHORTCUT.key
 
   return {
     key,
@@ -353,7 +342,11 @@ function EditModeToolbar({ isEditing, onToggle, label, shortcut, positionStyle }
       style={{ ...baseStyle, ...(positionStyle || {}) }}
     >
       <span>{isEditing ? 'Exit edit mode' : label}</span>
-      {shortcut ? <span style={shortcutStyle} aria-hidden="true">{shortcut}</span> : null}
+      {shortcut ? (
+        <span style={shortcutStyle} aria-hidden="true">
+          {shortcut}
+        </span>
+      ) : null}
     </button>
   )
 }

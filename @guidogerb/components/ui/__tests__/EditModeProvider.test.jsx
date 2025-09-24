@@ -1,9 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 
-import {
-  EditModeProvider,
-  useEditMode,
-} from '../src/ResponsiveSlot/editing/EditModeContext.jsx'
+import { EditModeProvider, useEditMode } from '../src/ResponsiveSlot/editing/EditModeContext.jsx'
 
 function ModeIndicator() {
   const { isEditing } = useEditMode()

@@ -39,7 +39,11 @@ describe('collectPaginatedResults', () => {
 
     expect(fetchPage).toHaveBeenCalledTimes(2)
     expect(fetchPage.mock.calls[0][0]).toEqual({ tenantId: 'tenant-42', limit: 25 })
-    expect(fetchPage.mock.calls[1][0]).toEqual({ tenantId: 'tenant-42', limit: 25, cursor: 'page-2' })
+    expect(fetchPage.mock.calls[1][0]).toEqual({
+      tenantId: 'tenant-42',
+      limit: 25,
+      cursor: 'page-2',
+    })
     expect(initialParams).toEqual({ tenantId: 'tenant-42', limit: 25 })
     expect(result.items).toEqual(['first', 'second'])
     expect(result.cursor).toBeNull()
@@ -66,7 +70,11 @@ describe('collectPaginatedResults', () => {
     const fetchPage = vi
       .fn()
       .mockResolvedValueOnce({ items: ['one', 'two'], cursor: 'cursor-a', hasNextPage: true })
-      .mockResolvedValueOnce({ items: ['three', 'four', 'five'], cursor: 'cursor-b', hasNextPage: true })
+      .mockResolvedValueOnce({
+        items: ['three', 'four', 'five'],
+        cursor: 'cursor-b',
+        hasNextPage: true,
+      })
 
     const result = await collectPaginatedResults({
       fetchPage,
@@ -87,7 +95,11 @@ describe('collectPaginatedResults', () => {
   it('treats exhausted pages as final when the item limit is met without a next cursor', async () => {
     const fetchPage = vi
       .fn()
-      .mockResolvedValueOnce({ items: ['alpha', 'beta', 'gamma'], cursor: null, hasNextPage: false })
+      .mockResolvedValueOnce({
+        items: ['alpha', 'beta', 'gamma'],
+        cursor: null,
+        hasNextPage: false,
+      })
 
     const result = await collectPaginatedResults({ fetchPage, maxItems: 2 })
 

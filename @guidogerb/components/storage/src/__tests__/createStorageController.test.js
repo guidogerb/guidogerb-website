@@ -87,9 +87,7 @@ describe('createStorageController diagnostics', () => {
     controller.clear()
 
     const eventTypes = diagnostics.mock.calls.map(([event]) => event.type)
-    expect(eventTypes).toEqual(
-      expect.arrayContaining(['set', 'remove', 'clear']),
-    )
+    expect(eventTypes).toEqual(expect.arrayContaining(['set', 'remove', 'clear']))
 
     const setEvent = diagnostics.mock.calls.find(([event]) => event.type === 'set')?.[0]
     expect(setEvent).toMatchObject({
@@ -127,8 +125,12 @@ describe('createStorageController diagnostics', () => {
 
     expect(onSet).toHaveBeenCalledWith(expect.objectContaining({ type: 'set', key: 'token' }))
     expect(onRemove).toHaveBeenCalledWith(expect.objectContaining({ type: 'remove', key: 'token' }))
-    expect(onClear).toHaveBeenCalledWith(expect.objectContaining({ type: 'clear', keys: expect.arrayContaining(['other']) }))
-    expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({ type: 'notify', eventType: 'set' }))
+    expect(onClear).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'clear', keys: expect.arrayContaining(['other']) }),
+    )
+    expect(onNotify).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'notify', eventType: 'set' }),
+    )
   })
 
   it('emits a fallback diagnostic when the requested area is unavailable', () => {

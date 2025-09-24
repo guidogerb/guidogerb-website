@@ -2,7 +2,10 @@ import { render, screen, within } from '@testing-library/react'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const useAuthMock = vi.hoisted(() =>
-  vi.fn(() => ({ isAuthenticated: true, user: { profile: { name: 'Partner Tester', email: 'partner@example.com' } } })),
+  vi.fn(() => ({
+    isAuthenticated: true,
+    user: { profile: { name: 'Partner Tester', email: 'partner@example.com' } },
+  })),
 )
 
 vi.mock('@guidogerb/components-auth', () => ({
@@ -81,9 +84,7 @@ describe('PickleCheeze landing sections', () => {
 
   it('wires the partner hub through the protected welcome experience', () => {
     const logoutUri = '/auth/logout'
-    render(
-      <PartnerHubSection logoutUri={logoutUri} />,
-    )
+    render(<PartnerHubSection logoutUri={logoutUri} />)
 
     const sectionHeading = screen.getByRole('heading', { level: 2, name: /partner pantry/i })
     const section = sectionHeading.closest('section')

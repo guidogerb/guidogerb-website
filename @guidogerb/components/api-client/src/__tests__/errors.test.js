@@ -33,7 +33,12 @@ describe('normalizeApiError', () => {
     expect(normalized.code).toBe('invalid_request')
     expect(normalized.details).toEqual([
       { message: 'Email is required', code: 'required', field: 'email', path: null },
-      { message: 'Name must be fewer than 80 characters', code: null, field: 'profile.name', path: 'profile.name' },
+      {
+        message: 'Name must be fewer than 80 characters',
+        code: null,
+        field: 'profile.name',
+        path: 'profile.name',
+      },
     ])
     expect(normalized.fieldErrors).toEqual({
       email: ['Email is required'],

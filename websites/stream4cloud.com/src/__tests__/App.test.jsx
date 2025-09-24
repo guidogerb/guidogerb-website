@@ -181,7 +181,10 @@ describe('Stream4Cloud marketing app', () => {
       timelineQueries.getByRole('heading', { level: 3, name: /align the launch blueprint/i }),
     ).toBeInTheDocument()
     expect(
-      timelineQueries.getByRole('heading', { level: 3, name: /measure and optimise the next season/i }),
+      timelineQueries.getByRole('heading', {
+        level: 3,
+        name: /measure and optimise the next season/i,
+      }),
     ).toBeInTheDocument()
     expect(
       timelineQueries.getByText(/rehearsal reminders and run-of-show updates/i),

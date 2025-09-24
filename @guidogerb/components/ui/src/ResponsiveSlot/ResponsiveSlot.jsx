@@ -840,15 +840,7 @@ export function useResponsiveSlotSize(slot, overrides) {
         inheritedSizes,
         fallbackBreakpoint: defaultBreakpoint,
       }),
-    [
-      activeBreakpoint,
-      defaultBreakpoint,
-      inheritedSizes,
-      overrides,
-      registry,
-      slot,
-      tokenResolver,
-    ],
+    [activeBreakpoint, defaultBreakpoint, inheritedSizes, overrides, registry, slot, tokenResolver],
   )
 
   return useMemo(

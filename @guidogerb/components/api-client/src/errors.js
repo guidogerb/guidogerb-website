@@ -114,12 +114,7 @@ const normalizeDetail = (detail) => {
         .join('.')
     : null
 
-  const field =
-    coerceString(detail.field) ??
-    coerceString(detail.name) ??
-    fieldPath ??
-    path ??
-    null
+  const field = coerceString(detail.field) ?? coerceString(detail.name) ?? fieldPath ?? path ?? null
 
   return { message, code: codeCandidate, field, path }
 }
@@ -210,7 +205,7 @@ export const normalizeApiError = (error) => {
   const isApiErrorInstance = error instanceof ApiError
   const status = error.status ?? error.response?.status
   const statusText = coerceString(error.statusText ?? error.response?.statusText)
-  const data = isApiErrorInstance ? error.data : error.data ?? error.body ?? error.response?.data
+  const data = isApiErrorInstance ? error.data : (error.data ?? error.body ?? error.response?.data)
 
   let message = coerceString(error.message) ?? DEFAULT_MESSAGE
 

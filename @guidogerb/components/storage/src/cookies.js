@@ -108,10 +108,7 @@ export const serializeCookie = (name, value, options = {}) => {
 
 export const parseCookies = (cookieString, options = {}) => {
   const { decode = defaultDecode, document: doc } = options ?? {}
-  const source =
-    typeof cookieString === 'string'
-      ? cookieString
-      : (getDocument(doc)?.cookie ?? '')
+  const source = typeof cookieString === 'string' ? cookieString : (getDocument(doc)?.cookie ?? '')
 
   const jar = {}
   if (!source) {

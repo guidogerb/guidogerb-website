@@ -287,11 +287,7 @@ function LandingRoute() {
         </div>
       </section>
 
-      <section
-        className="timeline"
-        aria-labelledby="stream4cloud-timeline"
-        id="broadcast-timeline"
-      >
+      <section className="timeline" aria-labelledby="stream4cloud-timeline" id="broadcast-timeline">
         <div className="timeline__intro">
           <h2 id="stream4cloud-timeline">Broadcast readiness timeline</h2>
           <p>
