@@ -100,6 +100,7 @@ function discoverWebsiteDomains(websitesRoot) {
 export function loadTenantRegistry(repoRoot = process.cwd()) {
   const root = resolve(repoRoot)
   const cfMapPath = join(root, 'infra', 'ps1', 'cf-distributions.json')
+  const manifestPath = join(root, 'infra', 'ps1', 'tenant-manifest.json')
   const websitesRoot = join(root, 'websites')
 
   if (!isDirectory(websitesRoot)) {
@@ -107,44 +108,126 @@ export function loadTenantRegistry(repoRoot = process.cwd()) {
   }
 
   const distributionMap = loadJsonFile(cfMapPath)
-  const domainsFromCf = Object.keys(distributionMap)
-  const workspaceDomains = discoverWebsiteDomains(websitesRoot)
+  const manifestEntries = loadJsonFile(manifestPath)
+  if (!Array.isArray(manifestEntries)) {
+    throw new Error(`Tenant manifest at '${manifestPath}' must be a JSON array`)
+  }
 
-  const missingInCf = workspaceDomains.filter((domain) => !domainsFromCf.includes(domain))
-  if (missingInCf.length > 0) {
+  const workspaceDomains = discoverWebsiteDomains(websitesRoot)
+  const manifestDomains = manifestEntries.map((entry) => {
+    if (!entry || typeof entry.domain !== 'string') {
+      throw new Error('tenant-manifest.json entries must include a domain string')
+    }
+    const trimmed = entry.domain.trim()
+    if (!trimmed) {
+      throw new Error('tenant-manifest.json contains an entry with an empty domain')
+    }
+    return trimmed
+  })
+
+  const duplicateDomains = manifestDomains.filter(
+    (domain, index, arr) => arr.indexOf(domain) !== index,
+  )
+  if (duplicateDomains.length > 0) {
     throw new Error(
-      `cf-distributions.json is missing domain entries: ${missingInCf.sort().join(', ')}`,
+      `tenant-manifest.json lists duplicate domains: ${[...new Set(duplicateDomains)].sort().join(', ')}`,
     )
   }
 
-  const missingWorkspaces = domainsFromCf.filter((domain) => !workspaceDomains.includes(domain))
-  if (missingWorkspaces.length > 0) {
+  const manifestDomainSet = new Set(manifestDomains)
+  const cfDomains = Object.keys(distributionMap)
+
+  const missingManifestDomains = cfDomains.filter((domain) => !manifestDomainSet.has(domain))
+  if (missingManifestDomains.length > 0) {
     throw new Error(
-      `CloudFront distribution map references domains without workspaces: ${missingWorkspaces
+      `tenant-manifest.json is missing domains from cf-distributions.json: ${missingManifestDomains
         .sort()
         .join(', ')}`,
     )
   }
 
-  const tenants = domainsFromCf
-    .sort((a, b) => a.localeCompare(b))
-    .map((domain) => {
-      const distributionId = distributionMap[domain]
+  const missingCfDomains = manifestDomains.filter((domain) => !cfDomains.includes(domain))
+  if (missingCfDomains.length > 0) {
+    throw new Error(
+      `cf-distributions.json is missing domains declared in tenant-manifest.json: ${missingCfDomains
+        .sort()
+        .join(', ')}`,
+    )
+  }
+
+  const workspaceDomainSet = new Set(workspaceDomains)
+  const missingWorkspaces = manifestDomains.filter((domain) => !workspaceDomainSet.has(domain))
+  if (missingWorkspaces.length > 0) {
+    throw new Error(`Workspaces missing for tenant domains: ${missingWorkspaces.sort().join(', ')}`)
+  }
+
+  const tenants = manifestEntries
+    .map((entry) => ({ ...entry, domain: entry.domain.trim() }))
+    .sort((a, b) => a.domain.localeCompare(b.domain))
+    .map((entry) => {
+      const domain = entry.domain
+      const distributionId = entry.distributionId || distributionMap[domain]
       if (!distributionId) {
-        throw new Error(`Distribution ID missing for domain '${domain}' in cf-distributions.json`)
+        throw new Error(`Distribution ID missing for domain '${domain}'`)
       }
-      const workspaceSlug = getTenantSlug(domain)
-      const scriptSlug = workspaceSlug
-      const secretName = getTenantSecretName(domain)
+      if (
+        distributionMap[domain] &&
+        entry.distributionId &&
+        distributionMap[domain] !== entry.distributionId
+      ) {
+        throw new Error(
+          `Distribution mismatch for '${domain}' between tenant-manifest.json and cf-distributions.json`,
+        )
+      }
+
+      const workspaceSlug = entry.workspaceSlug || getTenantSlug(domain)
+      const scriptSlug = entry.scriptSlug || workspaceSlug
+      const workspacePackage = entry.workspacePackage || `websites-${workspaceSlug}`
+      const workspaceDirectory = entry.workspaceDirectory || join('websites', domain)
+      const workspacePath = join(root, workspaceDirectory)
+      if (!isDirectory(workspacePath)) {
+        throw new Error(`Workspace directory missing for domain '${domain}': ${workspaceDirectory}`)
+      }
+
+      const secretName = entry.secretName || getTenantSecretName(domain)
+      const secretFileName = entry.secretFileName || `${secretName}-secrets`
+
+      const envSecretKeys = Array.isArray(entry.envSecretKeys)
+        ? entry.envSecretKeys
+            .map((key) => (typeof key === 'string' ? key.trim() : ''))
+            .filter((key) => key.length > 0)
+        : []
+
+      const dedupedKeys = []
+      for (const key of envSecretKeys) {
+        const canonical = key.toUpperCase()
+        if (!dedupedKeys.some((existing) => existing.toUpperCase() === canonical)) {
+          dedupedKeys.push(key)
+        }
+      }
+
+      const displayName =
+        typeof entry.displayName === 'string' && entry.displayName.trim()
+          ? entry.displayName.trim()
+          : domain
+      const supportEmail =
+        typeof entry.supportEmail === 'string' && entry.supportEmail.trim()
+          ? entry.supportEmail.trim()
+          : `support@${domain}`
+
       return {
         domain,
         site: domain,
         distributionId,
         workspaceSlug,
         scriptSlug,
-        workspacePackage: `websites-${workspaceSlug}`,
-        workspaceDirectory: join('websites', domain),
+        workspacePackage,
+        workspaceDirectory,
         secretName,
+        secretFileName,
+        envSecretKeys: dedupedKeys,
+        displayName,
+        supportEmail,
       }
     })
 

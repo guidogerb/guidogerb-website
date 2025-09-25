@@ -57,6 +57,14 @@ Map of tenant domains to CloudFront distribution IDs used by release and
 invalidation workflows. `AddCF-Tenant.ps1` now updates the file automatically
 whenever a new tenant scaffold is created.
 
+### `tenant-manifest.json`
+
+Canonical manifest describing each tenant's domain, display name, workspace
+metadata, CloudFront distribution ID, secrets file names, and required
+environment keys. Automation and CI workflows read the manifest to build
+matrices and provision `.env` files without re-deriving slugs from other
+sources. `AddCF-Tenant.ps1` maintains the file as tenants are added.
+
 ### `invalidation.json`
 
 Reference JSON payload that mirrors the structure CloudFront expects when
