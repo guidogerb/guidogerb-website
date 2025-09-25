@@ -47,6 +47,7 @@
   validated inputs.
 #>
 
+<#
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
 param(
     [Parameter(Mandatory = $true)]
@@ -481,7 +482,6 @@ function Update-WebsitesReadme {
             $updatedLines.Add($lines[$i]) | Out-Null
         }
     }
-
     Write-TextFile -Path $readmePath -Content $updatedLines -AllowOverwrite
 }
 
@@ -1405,3 +1405,4 @@ Update-TenantManifest -RepoRoot $repoRoot -Tenant $tenant -EnvSecretKeys $normal
 
 $result['Scaffolded'] = $true
 Write-Output ([pscustomobject]$result)
+#>
