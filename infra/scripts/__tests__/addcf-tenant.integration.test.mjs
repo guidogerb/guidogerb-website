@@ -8,6 +8,7 @@ import { spawn } from 'node:child_process'
 import { request } from 'node:http'
 import { once } from 'node:events'
 import { setTimeout as delay } from 'node:timers/promises'
+import { getTenantSecretName } from '../resolve-tenants.mjs'
 
 const repoRoot = fileURLToPath(new URL('../../..', import.meta.url))
 const scriptPath = fileURLToPath(new URL('../../ps1/AddCF-Tenant.ps1', import.meta.url))
@@ -179,6 +180,21 @@ describe('AddCF-Tenant integration', () => {
           await readFile(join(worktreePath, 'infra/ps1/cf-distributions.json'), 'utf8'),
         )
         expect(cfDistributions[domain]).toBe(distributionId)
+
+        const manifest = JSON.parse(
+          await readFile(join(worktreePath, 'infra/ps1/tenant-manifest.json'), 'utf8'),
+        )
+        const manifestEntry = manifest.find((entry) => entry.domain === domain)
+        expect(manifestEntry).toBeTruthy()
+        expect(manifestEntry.distributionId).toBe(distributionId)
+        expect(manifestEntry.displayName).toBe(displayName)
+        expect(manifestEntry.workspaceSlug).toBe(domainSlug)
+        expect(manifestEntry.workspacePackage).toBe(workspacePackage)
+        expect(manifestEntry.workspaceDirectory).toBe(`websites/${domain}`)
+        expect(manifestEntry.envSecretKeys).toEqual(envKeys)
+        const expectedSecretName = getTenantSecretName(domain)
+        expect(manifestEntry.secretName).toBe(expectedSecretName)
+        expect(manifestEntry.secretFileName).toBe(`${expectedSecretName}-secrets`)
 
         const repoCommands = [['clean'], ['install'], ['build'], ['lint'], ['format']]
 

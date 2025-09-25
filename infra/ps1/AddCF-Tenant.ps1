@@ -137,6 +137,21 @@ function Get-SecretFileName {
     return "${sanitized}_VITE_ENV-secrets"
 }
 
+function Get-TenantSecretName {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Domain
+    )
+
+    $sanitized = ($Domain.ToUpperInvariant() -replace '[^A-Z0-9]+', '_').Trim('_')
+    if ([string]::IsNullOrWhiteSpace($sanitized)) {
+        throw "Unable to derive a secret name from domain '$Domain'."
+    }
+
+    return "${sanitized}_VITE_ENV"
+}
+
 function ConvertTo-JsStringLiteral {
     param(
         [Parameter(Mandatory = $true)]
@@ -321,6 +336,87 @@ function Update-CfDistributionsFile {
     if ($script:PSCmdlet.ShouldProcess($cfPath, 'Update CloudFront distribution registry')) {
         [System.IO.File]::WriteAllText($cfPath, $json, $script:Utf8NoBomEncoding)
     }
+}
+
+function Update-TenantManifest {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]
+        $RepoRoot,
+
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]
+        $Tenant,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]
+        $EnvSecretKeys
+    )
+
+    $manifestPath = Join-Path $RepoRoot 'infra/ps1/tenant-manifest.json'
+    $entries = @()
+
+    if (Test-Path -Path $manifestPath -PathType Leaf) {
+        $rawManifest = Get-Content -Path $manifestPath -Raw
+        if (-not [string]::IsNullOrWhiteSpace($rawManifest)) {
+            $parsed = $rawManifest | ConvertFrom-Json
+            if ($parsed -is [System.Collections.IEnumerable]) {
+                foreach ($entry in $parsed) {
+                    if ($null -eq $entry) { continue }
+                    if ([string]::IsNullOrWhiteSpace($entry.domain)) {
+                        continue
+                    }
+                    if ($entry.domain -ieq $Tenant.Domain) {
+                        continue
+                    }
+
+                    $existingKeys = @()
+                    if ($entry.PSObject.Properties.Name -contains 'envSecretKeys') {
+                        foreach ($key in $entry.envSecretKeys) {
+                            if ([string]::IsNullOrWhiteSpace($key)) { continue }
+                            $existingKeys += [string]$key
+                        }
+                    }
+
+                    $entries += ,([ordered]@{
+                        domain = [string]$entry.domain
+                        displayName = [string]$entry.displayName
+                        distributionId = [string]$entry.distributionId
+                        workspaceSlug = [string]$entry.workspaceSlug
+                        workspacePackage = [string]$entry.workspacePackage
+                        workspaceDirectory = [string]$entry.workspaceDirectory
+                        scriptSlug = [string]$entry.scriptSlug
+                        secretFileName = [string]$entry.secretFileName
+                        secretName = [string]$entry.secretName
+                        envSecretKeys = $existingKeys
+                        supportEmail = [string]$entry.supportEmail
+                    })
+                }
+            }
+        }
+    }
+
+    $entries += ,([ordered]@{
+        domain = $Tenant.Domain
+        displayName = $Tenant.DisplayName
+        distributionId = $Tenant.DistributionId
+        workspaceSlug = $Tenant.WorkspaceSlug
+        workspacePackage = $Tenant.PackageName
+        workspaceDirectory = "websites/$($Tenant.Domain)"
+        scriptSlug = $Tenant.ScriptSlug
+        secretFileName = $Tenant.SecretFileName
+        secretName = $Tenant.SecretName
+        envSecretKeys = [string[]]$EnvSecretKeys
+        supportEmail = $Tenant.SupportEmail
+    })
+
+    $sorted = $entries | Sort-Object -Property { $_['domain'] }
+    $json = ($sorted | ConvertTo-Json -Depth 10)
+    if (-not $json.EndsWith([Environment]::NewLine)) {
+        $json += [Environment]::NewLine
+    }
+
+    Write-TextFile -Path $manifestPath -Content $json -AllowOverwrite
 }
 
 function Update-WebsitesReadme {
@@ -1258,6 +1354,7 @@ $normalizedSecretKeys = [string[]]$trimmedSecretKeys
 $workspaceSlug = Get-TenantSlug -Domain $Domain
 $scriptSlug = $workspaceSlug
 $packageName = "websites-$workspaceSlug"
+$secretName = Get-TenantSecretName -Domain $Domain
 $secretFileName = Get-SecretFileName -Domain $Domain
 $supportEmail = "support@$Domain"
 
@@ -1270,6 +1367,7 @@ $tenant = [pscustomobject]@{
     ScriptSlug = $scriptSlug
     PackageName = $packageName
     SecretFileName = $secretFileName
+    SecretName = $secretName
     SupportEmail = $supportEmail
 }
 
@@ -1283,6 +1381,7 @@ $result = [ordered]@{
     ScriptSlug = $scriptSlug
     WorkspacePath = $tenantWorkspacePath
     SecretFileName = $secretFileName
+    SecretName = $secretName
     ValidateOnly = [bool]$ValidateOnly
     Scaffolded = $false
 }
@@ -1299,6 +1398,7 @@ Update-WebsitesReadme -RepoRoot $repoRoot -Tenant $tenant
 Update-SyncSitesScript -RepoRoot $repoRoot -Tenant $tenant
 Update-CloudFrontConfig -RepoRoot $repoRoot -Tenant $tenant
 Update-S3Config -RepoRoot $repoRoot -Tenant $tenant
+Update-TenantManifest -RepoRoot $repoRoot -Tenant $tenant -EnvSecretKeys $normalizedSecretKeys
 
 $result['Scaffolded'] = $true
 Write-Output ([pscustomobject]$result)

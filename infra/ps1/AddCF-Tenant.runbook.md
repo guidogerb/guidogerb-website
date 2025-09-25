@@ -34,6 +34,7 @@ The managed policy `arn:aws:iam::aws:policy/CloudFrontFullAccess` plus your plat
    ```
 
    The command emits an object describing the resolved workspace slug, package name, and generated secret filename without touching disk.
+
 3. Remove `-ValidateOnly` and run the scaffold once the contract looks correct:
 
    ```powershell
@@ -54,6 +55,8 @@ Successful runs add or update the following paths:
 - `websites/<domain>/` — Vite workspace with `README.md`, `tasks.md`, `.env.example`, `<TENANT>_VITE_ENV-secrets`, and starter React files.
 - `package.json` — Adds the workspace entry plus `build:site:<slug>` and `dev:site:<slug>` scripts.
 - `infra/ps1/cf-distributions.json` — Maps the domain to the supplied CloudFront distribution ID.
+- `infra/ps1/tenant-manifest.json` — Records display name, workspace metadata, distribution ID, and
+  env secret keys for automation consumers.
 - `websites/README.md` — Lists the new tenant in the “Current tenants” section.
 - `infra/local-dev/scripts/sync-sites.sh` — Extends site syncing and workspace resolution for the tenant.
 - `infra/local-dev/cloudfront/nginx.conf` — Adds host-based routing for `local.<domain>` and wildcard variants.
@@ -75,6 +78,7 @@ Use `git status` to review the diff before proceeding.
    ```
 
    All commands must succeed without modifying additional files.
+
 3. Bootstrap the tenant preview and confirm it serves the shared `<AppBasic />` shell:
 
    ```bash
@@ -82,6 +86,7 @@ Use `git status` to review the diff before proceeding.
    ```
 
    Load `https://local.<domain>:4280/` in a browser (trust the mkcert certificate when prompted). The HTML should render `<title><DisplayName></title>`.
+
 4. Inspect `websites/<domain>/<TENANT>_VITE_ENV-secrets` and share it with the secrets-management team so GitHub Actions can provision the keys listed in `-EnvSecretKeys`.
 5. Confirm `infra/ps1/cf-distributions.json` and the local NGINX configs contain the expected hostnames so CloudFront/S3 simulators resolve the tenant.
 
