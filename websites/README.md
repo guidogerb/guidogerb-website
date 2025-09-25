@@ -29,3 +29,7 @@ cover each of the following touch points so the repository stays consistent:
 
 Documenting these dependencies here ensures the `AddCF-Tenant` automation has a
 clear checklist when it starts generating new tenants.
+
+tasks.md contains the current testing backlog for these applications.
+
+It also is a location to track needed refactors to share test utilities and cross cutting concerns across packages.
