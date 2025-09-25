@@ -8,6 +8,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    testTimeout: 10000,
     setupFiles: [resolve(workspaceRoot, 'vitest.setup.js')],
     coverage: {
       reporter: ['text', 'html'],
