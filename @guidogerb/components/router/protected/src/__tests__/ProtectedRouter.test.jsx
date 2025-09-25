@@ -1,10 +1,58 @@
 import { render, screen } from '@testing-library/react'
 import { createMemoryRouter } from 'react-router-dom'
-import { vi } from 'vitest'
+import { afterAll, beforeAll, vi } from 'vitest'
 import { ProtectedRouter } from '../ProtectedRouter.jsx'
 
 const guardSpy = vi.fn()
 const authState = { isAuthenticated: true, error: null }
+
+const originalRequest = globalThis.Request
+
+beforeAll(() => {
+  if (typeof originalRequest !== 'function') {
+    return
+  }
+
+  if (typeof AbortController === 'function') {
+    try {
+      const controller = new AbortController()
+      new originalRequest('http://localhost/', { signal: controller.signal })
+      return
+    } catch (error) {
+      // Native Request is incompatible with the AbortSignal generated above.
+    }
+  }
+
+  class RequestShim {
+    constructor(resource, init = {}) {
+      this.url = typeof resource === 'string' ? resource : resource?.url ?? ''
+      this.method = init.method ?? 'GET'
+      this.signal = init.signal ?? null
+
+      if (init.headers) {
+        this.headers = init.headers
+      } else if (typeof Headers === 'function') {
+        this.headers = new Headers()
+      } else {
+        this.headers = new Map()
+      }
+    }
+
+    clone() {
+      return new RequestShim(this.url, {
+        method: this.method,
+        signal: this.signal,
+        headers: this.headers,
+      })
+    }
+  }
+
+  globalThis.Request = RequestShim
+})
+
+afterAll(() => {
+  globalThis.Request = originalRequest
+})
 
 vi.mock('@guidogerb/components-pages-protected', () => ({
   __esModule: true,
