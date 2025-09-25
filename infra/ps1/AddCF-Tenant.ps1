@@ -521,8 +521,10 @@ function Update-SyncSitesScript {
     }
 
     $siteEntries = @()
+    $quote = [char]34
+    $pattern = "$quote([^$quote]+)$quote"
     for ($i = $sitesStart + 1; $i -lt $sitesEnd; $i++) {
-        if ($lines[$i] -match '"([^"]+)"') {
+        if ($lines[$i] -match $pattern) {
             $siteEntries += $matches[1]
         }
     }
