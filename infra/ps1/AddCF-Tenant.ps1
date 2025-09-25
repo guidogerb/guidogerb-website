@@ -509,7 +509,7 @@ function Update-SyncSitesScript {
         }
     }
     if ($sitesStart -lt 0) {
-        throw "Unable to locate SITES array in sync-sites.sh."
+        throw [System.InvalidOperationException]::new('Unable to locate SITES array in sync-sites.sh.')
     }
 
     $sitesEnd = $sitesStart + 1
@@ -517,7 +517,7 @@ function Update-SyncSitesScript {
         $sitesEnd++
     }
     if ($sitesEnd -ge $lines.Count) {
-        throw "Malformed SITES array in sync-sites.sh."
+        throw [System.InvalidOperationException]::new('Malformed SITES array in sync-sites.sh.')
     }
 
     $siteEntries = @()
@@ -533,7 +533,7 @@ function Update-SyncSitesScript {
 
     $siteBlock = @('SITES=(')
     foreach ($site in $siteEntries) {
-        $siteBlock += "  \"$site\""
+        $siteBlock += "  `"$site`""
     }
     $siteBlock += ')'
 
@@ -545,7 +545,7 @@ function Update-SyncSitesScript {
         }
     }
     if ($caseStart -lt 0) {
-        throw "Unable to locate workspace_name_for_site case statement."
+        throw [System.InvalidOperationException]::new('Unable to locate workspace_name_for_site case statement.')
     }
 
     $caseEnd = $caseStart + 1
@@ -553,7 +553,7 @@ function Update-SyncSitesScript {
         $caseEnd++
     }
     if ($caseEnd -ge $lines.Count) {
-        throw "Malformed case block in sync-sites.sh."
+        throw [System.InvalidOperationException]::new('Malformed case block in sync-sites.sh.')
     }
 
     $mappings = @{}
@@ -567,7 +567,7 @@ function Update-SyncSitesScript {
     $sortedMappings = $mappings.GetEnumerator() | Sort-Object -Property Key
     $caseLines = @('  case "$1" in')
     foreach ($mapping in $sortedMappings) {
-        $caseLines += "    \"$($mapping.Key)\") echo \"$($mapping.Value)\" ;;"
+        $caseLines += "    `"$($mapping.Key)`") echo `"$($mapping.Value)`" ;;"
     }
     $caseLines += '    *) return 1 ;;'
 
