@@ -500,8 +500,10 @@ function Update-SyncSitesScript {
     $lines = Get-Content -Path $scriptPath
 
     $sitesStart = -1
+    $sitesPattern = '^\s*(?:declare\s+-a\s+|readonly\s+|local\s+-r\s+|local\s+)?SITES\s*=\s*\('
+
     for ($i = 0; $i -lt $lines.Count; $i++) {
-        if ($lines[$i] -match '^SITES=\(') {
+        if ($lines[$i] -match $sitesPattern) {
             $sitesStart = $i
             break
         }
