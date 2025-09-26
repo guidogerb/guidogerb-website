@@ -38,5 +38,26 @@ pnpm --filter websites/this-is-my-story.org build
 pnpm --filter websites/this-is-my-story.org preview
 ```
 
+## Automation touch points
+
+Automation and provisioning scripts still rely on hard-coded references to this
+tenant. The tracked inventory lives in
+[`automation-touchpoints.json`](./automation-touchpoints.json) and includes:
+
+- **Root scripts** — `package.json` exposes `build:site:this-is-my-story` and
+  `dev:site:this-is-my-story` commands so CI can target this workspace.
+- **Site configuration** — `vite.config.js`, `generate-sitemap.mjs`, and the
+  published `public/sitemap.xml` embed the production domain and local dev
+  hostnames.
+- **Local development** — the CloudFront/S3 simulators (`infra/local-dev/*`)
+  and sync scripts restrict allowed hosts to `local.this-is-my-story.org`.
+- **Secrets and runbooks** — `docs/CICD.md` and the seeded
+  `THISISMYSTORY_VITE_ENV-secrets` file document the required environment
+  variables for deployments.
+- **Infrastructure metadata** — CloudFront exports and backup params under
+  `infra/ps1` and `infra/cfn` enumerate the tenant domain and buckets.
+- **Provisioning manifest** — `infra/ps1/tenant-manifest.json` records the
+  workspace slug consumed by the tenant generator.
+
 See [`tasks.md`](./tasks.md) for roadmap items such as richer public content and branded error
 routes.

@@ -1,0 +1,61 @@
+{
+  "domain": "this-is-my-story.org",
+  "workspaceSlug": "this-is-my-story",
+  "touchPoints": [
+    {
+      "category": "root-scripts",
+      "check": "domain",
+      "paths": [
+        "package.json"
+      ],
+      "notes": "Root scripts expose this-is-my-story.org-specific build and dev commands."
+    },
+    {
+      "category": "site-config",
+      "check": "domain",
+      "paths": [
+        "websites/this-is-my-story.org/vite.config.js",
+        "websites/this-is-my-story.org/generate-sitemap.mjs",
+        "websites/this-is-my-story.org/public/sitemap.xml"
+      ],
+      "notes": "Bundler and sitemap tooling hard-code the production and local domains."
+    },
+    {
+      "category": "local-development",
+      "check": "domain",
+      "paths": [
+        "infra/local-dev/cloudfront/nginx.conf",
+        "infra/local-dev/s3/nginx.conf",
+        "infra/local-dev/scripts/sync-sites.sh",
+        "infra/local-dev/README.md"
+      ],
+      "notes": "Local edge simulators and sync scripts enumerate the tenant hostnames."
+    },
+    {
+      "category": "secrets",
+      "check": "domain",
+      "paths": [
+        "docs/CICD.md",
+        "websites/this-is-my-story.org/THISISMYSTORY_VITE_ENV-secrets"
+      ],
+      "notes": "Deployment runbooks and seed secret files encode the production domain."
+    },
+    {
+      "category": "infrastructure",
+      "check": "domain",
+      "paths": [
+        "infra/ps1/cf-distributions.json",
+        "infra/cfn/backup/params/edge-this-is-my-story.org.json"
+      ],
+      "notes": "CloudFront distribution exports and backup params target this domain."
+    },
+    {
+      "category": "tenant-manifest",
+      "check": "slug",
+      "paths": [
+        "infra/ps1/tenant-manifest.json"
+      ],
+      "notes": "Tenant provisioning manifest records the workspace slug for scaffolding."
+    }
+  ]
+}
