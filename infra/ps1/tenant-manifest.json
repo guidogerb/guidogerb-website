@@ -113,7 +113,20 @@
     "scriptSlug": "stream4cloud",
     "secretFileName": "STREAM4CLOUD_COM_VITE_ENV-secrets",
     "secretName": "STREAM4CLOUD_COM_VITE_ENV",
-    "envSecretKeys": [],
+    "envSecretKeys": [
+      "VITE_COGNITO_AUTHORITY",
+      "VITE_COGNITO_CLIENT_ID",
+      "VITE_REDIRECT_URI",
+      "VITE_RESPONSE_TYPE",
+      "VITE_COGNITO_DOMAIN",
+      "VITE_COGNITO_METADATA_URL",
+      "VITE_COGNITO_SCOPE",
+      "VITE_LOGOUT_URI",
+      "VITE_COGNITO_POST_LOGOUT_REDIRECT_URI",
+      "VITE_SITE_URL",
+      "VITE_SITE_PORT",
+      "VITE_BASE_PATH"
+    ],
     "supportEmail": "support@stream4cloud.com"
   },
   {
