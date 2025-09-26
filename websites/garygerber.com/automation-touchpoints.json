@@ -1,0 +1,44 @@
+{
+  "domain": "garygerber.com",
+  "workspaceSlug": "garygerber",
+  "touchPoints": [
+    {
+      "category": "root-scripts",
+      "check": "domain",
+      "paths": [
+        "package.json"
+      ],
+      "notes": "Root scripts reference the tenant workspace for build/dev commands."
+    },
+    {
+      "category": "site-config",
+      "check": "domain",
+      "paths": [
+        "websites/garygerber.com/vite.config.js",
+        "websites/garygerber.com/generate-sitemap.mjs",
+        "websites/garygerber.com/public/sitemap.xml"
+      ],
+      "notes": "Tenant bundler, sitemap tooling, and generated assets embed the production domain."
+    },
+    {
+      "category": "local-development",
+      "check": "domain",
+      "paths": [
+        "infra/local-dev/cloudfront/nginx.conf",
+        "infra/local-dev/s3/nginx.conf",
+        "infra/local-dev/scripts/sync-sites.sh",
+        "infra/local-dev/README.md"
+      ],
+      "notes": "Local CloudFront/S3 simulators and sync scripts hard-code the tenant hostnames."
+    },
+    {
+      "category": "secrets",
+      "check": "domain",
+      "paths": [
+        "docs/CICD.md",
+        "websites/garygerber.com/GARYGERBER_COM_VITE_ENV-secrets"
+      ],
+      "notes": "Deployment runbooks and seed secret files encode the tenant domain."
+    }
+  ]
+}

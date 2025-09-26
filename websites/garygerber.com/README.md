@@ -46,5 +46,22 @@ pnpm --filter websites/garygerber.com build
 pnpm --filter websites/garygerber.com preview
 ```
 
+## Automation touch points
+
+Automation and provisioning scripts still rely on hard-coded references to this
+tenant. The tracked inventory lives in
+[`automation-touchpoints.json`](./automation-touchpoints.json) and includes:
+
+- **Root scripts** — `package.json` exposes `build:site:garygerber` and
+  `dev:site:garygerber` commands so CI can target this workspace directly.
+- **Site configuration** — `vite.config.js`, `generate-sitemap.mjs`, and the
+  published `public/sitemap.xml` embed the production domain and local dev
+  hostnames.
+- **Local development** — the CloudFront/S3 simulators (`infra/local-dev/*`) and
+  sync scripts restrict allowed hosts to `local.garygerber.com`.
+- **Secrets and runbooks** — `docs/CICD.md` and the seeded
+  `GARYGERBER_COM_VITE_ENV-secrets` file document the required environment
+  variables for deployments.
+
 Upcoming work—including rehearsal portal expansion and localized error routes—is tracked in
 [`tasks.md`](./tasks.md).
