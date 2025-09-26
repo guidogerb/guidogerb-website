@@ -18,9 +18,9 @@ const DEFAULT_LOGIN_CALLBACK_PATH = '/auth/callback'
 const DEFAULT_LOGOUT_PATH = '/auth/logout'
 
 const DEFAULT_NAVIGATION_ITEMS = Object.freeze([
-  { id: 'home', label: 'Welcome', href: '/' },
+  { id: 'home', label: 'Home', href: '/' },
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-  { id: 'support', label: 'Support', href: 'mailto:hello@guidogerb.com', external: true },
+  { id: 'support', label: 'Support', href: 'mailto:support@guidogerb.com', external: true },
 ])
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -210,7 +210,8 @@ export const APP_BASIC_DEFAULTS = Object.freeze({
     authority: DEFAULT_AUTH_AUTHORITY,
     client_id: DEFAULT_AUTH_CLIENT_ID,
     loginCallbackPath: DEFAULT_LOGIN_CALLBACK_PATH,
-    scope: 'openid email phone profile',
+    response_type: 'code',
+    scope: 'openid profile email',
   }),
   navigation: Object.freeze({
     items: DEFAULT_NAVIGATION_ITEMS,
@@ -218,7 +219,7 @@ export const APP_BASIC_DEFAULTS = Object.freeze({
   }),
   headerSettings: DEFAULT_HEADER_SETTINGS,
   footer: DEFAULT_FOOTER_PROPS,
-  serviceWorker: Object.freeze({ enabled: true, url: '/sw.js' }),
+  serviceWorker: Object.freeze({ enabled: false, url: '/sw.js' }),
   layout: Object.freeze({
     rootClassName: 'gg-app gg-app--basic',
     mainClassName: 'gg-app-basic__main',
@@ -547,10 +548,14 @@ const normalizeAuthOptions = (authConfig) => {
   delete merged.redirectUri
 
   merged.response_type =
-    merged.response_type ?? merged.responseType ?? config.response_type ?? config.responseType
+    merged.response_type ??
+    merged.responseType ??
+    config.response_type ??
+    config.responseType ??
+    APP_BASIC_DEFAULTS.auth.response_type
   delete merged.responseType
 
-  merged.scope = merged.scope ?? config.scope ?? 'openid email phone profile'
+  merged.scope = merged.scope ?? config.scope ?? APP_BASIC_DEFAULTS.auth.scope
 
   merged.post_logout_redirect_uri =
     merged.post_logout_redirect_uri ??
@@ -656,7 +661,8 @@ export const createAppBasicPlan = ({
 
   const swConfig = isObject(serviceWorker) ? serviceWorker : {}
   const { enabled: swEnabledRaw, url: swUrlRaw, ...swOptions } = swConfig
-  const swEnabled = swEnabledRaw !== false
+  const swEnabled =
+    swEnabledRaw === undefined ? APP_BASIC_DEFAULTS.serviceWorker.enabled : swEnabledRaw !== false
   const swUrl =
     typeof swUrlRaw === 'string' && swUrlRaw.length > 0
       ? swUrlRaw
