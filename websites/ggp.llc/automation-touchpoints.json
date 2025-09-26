@@ -1,0 +1,76 @@
+{
+  "domain": "ggp.llc",
+  "workspaceSlug": "ggp-llc",
+  "touchPoints": [
+    {
+      "category": "root-scripts",
+      "check": "domain",
+      "paths": [
+        "package.json"
+      ],
+      "notes": "Root scripts expose ggp.llc-specific workspace filters for CI and local builds."
+    },
+    {
+      "category": "site-config",
+      "check": "domain",
+      "paths": [
+        "websites/ggp.llc/generate-sitemap.mjs",
+        "websites/ggp.llc/public/sitemap.xml"
+      ],
+      "notes": "Sitemap generation and published XML embed the production domain and callback URLs."
+    },
+    {
+      "category": "preview-hosts",
+      "check": "match",
+      "match": "llc.guidogerbpublishing.com",
+      "paths": [
+        "websites/ggp.llc/vite.config.js"
+      ],
+      "notes": "Vite preview restricts HTTPS hosts to the guidogerbpublishing.com alias used for staging."
+    },
+    {
+      "category": "secrets",
+      "check": "match",
+      "match": "llm.guidogerbpublishing.com",
+      "paths": [
+        "websites/ggp.llc/GGP-LLC_VITE_ENV-secrets"
+      ],
+      "notes": "Seed secret file encodes the hosted UI and logout domains for automation to template."
+    },
+    {
+      "category": "deployment-runbooks",
+      "check": "domain",
+      "paths": [
+        "docs/CICD.md"
+      ],
+      "notes": "CI/CD documentation maps the tenant domain to its environment secret name."
+    },
+    {
+      "category": "local-development",
+      "check": "domain",
+      "paths": [
+        "infra/local-dev/cloudfront/nginx.conf",
+        "infra/local-dev/s3/nginx.conf",
+        "infra/local-dev/scripts/sync-sites.sh",
+        "infra/local-dev/README.md"
+      ],
+      "notes": "Local edge simulators and sync scripts enumerate the tenant hostnames."
+    },
+    {
+      "category": "infrastructure",
+      "check": "domain",
+      "paths": [
+        "infra/ps1/cf-distributions.json"
+      ],
+      "notes": "CloudFront distribution mappings associate the tenant domain with its distribution ID."
+    },
+    {
+      "category": "tenant-manifest",
+      "check": "slug",
+      "paths": [
+        "infra/ps1/tenant-manifest.json"
+      ],
+      "notes": "Tenant provisioning manifest records the workspace slug consumed by automation scripts."
+    }
+  ]
+}

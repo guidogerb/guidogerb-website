@@ -5,4 +5,4 @@
 | Replace SPEC excerpt with site README   | 2025-09-19  | 2025-09-19      | 2025-09-19    | complete | Rewrote documentation to describe the regulatory platform microsite instead of embedding the full spec.                   |
 | Author public overview content          | 2025-09-19  | 2025-09-24      | 2025-09-24    | complete | Drafted a regulator-focused marketing narrative with modernization pillars and clear calls to action.                     |
 | Add router fallback + maintenance pages | 2025-09-19  | 2025-09-25      | 2025-09-25    | complete | Provide 404/503 experiences aligned with the compliance-focused brand.                                                    |
-| Enumerate automation configuration      | 2025-09-30  | 2025-09-30      | -             | planned  | Document ggp.llc-specific build flags (LLC domain handling, preview hostnames, secrets) for the tenant generator backlog. |
+| Enumerate automation configuration      | 2025-09-30  | 2025-10-07      | 2025-10-07    | complete | Documented ggp.llc domain + alias hosts in `automation-touchpoints.json` and added tests to guard the inventory. |
