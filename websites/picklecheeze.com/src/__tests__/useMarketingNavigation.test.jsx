@@ -2,28 +2,56 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from '@testing-library/react'
 import React from 'react'
 
-let currentPath = '/'
-const navigateSpy = vi.fn()
+const { routerMocks } = vi.hoisted(() => {
+  let currentPath = '/'
+  const navigateSpy = vi.fn()
 
-const mockRouterModule = {
-  useLocation: () => ({ pathname: currentPath }),
-  useNavigate: () => navigateSpy,
-}
-vi.mock('react-router-dom', () => mockRouterModule)
-// Explicit reference to ensure ESLint treats properties as used
-void mockRouterModule.useLocation
+  return {
+    routerMocks: {
+      module: {
+        useLocation: () => ({ pathname: currentPath }),
+        useNavigate: () => navigateSpy,
+      },
+      navigateSpy,
+      setCurrentPath(path) {
+        currentPath = path
+      },
+    },
+  }
+})
+
+vi.mock('react-router-dom', () => routerMocks.module)
+
+const navigateSpy = routerMocks.navigateSpy
+const setCurrentPath = (path) => routerMocks.setCurrentPath(path)
 
 import { useMarketingNavigation } from '../useMarketingNavigation.js'
 
 const scrollSpy = vi.fn()
+const originalLocation = window.location
 
 function setupDom() {
-  const original = globalThis.document
-  globalThis.document = {
-    getElementById: vi.fn(() => ({ scrollIntoView: scrollSpy })),
+  const doc = globalThis.document
+  if (!doc) {
+    return () => {}
   }
+
+  const originalDescriptor = Object.getOwnPropertyDescriptor(doc, 'getElementById')
+  const stub = vi.fn(() => ({ scrollIntoView: scrollSpy }))
+
+  Object.defineProperty(doc, 'getElementById', {
+    configurable: true,
+    enumerable: true,
+    value: stub,
+    writable: true,
+  })
+
   return () => {
-    globalThis.document = original
+    if (originalDescriptor) {
+      Object.defineProperty(doc, 'getElementById', originalDescriptor)
+    } else {
+      delete doc.getElementById
+    }
   }
 }
 
@@ -43,10 +71,23 @@ describe('useMarketingNavigation', () => {
     restoreDoc = setupDom()
     scrollSpy.mockClear()
     navigateSpy.mockClear()
-    currentPath = '/'
+    setCurrentPath('/')
     vi.useFakeTimers()
     openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
-    assignSpyGlobal = vi.spyOn(window.location, 'assign').mockImplementation(() => {})
+
+    const locationMock = {
+      origin: originalLocation.origin,
+      href: originalLocation.href,
+      assign: vi.fn(),
+    }
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      enumerable: true,
+      value: locationMock,
+    })
+
+    assignSpyGlobal = locationMock.assign
   })
 
   afterEach(() => {
@@ -55,7 +96,12 @@ describe('useMarketingNavigation', () => {
       originalHrefDescriptor = undefined
     }
     openSpy?.mockRestore()
-    assignSpyGlobal?.mockRestore()
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      enumerable: true,
+      value: originalLocation,
+    })
+    assignSpyGlobal = undefined
     restoreDoc?.()
     vi.runAllTimers()
     vi.useRealTimers()
@@ -65,7 +111,7 @@ describe('useMarketingNavigation', () => {
     const { rerender } = render(<TestComponent />)
     expect(scrollSpy).not.toHaveBeenCalled()
 
-    currentPath = '/events'
+    setCurrentPath('/events')
     rerender(<TestComponent />)
 
     expect(scrollSpy).toHaveBeenCalledTimes(1)
@@ -86,7 +132,7 @@ describe('useMarketingNavigation', () => {
   })
 
   it('scrolls current section without navigating if already on target path', () => {
-    currentPath = '/market'
+    setCurrentPath('/market')
     render(<TestComponent />)
     scrollSpy.mockClear()
     navigateSpy.mockClear()
@@ -180,8 +226,8 @@ describe('useMarketingNavigation', () => {
   it('falls back to location.assign on invalid URL strings', () => {
     render(<TestComponent />)
     const { handleNavigate } = lastNav
-    handleNavigate({ href: '::::not-a-valid-url' })
-    expect(assignSpyGlobal).toHaveBeenCalledWith('::::not-a-valid-url')
+    handleNavigate({ href: 'http://exa mple.com' })
+    expect(assignSpyGlobal).toHaveBeenCalledWith('http://exa mple.com')
   })
 
   it('preserves search and hash when navigating to a section path', () => {
@@ -193,8 +239,10 @@ describe('useMarketingNavigation', () => {
   })
 
   it('navigateHome navigates to root when not already on root', () => {
-    currentPath = '/market'
+    setCurrentPath('/market')
     render(<TestComponent />)
+    scrollSpy.mockClear()
+    navigateSpy.mockClear()
     const { navigateHome } = lastNav
     const prevent = vi.fn()
     navigateHome({ preventDefault: prevent })
@@ -204,7 +252,7 @@ describe('useMarketingNavigation', () => {
   })
 
   it('navigateHome scrolls to top when already on root', () => {
-    currentPath = '/'
+    setCurrentPath('/')
     render(<TestComponent />)
     scrollSpy.mockClear()
     navigateSpy.mockClear()
