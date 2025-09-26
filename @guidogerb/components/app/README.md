@@ -48,6 +48,37 @@ defaults representative ensures fresh tenants boot with a working shell. Overrid
 header, footer, authentication, API client, storage, service worker, theming, and page collections
 through the component props.
 
+### Automation helpers
+
+Automation workflows can inspect the shared defaults and bootstrap tenant plans through the new
+helpers exported from this package:
+
+```js
+import {
+  APP_BASIC_AUTOMATION_DEFAULTS,
+  createAppBasicAutomationScaffold,
+} from '@guidogerb/components-app'
+
+const scaffold = createAppBasicAutomationScaffold({
+  tenant: {
+    domain: 'stories.example.com',
+    displayName: 'Stories Example',
+    supportEmail: 'help@example.com',
+  },
+  env: {
+    VITE_API_BASE_URL: 'https://api.stories.example/',
+  },
+})
+
+console.log(scaffold.environment.VITE_REDIRECT_URI)
+// -> https://stories.example.com/auth/callback
+```
+
+- **`APP_BASIC_AUTOMATION_DEFAULTS`** documents the provider order, layout regions, CI commands, and
+  environment variables automation must seed when generating a tenant.
+- **`createAppBasicAutomationScaffold(options)`** merges tenant metadata, environment overrides, and
+  optional plan customisations before returning a ready-to-use `<AppBasic />` plan.
+
 #### Blueprint & planning helpers
 
 `@guidogerb/components-app` now exports metadata describing the shared shell contract so new
