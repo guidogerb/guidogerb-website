@@ -27,7 +27,7 @@ const buildItems = () => [
   },
 ]
 
-describe('App', () => {
+describe('NavigationMenu', () => {
   it('renders a navigation landmark with list semantics', () => {
     render(<NavigationMenu items={buildItems()} label="Tenant navigation" />)
 
@@ -97,82 +97,224 @@ describe('App', () => {
     expect(screen.getAllByRole('button')).toHaveLength(2)
   })
 
-  it('manages roving tabindex for horizontal menus', async () => {
-    const user = userEvent.setup()
+  describe('keyboard interactions', () => {
+    it('manages roving tabindex for horizontal menus', async () => {
+      const user = userEvent.setup()
 
-    render(<NavigationMenu items={buildItems()} label="Main navigation" />)
+      render(<NavigationMenu items={buildItems()} label="Main navigation" />)
 
-    const home = screen.getByRole('link', { name: 'Home' })
-    const catalog = screen.getByRole('link', { name: /Catalog/ })
+      const home = screen.getByRole('link', { name: 'Home' })
+      const catalog = screen.getByRole('link', { name: /Catalog/ })
 
-    await user.tab()
+      await user.tab()
 
-    expect(home).toHaveFocus()
-    expect(home).toHaveAttribute('tabindex', '0')
-    expect(catalog).toHaveAttribute('tabindex', '-1')
+      expect(home).toHaveFocus()
+      expect(home).toHaveAttribute('tabindex', '0')
+      expect(catalog).toHaveAttribute('tabindex', '-1')
 
-    await user.keyboard('{ArrowRight}')
+      await user.keyboard('{ArrowRight}')
 
-    expect(catalog).toHaveFocus()
-    expect(catalog).toHaveAttribute('tabindex', '0')
-    expect(home).toHaveAttribute('tabindex', '-1')
+      expect(catalog).toHaveFocus()
+      expect(catalog).toHaveAttribute('tabindex', '0')
+      expect(home).toHaveAttribute('tabindex', '-1')
 
-    await user.keyboard('{ArrowLeft}')
+      await user.keyboard('{ArrowLeft}')
 
-    expect(home).toHaveFocus()
+      expect(home).toHaveFocus()
+    })
+
+    it('wraps focus across horizontal menu items', async () => {
+      const user = userEvent.setup()
+
+      render(<NavigationMenu items={buildItems()} label="Main navigation" />)
+
+      const home = screen.getByRole('link', { name: 'Home' })
+      const blog = screen.getByRole('link', { name: 'Blog' })
+
+      await user.tab()
+      expect(home).toHaveFocus()
+
+      await user.keyboard('{ArrowLeft}')
+      expect(blog).toHaveFocus()
+      expect(blog).toHaveAttribute('tabindex', '0')
+      expect(home).toHaveAttribute('tabindex', '-1')
+
+      await user.keyboard('{ArrowRight}')
+      expect(home).toHaveFocus()
+      expect(home).toHaveAttribute('tabindex', '0')
+      expect(blog).toHaveAttribute('tabindex', '-1')
+    })
+
+    it('supports home and end keys on root navigation lists', async () => {
+      const user = userEvent.setup()
+
+      render(<NavigationMenu items={buildItems()} label="Main navigation" />)
+
+      const home = screen.getByRole('link', { name: 'Home' })
+      const catalog = screen.getByRole('link', { name: /Catalog/ })
+      const blog = screen.getByRole('link', { name: 'Blog' })
+
+      await user.tab()
+      await user.keyboard('{ArrowRight}')
+      expect(catalog).toHaveFocus()
+
+      await user.keyboard('{Home}')
+      expect(home).toHaveFocus()
+      expect(home).toHaveAttribute('tabindex', '0')
+      expect(catalog).toHaveAttribute('tabindex', '-1')
+
+      await user.keyboard('{End}')
+      expect(blog).toHaveFocus()
+      expect(blog).toHaveAttribute('tabindex', '0')
+      expect(home).toHaveAttribute('tabindex', '-1')
+    })
+
+    it('allows entering and leaving nested menus with arrow keys', async () => {
+      const user = userEvent.setup()
+
+      render(<NavigationMenu items={buildItems()} label="Main navigation" />)
+
+      const catalog = screen.getByRole('link', { name: /Catalog/ })
+      const music = screen.getByRole('link', { name: 'Music' })
+      const books = screen.getByRole('link', { name: 'Books' })
+
+      await user.tab()
+      await user.keyboard('{ArrowRight}')
+      expect(catalog).toHaveFocus()
+
+      await user.keyboard('{ArrowDown}')
+      expect(music).toHaveFocus()
+      expect(music).toHaveAttribute('tabindex', '0')
+
+      await user.keyboard('{ArrowDown}')
+      expect(books).toHaveFocus()
+
+      await user.keyboard('{ArrowLeft}')
+      expect(catalog).toHaveFocus()
+
+      await user.keyboard('{ArrowDown}')
+      expect(music).toHaveFocus()
+
+      await user.keyboard('{Escape}')
+      expect(catalog).toHaveFocus()
+    })
+
+    it('supports vertical navigation focus management', async () => {
+      const user = userEvent.setup()
+
+      render(
+        <NavigationMenu items={buildItems()} orientation="vertical" label="Sidebar navigation" />,
+      )
+
+      const home = screen.getByRole('link', { name: 'Home' })
+      const catalog = screen.getByRole('link', { name: /Catalog/ })
+      const blog = screen.getByRole('link', { name: 'Blog' })
+
+      await user.tab()
+      expect(home).toHaveFocus()
+
+      await user.keyboard('{ArrowDown}')
+      expect(catalog).toHaveFocus()
+
+      await user.keyboard('{End}')
+      expect(blog).toHaveFocus()
+
+      await user.keyboard('{ArrowUp}')
+      expect(catalog).toHaveFocus()
+    })
+
+    it('enters and exits vertical submenus with arrow keys', async () => {
+      const user = userEvent.setup()
+
+      render(
+        <NavigationMenu items={buildItems()} orientation="vertical" label="Sidebar navigation" />,
+      )
+
+      const catalog = screen.getByRole('link', { name: /Catalog/ })
+      const music = screen.getByRole('link', { name: 'Music' })
+
+      await user.tab()
+      await user.keyboard('{ArrowDown}')
+      expect(catalog).toHaveFocus()
+
+      await user.keyboard('{ArrowRight}')
+      expect(music).toHaveFocus()
+      expect(music).toHaveAttribute('tabindex', '0')
+      expect(catalog).toHaveAttribute('tabindex', '0')
+
+      await user.keyboard('{ArrowLeft}')
+      expect(catalog).toHaveFocus()
+      expect(catalog).toHaveAttribute('tabindex', '0')
+      expect(music).toHaveAttribute('tabindex', '0')
+    })
   })
 
-  it('allows entering and leaving nested menus with arrow keys', async () => {
-    const user = userEvent.setup()
+  describe('focus management', () => {
+    it('restores focus to the parent trigger when exiting a submenu', async () => {
+      const user = userEvent.setup()
 
-    render(<NavigationMenu items={buildItems()} label="Main navigation" />)
+      render(<NavigationMenu items={buildItems()} label="Main navigation" />)
 
-    const catalog = screen.getByRole('link', { name: /Catalog/ })
-    const music = screen.getByRole('link', { name: 'Music' })
-    const books = screen.getByRole('link', { name: 'Books' })
+      const catalog = screen.getByRole('link', { name: /Catalog/ })
+      const music = screen.getByRole('link', { name: 'Music' })
+      const books = screen.getByRole('link', { name: 'Books' })
 
-    await user.tab()
-    await user.keyboard('{ArrowRight}')
-    expect(catalog).toHaveFocus()
+      await user.tab()
+      await user.keyboard('{ArrowRight}')
+      await user.keyboard('{ArrowDown}')
+      await user.keyboard('{ArrowDown}')
 
-    await user.keyboard('{ArrowDown}')
-    expect(music).toHaveFocus()
-    expect(music).toHaveAttribute('tabindex', '0')
+      expect(books).toHaveFocus()
+      expect(books).toHaveAttribute('tabindex', '0')
+      expect(music).toHaveAttribute('tabindex', '-1')
 
-    await user.keyboard('{ArrowDown}')
-    expect(books).toHaveFocus()
+      await user.keyboard('{Escape}')
 
-    await user.keyboard('{ArrowLeft}')
-    expect(catalog).toHaveFocus()
+      expect(catalog).toHaveFocus()
+      expect(catalog).toHaveAttribute('tabindex', '0')
+      expect(books).toHaveAttribute('tabindex', '0')
+    })
 
-    await user.keyboard('{ArrowDown}')
-    expect(music).toHaveFocus()
+    it('keeps roving tabindex synced when moving between nested levels', async () => {
+      const user = userEvent.setup()
 
-    await user.keyboard('{Escape}')
-    expect(catalog).toHaveFocus()
-  })
+      render(<NavigationMenu items={buildItems()} label="Main navigation" />)
 
-  it('supports vertical navigation focus management', async () => {
-    const user = userEvent.setup()
+      const home = screen.getByRole('link', { name: 'Home' })
+      const catalog = screen.getByRole('link', { name: /Catalog/ })
+      const music = screen.getByRole('link', { name: 'Music' })
+      const books = screen.getByRole('link', { name: 'Books' })
 
-    render(
-      <NavigationMenu items={buildItems()} orientation="vertical" label="Sidebar navigation" />,
-    )
+      await user.tab()
+      await user.keyboard('{ArrowRight}')
+      await user.keyboard('{ArrowDown}')
 
-    const home = screen.getByRole('link', { name: 'Home' })
-    const catalog = screen.getByRole('link', { name: /Catalog/ })
-    const blog = screen.getByRole('link', { name: 'Blog' })
+      expect(music).toHaveFocus()
+      expect(music).toHaveAttribute('tabindex', '0')
+      expect(books).toHaveAttribute('tabindex', '-1')
 
-    await user.tab()
-    expect(home).toHaveFocus()
+      await user.keyboard('{ArrowDown}')
 
-    await user.keyboard('{ArrowDown}')
-    expect(catalog).toHaveFocus()
+      expect(books).toHaveFocus()
+      expect(books).toHaveAttribute('tabindex', '0')
+      expect(music).toHaveAttribute('tabindex', '-1')
 
-    await user.keyboard('{End}')
-    expect(blog).toHaveFocus()
+      await user.keyboard('{ArrowUp}')
 
-    await user.keyboard('{ArrowUp}')
-    expect(catalog).toHaveFocus()
+      expect(music).toHaveFocus()
+      expect(music).toHaveAttribute('tabindex', '0')
+      expect(books).toHaveAttribute('tabindex', '-1')
+
+      await user.keyboard('{ArrowLeft}')
+
+      expect(catalog).toHaveFocus()
+      expect(catalog).toHaveAttribute('tabindex', '0')
+
+      await user.keyboard('{ArrowLeft}')
+
+      expect(home).toHaveFocus()
+      expect(home).toHaveAttribute('tabindex', '0')
+      expect(catalog).toHaveAttribute('tabindex', '-1')
+    })
   })
 })
