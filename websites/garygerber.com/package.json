@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@guidogerb/components-api": "workspace:*",
+    "@guidogerb/components-app": "workspace:*",
     "@guidogerb/components-auth": "workspace:*",
     "@guidogerb/components-menu": "workspace:*",
     "@guidogerb/components-pages-protected": "workspace:*",
@@ -30,6 +31,7 @@
     "@guidogerb/css": "workspace:*",
     "@guidogerb/footer": "workspace:*",
     "@guidogerb/header": "workspace:*",
+    "react-router-dom": "^6.30.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-json-view": "^1.21.3"

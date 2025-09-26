@@ -413,6 +413,9 @@ importers:
       '@guidogerb/components-api':
         specifier: workspace:*
         version: link:../../@guidogerb/components/api-client
+      '@guidogerb/components-app':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/app
       '@guidogerb/components-auth':
         specifier: workspace:*
         version: link:../../@guidogerb/components/auth
@@ -455,6 +458,9 @@ importers:
       react-json-view:
         specifier: ^1.21.3
         version: 1.21.3(@types/react@19.1.13)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react-router-dom:
+        specifier: ^6.30.1
+        version: 6.30.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
     devDependencies:
       '@eslint/js':
         specifier: ^9.33.0
@@ -580,6 +586,9 @@ importers:
       '@guidogerb/components-api':
         specifier: workspace:*
         version: link:../../@guidogerb/components/api-client
+      '@guidogerb/components-app':
+        specifier: workspace:*
+        version: link:../../@guidogerb/components/app
       '@guidogerb/components-auth':
         specifier: workspace:*
         version: link:../../@guidogerb/components/auth

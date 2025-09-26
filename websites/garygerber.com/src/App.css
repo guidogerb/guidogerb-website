@@ -885,3 +885,35 @@
     padding: var(--space-4);
   }
 }
+
+.gg-garygerber-marketing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding-block: var(--space-10);
+}
+
+.gg-garygerber-section {
+  scroll-margin-top: var(--space-16);
+}
+
+.gg-garygerber-contact {
+  background: rgba(17, 19, 24, 0.75);
+  border-radius: var(--radius-2);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-1);
+}
+
+.gg-garygerber-contact__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-bottom: var(--space-2);
+}
+
+.gg-garygerber-footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
