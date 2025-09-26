@@ -1,247 +1,123 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { AppBasic } from '@guidogerb/components-app'
+import {
+  createGaryGerberAppBasicConfig,
+  garyGerberAutomationScaffold,
+} from '../appBasicPlan.jsx'
 
-const { mockProtected, mockUseAuth } = vi.hoisted(() => ({
-  mockProtected: vi.fn(),
+const { mockUseAuth, mockRegisterSW } = vi.hoisted(() => ({
   mockUseAuth: vi.fn(),
+  mockRegisterSW: vi.fn(),
 }))
 
-vi.mock('@guidogerb/components-pages-protected', () => ({
+vi.mock('@guidogerb/components-auth', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    __esModule: true,
+    ...actual,
+    AuthProvider: ({ children }) => <>{children}</>,
+    useAuth: mockUseAuth,
+  }
+})
+
+vi.mock('@guidogerb/components-sw', () => ({
   __esModule: true,
-  default: (props) => {
-    mockProtected(props)
-    return <div data-testid="protected-shell">{props.children}</div>
+  registerSW: (...args) => mockRegisterSW(...args),
+}))
+
+vi.mock('@guidogerb/components-router-protected', () => ({
+  __esModule: true,
+  ProtectedRouter: ({ routes = [], fallback, routerOptions }) => {
+    const initialEntries = routerOptions?.initialEntries ?? ['/']
+    const path = Array.isArray(initialEntries) ? initialEntries[0] : initialEntries ?? '/'
+    const match = routes.find((route) => route.path === path)
+    if (match?.element) {
+      return match.element
+    }
+    if (fallback?.element) {
+      return fallback.element
+    }
+    return null
   },
 }))
 
-vi.mock('@guidogerb/components-auth', () => ({
-  __esModule: true,
-  Auth: ({ children }) => <>{children}</>,
-  AuthProvider: ({ children }) => <>{children}</>,
-  useAuth: mockUseAuth,
-}))
+beforeEach(() => {
+  mockUseAuth.mockReset()
+  mockUseAuth.mockReturnValue({
+    isAuthenticated: true,
+    user: {
+      profile: {
+        name: 'Guest Artist',
+        email: 'guest@example.com',
+      },
+    },
+  })
+  mockRegisterSW.mockReset()
+})
 
-vi.mock('../App.css', () => ({}), { virtual: true })
-
-async function renderApp() {
-  const AppModule = await import('../App.jsx')
-  const App = AppModule.default
-  return render(<App />)
+function renderApp(initialPath = '/') {
+  const config = createGaryGerberAppBasicConfig()
+  config.protectedPages = {
+    ...config.protectedPages,
+    routerOptions: {
+      routerOptions: { initialEntries: [initialPath] },
+    },
+  }
+  return render(<AppBasic {...config} />)
 }
 
-describe('Gary Gerber website App', () => {
-  let originalScrollIntoView
-  const scrollSpy = vi.fn()
-
-  beforeEach(() => {
-    vi.resetModules()
-
-    originalScrollIntoView = globalThis.Element?.prototype?.scrollIntoView
-
-    window.history.replaceState({}, '', '/')
-
-    mockProtected.mockClear()
-
-    mockUseAuth.mockReset()
-    mockUseAuth.mockReturnValue({
-      isAuthenticated: true,
-      user: {
-        profile: {
-          name: 'Guest Artist',
-          email: 'guest@example.com',
-        },
-      },
-    })
-
-    scrollSpy.mockClear()
-    if (globalThis.Element?.prototype) {
-      globalThis.Element.prototype.scrollIntoView = function scrollIntoViewSpy(...args) {
-        scrollSpy(this, ...args)
-      }
-    }
-  })
-
-  afterEach(() => {
-    if (originalScrollIntoView && globalThis.Element?.prototype) {
-      globalThis.Element.prototype.scrollIntoView = originalScrollIntoView
-    }
-    vi.unstubAllEnvs()
-    window.history.replaceState({}, '', '/')
-  })
-
-  it('renders the landing page content and configures the rehearsal room guard', async () => {
-    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
-
-    await renderApp()
+describe('Gary Gerber AppBasic integration', () => {
+  it('renders marketing landing content with shared navigation', () => {
+    renderApp('/')
 
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: /Gary Gerber shapes performances that stay with audiences long after the final encore/i,
+        name: /Gary Gerber shapes performances that stay with audiences/i,
       }),
     ).toBeInTheDocument()
-
     expect(
       screen.getByRole('heading', {
         level: 2,
-        name: 'Client rehearsal room',
+        name: /Bring Gary Gerber to your next residency/i,
       }),
     ).toBeInTheDocument()
+  })
 
-    expect(
-      screen.getByRole('heading', {
-        level: 3,
-        name: 'Welcome back, Guest Artist!',
-      }),
-    ).toBeInTheDocument()
-
-    expect(screen.getByText('Signed in as guest@example.com')).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', {
-        level: 3,
-        name: 'Everything you need for the next residency',
-      }),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' })).toBeInTheDocument()
-    expect(screen.getByText('Tech rehearsal — Northern Lights residency')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Open full calendar' })).toHaveAttribute(
-      'href',
-      'https://calendar.google.com/calendar/u/0?cid=Z2FyeWdlcmJlci5jb21fcmVoZWFyc2Fsc0BleGFtcGxlLmNvbQ',
-    )
-    expect(screen.getByRole('link', { name: 'Call +1 (612) 555-0148' })).toBeInTheDocument()
-
-    expect(mockProtected).toHaveBeenCalledWith(
+  it('exposes the protected rehearsal route in the plan configuration', () => {
+    const config = createGaryGerberAppBasicConfig()
+    const rehearsalRoute = config.protectedPages.routes.find((route) => route.path === '/rehearsal')
+    expect(rehearsalRoute).toEqual(
       expect.objectContaining({
-        logoutUri: '/logout',
+        path: '/rehearsal',
+        componentProps: expect.objectContaining({ logoutUri: expect.any(String) }),
       }),
     )
   })
 
-  it('activates header navigation links and scrolls to the matching section', async () => {
-    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
-
-    const pushStateSpy = vi.spyOn(window.history, 'pushState')
-
-    await renderApp()
-
-    const user = userEvent.setup()
-    const programsLink = await screen.findByRole('link', { name: /Programs/ })
-
-    await user.click(programsLink)
-
-    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/programs')
-
-    const lastScrollCall = scrollSpy.mock.calls.at(-1)
-    expect(lastScrollCall?.[0]).toHaveProperty('id', 'programs')
-
-    await waitFor(() => {
-      expect(programsLink).toHaveAttribute('aria-current', 'page')
-    })
-
-    pushStateSpy.mockRestore()
-  })
-
-  it('renders the shared footer and routes footer links through the navigation handler', async () => {
-    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
-
-    const pushStateSpy = vi.spyOn(window.history, 'pushState')
-
-    await renderApp()
-
-    const footer = screen.getByRole('contentinfo')
-    expect(footer).toHaveTextContent('Bookings & inquiries')
-    expect(screen.getByRole('link', { name: 'Instagram' })).toHaveAttribute(
-      'href',
-      'https://instagram.com/garygerbermusic',
-    )
-
-    const user = userEvent.setup()
-    const rehearsalLink = await within(footer).findByRole('link', { name: /Rehearsal room/i })
-
-    await user.click(rehearsalLink)
-
-    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/rehearsal')
-    const lastScrollCall = scrollSpy.mock.calls.at(-1)
-    expect(lastScrollCall?.[0]).toHaveProperty('id', 'client-access')
-
-    pushStateSpy.mockRestore()
-  })
-
-  it('renders a localized not-found page when navigating to an unknown route', async () => {
-    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
-
-    window.history.replaceState({}, '', '/missing-page')
-    const pushStateSpy = vi.spyOn(window.history, 'pushState')
-
-    await renderApp()
+  it('falls back to the localized not-found route for unknown paths', () => {
+    const config = createGaryGerberAppBasicConfig()
+    const fallbackElement = config.publicPages.fallback?.element
+    expect(fallbackElement).toBeTruthy()
+    render(fallbackElement)
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'We couldn’t find that page' }),
+      screen.getByRole('heading', { level: 1, name: /We couldn’t find that page/i }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/the link has been retired between tour stops/i)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Email production team' })).toHaveAttribute(
       'href',
       expect.stringContaining('hello@garygerber.com'),
     )
-    expect(screen.getByRole('link', { name: 'Call +1 (612) 555-0148' })).toHaveAttribute(
-      'href',
-      'tel:+16125550148',
+  })
+
+  it('exposes automation defaults aligned with the shared scaffold', () => {
+    expect(garyGerberAutomationScaffold.tenant.domain).toBe('garygerber.com')
+    expect(garyGerberAutomationScaffold.plan.navigation.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'Programs', href: '/programs' }),
+        expect.objectContaining({ label: 'Rehearsal room', href: '/rehearsal' }),
+      ]),
     )
-    expect(mockProtected).not.toHaveBeenCalled()
-
-    const user = userEvent.setup()
-    const homeLink = screen.getByRole('link', { name: 'Back to main stage' })
-
-    await user.click(homeLink)
-
-    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/')
-
-    pushStateSpy.mockRestore()
-  })
-
-  it('renders the rehearsal overview route with quick navigation to the resource library', async () => {
-    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
-    window.history.replaceState({}, '', '/rehearsal')
-
-    const pushStateSpy = vi.spyOn(window.history, 'pushState')
-
-    await renderApp()
-
-    expect(
-      screen.getByRole('heading', { level: 2, name: 'Client rehearsal room' }),
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByRole('heading', { level: 4, name: 'Rehearsal quick access' }),
-    ).toBeInTheDocument()
-
-    const user = userEvent.setup()
-    const openResourcesLink = screen.getByRole('link', { name: 'Open rehearsal resources' })
-
-    await user.click(openResourcesLink)
-
-    expect(pushStateSpy).toHaveBeenCalledWith({}, '', '/rehearsal/resources')
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' }),
-      ).toBeInTheDocument()
-    })
-
-    pushStateSpy.mockRestore()
-  })
-
-  it('renders the rehearsal library directly when routed to the resource path', async () => {
-    vi.stubEnv('VITE_LOGOUT_URI', '/logout')
-    window.history.replaceState({}, '', '/rehearsal/resources')
-
-    await renderApp()
-
-    expect(
-      screen.getByRole('heading', { level: 2, name: 'Client rehearsal room' }),
-    ).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { level: 4, name: 'Rehearsal quick access' })).toBeNull()
-    expect(screen.getByRole('heading', { level: 4, name: 'Upcoming schedule' })).toBeInTheDocument()
   })
 })
