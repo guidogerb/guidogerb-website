@@ -1,0 +1,52 @@
+{
+  "domain": "picklecheeze.com",
+  "workspaceSlug": "picklecheeze",
+  "touchPoints": [
+    {
+      "category": "root-scripts",
+      "check": "domain",
+      "paths": [
+        "package.json"
+      ],
+      "notes": "Root scripts reference the picklecheeze.com workspace for targeted build and dev commands."
+    },
+    {
+      "category": "site-config",
+      "check": "domain",
+      "paths": [
+        "websites/picklecheeze.com/vite.config.js",
+        "websites/picklecheeze.com/generate-sitemap.mjs",
+        "websites/picklecheeze.com/public/sitemap.xml"
+      ],
+      "notes": "Vite configuration, sitemap generation, and published assets embed the tenant domain and hosts."
+    },
+    {
+      "category": "local-development",
+      "check": "domain",
+      "paths": [
+        "infra/local-dev/cloudfront/nginx.conf",
+        "infra/local-dev/s3/nginx.conf",
+        "infra/local-dev/scripts/sync-sites.sh",
+        "infra/local-dev/README.md"
+      ],
+      "notes": "Local CloudFront/S3 simulators and sync scripts list the picklecheeze.com hostnames."
+    },
+    {
+      "category": "secrets",
+      "check": "domain",
+      "paths": [
+        "docs/CICD.md",
+        "websites/picklecheeze.com/PICKLECHEEZE_VITE_ENV-secrets"
+      ],
+      "notes": "Deployment runbooks and seed secret files encode the production domain."
+    },
+    {
+      "category": "tenant-manifest",
+      "check": "slug",
+      "paths": [
+        "infra/ps1/tenant-manifest.json"
+      ],
+      "notes": "Tenant provisioning manifest stores the workspace slug consumed by scaffolding scripts."
+    }
+  ]
+}
