@@ -50,5 +50,24 @@ pnpm --filter websites/picklecheeze.com build   # Production bundle
 pnpm --filter websites/picklecheeze.com preview # Preview the build locally
 ```
 
-Refer to [`tasks.md`](./tasks.md) for upcoming work such as branded 404 routes and feature flagging
-partner resources.
+## Automation touch points
+
+Automation and provisioning scripts still depend on hard-coded references to this
+tenant. The tracked inventory lives in
+[`automation-touchpoints.json`](./automation-touchpoints.json) and includes:
+
+- **Root scripts** — `package.json` surfaces `build:site:picklecheeze` and
+  `dev:site:picklecheeze` commands so CI can target this workspace.
+- **Site configuration** — `vite.config.js`, `generate-sitemap.mjs`, and the
+  published `public/sitemap.xml` embed the picklecheeze.com domain and local
+  hosts.
+- **Local development** — the CloudFront/S3 simulators (`infra/local-dev/*`) and
+  sync scripts restrict allowed hosts to `local.picklecheeze.com`.
+- **Secrets and runbooks** — `docs/CICD.md` and the seeded
+  `PICKLECHEEZE_VITE_ENV-secrets` file document the required environment
+  variables.
+- **Tenant manifest** — `infra/ps1/tenant-manifest.json` records the
+  `picklecheeze` workspace slug consumed by scaffolding automation.
+
+Refer to [`tasks.md`](./tasks.md) for upcoming work such as branded 404 routes and
+feature flagging partner resources.
