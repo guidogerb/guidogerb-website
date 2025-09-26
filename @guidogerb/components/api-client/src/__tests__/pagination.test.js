@@ -167,8 +167,11 @@ describe('collectPaginatedResults', () => {
     await collectPaginatedResults({ fetchPage, onPage, initialParams: { limit: 10 } })
 
     expect(onPage).toHaveBeenCalledTimes(2)
-    const [[, context]] = onPage.mock.calls
-    expect(Object.isFrozen(context.params)).toBe(true)
-    expect(context.params).toEqual({ limit: 10 })
+    const [[, firstContext], [, secondContext]] = onPage.mock.calls
+    expect(Object.isFrozen(firstContext.params)).toBe(true)
+    expect(firstContext.params).toEqual({ limit: 10 })
+    expect(firstContext.cursor).toBeNull()
+    expect(secondContext.cursor).toBe('cursor-1')
+    expect(secondContext.params).toEqual({ limit: 10, cursor: 'cursor-1' })
   })
 })
