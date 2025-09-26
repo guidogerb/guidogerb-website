@@ -170,6 +170,7 @@ export const collectPaginatedResults = async ({
     if (typeof onPage === 'function') {
       await onPage(result, {
         page: pageNumber,
+        cursor: cursorForNextPage,
         params: Object.freeze({ ...paramsForRequest }),
       })
     }
