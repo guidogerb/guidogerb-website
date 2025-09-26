@@ -1,0 +1,52 @@
+{
+  "domain": "stream4cloud.com",
+  "workspaceSlug": "stream4cloud",
+  "touchPoints": [
+    {
+      "category": "root-scripts",
+      "check": "domain",
+      "paths": [
+        "package.json"
+      ],
+      "notes": "Root scripts expose stream4cloud.com-specific build and dev commands."
+    },
+    {
+      "category": "site-config",
+      "check": "domain",
+      "paths": [
+        "websites/stream4cloud.com/vite.config.js",
+        "websites/stream4cloud.com/generate-sitemap.mjs",
+        "websites/stream4cloud.com/public/sitemap.xml"
+      ],
+      "notes": "Vite configuration and sitemap tooling embed the stream4cloud.com domain for hosts and URLs."
+    },
+    {
+      "category": "local-development",
+      "check": "domain",
+      "paths": [
+        "infra/local-dev/cloudfront/nginx.conf",
+        "infra/local-dev/s3/nginx.conf",
+        "infra/local-dev/scripts/sync-sites.sh",
+        "infra/local-dev/README.md"
+      ],
+      "notes": "Local CloudFront/S3 simulators and sync scripts list the stream4cloud.com hostnames."
+    },
+    {
+      "category": "secrets",
+      "check": "domain",
+      "paths": [
+        "docs/CICD.md",
+        "websites/stream4cloud.com/STREAM4CLOUD_COM_VITE_ENV-secrets"
+      ],
+      "notes": "Deployment runbooks and seed secret files encode the production domain."
+    },
+    {
+      "category": "tenant-manifest",
+      "check": "slug",
+      "paths": [
+        "infra/ps1/tenant-manifest.json"
+      ],
+      "notes": "Tenant provisioning manifest stores the workspace slug and env secret keys consumed by automation."
+    }
+  ]
+}

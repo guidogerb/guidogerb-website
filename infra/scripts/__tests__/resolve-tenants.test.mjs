@@ -62,4 +62,19 @@ describe('tenant registry discovery', () => {
     expect(sample).toHaveProperty('secretName')
     expect(sample).toHaveProperty('workspacePackage')
   })
+
+  test('every tenant declares the env secret keys automation requires', () => {
+    const tenants = loadTenantRegistry(repoRoot)
+    const missingSecrets = tenants
+      .filter((tenant) => !Array.isArray(tenant.envSecretKeys) || tenant.envSecretKeys.length === 0)
+      .map((tenant) => tenant.domain)
+
+    expect(missingSecrets).toEqual([])
+
+    tenants.forEach((tenant) => {
+      expect(tenant.envSecretKeys.every((key) => typeof key === 'string' && key.length > 0)).toBe(
+        true,
+      )
+    })
+  })
 })
