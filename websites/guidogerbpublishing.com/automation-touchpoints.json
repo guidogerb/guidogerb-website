@@ -1,0 +1,60 @@
+{
+  "domain": "guidogerbpublishing.com",
+  "workspaceSlug": "guidogerbpublishing",
+  "touchPoints": [
+    {
+      "category": "root-scripts",
+      "check": "domain",
+      "paths": [
+        "package.json"
+      ],
+      "notes": "Root scripts expose guidogerbpublishing.com-specific build and dev commands."
+    },
+    {
+      "category": "site-config",
+      "check": "domain",
+      "paths": [
+        "websites/guidogerbpublishing.com/vite.config.js",
+        "websites/guidogerbpublishing.com/generate-sitemap.mjs",
+        "websites/guidogerbpublishing.com/public/sitemap.xml"
+      ],
+      "notes": "Bundler and sitemap configuration embed the tenant domain and local hostnames."
+    },
+    {
+      "category": "local-development",
+      "check": "domain",
+      "paths": [
+        "infra/local-dev/cloudfront/nginx.conf",
+        "infra/local-dev/s3/nginx.conf",
+        "infra/local-dev/scripts/sync-sites.sh",
+        "infra/local-dev/README.md"
+      ],
+      "notes": "Local edge simulators and sync scripts enumerate the guidogerbpublishing.com hosts."
+    },
+    {
+      "category": "secrets",
+      "check": "domain",
+      "paths": [
+        "docs/CICD.md",
+        "websites/guidogerbpublishing.com/GUIDOGERBPUBLISHING_VITE_ENV-secrets"
+      ],
+      "notes": "Deployment runbooks and seed secret files encode the production domain."
+    },
+    {
+      "category": "deploy-scripts",
+      "check": "slug",
+      "paths": [
+        "websites/guidogerbpublishing.com/scripts/deploy-reference.mjs"
+      ],
+      "notes": "Reference deployment automation builds the workspace using the slug."
+    },
+    {
+      "category": "tenant-manifest",
+      "check": "slug",
+      "paths": [
+        "infra/ps1/tenant-manifest.json"
+      ],
+      "notes": "Tenant provisioning manifest records the workspace slug for generator tooling."
+    }
+  ]
+}

@@ -48,5 +48,21 @@ pnpm --filter websites/guidogerbpublishing.com build
 pnpm --filter websites/guidogerbpublishing.com preview
 ```
 
+## Automation touch points
+
+Automation and provisioning scripts still reference this tenant directly. The tracked
+inventory lives in [`automation-touchpoints.json`](./automation-touchpoints.json) and includes:
+
+- **Root scripts** — `package.json` exposes `build:site:guidogerbpublishing` and
+  `dev:site:guidogerbpublishing` entries so CI and local tooling can target the workspace.
+- **Site configuration** — `vite.config.js`, `generate-sitemap.mjs`, and the published
+  `public/sitemap.xml` embed the production domain alongside local development hosts.
+- **Local development** — CloudFront/S3 simulators and sync scripts in `infra/local-dev/*`
+  enumerate the `guidogerbpublishing.com` hostnames that must be templated during scaffolding.
+- **Secrets and runbooks** — `docs/CICD.md` and the seeded
+  `GUIDOGERBPUBLISHING_VITE_ENV-secrets` document the required environment variables.
+- **Deployment helpers** — the `scripts/deploy-reference.mjs` workflow depends on the
+  `guidogerbpublishing` workspace slug for build orchestration.
+
 See [`tasks.md`](./tasks.md) for outstanding work such as wiring CMS-driven content and building the
 partner portal route.
