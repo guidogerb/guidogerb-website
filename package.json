@@ -33,7 +33,7 @@
     "websites/this-is-my-story.org"
   ],
   "scripts": {
-    "clean": "rimraf --glob \"node_modules\" \"@guidogerb/**/node_modules\" \"websites/**/node_modules\" \"@guidogerb/**/dist\" \"websites/**/dist\" \"pnpm-lock.yaml\" \"package-lock.json\" \"yarn.lock\" \"npm-shrinkwrap.json\" \"**/pnpm-lock.yaml\" \"**/package-lock.json\" \"**/yarn.lock\" \"**/npm-shrinkwrap.json\"",
+    "clean": "node scripts/clean.mjs",
     "cleani": "pnpm run clean && pnpm install && pnpm run format",
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",
@@ -62,7 +62,10 @@
     "ai:check:tasks": "node .aiassistant/validate.mjs .aiassistant/.ai-self-review.json global-tasks.md",
     "ai:check:files": "node .aiassistant/check-files.mjs",
     "format": "prettier -w .",
-    "format:check": "prettier -c ."
+    "format:check": "prettier -c .",
+    "test:pickle": "pnpm --filter websites-picklecheeze test",
+    "test:coverage": "vitest run --coverage",
+    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=junit-report.xml"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.8.0",

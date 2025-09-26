@@ -29,6 +29,40 @@ pnpm -r dev     # watcher
 pnpm -r test    # tests (where present)
 ```
 
+### Testing
+
+The root Vitest config enforces minimum coverage thresholds (approximate initial gates):
+
+- Lines: 70%
+- Statements: 70%
+- Functions: 60%
+- Branches: 60%
+
+Helpful scripts:
+
+```bash
+pnpm test               # Full docs + packages test run (root script)
+pnpm test:pickle        # Focus only the PickleCheeze site tests
+pnpm test:coverage      # Run all tests once with coverage output (text + html)
+pnpm test:ci            # CI-oriented run (coverage + JUnit XML at junit-report.xml)
+```
+
+CI integration: `pnpm test:ci` emits `junit-report.xml` (JUnit XML) and coverage reports; integrate the XML with most CI test summary dashboards.
+
+To open the HTML coverage report after a run:
+
+```bash
+start coverage/index.html  # Windows (cmd)
+```
+
+To run an individual test file (example):
+
+```bash
+pnpm --filter websites-picklecheeze exec vitest run src/__tests__/useMarketingNavigation.test.js
+```
+
+If you add new packages with tests, no extra config is needed—Vitest auto-discovers `*.test.js` under workspaces using the shared root `vitest.config.mjs`.
+
 Coding standards: TS strict, a11y-first components, no secret material in browser code.
 
 ## Third-party Node.js libraries

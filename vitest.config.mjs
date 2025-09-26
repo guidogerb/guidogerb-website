@@ -12,6 +12,10 @@ export default defineConfig({
     setupFiles: [resolve(workspaceRoot, 'vitest.setup.js')],
     coverage: {
       reporter: ['text', 'html'],
+      lines: 70,
+      statements: 70,
+      functions: 60,
+      branches: 60,
     },
   },
   esbuild: {
