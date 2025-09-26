@@ -19,25 +19,26 @@ export function useDebounceFunc(func, delay = 1000) {
   return useCallback(
     (param) => {
       const promise = new Promise((resolve) => {
-        if (
-          !lastInvocationRef.current ||
-          lastInvocationRef.current - new Date().getTime() >= delay
-        ) {
+        const now = new Date().getTime()
+
+        if (!lastInvocationRef.current || now - lastInvocationRef.current >= delay) {
           clearTimeout(timeoutRef.current)
-          lastInvocationRef.current = new Date().getTime()
+          lastInvocationRef.current = now
           lastVarArgsRef.current = null
           func(param)
-        } else {
-          lastVarArgsRef.current = param
-          lastInvocationRef.current = new Date().getTime()
-          clearTimeout(timeoutRef.current)
-          timeoutRef.current = window.setTimeout(() => {
-            func(lastVarArgsRef.current)
-            lastVarArgsRef.current = null
-            lastInvocationRef.current = NaN
-            resolve(param)
-          }, delay)
+          resolve(param)
+          return
         }
+
+        lastVarArgsRef.current = param
+        lastInvocationRef.current = now
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = window.setTimeout(() => {
+          func(lastVarArgsRef.current)
+          lastVarArgsRef.current = null
+          lastInvocationRef.current = NaN
+          resolve(param)
+        }, delay)
       })
       return promise
     },
