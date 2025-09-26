@@ -140,7 +140,15 @@ describe('AppBasic', () => {
       }),
     ).toBeInTheDocument()
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()
-    expect(mocks.registerSW).toHaveBeenCalledWith({ url: '/sw.js' })
+    expect(mocks.registerSW).not.toHaveBeenCalled()
+  })
+
+  it('registers the shared service worker when explicitly enabled', async () => {
+    render(<AppBasic serviceWorker={{ enabled: true }} />)
+
+    await waitFor(() => {
+      expect(mocks.registerSW).toHaveBeenCalledWith({ url: '/sw.js' })
+    })
   })
 
   it('renders protected content when navigating to the dashboard', async () => {
@@ -254,6 +262,7 @@ describe('AppBasic', () => {
     render(
       <AppBasic
         serviceWorker={{
+          enabled: true,
           url: '/tenant/sw.js',
           immediate: true,
           scope: '/tenant',
@@ -282,7 +291,7 @@ describe('AppBasic', () => {
     const previewNav = await screen.findByRole('navigation', { name: /app navigation/i })
     const dashboardLink = within(previewNav).getByRole('link', { name: /dashboard/i })
 
-    expect(within(previewNav).getByRole('link', { name: /welcome/i })).toHaveAttribute(
+    expect(within(previewNav).getByRole('link', { name: /home/i })).toHaveAttribute(
       'aria-current',
       'page',
     )
@@ -444,8 +453,14 @@ describe('createAppBasicPlan', () => {
     expect(plan.providers.storage.props.namespace).toBe('guidogerb.app')
     expect(plan.providers.auth.logoutUri).toMatch(/\/auth\/logout$/)
     expect(plan.defaults.auth.logoutUri).toMatch(/\/auth\/logout$/)
+    expect(plan.providers.auth.props.response_type).toBe('code')
+    expect(plan.providers.auth.props.scope).toBe('openid profile email')
+    expect(plan.defaults.auth.response_type).toBe('code')
+    expect(plan.defaults.auth.scope).toBe('openid profile email')
     expect(plan.tenantControls).toBe(APP_BASIC_TENANT_CONTROLS)
     expect(plan.layout.main.props.className).toBe('gg-app-basic__main')
+    expect(plan.defaults.serviceWorker.enabled).toBe(false)
+    expect(plan.defaults.navigation.items[0]?.label).toBe('Home')
     expect(plan.router.routes.some((route) => route.path === '/')).toBe(true)
   })
 
